@@ -1,9 +1,14 @@
 /**
- * The beat step: advance a run in play by exactly one beat (TECHNICAL.md §3).
- * Pure: the input state is never modified, and the same state plus the same
- * throw always gives the same result.
+ * The beat step: advance a run by exactly one beat (TECHNICAL.md §3). Pure:
+ * the input state is never modified, and the same state plus the same throw
+ * always gives the same result.
  *
- * Order within a beat:
+ * The beat is global: it ticks in every phase, in time with the music, and
+ * never resets. What changes is who acts on it. Before HIKE (and between
+ * screens) only the patrols move: Bats circle whatever the play is doing,
+ * while your players and the other defenders wait for the snap.
+ *
+ * Order within a beat in play:
  *   1. Knocked-down units recover a little.
  *   2. A throw tapped for this beat leaves the QB's hand.
  *   3. Units hop (on their hop beats) and collisions resolve.
@@ -39,9 +44,11 @@ export interface StepResult {
 export function step(prev: RunState, throwTarget: Vec | null = null): StepResult {
   const state = structuredClone(prev);
   const events: SimEvent[] = [];
-  if (state.phase !== 'play') return { state, events };
-
   state.beat += 1;
+  if (state.phase !== 'play') {
+    patrolStep(state, events);
+    return { state, events };
+  }
   for (const u of liveUnits(state)) if (u.downBeats > 0) u.downBeats--;
 
   if (throwTarget) tryThrow(state, throwTarget, events);
@@ -148,18 +155,11 @@ function advancePatrol(d: Defender): void {
   if (eq(d.patrol[next], d.pos)) d.patrolIndex = next;
 }
 
-/**
- * A beat ticked during setup, before HIKE: patrolling defenders keep
- * circling so you can watch the pattern while you plan. Nothing else moves.
- */
-export function idleStep(prev: RunState): StepResult {
-  const state = structuredClone(prev);
-  const events: SimEvent[] = [];
-  if (state.phase !== 'setup') return { state, events };
+/** Outside play, only patrolling defenders (the Bats) hop. Nothing collides: they stay out of the setup rows. */
+function patrolStep(state: RunState, events: SimEvent[]): void {
   const screen = state.screen;
-  screen.idleBeat += 1;
   for (const d of screen.defenders) {
-    if (!d.alive || !d.patrol || !actsOn(d.stats, screen.idleBeat)) continue;
+    if (!d.alive || !d.patrol || !actsOn(d.stats, state.beat)) continue;
     const to = patrolNext(d);
     if (!to) continue;
     events.push({ type: 'hop', id: d.id, from: d.pos, to });
@@ -167,7 +167,6 @@ export function idleStep(prev: RunState): StepResult {
     advancePatrol(d);
   }
   updateIntents(screen);
-  return { state, events };
 }
 
 /**

@@ -4,7 +4,7 @@ import { QB_POS, SETUP_ROWS, eq, key, vec } from '../../src/sim/grid';
 import { replay, type Input } from '../../src/sim/replay';
 import { createRun, dispatch } from '../../src/sim/run';
 import { boxCircuit, createDefenders, generateSpawns } from '../../src/sim/screen';
-import { idleStep, step } from '../../src/sim/step';
+import { step } from '../../src/sim/step';
 import { ofType, playState, run, small, standStill } from './helpers';
 
 describe('creating a run', () => {
@@ -234,7 +234,8 @@ describe('Bats (Pickers) patrol a 4×4 box', () => {
     state.screen.defenders.splice(0, state.screen.defenders.length);
     state.screen.defenders.push(...createDefenders([{ kind: 'picker', pos: vec(2, 6) }], 900));
     const start = state.screen.defenders[0]!.pos;
-    for (let i = 0; i < 4; i++) state = idleStep(state).state; // two hops (Hustle 0)
+    state = run(state, 4).state; // four setup beats: two hops (Hustle 0)
+    expect(state.beat).toBe(4);
     const bat = state.screen.defenders[0]!;
     expect(bat.patrolIndex).toBe(2);
     expect(bat.pos).not.toEqual(start);
@@ -242,6 +243,37 @@ describe('Bats (Pickers) patrol a 4×4 box', () => {
     const after = run(state, 2).state.screen.defenders[0]!;
     expect(after.patrolIndex).toBe(3);
     expect(after.pos).toEqual(bat.patrol![3]);
+  });
+});
+
+describe('the global beat', () => {
+  it('ticks during setup, but only Bats move: players and other defenders wait for HIKE', () => {
+    const state = createRun(1);
+    state.screen.defenders.splice(0, state.screen.defenders.length);
+    state.screen.defenders.push(
+      ...createDefenders(
+        [
+          { kind: 'chaser', pos: vec(2, 8) },
+          { kind: 'picker', pos: vec(5, 6) },
+        ],
+        900,
+      ),
+    );
+    const before = structuredClone(state.screen);
+    const r = run(state, 6);
+    expect(r.state.beat).toBe(6);
+    expect(r.state.phase).toBe('setup');
+    expect(r.state.screen.smalls.map((u) => u.pos)).toEqual(before.smalls.map((u) => u.pos));
+    expect(r.state.screen.defenders[0]!.pos).toEqual(before.defenders[0]!.pos);
+    expect(r.state.screen.defenders[1]!.pos).not.toEqual(before.defenders[1]!.pos);
+    expect(new Set(ofType(r.events, 'hop').map((e) => e.id))).toEqual(new Set([901]));
+  });
+
+  it('carries on through HIKE without resetting', () => {
+    const state = run(createRun(1), 3).state;
+    dispatch(state, { type: 'hike' });
+    expect(state.beat).toBe(3);
+    expect(step(state).state.beat).toBe(4);
   });
 });
 

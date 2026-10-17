@@ -79,13 +79,11 @@ export interface ScreenState {
   readonly smalls: SmallUnit[];
   readonly defenders: Defender[];
   ball: BallState;
-  /** Beats ticked during setup, so patrols keep circling before HIKE. */
-  idleBeat: number;
 }
 
 export interface RunState {
   readonly seed: number;
-  /** The current beat (the last beat step() resolved). */
+  /** The global beat (the last beat step() resolved). It ticks in every phase, with the music, and never resets. */
   beat: number;
   phase: Phase;
   balls: number;

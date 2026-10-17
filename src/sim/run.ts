@@ -31,7 +31,7 @@ export function createRun(seed: number): RunState {
     screensCleared: 0,
     slots: Array.from({ length: tuning.run.startingSlots }, () => ({ kindId: WALK_ON.id })),
     formation: [],
-    screen: { index: 0, smalls: [], defenders: [], ball: { at: 'qb' }, idleBeat: 0 },
+    screen: { index: 0, smalls: [], defenders: [], ball: { at: 'qb' } },
     nextId: 1,
   };
   setUpScreen(state, 0);
@@ -64,10 +64,8 @@ export function setUpScreen(state: RunState, index: number): void {
     smalls,
     defenders,
     ball: { at: 'qb' },
-    idleBeat: 0,
   };
   state.phase = 'setup';
-  state.beat = 0;
 }
 
 function formationTile(state: RunState, slot: number): Vec {
@@ -104,7 +102,6 @@ function place(state: RunState, slot: number, tile: Vec): SimEvent[] {
 function hike(state: RunState): SimEvent[] {
   if (state.phase !== 'setup') return [];
   state.phase = 'play';
-  state.beat = 0;
   updateIntents(state.screen);
   return [{ type: 'hiked' }];
 }
