@@ -167,7 +167,8 @@ Everything goes through **one `AudioContext`**, with a small mixer: `master → 
 - **▲ Decision: render the songs at load time, not live.** Each song's stems are rendered to `AudioBuffer`s with an `OfflineAudioContext` while the game loads (and cached), then played as perfectly looping buffers.
   - **Why:** it's still all synthesized (no music files, tiny downloads), but it plays back at near-zero CPU cost and with sample-accurate loops.
   - **Live synthesis** stays an option for reactive layers later.
-- **Layering:** the setup huddle plays only some stems (say, bass and hats). **HIKE!** brings in the full arrangement, starting on a bar line.
+- **Layering:** the setup huddle plays only some stems (bass and hats). **HIKE!** brings in the full arrangement on the next beat (a bar line felt too slow to wait for), and the beat clock starts on that beat, so the music *is* the clock.
+- **Notation:** each stem is one string per bar: notes like `A3`, chords like `A3+C4+E4`, `-` to hold, `.` to rest, and `x`/`X` for drum hits (`src/audio/synth/notes.ts`).
 - **Tempo per biome:** each biome's song has its own BPM. Changing tempo means switching songs, which happens on a screen transition, never mid-play.
 - **The chant** ("FEE! FI! FO! FUMBLE!") is a stinger that lands on the beat, made either from synthesized vocal-ish sounds or from a recorded public-domain or CC0 sample.
 
@@ -178,7 +179,7 @@ Everything goes through **one `AudioContext`**, with a small mixer: `master → 
 - **Playback:**
   - **Voice limits** per sound, so that twenty Rattlebones hopping don't stack twenty clicks.
   - **Small random pitch variation** so repeats don't sound robotic.
-  - **Beat-aligned SFX** (hops, traps) are scheduled on the audio clock, not when the frame happens to render.
+  - **Beat-aligned SFX** (hops, traps) should be scheduled on the audio clock, not when the frame happens to render. *(As of M1.5, event sounds play when the beat is heard, so they land one output-latency late. Scheduling them ahead is an M3 task.)*
 - **Sample format:** **MP3** (universal, small). Gapless looping isn't needed, since all the looping music is synthesized.
 
 ---

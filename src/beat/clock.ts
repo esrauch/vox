@@ -62,8 +62,13 @@ export class BeatClock {
 
   /** Start a beat grid whose first beat lands `delay` seconds from now. */
   start(bpm: number, delay = 0.2): void {
+    this.startAt(bpm, this.ctx.currentTime + delay);
+  }
+
+  /** Start a beat grid whose first beat (beat 0) lands at context time `origin`. */
+  startAt(bpm: number, origin: number): void {
     this.stop();
-    this.grid = { bpm, origin: this.ctx.currentTime + delay };
+    this.grid = { bpm, origin };
     this.nextToSchedule = 0;
     this.schedule();
     this.timer = setInterval(() => this.schedule(), this.intervalMs);

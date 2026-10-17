@@ -35,6 +35,13 @@ export const tuning = {
     /** The Big's hold counter, per ball: Blitzer attacks tick it down; at 0 it's a sack. */
     hold: 3,
   },
+  audio: {
+    /** Bus levels (0..1). */
+    master: 0.9,
+    music: 0.65,
+    sfx: 0.8,
+    ui: 0.5,
+  },
   units: {
     /** Beats a knocked-down unit stays down. */
     knockdownBeats: 2,

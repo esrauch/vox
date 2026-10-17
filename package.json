@@ -17,6 +17,7 @@
     "check-assets": "tsx tools/check-assets.ts",
     "import-vox": "tsx tools/voxels/import-vox.ts",
     "preview-models": "tsx tools/voxels/preview.ts",
+    "render-audio": "tsx tools/audio/render.ts",
     "check": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run check-assets"
   },
   "dependencies": {

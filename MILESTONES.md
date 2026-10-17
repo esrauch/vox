@@ -4,7 +4,7 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** M1.5, the synth and first audio. Still open: the M1.1 iPhone test, and switching Pages to GitHub Actions.
+**Current focus:** listen to M1.5 (`/dev/audio.html` and the game) and check it on a phone, then M2 (first playable). Still open: the M1.1 iPhone test, and switching Pages to GitHub Actions.
 
 ---
 
@@ -131,15 +131,19 @@ The base systems everything else is built on. **Each one is built and verified o
 **Lesson:** models have to be judged **from the game's steep camera**. The first Walk-on read as a brown cap, and the Big's canopy hid its face. The contact sheet now renders at the game's angle.
 
 ### M1.5 Synth and first audio
-- [ ] The mixer (music, SFX and UI buses).
-- [ ] The synth voices: oscillators, filters, envelopes, noise and drums.
-- [ ] Songs written as data, with stems rendered to audio buffers at load.
-- [ ] The song player, locked to the beat clock, with the setup loop switching to the full song on **HIKE!**
-- [ ] sfxr-style SFX: hop, throw, catch, burst, UI click, fumble.
-- [ ] Render-to-WAV plus waveform PNG tooling, and the `/dev/audio` sound board.
-- [ ] **The first song:** one cheerful Halloween track.
+- [x] The mixer: music, SFX and UI buses into a master gain and a gentle compressor (`src/audio/mixer.ts`).
+- [x] Synth voices: kick, snare, hat, bass, organ (drawbars and wobble), lead (a driven, detuned surf twang with vibrato and echo), pluck (`src/audio/synth/instruments.ts`).
+- [x] Songs as data: a bar-by-bar notation for notes, chords, holds, rests and drum hits, validated with errors per stem and bar (`src/audio/synth/notes.ts`).
+- [x] Stems rendered to buffers at load with `OfflineAudioContext`. Tails are folded back for seamless loops (`src/audio/synth/render.ts`). Rendering starts at page load, before any tap.
+- [x] The music player is locked to the beat clock. The clock's beat 0 is set on a beat of the song. Setup plays bass and hats; **HIKE!** brings in the full arrangement on the next beat. A pause stops the music and RESUME restarts it locked to the beat. Game over fades it out.
+- [x] sfxr-style SFX: hop, throw, catch, clean catch, burst, fumble, the **FEE FI FO FUMBLE chant**, sack, on-beat, touchdown, UI click. Each has random pitch and a voice cap, and they're hooked to game events.
+- [x] `npm run render-audio`: WAVs, waveform PNGs, peak/RMS levels and a loop-seam check. Plus the `/dev/audio.html` sound board with per-stem mutes.
+- [x] **The first song: "Spooky Surf"**: A-minor Halloween surf rock at 120 BPM, 8 bars (Am Am F E Am Am Dm E). The mix peaks at −2.5 dBFS with a clean loop seam.
+- [ ] **A human listens and approves** the song and the SFX. *(Claude can check levels and seams, but not whether it sounds good.)*
+- [ ] Confirm on a phone that the loop is seamless and stays locked to the beat.
+- [ ] Event SFX (catch, burst…) play when the beat is *heard*, so they land one output-latency late. Scheduling them ahead on the audio clock is for M3 (feel pass).
 
-**Done when:** the first song loops seamlessly in time with the beat clock on a phone, and a human has listened and approved it.
+**Done when:** the first song loops seamlessly in time with the beat clock on a phone, and a human has listened and approved it. *(Built and checked in the browser: levels, seam, sync, layers, pause and resume. Waiting on listening and the phone.)*
 
 ---
 
@@ -284,6 +288,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** M1.5 synth and audio: mixer, synth voices, song notation, offline stem rendering, music locked to the beat, SFX, render tooling, and the first song, "Spooky Surf".
 - **2026-10-17:** M1.4 voxel pipeline: `.voxt` format, `.vox` import, greedy meshing, headless previews, and the first three Elder Bough models in the game.
 - **2026-10-17:** M1.3 done: perspective camera chosen, 60 fps confirmed on a phone.
 - **2026-10-17:** Removed the pocket and Blockers (now a Future Idea). Blitzers go straight for the Big. Walk-ons trade themselves with defenders when they don't have the ball.
