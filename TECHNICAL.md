@@ -460,7 +460,7 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 | Kind | Typical size | Example |
 |---|---|---|
 | Players (Walk-on) | 9×14×5 at 0.08 → ~0.7 wide, 1.1 tall | `team/walkOn` |
-| QB | 9×14×5 at 0.1 → 0.9 wide, 1.4 tall | `team/qb` |
+| QB | 9×14×5 at 0.1 → 0.9 wide, 1.4 tall | `team/qb` (arm raised, holding the ball); `team/qbThrown` (arm lowered after the throw; drawn by `markers.ts`) |
 | Defenders | 0.6–0.9 wide, 0.6–1.1 tall | `forest/*` |
 | Ball | 9×5×5 at 0.045 | `team/ball` |
 | Field hazards | about a tile wide | `forestHazards/pumpkin` (9×8×9 at 0.1) |

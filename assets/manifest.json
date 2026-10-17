@@ -80,6 +80,12 @@
       "license": "original"
     },
     {
+      "path": "assets-src/voxels/team/qbThrown.voxt",
+      "source": "Original voxel model (quarterback with the throwing arm lowered), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
       "path": "assets-src/voxels/team/ball.voxt",
       "source": "Original voxel model (jack-o'-lantern football), written by Claude",
       "author": "Claude",

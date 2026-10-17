@@ -1,0 +1,74 @@
+# The quarterback after the throw: the same as qb.voxt, with the throwing arm
+# lowered to its side. Shown while the QB has no ball.
+size 9 14 5
+voxel 0.1
+colors
+  h pumpkin
+  n white
+  m woodGrey
+  s skin
+  k ink
+  p pumpkinDark
+  j leafGold
+  N pumpkinDark
+  w bone
+slice 0
+  ..hhnhh..
+  .hhhhhhh.
+  .hsksksh.
+  .hmmmmmh.
+  ...sss...
+  ppppppppp
+  pjjjjjjjp
+  sjjjNjjjs
+  sjjjNjjjs
+  kjjjNjjjk
+  ..wwwww..
+  ..ww.ww..
+  ..jj.jj..
+  ..kk.kk..
+slice 1-2
+  ..hhnhh..
+  .hhhhhhh.
+  .hhhhhhh.
+  .hhhhhhh.
+  ...sss...
+  ppppppppp
+  pjjjjjjjp
+  sjjjjjjjs
+  sjjjjjjjs
+  kjjjjjjjk
+  ..wwwww..
+  ..ww.ww..
+  ..jj.jj..
+  ..kk.kk..
+slice 3
+  ..hhnhh..
+  .hhhhhhh.
+  .hhhhhhh.
+  .hhhhhhh.
+  ...sss...
+  ppppppppp
+  pjjjjjjjp
+  sjjjjjjjs
+  sjjjjjjjs
+  kjjjjjjjk
+  ..wwwww..
+  ..ww.ww..
+  ..jj.jj..
+  ..kk.kk..
+slice 4
+  ..hhnhh..
+  .hhhhhhh.
+  .hhhhhhh.
+  .hhhhhhh.
+  ...sss...
+  ppppppppp
+  pjjjjjjjp
+  sjjjNjjjs
+  sjjjNjjjs
+  kjjjNjjjk
+  ..wwwww..
+  ..ww.ww..
+  ..jj.jj..
+  ..kk.kk..

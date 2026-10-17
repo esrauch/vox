@@ -294,6 +294,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** The QB lowers its throwing arm the moment the ball leaves its hand (a second model, `team/qbThrown`), and raises it again when it gets a new ball.
 - **2026-10-17:** A throw leaves the QB's hand the moment you release, and its speed is adjusted so it still lands on the beat (2 beats after the next beat).
 - **2026-10-17:** Bats (Pickers) fly a fixed 4×4 box circuit. They start circling during setup and carry on after HIKE, instead of chasing the ball.
 - **2026-10-17:** Removed the rhythm-game HUD (the beat bar and the throw circle): aiming is on the field, and the beat is felt through the music and the bouncing.

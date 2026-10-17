@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { biomes, hexToNumber, type Hex } from '../content/palettes';
 import { tuning } from '../content/tuning';
-import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, inThrowBand, vec } from '../sim/grid';
-import { getGeometry, voxelMaterial } from '../voxel/models';
-import { tilt } from './experiments';
+import { COLS, END_ROW, ROWS, SETUP_ROWS, inThrowBand, vec } from '../sim/grid';
 import { tileToWorld } from './view';
 
 /** The quarterback's model. */
 export const QB_MODEL = 'team/qb';
+/** The QB with its throwing arm lowered, once the ball has left its hand. */
+export const QB_THROWN_MODEL = 'team/qbThrown';
 
 /**
  * The static field: a checkerboard of tiles with the setup zone, end zone
@@ -58,12 +58,7 @@ export function createField(): THREE.Group {
     group.add(line);
   }
 
-  // The QB never moves. It faces the camera so its carved face is visible.
-  const qb = new THREE.Mesh(getGeometry(QB_MODEL), voxelMaterial);
-  qb.position.copy(tileToWorld(QB_POS)).add(new THREE.Vector3(0, 0, 0.15)); // matches QB_OFFSET in markers.ts
-  qb.castShadow = true;
-  qb.rotation.x = tilt;
-  group.add(qb);
+  // The QB is drawn by Markers, which swaps its arm up or down with the ball.
 
   return group;
 }

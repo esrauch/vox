@@ -4,7 +4,7 @@ import { QB_POS } from '../sim/grid';
 import type { ScreenState, Vec } from '../sim/types';
 import { getGeometry, modelHeight, voxelMaterial } from '../voxel/models';
 import { tuning } from '../content/tuning';
-import { QB_MODEL } from './field';
+import { QB_MODEL, QB_THROWN_MODEL } from './field';
 import type { UnitViews } from './units';
 import { tilt } from './experiments';
 import { tileToWorld } from './view';
@@ -20,7 +20,7 @@ const BALL_MODEL = 'team/ball';
 const HELD_Y = modelHeight(QB_MODEL) + 0.02;
 /** The QB's raised throwing hand, relative to its tile (the model's right arm, slightly forward). */
 const X_AXIS = new THREE.Vector3(1, 0, 0);
-/** The QB stands slightly forward on its tile (see field.ts). */
+/** The QB stands slightly forward on its tile. */
 const QB_OFFSET = new THREE.Vector3(0, 0, 0.15);
 /** The raised hand relative to the QB's feet, leaning back with the character tilt. */
 const HAND = new THREE.Vector3(0.4, HELD_Y, 0.05).applyAxisAngle(X_AXIS, tilt);
@@ -44,6 +44,8 @@ interface Launch {
  */
 export class Markers {
   private readonly ball: THREE.Mesh;
+  /** The QB never moves. It raises its throwing arm while it holds the ball and lowers it after the throw. */
+  private readonly qb: THREE.Mesh;
   private readonly reticle = new THREE.Group();
   private readonly reticleMat = new THREE.MeshBasicMaterial({
     color: RETICLE_COLOR,
@@ -64,6 +66,12 @@ export class Markers {
   constructor(scene: THREE.Scene) {
     this.ball = new THREE.Mesh(getGeometry(BALL_MODEL), voxelMaterial);
     this.ball.castShadow = true;
+
+    // The QB faces the camera so its carved face is visible.
+    this.qb = new THREE.Mesh(getGeometry(QB_MODEL), voxelMaterial);
+    this.qb.position.copy(tileToWorld(QB_POS)).add(QB_OFFSET);
+    this.qb.castShadow = true;
+    this.qb.rotation.x = tilt;
 
     // The reticle: rings at the "perfect" and "ok" catch distances, plus a centre dot.
     for (const [inner, outer] of [
@@ -111,7 +119,7 @@ export class Markers {
     this.carrierRing.rotation.x = -Math.PI / 2;
     this.carrierRing.visible = false;
 
-    scene.add(this.ball, this.reticle, this.arc, this.landing, this.carrierRing);
+    scene.add(this.qb, this.ball, this.reticle, this.arc, this.landing, this.carrierRing);
   }
 
   /** While aiming: where the throw would land (a free point in tile units), and whether it's allowed. */
@@ -148,6 +156,7 @@ export class Markers {
           ? { target: ball.target, releasedAt: ball.releasedOn, landsOn: ball.landsOn }
           : null;
     if (!flying) this.launched = null;
+    this.qb.geometry = getGeometry(ball.at === 'qb' && !flying ? QB_MODEL : QB_THROWN_MODEL);
     this.ball.visible = ball.at !== 'none';
     this.landing.visible = flying !== null;
     this.ball.rotation.y = time * 1.5;
