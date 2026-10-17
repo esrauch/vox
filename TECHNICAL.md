@@ -64,7 +64,7 @@ The game is **discrete**: a tile grid that advances once per beat. That makes a 
 
 ### Game flow
 
-A small state machine covers the screens: `Boot → Title → BigSelect → [Setup → Play → Draft]* → GameOver`. Each state owns its DOM overlay and its input handling.
+A small state machine covers the screens: `Boot → Title → [Setup → Play → Draft]* → GameOver`. Each state owns its DOM overlay and its input handling.
 
 ### No ECS framework
 
@@ -121,7 +121,7 @@ This is the riskiest system in the project, so it gets built and tested first.
 - **Layering:** the canvas fills the screen, and a DOM root sits over it. The overlay doesn't block taps by default (`pointer-events: none`), and only real controls accept them.
 - **What lives in the DOM:**
   - The title screen and menus.
-  - Big select, the draft cards and the game-over roll call.
+  - The draft cards and the game-over roll call.
   - The HUD: the **ball button**, the **Hijink icons**, the Hype meter and the yards.
   - Settings and credits.
 - **Polish toolkit:**
@@ -147,7 +147,7 @@ This is the riskiest system in the project, so it gets built and tested first.
 - **Tap routing:**
   - **Field taps** go through a raycast to a grid tile, which places the reticle.
   - **Button taps** (the ball, Hijinks) are handled by DOM elements.
-  - **Setup drags** move Smalls between tiles.
+  - **Setup drags** move players between tiles.
 - **Haptics:** `navigator.vibrate` for throws, catches, fumbles and the beat tick.
   - **Known limitation:** iOS Safari doesn't support vibration. On iOS, the beat has to be readable from visuals and sound alone (it already is by design).
 
@@ -187,8 +187,9 @@ All game content is **typed data**, kept separate from the engine code. That kee
 
 ```
 src/content/
-  bigs.ts         // Bigs: theme, ball, Walk-on look, slot count, recruit/card/Hijink pools, palette
+  team.ts         // the team: helmet/jersey colors, ball, slot count
   smalls.ts       // the Walk-on plus every recruit kind: Hustle/Hands/Heft, role, look
+  places.ts       // each haunted place: defenders, hazards, recruit/card/Hijink pools, palette, song
   defenders.ts    // defender kinds and behaviors
   hazards.ts      // hazard types and their beat patterns
   biomes.ts       // strip sets, hazard pools, song, palette
@@ -205,9 +206,9 @@ src/content/
 ## 10. Screen Generation and AI
 
 - **Strip-based generation:** a screen is about 15–16 rows of stacked **strips** (turf, defender zone, hazard lane), chosen from the biome's pool by a seeded RNG along a difficulty curve.
-- **Solvability check:** setup is a puzzle, so a generated screen must be beatable. A cheap simulated check (can *some* formation and throw timing get a Small to the top?) rejects unfair screens. It runs at generation time, and in bulk tests during development.
+- **Solvability check:** setup is a puzzle, so a generated screen must be beatable. A cheap simulated check (can *some* formation and throw timing get a player to the top?) rejects unfair screens. It runs at generation time, and in bulk tests during development.
 - **AI** is simple, readable rules, decided once per beat:
-  - Each Small and defender kind has a small decision function that chooses a target tile.
+  - Each player and defender kind has a small decision function that chooses a target tile.
   - **Its facing direction is set one beat ahead**, which gives the "faces where it'll hop" telegraph for free.
 - **Collisions** are resolved within the simulation step, in a fixed order, so they're deterministic.
 
@@ -238,7 +239,7 @@ layer 0
 ```
 
 - Colors refer to **named palette entries**, not raw hex values, so changing a palette recolors everything.
-- **Helpers for bigger models (▲ Decision):** symmetry flags (`mirror x`), reusable parts, and simple primitives (a box, a sphere) for Bigs and props, so Claude isn't hand-typing every slice of a 20-voxel-tall treant.
+- **Helpers for bigger models (▲ Decision):** symmetry flags (`mirror x`), reusable parts, and simple primitives (a box, a sphere) for big models and props, so Claude isn't hand-typing every slice of a 20-voxel-tall treant.
 
 ### B. MagicaVoxel (`.vox`): imports
 
@@ -249,12 +250,12 @@ layer 0
 
 - **`.voxt` is the runtime format.** Vite loads every `.voxt` under `assets-src/voxels/` as text (so edits hot-reload). It's parsed once and greedy-meshed once at load into cached geometry with vertex colors (`src/voxel/`). The models are tiny, so this is fast. If loading ever gets slow, meshing can move into the build.
 - **`.vox` files are converted, not loaded.** `npm run import-vox -- model.vox <id>` turns a MagicaVoxel file into `.voxt`, snapping every color to the nearest named palette color. Everything in the game is then in one format.
-- **Model ids are paths:** `elderBough/walkOn` is `assets-src/voxels/elderBough/walkOn.voxt`. Each Big gets a folder.
+- **Model ids are paths:** `forest/chaser` is `assets-src/voxels/forest/chaser.voxt`. Folders group models by place (`forest`, `forestProps`) or role (`misc`).
 - **Orientation:** a model's front (slice 0) faces the camera. Units turn to face where they're hopping.
 
 ### Preview loop (how Claude sees its work)
 
-- **`npm run preview-models`** (`tools/voxels/preview.ts`) renders each model headlessly (playwright-core driving the system Chrome, plus the game's own renderer) to **PNG turntables** in `previews/` (front, ¾ view, side), plus a **contact sheet** per Big folder, seen from the game's camera angle.
+- **`npm run preview-models`** (`tools/voxels/preview.ts`) renders each model headlessly (playwright-core driving the system Chrome, plus the game's own renderer) to **PNG turntables** in `previews/` (front, ¾ view, side), plus a **contact sheet** per model folder, seen from the game's camera angle.
 - Claude writes a model, renders the preview, *looks at the PNG*, and iterates. Scale and color comparisons against the rest of the team are part of every review.
 - **A dev-only asset viewer page** (`/dev/models`) does the same thing interactively in the browser.
 
@@ -306,7 +307,7 @@ layer 0
 ## 15. Saving and Settings
 
 - **localStorage**, holding small JSON with a version number for migrations:
-  - best score (yards), unlocks (Bigs, teams, cards), and seen tutorials;
+  - best score (yards), unlocks (recruits, cards, team looks, places), and seen tutorials;
   - settings: music and SFX volume, **audio latency offset**, reduced motion, haptics on or off.
 - **No accounts and no backend.**
 - **▲ Decision:** whether to save a run in progress so you can resume it. Recommendation: yes. A phone call shouldn't end a good run. The simulation state is small and serializable, which makes this cheap.
@@ -379,7 +380,7 @@ layer 0
 1. **Beat-clock spike.** Audio clock, synthesized metronome, tap judging, calibration, all on real phones. If this doesn't feel right, nothing else matters.
 2. **Simulation core.** Grid, hops on the beat, a throw taking 2 beats, catch/interception/miss, fumbles, the pile of balls. All of it unit-tested.
 3. **Minimal render.** Cubes standing in for units, the camera, the reticle, the ball button, the beat pulse.
-4. **The voxel pipeline.** `.voxt` → mesh → preview PNGs. First models: Woodfolk Smalls, the Elder Bough, the Jack-o'-Lantern.
+4. **The voxel pipeline.** `.voxt` → mesh → preview PNGs. First models: a Walk-on, the QB, the Jack-o'-Lantern ball.
 5. **Synth and the first song.** One Halloween track with stems, plus the core SFX.
 6. **First playable** (as scoped in GAMEPLAY.md). Then iterate on feel.
 

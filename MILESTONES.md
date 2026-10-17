@@ -38,16 +38,19 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 ### Missing from the design so far (needed before M5–M8)
 
 - [ ] **Onboarding:** how a first-time player learns setup, the reticle and the ball button, using the beat as a shared rhythm cue rather than a perfect-timing gate. *(Idea: the first few screens of the first run are built to teach one thing each.)*
-- [ ] **The UX flow and wireframes:** title, Big select, setup, play HUD, draft, game over (with the roll call of fallen recruits), pause, settings and calibration.
-- [ ] **Unlock conditions:** how new Bigs and new cards are earned (distance milestones? achievements?).
-- [ ] **Content scope for v1:** how many recruits, Walk-on upgrades, perks and Hijinks each Big gets, and how many biomes there are.
+- [ ] **The UX flow and wireframes:** title, setup, play HUD, draft, game over (with the roll call of fallen recruits), pause, settings and calibration.
+- [ ] **Unlock conditions:** how new recruits, cards, team looks and places are earned (distance milestones? achievements?).
+- [ ] **Content scope for v1:** how many recruits, Walk-on upgrades, perks and Hijinks the Haunted Forest has, and how many places there are.
 - [ ] **Biomes:** their order, how many screens each lasts, and whether the sequence loops or changes as you climb.
-- [ ] **Boss screens:** how often they come, what an enemy Big does on the beat, and how you beat one.
+- [ ] **Boss screens:** how often they come, what a giant forest boss does on the beat, and how you beat one.
 - [ ] **The Hype economy:** meter size, what fills it and by how much, and how much each Hijink costs.
 - [ ] **Treats vs Tricks:** keep Tricks for v1, or postpone?
 - [ ] **The announcer:** text pop-ups only, or synthesized or sampled voice?
 - [ ] **The audio list:** the songs (per biome, boss, menus) and the core list of sound effects.
-- [ ] **Final names:** the three Bigs' homeland team names (from the candidate lists in THEME.md).
+- [ ] **Who the quarterback is:** a Walk-on, or a special player that's always there.
+- [ ] **What makes runs different** now that there's no Big to choose (a starting recruit, a coach, the team's look?).
+- [ ] **Names:** "Walk-ons" or "Rookies"; "Hijinks" or "Trick Plays"; the team's name.
+- [ ] **The Bat as both defender and recruit:** keep it (told apart by the helmet), or make the Picker an Owl or Crow.
 - [x] **Who the defenders are:** each biome's locals, always in candy purple. The Forest set is built (gnome, rhino beetle, scarecrow, bat); the Graveyard and Mountain sets are still to design.
 - [ ] **The theme of the climb:** where it's going, and whether there's a joke at the top.
 
@@ -153,7 +156,8 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** prove the fun. It's rough, but it's a whole run.
 
-- [ ] One Big (**the Elder Bough**), Walk-ons, and **two recruit kinds**.
+- [ ] **Swap in the new theme's models:** football-player Walk-ons (`misc/footballPlayer`), a QB model, and a jack-o'-lantern football. The Elder Bough treant and leaf-sprite Walk-ons are still in the game.
+- [ ] The Haunted Forest, Walk-ons, and **two recruit kinds** (e.g. the Bat and the Pumpkin-head, in team helmets).
 - [ ] One biome, generic defenders (all four kinds), and two hazards (one lane, one timed trap).
 - [ ] Endless screens from strip-based generation, with a simple difficulty ramp.
 - [ ] A draft with **recruit** and **Walk-on upgrade** cards only, in a plain UI.
@@ -169,10 +173,10 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** make every second feel great.
 
-- [ ] The full juice list from GAMEPLAY.md: squash and stretch, everything bouncing on the beat, haptics, rhythm cues, sparkle trails, Small noises.
+- [ ] The full juice list from GAMEPLAY.md: squash and stretch, everything bouncing on the beat, haptics, rhythm cues, sparkle trails, player noises.
 - [ ] Every indicator from *Reading the Beat*, polished, with hazards telegraphing one beat ahead.
 - [ ] The tombstone and waving ghost when a recruit dies.
-- [ ] Tuning: hop rates, throw range, Blitzer attack rhythm and the Big's counter, and beat alignment.
+- [ ] Tuning: hop rates, throw range, Blitzer attack rhythm and the QB's counter, and beat alignment.
 - [ ] A screen-generation solvability check, so no unfair screens get through.
 
 **Done when:** the game is satisfying to watch with the sound off, satisfying to play with the sound on, and playtesters can say *why* they fumbled.
@@ -185,12 +189,12 @@ The base systems everything else is built on. **Each one is built and verified o
 
 - [ ] The Hype meter, filled by strong plays and drained by fumbles.
 - [ ] Hijinks only after the throw, using the reticle, in targeted and global kinds, without a separate perfect-timing bonus.
-- [ ] Three Hijinks for the Elder Bough.
+- [ ] Three Hijinks, several of them brought by recruits.
 - [ ] The full card types: recruit upgrades, arm perks (Long Arm), +1 slot, extra balls, Fast Throw, Butterfingers Insurance, Second String.
 - [ ] Treats and Tricks (if M0 kept Tricks).
 - [ ] The draft UI: three cards, chosen in one tap.
 
-**Done when:** two runs with the same Big can grow into noticeably different squads and playstyles.
+**Done when:** two runs can grow into noticeably different teams and playstyles.
 
 ---
 
@@ -198,7 +202,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** it looks and feels like a finished game from the first tap.
 
-- [ ] The UX flow from M0: title, Big select, setup HUD, play HUD, draft, game over and the roll call.
+- [ ] The UX flow from M0: title, setup HUD, play HUD, draft, game over and the roll call.
 - [ ] Pause, settings (volume, haptics, reduced motion), the calibration screen, credits (generated from the manifest).
 - [ ] The "rotate your phone" card, safe areas and thumb-reach layout.
 - [ ] SVG art for icons and cards. Public-domain UI assets, recolored to the palette.
@@ -209,17 +213,15 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ---
 
-## M6: All Three Bigs
+## M6: The Full Haunted Forest
 
-**Goal:** the starting roster.
+**Goal:** the first place, complete.
 
-- [ ] **The Groundskeeper:** the Skull ball, bedsheet-ghost Walk-ons, a recruit pool (Rattlebones, Shamblers, Wisps, Grave Rats), its perks and Hijinks.
-- [ ] **The Slagfather:** the Ember ball, coal-sprite Walk-ons, a recruit pool (Cinder Imps, Kobolds, Rocklings, Salamanders), its perks and Hijinks.
-- [ ] Full Elder Bough recruit pool (Pixies, Acorns, Squirrel Riders, Toadstools).
-- [ ] Voxel models and a palette for each.
-- [ ] A Big-select screen showing all three.
+- [ ] The full recruit roster for the forest, each with a model in the team helmet: Bat, Skeleton, Pumpkin-head, Werewolf, Mummy, Ghost, Black Cat, Witch, Frankenstein's Monster, Owl (THEME.md).
+- [ ] Their perks and Hijinks.
+- [ ] Every recruit's job reads from its silhouette and plays differently.
 
-**Done when:** each Big feels clearly different to play, and none of them is obviously the best.
+**Done when:** each recruit feels clearly different to play, and none of them is obviously the best.
 
 ---
 
@@ -229,7 +231,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 - [ ] Three biomes (Graveyard, Forest, Mountain), each with its own strips, hazards, defenders, palette and song (with its own tempo).
 - [ ] Biome transitions and their order (from M0).
-- [ ] Boss screens with enemy Bigs, plus a boss song.
+- [ ] Boss screens with giant forest bosses, plus a boss song.
 - [ ] A difficulty curve that hits the target run lengths: about 2 minutes early, about 10 for a good run, 20+ for a legendary one.
 
 **Done when:** a good run passes through every biome and a boss, and the climb feels like a journey.
@@ -241,7 +243,7 @@ The base systems everything else is built on. **Each one is built and verified o
 **Goal:** the first run teaches the game, and every later run gives you a reason to come back.
 
 - [ ] Onboarding from M0: the first screens of the first run each teach one thing.
-- [ ] Unlocks (from M0): new cards in each Big's pool, and the Big variants hook (see Backlog).
+- [ ] Unlocks (from M0): new recruits, cards, team looks and places.
 - [ ] Best distance on the title screen, and a collection screen.
 - [ ] More content toward the v1 scope from M0.
 
@@ -269,7 +271,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 - [ ] Performance on low and mid-range phones: frame rate, load time, battery.
 - [ ] An accessibility pass: reduced motion, color-blind checks, playing on mute, text sizes.
-- [ ] A balance pass across all three Bigs.
+- [ ] A balance pass across the recruits and cards.
 - [ ] A bug bash on iOS Safari and Android Chrome, in the browser and installed.
 - [ ] The final domain/URL, a share image and a short landing blurb.
 
@@ -279,8 +281,8 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Backlog (after v1)
 
-- [ ] **Big variants** that share a homeland pool, e.g. Ghost, Skeleton and Vampire for the Graveyard.
-- [ ] **The Halflings** (*The Second Breakfast Club*): the hired ogre, the Sandwich ball, and Hijinks-heavy play.
+- [ ] **More haunted places:** the graveyard, a witch's swamp, a haunted manor, each with its own defenders, hazards and recruits.
+- [ ] **Team looks:** helmet and jersey colors, team names.
 - [ ] Daily runs with a shared seed.
 - [ ] More biomes (swamp, sky, clockwork, sea).
 - [ ] Balls with rules (e.g. a biting Skull perk).
@@ -290,7 +292,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
-- **2026-10-17:** Theme reworked: a football team in a haunted forest, with no Bigs or Smalls. The game is now called **Fourth & Ghoul**. GAMEPLAY.md and TECHNICAL.md still need updating for the new theme.
+- **2026-10-17:** Theme reworked: a football team in a haunted forest, with no Bigs or Smalls. The game is now called **Fourth & Ghoul**. GAMEPLAY.md and TECHNICAL.md are updated to match. *(Items checked off before this point use the old words: the Big is now the QB, and Smalls are now players.)*
 - **2026-10-17:** Defenders are biome locals in candy purple. The Forest set (gnome Chaser, rhino-beetle Blitzer, scarecrow Wall-er, bat Picker) is modelled and in the game.
 - **2026-10-17:** Playtest changes: a fumble now resets the whole screen to setup, and Smalls no longer block each other.
 - **2026-10-17:** M1.5 synth and audio: mixer, synth voices, song notation, offline stem rendering, music locked to the beat, SFX, render tooling, and the first song, "Spooky Surf".
