@@ -4,9 +4,9 @@
  * always gives the same result.
  *
  * The beat is global: it ticks in every phase, in time with the music, and
- * never resets. What changes is who acts on it. Before HIKE (and between
- * screens) only the patrols move: Bats circle whatever the play is doing,
- * while your players and the other defenders wait for the snap.
+ * never resets. What changes is who acts on it. Outside play (before HIKE and
+ * between screens) only defenders that ignore the snap move (the Bats; see
+ * content/defenders.ts), and nothing collides; everyone else waits.
  *
  * Order within a beat in play:
  *   1. Knocked-down units recover a little.
@@ -17,9 +17,10 @@
  *   6. Touchdown and wipeout checks.
  *   7. Everyone decides next beat's hop (the telegraph).
  */
+import { DEFENDERS } from '../content/defenders';
 import { playerKind } from '../content/players';
 import { tuning } from '../content/tuning';
-import { patrolNext, updateIntents } from './ai';
+import { updateIntents } from './ai';
 import { COLS, END_ROW, eq, inBounds, key, nextToQb } from './grid';
 import { setUpScreen, yards } from './run';
 import { actsOn, hitsSurvived } from './stats';
@@ -46,7 +47,8 @@ export function step(prev: RunState, throwTarget: Vec | null = null): StepResult
   const events: SimEvent[] = [];
   state.beat += 1;
   if (state.phase !== 'play') {
-    patrolStep(state, events);
+    resolveMoves(state, events);
+    updateIntents(state.screen);
     return { state, events };
   }
   for (const u of liveUnits(state)) if (u.downBeats > 0) u.downBeats--;
@@ -95,12 +97,24 @@ function tryThrow(state: RunState, target: Vec, events: SimEvent[]): void {
 
 // ── Movement and collisions ────────────────────────────────────────────────
 
+/** Whether a unit moves in the current phase: everyone in play, only snap-ignorers outside it. */
+function movesNow(state: RunState, u: Unit): boolean {
+  return state.phase === 'play' || (u.side === 'defender' && DEFENDERS[u.kind].ignoresSnap);
+}
+
+/**
+ * Everyone due to hop this beat hops. In play, players and defenders that
+ * meet collide; outside play only snap-ignoring defenders move, and they pass
+ * through players without contact.
+ */
 function resolveMoves(state: RunState, events: SimEvent[]): void {
-  const { beat } = state;
+  const { beat, screen } = state;
+  const contact = state.phase === 'play';
   const units = liveUnits(state).sort(byId);
   const moving = new Map<number, Vec>();
   for (const u of units) {
-    if (u.downBeats > 0 || !u.intent || !inBounds(u.intent) || !actsOn(u.stats, beat)) continue;
+    if (u.downBeats > 0 || !u.intent || !inBounds(u.intent)) continue;
+    if (!actsOn(u.stats, beat) || !movesNow(state, u)) continue;
     moving.set(u.id, u.intent);
   }
   const finalOf = (u: Unit): Vec => moving.get(u.id) ?? u.pos;
@@ -116,7 +130,9 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
     for (const d of defenders) {
       for (const s of players) {
         const pair = `${s.id}:${d.id}`;
-        if (!s.alive || !d.alive || resolved.has(pair) || state.phase !== 'play') continue;
+        if (!contact || !s.alive || !d.alive || resolved.has(pair) || state.screen !== screen) {
+          continue;
+        }
         const sMoves = moving.has(s.id);
         const dMoves = moving.has(d.id);
         const meet = eq(finalOf(s), finalOf(d));
@@ -137,7 +153,7 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
   }
 
   // A tackle fumble resets the screen; the old units are gone, so stop here.
-  if (state.phase !== 'play') return;
+  if (state.screen !== screen) return;
 
   for (const u of units) {
     const to = moving.get(u.id);
@@ -153,20 +169,6 @@ function advancePatrol(d: Defender): void {
   if (!d.patrol) return;
   const next = (d.patrolIndex + 1) % d.patrol.length;
   if (eq(d.patrol[next], d.pos)) d.patrolIndex = next;
-}
-
-/** Outside play, only patrolling defenders (the Bats) hop. Nothing collides: they stay out of the setup rows. */
-function patrolStep(state: RunState, events: SimEvent[]): void {
-  const screen = state.screen;
-  for (const d of screen.defenders) {
-    if (!d.alive || !d.patrol || !actsOn(d.stats, state.beat)) continue;
-    const to = patrolNext(d);
-    if (!to) continue;
-    events.push({ type: 'hop', id: d.id, from: d.pos, to });
-    d.pos = to;
-    advancePatrol(d);
-  }
-  updateIntents(screen);
 }
 
 /**

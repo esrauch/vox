@@ -1,17 +1,15 @@
 import * as THREE from 'three';
+import { DEFENDERS } from '../content/defenders';
 import { hexToNumber, team } from '../content/palettes';
 import { eq } from '../sim/grid';
 import { getGeometry, voxelMaterial } from '../voxel/models';
-import type { DefenderKind, ScreenState, Unit, Vec } from '../sim/types';
+import type { ScreenState, Unit, Vec } from '../sim/types';
 import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
 const RECRUIT_COLOR = hexToNumber(team.accent);
 /** The vanilla rookie football player. */
 const WALK_ON_MODEL = 'team/walkOn';
-/** Defenders are the biome's locals; only the Forest exists so far. */
-const BIOME = 'forest';
-const defenderModel = (kind: DefenderKind): string => `${BIOME}/${kind}`;
 
 /** How much of a beat a hop takes. The rest of the beat the unit stands still. */
 const HOP_SHARE = 0.55;
@@ -91,7 +89,11 @@ export class UnitViews {
   private create(u: Unit): UnitView {
     // Walk-ons and defenders are voxel models; recruits are still placeholder cubes.
     const model =
-      u.side === 'defender' ? defenderModel(u.kind) : u.kindId === 'walkOn' ? WALK_ON_MODEL : null;
+      u.side === 'defender'
+        ? DEFENDERS[u.kind].model
+        : u.kindId === 'walkOn'
+          ? WALK_ON_MODEL
+          : null;
     const body = model
       ? new THREE.Mesh(getGeometry(model), voxelMaterial)
       : new THREE.Mesh(this.recruitBox, this.material(RECRUIT_COLOR));

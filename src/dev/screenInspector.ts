@@ -2,6 +2,7 @@
  * Dev page for the M1.2 simulation core: step a screen beat by beat, place
  * Players in setup, and queue throws by tapping tiles. Open /dev/screen.html?seed=N.
  */
+import { DEFENDERS } from '../content/defenders';
 import { tuning } from '../content/tuning';
 import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, inThrowBand, vec } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
@@ -26,8 +27,6 @@ const buttons = {
   next: $<HTMLButtonElement>('next'),
   reset: $<HTMLButtonElement>('reset'),
 };
-
-const DEFENDER_GLYPH = { chaser: 'C', blitzer: 'Z', waller: 'W', picker: 'P' } as const;
 
 const params = new URLSearchParams(location.search);
 let seed = Number(params.get('seed') ?? 1) || 1;
@@ -172,7 +171,7 @@ function unitHtml(u: Unit): string {
     const fend = u.fendOff > 0 ? '⛨' : '';
     return `<span class="player ${state}">${glyph}${fend}${arrow}</span>${carrying}`;
   }
-  const glyph = u.alive ? DEFENDER_GLYPH[u.kind] : '✝';
+  const glyph = u.alive ? DEFENDERS[u.kind].glyph : '✝';
   return `<span class="defender ${state}">${glyph}${arrow}</span>`;
 }
 

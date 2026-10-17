@@ -47,7 +47,7 @@ export interface Defender extends UnitBase {
   readonly kind: DefenderKind;
   /** Where it started. A Wall-er holds this row. */
   readonly home: Vec;
-  /** A fixed circuit of tiles this defender loops around (Pickers: a 4×4 box), or null. */
+  /** The circuit a patrolling defender loops (a 4×4 box), or null. */
   readonly patrol: readonly Vec[] | null;
   /** Which tile of the patrol it's on. */
   patrolIndex: number;

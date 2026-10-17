@@ -3,7 +3,7 @@
  * that ramps with the screen index. Strip-based generation with hazards and a
  * solvability check replaces it in M2/M3 (TECHNICAL.md §10).
  */
-import { DEFENDER_STATS } from '../content/defenders';
+import { DEFENDERS, DEFENDER_KINDS } from '../content/defenders';
 import { COLS, END_ROW, SETUP_ROWS, eq, vec } from './grid';
 import { createRng, deriveSeed } from './rng';
 import type { Defender, DefenderKind, Vec } from './types';
@@ -35,16 +35,16 @@ export function generateSpawns(seed: number, index: number): DefenderSpawn[] {
   place('picker', END_ROW - 5, END_ROW - 3);
   place('chaser', END_ROW - 3, END_ROW - 1);
   // Ramp: one extra defender every two screens, cycling through the kinds.
-  const extras: DefenderKind[] = ['chaser', 'blitzer', 'waller', 'picker'];
   for (let i = 0; i < Math.floor(index / 2); i++) {
-    place(extras[i % extras.length] as DefenderKind, low, END_ROW - 1);
+    place(DEFENDER_KINDS[i % DEFENDER_KINDS.length] as DefenderKind, low, END_ROW - 1);
   }
   return spawns;
 }
 
 export function createDefenders(spawns: readonly DefenderSpawn[], firstId: number): Defender[] {
   return spawns.map((spawn, i) => {
-    const patrol = spawn.kind === 'picker' ? boxCircuit(spawn.pos) : null;
+    const def = DEFENDERS[spawn.kind];
+    const patrol = def.movement === 'patrol' ? boxCircuit(spawn.pos) : null;
     const start = patrol?.[0] ?? spawn.pos;
     return {
       id: firstId + i,
@@ -52,7 +52,7 @@ export function createDefenders(spawns: readonly DefenderSpawn[], firstId: numbe
       kind: spawn.kind,
       pos: start,
       home: start,
-      stats: DEFENDER_STATS[spawn.kind],
+      stats: def.stats,
       alive: true,
       downBeats: 0,
       hitsTaken: 0,
@@ -63,7 +63,7 @@ export function createDefenders(spawns: readonly DefenderSpawn[], firstId: numbe
   });
 }
 
-/** The size of a Picker's square patrol. */
+/** The size of a patrol's square circuit. */
 const BOX = 4;
 
 /**

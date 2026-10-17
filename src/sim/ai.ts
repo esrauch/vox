@@ -2,6 +2,7 @@
  * Per-beat decisions (GAMEPLAY.md, What's in the Way). Every unit's intent is
  * decided one beat ahead, so it always faces where it's about to hop.
  */
+import { DEFENDERS } from '../content/defenders';
 import { QB_POS, END_ROW, dist, eq, stepToward, vec } from './grid';
 import type { Defender, ScreenState, PlayerUnit, Vec } from './types';
 
@@ -23,22 +24,21 @@ function playerIntent(s: PlayerUnit): Vec | null {
 }
 
 function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
-  switch (d.kind) {
-    case 'chaser': {
+  switch (DEFENDERS[d.kind].movement) {
+    case 'chase': {
       const target = chaseTarget(d, screen);
       return target ? stepToward(d.pos, target) : null;
     }
-    case 'blitzer': {
-      // Blitzers go straight for the QB. Reaching it (while it holds the ball) is a sack.
+    case 'blitz':
+      // Straight for the QB. Reaching it (while it holds the ball) is a sack.
       return stepToward(d.pos, QB_POS);
-    }
-    case 'waller': {
+    case 'wall': {
       const target = wallTarget(d, screen);
       return target ? stepToward(d.pos, target) : null;
     }
-    case 'picker':
-      // A Picker (the Bat) loops its box circuit, whatever the ball does: a
-      // pattern you learn, and it picks off any pass that comes down under it.
+    case 'patrol':
+      // Loops its circuit whatever the ball does: a pattern you learn, and it
+      // picks off any pass that comes down under it.
       return patrolNext(d);
   }
 }
