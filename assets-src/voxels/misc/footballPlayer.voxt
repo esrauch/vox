@@ -1,0 +1,59 @@
+# A classic football player: gold helmet with a white stripe and face mask,
+# orange jersey with a number 1, shoulder pads, white pants, socks and cleats.
+size 9 14 5
+voxel 0.08
+mirror x
+colors
+  h leafGold
+  n white
+  m woodGrey
+  s skin
+  k ink
+  p pumpkinDark
+  j pumpkin
+  w bone
+slice 0
+  ..hhn
+  .hhhh
+  .hsks
+  .hmmm
+  ...ss
+  ppppp
+  pjjjj
+  sjjjn
+  sjjjn
+  kjjjn
+  ..www
+  ..ww.
+  ..jj.
+  ..kk.
+slice 1-3
+  ..hhn
+  .hhhn
+  .hhhh
+  .hhhh
+  ...ss
+  ppppp
+  pjjjj
+  sjjjj
+  sjjjj
+  kjjjj
+  ..www
+  ..ww.
+  ..jj.
+  ..kk.
+slice 4
+  ..hhn
+  .hhhn
+  .hhhh
+  .hhhh
+  ...ss
+  ppppp
+  pjjjj
+  sjjjn
+  sjjjn
+  kjjjn
+  ..www
+  ..ww.
+  ..jj.
+  ..kk.

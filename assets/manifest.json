@@ -84,6 +84,12 @@
       "source": "Original voxel model (Forest prop: fence segment), written by Claude",
       "author": "Claude",
       "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/misc/footballPlayer.voxt",
+      "source": "Original voxel model (football player), written by Claude",
+      "author": "Claude",
+      "license": "original"
     }
   ]
 }
