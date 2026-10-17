@@ -239,6 +239,7 @@ export class Game {
     this.paused = true;
     this.clock?.stop();
     this.queuedThrow = null;
+    this.markers.launch(null);
     this.syncHud();
   }
 
@@ -271,6 +272,7 @@ export class Game {
     }
     this.beatOffset = this.state.beat;
     this.queuedThrow = null;
+    this.markers.launch(null);
     this.clock.startAt(music.song.bpm, origin);
   }
 
@@ -324,7 +326,7 @@ export class Game {
     this.markers.setAim({ target, valid });
   }
 
-  /** Releasing throws, on the next beat, if the aim is valid; otherwise it cancels. */
+  /** Releasing throws if the aim is valid (the sim takes it on the next beat); otherwise it cancels. */
   private onAimEnd(e: PointerEvent): void {
     const aim = this.aim;
     this.aim = null;
@@ -334,14 +336,19 @@ export class Game {
       if (aim.target.y > tuning.throw.minRow - 0.5) this.hud.showJudgement('out of range', 'bad');
       return;
     }
-    const result = this.clock.judgeTap(
-      e.timeStamp,
-      this.settings.audioOffsetMs / 1000,
-      tuning.beat.onBeatWindow,
-    );
-    if (!result) return;
-    const beat = Math.max(result.resolvesOn, this.state.beat + 1);
+    const pos = this.clock.position(e.timeStamp);
+    if (!pos) return;
+    // The sim throws on the next beat and the ball lands flightBeats after
+    // that, but the ball leaves the QB's hand the moment you let go: it flies
+    // a little faster or slower so it still lands right on that beat.
+    const releasedAt = Math.max(pos.index + this.beatOffset + pos.phase, this.state.beat);
+    const beat = Math.max(Math.floor(releasedAt), this.state.beat) + 1;
     this.queuedThrow = { beat, target: aim.target };
+    this.markers.launch({
+      target: aim.target,
+      releasedAt,
+      landsOn: beat + tuning.throw.flightBeats,
+    });
   }
 
   private onPointerDown(e: PointerEvent): void {

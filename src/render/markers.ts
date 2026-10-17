@@ -30,6 +30,13 @@ const CARRIED = new THREE.Vector3(0, 1.3, 0.1).applyAxisAngle(X_AXIS, tilt);
 /** The ball is shown bigger while carried, so the carrier is unmistakable. */
 const CARRIED_SCALE = 1.6;
 
+interface Launch {
+  readonly target: Vec;
+  /** Fractional beat position of the release. */
+  readonly releasedAt: number;
+  readonly landsOn: number;
+}
+
 /**
  * The ball and the field indicators that move: the free (not grid-locked)
  * reticle with an animated dashed arc while aiming, and the landing ring with
@@ -47,6 +54,8 @@ export class Markers {
   private readonly arc = new THREE.Group();
   private readonly dashes: THREE.Mesh[] = [];
   private aim: { target: Vec; valid: boolean } | null = null;
+  /** The throw just released: animated from the moment of release, before the sim takes it. */
+  private launched: Launch | null = null;
   /** A pulsing ring on the ground around whoever is carrying the ball. */
   private readonly carrierRing: THREE.Mesh;
   private readonly landing = new THREE.Group();
@@ -116,11 +125,31 @@ export class Markers {
     }
   }
 
+  /** The ball left the QB's hand at beat position `releasedAt` and lands on beat `landsOn`; null forgets it. */
+  launch(launch: Launch | null): void {
+    this.launched = launch;
+  }
+
   /** `beatPos` is the current beat plus its phase, e.g. 12.4. */
   update(screen: ScreenState, beatPos: number, units: UnitViews, time: number): void {
     const ball = screen.ball;
+    // A released throw flies from the moment of release. Drop it once the sim's
+    // ball has moved on, if the sim never took the throw (the QB lost the ball),
+    // or if the beat count restarted (a new screen).
+    const launch = this.launched;
+    const flying =
+      launch &&
+      beatPos >= launch.releasedAt &&
+      beatPos < launch.landsOn &&
+      ((ball.at === 'qb' && beatPos < launch.landsOn - tuning.throw.flightBeats + 1) ||
+        (ball.at === 'flight' && ball.landsOn === launch.landsOn))
+        ? launch
+        : ball.at === 'flight'
+          ? { target: ball.target, releasedAt: ball.releasedOn, landsOn: ball.landsOn }
+          : null;
+    if (!flying) this.launched = null;
     this.ball.visible = ball.at !== 'none';
-    this.landing.visible = ball.at === 'flight';
+    this.landing.visible = flying !== null;
     this.ball.rotation.y = time * 1.5;
 
     if (this.aim) {
@@ -138,7 +167,23 @@ export class Markers {
 
     this.carrierRing.visible = ball.at === 'carried';
     this.ball.scale.setScalar(ball.at === 'carried' ? CARRIED_SCALE : 1);
-    if (ball.at === 'qb') {
+    if (flying) {
+      // A parabola from the QB's hand to the landing point, timed to the beat.
+      const t = Math.min(
+        1,
+        Math.max(0, (beatPos - flying.releasedAt) / (flying.landsOn - flying.releasedAt)),
+      );
+      const from = heldPosition();
+      const to = tileToWorld(flying.target, 0.6);
+      this.ball.position.lerpVectors(from, to, t);
+      this.ball.position.y += Math.sin(t * Math.PI) * ARC_HEIGHT;
+      this.ball.rotation.x = t * Math.PI * 4;
+
+      this.landing.position.copy(tileToWorld(flying.target, 0.03));
+      const beatsLeft = Math.max(0, Math.ceil(flying.landsOn - beatPos));
+      this.pips.forEach((pip, i) => (pip.visible = i < beatsLeft));
+      this.landing.scale.setScalar(1 + (1 - (beatPos % 1)) * 0.15);
+    } else if (ball.at === 'qb') {
       this.ball.position.copy(heldPosition());
     } else if (ball.at === 'carried') {
       const p = units.positionOf(ball.by);
@@ -147,22 +192,6 @@ export class Markers {
         this.carrierRing.position.set(p.x, 0.03, p.z);
         this.carrierRing.scale.setScalar(1 + Math.abs(Math.sin(time * Math.PI * 2)) * 0.12);
       }
-    } else if (ball.at === 'flight') {
-      // A parabola from the QB's hand to the landing tile, timed to the beat.
-      const t = Math.min(
-        1,
-        Math.max(0, (beatPos - ball.releasedOn) / (ball.landsOn - ball.releasedOn)),
-      );
-      const from = heldPosition();
-      const to = tileToWorld(ball.target, 0.6);
-      this.ball.position.lerpVectors(from, to, t);
-      this.ball.position.y += Math.sin(t * Math.PI) * ARC_HEIGHT;
-      this.ball.rotation.x = t * Math.PI * 4;
-
-      this.landing.position.copy(tileToWorld(ball.target, 0.03));
-      const beatsLeft = Math.max(0, Math.ceil(ball.landsOn - beatPos));
-      this.pips.forEach((pip, i) => (pip.visible = i < beatsLeft));
-      this.landing.scale.setScalar(1 + (1 - (beatPos % 1)) * 0.15);
     }
   }
 }

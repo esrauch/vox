@@ -60,7 +60,7 @@ This gives the game one thing to master: **where and when you throw**.
 | **Setup** | **Drag a player** onto a tile of the setup zone | Set your formation. |
 | **Setup** | **Tap HIKE!** | Start the play. |
 | **Play** | **Press anywhere and pull back** | **Aim.** Wherever your finger first touches is the anchor. Pulling down aims up the field, and pulling left aims right. A **reticle** appears where the ball would land, with an animated dashed arc from the QB's hand to it. |
-| **Play** | **Release** | **Throw** to the reticle on the next beat. Releasing where you can't throw (outside the middle-half band) cancels. |
+| **Play** | **Release** | **Throw** to the reticle: the ball leaves at once and lands on a beat. Releasing where you can't throw (outside the middle-half band) cancels. |
 | **After the throw** | **Tap a Hijink icon** | Fire it, either at the reticle or across the whole field (see *Hype and Hijinks*). |
 
 **That's it.** There's nothing to move or steer.
@@ -91,7 +91,7 @@ Each screen is one field-length climb, in two phases.
 
 - **Everything hops on the beat.** Players, defenders, rolling pumpkins and boars all move one step per beat (or per two beats, for the slow ones). The screen bounces in time: the crowd claps and the jack-o'-lanterns pulse.
 - **Hazards are beat patterns.** For example, a lane of pumpkins rolls every beat and a flytrap snaps shut every fourth beat. You learn a lane the way you learn a riff.
-- **Every throw takes exactly 2 beats.** You can release any time. The ball leaves on the **next beat** and lands **2 beats later**, however far it goes. One fixed rhythm makes every throw predictable, so **leading your receiver is counting**: "two hops from now, Pip will be *there*." The **Fast Throw** perk cuts this to **1 beat**, which leaves defenders almost no time to react.
+- **Every throw lands on a beat, 2 beats after the next one.** You can release any time. The ball **leaves the QB's hand the instant you let go**, and lands **on the beat 2 beats after the next beat**, however far it goes. Its flight speed varies a little, from just over 2 beats to just under 3, so the landing always hits the beat. (The sim takes the throw on the next beat; only the animation starts early.) One fixed rhythm makes every throw predictable, so **leading your receiver is counting**: "two hops from now, Pip will be *there*." The **Fast Throw** perk cuts this to **1 beat**, which leaves defenders almost no time to react.
 - **Somebody has to catch it, and close is good enough.** When the ball comes down:
   - **The closest of your players within about a tile catches it**, rated by how close it is to where the ball landed:
     - **Perfect** (within about ⅓ of a tile): a **Clean Catch**. The receiver **fends off 1 defender** while it carries the ball (shown by a glowing outline).
@@ -101,7 +101,7 @@ Each screen is one field-length climb, in two phases.
   - **A defender right under the ball** (within about 0.6 of a tile) **and closer than your receiver intercepts it**, which is a **fumble**.
   - **Nobody close enough:** it's a miss, and that's also a **fumble**. There are no loose balls and no scrambles. A throw either connects or it costs you a ball.
   - The distances are tuning values (`tuning.catch`), and the game pops "PERFECT!", "GOOD!" or "OK".
-- **Throws and Hijinks always happen on a beat.** Release or tap whenever you like, and the action fires on the **next beat**. Nothing ever happens off the beat.
+- **Throws and Hijinks always happen on a beat.** Release or tap whenever you like, and the action fires on the **next beat** (a thrown ball starts flying at once, but lands on a beat). Nothing ever happens off the beat.
 - **Setup is the break.** During the huddle the music drops to a quiet loop. **HIKE!** brings the beat crashing back in.
 - **The tempo is the difficulty dial.** Each place has its own track and tempo, and the beat picks up as you climb. Boss screens get their own song.
 
