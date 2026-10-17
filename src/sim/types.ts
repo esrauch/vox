@@ -45,7 +45,7 @@ export type DefenderKind = 'chaser' | 'blitzer' | 'waller' | 'picker';
 export interface Defender extends UnitBase {
   readonly side: 'defender';
   readonly kind: DefenderKind;
-  /** Where a Picker returns to, and a Wall-er's row. */
+  /** Where it started. A Wall-er holds this row. */
   readonly home: Vec;
   /** A fixed circuit of tiles this defender loops around (Pickers: a 4×4 box), or null. */
   readonly patrol: readonly Vec[] | null;
@@ -105,8 +105,8 @@ export type Action =
 export type CatchQuality = 'perfect' | 'good' | 'ok';
 
 export type FumbleReason = 'sack' | 'miss' | 'interception' | 'tackle';
-/** What killed a unit: a defender, a Blitzer, or (for defenders) a Walk-on trading itself. */
-export type DeathCause = 'defender' | 'blitzer' | 'walkOn';
+/** What killed a unit: a defender, or (for defenders) a Walk-on trading itself. */
+export type DeathCause = 'defender' | 'walkOn';
 export type HitResult = 'down' | 'dead';
 
 /** Everything that happened during a step, for the renderer, audio and tests. */

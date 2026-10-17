@@ -39,11 +39,7 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
     case 'picker':
       // A Picker (the Bat) loops its box circuit, whatever the ball does: a
       // pattern you learn, and it picks off any pass that comes down under it.
-      if (d.patrol) return patrolNext(d);
-      return stepToward(
-        d.pos,
-        screen.ball.at === 'flight' ? landingTile(screen.ball.target) : d.home,
-      );
+      return patrolNext(d);
   }
 }
 

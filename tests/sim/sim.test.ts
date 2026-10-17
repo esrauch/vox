@@ -126,7 +126,7 @@ describe('throwing and catching', () => {
     let state = createRun(5);
     dispatch(state, { type: 'hike' });
     const startTiles = state.screen.smalls.map((s) => key(s.pos));
-    const defenderTiles = state.screen.defenders.map((d) => key(d.home));
+    const defenderTiles = state.screen.defenders.map((d) => key(d.pos));
     state = run(state, 4).state;
     const r = run(step(state, vec(0, 11)).state, 2);
     expect(ofType(r.events, 'fumble')).toHaveLength(1);
@@ -140,7 +140,8 @@ describe('throwing and catching', () => {
 
   it('counts a defender on the landing tile as an interception', () => {
     const state = standStill(playState([{ pos: vec(1, 2) }], [{ kind: 'picker', pos: vec(6, 6) }]));
-    const r = run(step(state, vec(6, 6)).state, 2);
+    const bat = state.screen.defenders[0]!.pos;
+    const r = run(step(state, bat).state, 2);
     expect(ofType(r.events, 'fumble')[0]?.reason).toBe('interception');
   });
 });

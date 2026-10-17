@@ -69,9 +69,11 @@ export const small = (state: RunState, id: number): SmallUnit => {
 export const ofType = <T extends SimEvent['type']>(events: SimEvent[], type: T) =>
   events.filter((e): e is Extract<SimEvent, { type: T }> => e.type === type);
 
-/** Pin every defender in place (no patrol), for tests that need a stationary one. */
+/** Pin every Bat in place (a one-tile patrol), for tests that need a stationary interceptor. */
 export function standStill(state: RunState): RunState {
-  for (const d of state.screen.defenders) Object.assign(d, { patrol: null });
+  for (const d of state.screen.defenders) {
+    if (d.patrol) Object.assign(d, { patrol: [d.pos], patrolIndex: 0 });
+  }
   updateIntents(state.screen);
   return state;
 }

@@ -36,7 +36,7 @@ export function dist(a: Vec, b: Vec): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
-/** Whether a tile touches the QB (up, left or right). A Blitzer standing there attacks it. */
+/** Whether a tile touches the QB (up, left or right). A defender standing there sacks it. */
 export function nextToQb(v: Vec): boolean {
   return dist(v, QB_POS) === 1;
 }

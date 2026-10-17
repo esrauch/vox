@@ -112,7 +112,7 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
   const resolved = new Set<string>();
   for (let changed = true; changed;) {
     changed = false;
-    cancelSameSideConflicts(units, moving);
+    cancelDefenderConflicts(units, moving);
     for (const d of defenders) {
       for (const s of smalls) {
         const pair = `${s.id}:${d.id}`;
@@ -174,26 +174,23 @@ function patrolStep(state: RunState, events: SimEvent[]): void {
  * moving keep their tile; among movers, the lower id wins. Smalls never block
  * each other: they can share a tile and hop past one another.
  */
-function cancelSameSideConflicts(units: readonly Unit[], moving: Map<number, Vec>): void {
+function cancelDefenderConflicts(units: readonly Unit[], moving: Map<number, Vec>): void {
+  const defenders = units.filter((u) => u.side === 'defender' && u.alive);
   for (let changed = true; changed;) {
     changed = false;
-    for (const side of ['defender'] as const) {
-      const sideUnits = units.filter((u) => u.side === side && u.alive);
-      const claimed = new Set(sideUnits.filter((u) => !moving.has(u.id)).map((u) => key(u.pos)));
-      for (const u of sideUnits) {
-        const to = moving.get(u.id);
-        if (!to) continue;
-        const swapper = sideUnits.find(
-          (v) => v.id < u.id && eq(moving.get(v.id), u.pos) && eq(to, v.pos),
-        );
-        if (claimed.has(key(to)) || swapper) {
-          moving.delete(u.id);
-          changed = true;
-          break;
-        }
-        claimed.add(key(to));
+    const claimed = new Set(defenders.filter((u) => !moving.has(u.id)).map((u) => key(u.pos)));
+    for (const u of defenders) {
+      const to = moving.get(u.id);
+      if (!to) continue;
+      const swapper = defenders.find(
+        (v) => v.id < u.id && eq(moving.get(v.id), u.pos) && eq(to, v.pos),
+      );
+      if (claimed.has(key(to)) || swapper) {
+        moving.delete(u.id);
+        changed = true;
+        break;
       }
-      if (changed) break;
+      claimed.add(key(to));
     }
   }
 }
@@ -219,7 +216,7 @@ function collide(
   }
   const carrying = state.screen.ball.at === 'carried' && state.screen.ball.by === s.id;
   const trades = !carrying && smallKind(s.kindId).trades;
-  const result = hit(state, s, d.kind === 'blitzer' ? 'blitzer' : 'defender', events);
+  const result = hit(state, s, 'defender', events);
   const defenderResult = trades ? hit(state, d, 'walkOn', events) : null;
   if (result === 'down') moving.delete(s.id);
   if (result === 'down' || defenderResult === 'down') moving.delete(d.id);
