@@ -60,7 +60,7 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 The base systems everything else is built on. **Each one is built and verified on its own**, before any of them are combined into a game.
 
 ### M1.0 Project scaffold
-- [x] Vite + TypeScript (strict), ESLint and Prettier, Vitest. *(Pinned to Vite 6 and Vitest 3 because the local Node is 21.2. Upgrade Node to 22 LTS, then bump them to the latest versions, which also clears Vitest's dev-only audit warnings.)*
+- [x] Vite 8 + TypeScript (strict), ESLint 10 and Prettier, Vitest 5, on Node 24 LTS (pinned in `.nvmrc`, which CI uses too).
 - [x] The folder layout from TECHNICAL.md §19. Folders get created as they're needed.
 - [x] Dev-only pages (`/dev/*`), excluded from production builds.
 - [~] **Deploy to a static host from day one.** A GitHub Pages workflow is ready (`.github/workflows/deploy.yml`). It goes live after one-time setup (Settings → Pages → Source: GitHub Actions) and a push to `main`.
@@ -265,6 +265,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Upgraded to Node 24, Vite 8, Vitest 5 and ESLint 10. The audit is clean.
 - **2026-10-17:** M1.0 scaffold built: hello-cube page, checks, tests, asset manifest, Pages workflow.
 - **2026-10-17:** Set the stat scale, with Walk-ons at 0/0/0.
 - **2026-10-17:** Made most of the M0 decisions needed before M2.
