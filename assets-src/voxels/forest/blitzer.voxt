@@ -1,0 +1,28 @@
+# Forest Blitzer: a rhino beetle. Low, wide and horned: a little battering ram.
+size 7 5 7
+voxel 0.11
+colors
+  P purple
+  d purpleDark
+  l purpleLight
+  w white
+  k ink
+  h horn
+# Legs, sticking out at the sides.
+box 0 0 2 0 0 2 k
+box 6 0 2 6 0 2 k
+box 0 0 4 0 0 4 k
+box 6 0 4 6 0 4 k
+box 0 0 6 0 0 6 k
+box 6 0 6 6 0 6 k
+# The shell, with a shiny stripe down the middle.
+box 1 0 2 5 2 6 P
+box 2 3 2 4 3 6 P
+box 3 3 2 3 3 6 l
+box 3 2 2 3 2 6 l
+# Head, eyes and a short horn curling up and back at the front.
+box 2 0 1 4 1 1 d
+box 2 1 1 2 1 1 w
+box 4 1 1 4 1 1 w
+box 3 1 0 3 2 0 h
+box 3 3 1 3 3 1 h

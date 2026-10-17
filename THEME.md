@@ -183,6 +183,19 @@ Three starting Bigs, each bringing a homeland with a style and an attitude. In p
 
 ---
 
+## The Defenders
+
+**Defenders are the locals of each biome**, defending their turf, and **every one of them wears candy purple**. Purple reads as "not us" against your gold squad, the green field and the orange pumpkins, so you can always tell sides apart at a glance. Each defender kind gets its own creature in each biome, with a silhouette that says what it does.
+
+| Kind | Forest (pumpkin patch) | Graveyard *(later)* | Mountain *(later)* |
+|---|---|---|---|
+| **Chaser** | **Garden Gnome**: a tall pointy hat, a beard, arms out. | *TBD* | *TBD* |
+| **Blitzer** | **Rhino Beetle**: low, wide and horned, a little battering ram. | *TBD* | *TBD* |
+| **Wall-er** | **Scarecrow**: arms spread wide along its crossbar, a literal wall. | *TBD* | *TBD* |
+| **Picker** | **Bat**: hovering with its wings spread, to snatch passes out of the air. | *TBD* | *TBD* |
+
+---
+
 ## Attributes (in the abstract)
 
 Every Small and every defender is described by **three attributes**: the **Three H's**. (Bigs are the exception: they're legends, not stat lines. A Big's character comes from its homeland, not from numbers.) In play they're simple numbers starting at 0. Walk-ons are a perfectly average 0 / 0 / 0. These are *character* traits first: they should tell you who someone is before they tell you any numbers. A player should be able to guess a Small's attributes from its silhouette.

@@ -8,12 +8,9 @@ import { tileToWorld } from './view';
 const RECRUIT_COLOR = hexToNumber(bigs.elderBough.accent);
 /** The Walk-on model for the current Big (only the Elder Bough exists so far). */
 const WALK_ON_MODEL = 'elderBough/walkOn';
-const DEFENDER_COLORS: Record<DefenderKind, number> = {
-  chaser: 0xe8344e,
-  blitzer: 0x9e1030,
-  waller: 0xd9622b,
-  picker: 0xff5fa2,
-};
+/** Defenders are the biome's locals; only the Forest exists so far. */
+const BIOME = 'forest';
+const defenderModel = (kind: DefenderKind): string => `${BIOME}/${kind}`;
 
 /** How much of a beat a hop takes. The rest of the beat the unit stands still. */
 const HOP_SHARE = 0.55;
@@ -33,8 +30,8 @@ interface UnitView {
 }
 
 /**
- * Every Small and defender on the field. Walk-ons are voxel models (M1.4);
- * recruits and defenders are still placeholder cubes. They hop from their old
+ * Every Small and defender on the field. Walk-ons and defenders are voxel
+ * models; recruits are still placeholder cubes. They hop from their old
  * tile to their new one at the start of each beat, face where they'll hop
  * next, tip over when knocked down and shrink away when they die.
  */
@@ -42,7 +39,6 @@ export class UnitViews {
   private readonly views = new Map<number, UnitView>();
   private readonly materials = new Map<number, THREE.MeshLambertMaterial>();
   private readonly smallBox = new THREE.BoxGeometry(0.55, 0.55, 0.55);
-  private readonly defenderBox = new THREE.BoxGeometry(0.6, 0.75, 0.6);
   private readonly arrowGeo = new THREE.ConeGeometry(0.13, 0.28, 4).rotateX(-Math.PI / 2);
   private readonly arrowMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
   private dragging: { id: number; tile: Vec } | null = null;
@@ -91,15 +87,14 @@ export class UnitViews {
   }
 
   private create(u: Unit): UnitView {
-    const isWalkOn = u.side === 'small' && u.kindId === 'walkOn';
-    const body = isWalkOn
-      ? new THREE.Mesh(getGeometry(WALK_ON_MODEL), voxelMaterial)
-      : new THREE.Mesh(
-          u.side === 'small' ? this.smallBox : this.defenderBox,
-          this.material(u.side === 'defender' ? DEFENDER_COLORS[u.kind] : RECRUIT_COLOR),
-        );
+    // Walk-ons and defenders are voxel models; recruits are still placeholder cubes.
+    const model =
+      u.side === 'defender' ? defenderModel(u.kind) : u.kindId === 'walkOn' ? WALK_ON_MODEL : null;
+    const body = model
+      ? new THREE.Mesh(getGeometry(model), voxelMaterial)
+      : new THREE.Mesh(this.smallBox, this.material(RECRUIT_COLOR));
     body.castShadow = true;
-    const base = isWalkOn ? 0 : u.side === 'small' ? 0.275 : 0.375;
+    const base = model ? 0 : 0.275;
     const arrow = new THREE.Mesh(this.arrowGeo, this.arrowMat);
     const root = new THREE.Group();
     root.add(body, arrow);

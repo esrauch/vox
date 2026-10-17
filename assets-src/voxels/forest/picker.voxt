@@ -1,0 +1,40 @@
+# Forest Picker: a bat. It hovers with its wings spread, ready to snatch passes out of the air.
+# The wings are two voxels deep so they still read from the game's steep camera.
+size 9 9 3
+voxel 0.1
+mirror x
+colors
+  P purple
+  l purpleLight
+  d purpleDark
+  w white
+slice 0
+  ...d.
+  ...dd
+  ...wd
+  ....w
+  ...dd
+  ....d
+  .....
+  .....
+  .....
+slice 1
+  ...d.
+  P..dd
+  PP.dd
+  PPPdd
+  lPPdd
+  P.Pdd
+  ....d
+  .....
+  .....
+slice 2
+  ...d.
+  P..dd
+  PP.dd
+  PPPdd
+  PPPdd
+  P.Pdd
+  ....d
+  .....
+  .....

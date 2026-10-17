@@ -18,6 +18,30 @@
       "source": "Original voxel model (Jack-o'-Lantern ball), written by Claude",
       "author": "Claude",
       "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forest/chaser.voxt",
+      "source": "Original voxel model (Forest Chaser: garden gnome), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forest/blitzer.voxt",
+      "source": "Original voxel model (Forest Blitzer: rhino beetle), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forest/waller.voxt",
+      "source": "Original voxel model (Forest Wall-er: scarecrow), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forest/picker.voxt",
+      "source": "Original voxel model (Forest Picker: bat), written by Claude",
+      "author": "Claude",
+      "license": "original"
     }
   ]
 }

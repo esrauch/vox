@@ -48,6 +48,7 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 - [ ] **The announcer:** text pop-ups only, or synthesized or sampled voice?
 - [ ] **The audio list:** the songs (per biome, boss, menus) and the core list of sound effects.
 - [ ] **Final names:** the three Bigs' homeland team names (from the candidate lists in THEME.md).
+- [x] **Who the defenders are:** each biome's locals, always in candy purple. The Forest set is built (gnome, rhino beetle, scarecrow, bat); the Graveyard and Mountain sets are still to design.
 - [ ] **The theme of the climb:** where it's going, and whether there's a joke at the top.
 
 ### Can be settled by prototyping
@@ -289,6 +290,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Defenders are biome locals in candy purple. The Forest set (gnome Chaser, rhino-beetle Blitzer, scarecrow Wall-er, bat Picker) is modelled and in the game.
 - **2026-10-17:** Playtest changes: a fumble now resets the whole screen to setup, and Smalls no longer block each other.
 - **2026-10-17:** M1.5 synth and audio: mixer, synth voices, song notation, offline stem rendering, music locked to the beat, SFX, render tooling, and the first song, "Spooky Surf".
 - **2026-10-17:** M1.4 voxel pipeline: `.voxt` format, `.vox` import, greedy meshing, headless previews, and the first three Elder Bough models in the game.

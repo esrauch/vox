@@ -1,0 +1,42 @@
+# Forest Chaser: a garden gnome. The tall purple hat reads from the steep camera.
+size 5 9 4
+voxel 0.12
+mirror x
+colors
+  P purple
+  p purpleDark
+  s skin
+  r leafRed
+  w bone
+  k ink
+  b barkDark
+slice 0
+  ..P
+  ..P
+  .PP
+  PPP
+  .kr
+  .ww
+  pww
+  .pp
+  .b.
+slice 1-2
+  ..P
+  ..P
+  .PP
+  PPP
+  .ss
+  .ss
+  ppp
+  .pp
+  .b.
+slice 3
+  ...
+  ...
+  .PP
+  PPP
+  .ss
+  .pp
+  ppp
+  .pp
+  ...

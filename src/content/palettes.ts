@@ -59,6 +59,14 @@ export const voxel = {
   bark: '#7a4e2d',
   barkDark: '#5a3a22',
   moss: '#6cc447',
+  // Defenders: every biome's locals wear candy purple, so the opposition always reads as "not us".
+  purple: '#a259ff',
+  purpleDark: '#6b2fc4',
+  purpleLight: '#c9a2ff',
+  skin: '#ffcfa0',
+  straw: '#e8c65a',
+  burlap: '#e9d8a6',
+  horn: '#f3e6c4',
 } as const satisfies Record<string, Hex>;
 
 export type VoxelColor = keyof typeof voxel;

@@ -1,0 +1,42 @@
+# Forest Wall-er: a scarecrow. Its arms stretch out along the crossbar: a literal wall.
+size 9 9 3
+voxel 0.1
+mirror x
+colors
+  h purpleDark
+  P purple
+  d purpleDark
+  y straw
+  s burlap
+  k ink
+  b bark
+slice 0
+  ...hh
+  ..hhh
+  ...ss
+  ...ks
+  ...sk
+  yPPPP
+  ..PdP
+  ...PP
+  ....b
+slice 1
+  ...hh
+  ..hhh
+  ...ss
+  ...ss
+  ...ss
+  yPPPP
+  ..PPP
+  ...PP
+  ....b
+slice 2
+  ...hh
+  ..hhh
+  ...ss
+  ...ss
+  ...ss
+  .PPPP
+  ..PPP
+  ...PP
+  ....b

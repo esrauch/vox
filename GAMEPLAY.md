@@ -147,6 +147,8 @@ Two kinds of trouble fill each screen. **Neither of them ever has the ball.** Al
 
 **Defenders** react to you. They're the AI opposition. Each kind follows one simple rule, decided once per beat, and always faces the tile it's about to hop to. *(▲ Draft spec, to confirm in play.)*
 
+**Defenders are the biome's locals**, and they **always wear candy purple**, so the opposition never gets confused with your gold squad. Each biome has its own creature for each kind (see THEME.md, *The Defenders*).
+
 | Kind | Each beat, it… | Threat |
 |---|---|---|
 | **Chaser** | Hops one tile toward your carrier. With no carrier, it hops toward the ball's landing tile while the ball is in flight, and otherwise toward the nearest Small. | Tackling your carrier is a fumble. |
