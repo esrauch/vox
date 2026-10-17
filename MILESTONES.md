@@ -4,7 +4,7 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** M1.1, the beat-clock spike. M1.0 is done apart from going live on GitHub Pages. The remaining M0 items aren't needed until M5–M8.
+**Current focus:** testing the M1.1 beat clock on real phones, then M1.2 (the simulation core). M1.0 is done apart from going live on GitHub Pages.
 
 ---
 
@@ -69,14 +69,16 @@ The base systems everything else is built on. **Each one is built and verified o
 **Done when:** a "hello cube" page loads on a real phone from a public URL, and tests and lint run. *(The cube page and the checks work locally. The public URL and the phone check are waiting on the deploy.)*
 
 ### M1.1 Beat-clock spike *(the riskiest system)*
-- [ ] A beat clock running off `AudioContext.currentTime`, with lookahead scheduling.
-- [ ] A synthesized metronome click.
-- [ ] Tap judging: each tap's offset from the nearest beat, plus the On-Beat window.
-- [ ] Latency calibration (tap along to the beat), with the offset saved.
-- [ ] Audio unlock on first tap, and pause/resume when the tab is hidden or shown.
-- [ ] A debug overlay: current beat, tap offsets, latency, frame time.
+- [x] A beat clock running off `AudioContext.currentTime`, with lookahead scheduling (`src/beat/clock.ts`).
+- [x] A synthesized metronome click, accented on the bar (`src/audio/metronome.ts`).
+- [x] Tap judging: each tap's offset from the nearest beat, the On-Beat window (±80 ms to start), and which beat the action resolves on. Taps are mapped to *audible* time via `getOutputTimestamp`, with a latency fallback.
+- [x] Latency calibration: tap along, with the median of 12 taps after 4 warm-up taps saved to settings.
+- [x] Audio unlock on first tap, and pause/resume when the tab is hidden or shown.
+- [x] A debug page (`/dev/beat.html`): beat pulse, verdicts, offset histogram, latency readouts, frame time, BPM and window sliders, haptic tick.
+- [x] Unit tests for the beat maths and calibration.
+- [ ] **On a real mid-range Android phone and an iPhone:** does it feel tight, do the offsets match what you feel, and does calibration fix Bluetooth headphones? Then choose the On-Beat window.
 
-**Done when:** on a mid-range Android phone and on an iPhone, tapping along *feels* tight, the judged offsets match what you feel, and calibration fixes Bluetooth headphones.
+**Done when:** on a mid-range Android phone and on an iPhone, tapping along *feels* tight, the judged offsets match what you feel, and calibration fixes Bluetooth headphones. *(Everything is built and checked in a desktop browser. The real-phone feel test is still to do.)*
 
 ### M1.2 Simulation core
 - [ ] The grid (about 9 × 16), strips, and the setup zone.
@@ -265,6 +267,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** M1.1 beat clock built: clock, metronome, tap judging, calibration, and the `/dev/beat.html` debug page. Waiting on the phone test.
 - **2026-10-17:** Upgraded to Node 24, Vite 8, Vitest 5 and ESLint 10. The audit is clean.
 - **2026-10-17:** M1.0 scaffold built: hello-cube page, checks, tests, asset manifest, Pages workflow.
 - **2026-10-17:** Set the stat scale, with Walk-ons at 0/0/0.
