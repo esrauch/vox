@@ -33,3 +33,13 @@ export function createRng(seed: number): Rng {
     },
   };
 }
+
+/** Derive an independent seed from a run seed plus labels (e.g. the screen index). FNV-1a. */
+export function deriveSeed(seed: number, ...parts: (string | number)[]): number {
+  let h = 0x811c9dc5 ^ (seed >>> 0);
+  for (const ch of parts.join('|')) {
+    h ^= ch.charCodeAt(0);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}

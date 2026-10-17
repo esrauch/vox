@@ -4,7 +4,7 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** M1.2, the simulation core. M1.1 passes on Android after calibration, with the iPhone test still to do. M1.0 is done apart from switching Pages to GitHub Actions.
+**Current focus:** M1.3, the minimal render. M1.2 is done. M1.1 still needs an iPhone test, and M1.0 still needs Pages switched to GitHub Actions.
 
 ---
 
@@ -86,18 +86,22 @@ The base systems everything else is built on. **Each one is built and verified o
 **Lesson:** the browser's reported latency can't be trusted, so **every player needs calibrating**. Onboarding (M0, M8) must include a short tap-along calibration on first launch, ideally disguised as a warm-up.
 
 ### M1.2 Simulation core
-- [ ] The grid (about 9 × 16), strips, and the setup zone.
-- [ ] Units, with Hustle, Hands and Heft. They hop on the beat and face their next hop.
-- [ ] Actions are queued and resolve on the next beat.
-- [ ] Throws: a reticle tile, and a fixed 2-beat flight (1 beat with Fast Throw).
-- [ ] The ball landing: catch, interception or miss. Interceptions and misses are fumbles.
-- [ ] Fumbles and the pile of balls, plus the run ending when the last ball is gone.
-- [ ] Knocked down vs. dead, the Walk-on/recruit slot rules, and wipeouts.
-- [ ] Blitzers, Blockers and counters: attack rhythm, ganging up, the Big's counter, and sacks.
-- [ ] A seeded RNG, and deterministic replays (seed plus inputs).
-- [ ] Unit tests covering all of the above.
+- [x] The grid (9 × 16), the setup zone (bottom 3 rows), the pocket tiles and the end row (`src/sim/grid.ts`). *Typed strips are deferred to M2, along with hazards.*
+- [x] Units with Hustle, Hands and Heft. They hop on the beat and face their next hop (`src/sim/stats.ts`, `src/sim/ai.ts`). The 0 values follow the decisions; the 1+ values are placeholders.
+- [x] Setup actions (place, with swapping and a remembered formation), hike, and next screen. Throws resolve on the beat they're passed to `step()`.
+- [x] Throws: a fixed 2-beat flight, a maximum range row, and rejected throws.
+- [x] The ball landing: Clean Catch (+1 fend-off), the one-tile lunge, interceptions and misses, with interceptions and misses counting as fumbles.
+- [x] Fumbles and the pile of balls, and the run ending when the last ball is gone.
+- [x] Collisions (the defender wins unless the Small can fend it off), Heft-based knockdowns and deaths, Walk-on and recruit slot rules, wipeouts.
+- [x] Blitzers and Blockers: engaging, hold counters, ganging up, the Big's counter, sacks only while the Big holds the ball.
+- [x] The four defender kinds, following the draft spec (Chaser, Blitzer, Wall-er, Picker).
+- [x] A seeded, deterministic placeholder screen generator, and `replay(seed, inputs)`.
+- [x] 26 simulation tests, including replay determinism and a randomized invariant check.
+- [x] A dev screen inspector (`/dev/screen.html?seed=N`): place Smalls, hike, queue throws by tapping, step or auto-run.
 
-**Done when:** a whole screen can be played headlessly in tests, from setup through touchdown or fumble, and replays come out the same every time.
+**Done when:** a whole screen can be played headlessly in tests, from setup through touchdown or fumble, and replays come out the same every time. ✅
+
+**Noticed while testing:** a Blitzer heads for the nearest *free* pocket tile, so a single Blocker is easy to walk around, and you need several Blockers to really seal the pocket. Revisit in M2 playtesting. Should Blitzers always go through the nearest Blocker instead?
 
 ### M1.3 Minimal render
 - [ ] A three.js scene, the camera (prototype both options), lighting and a checkerboard field.
@@ -272,6 +276,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** M1.2 simulation core built and tested (47 tests), plus the screen inspector dev page.
 - **2026-10-17:** Android phone test: −115 ms uncalibrated, good after calibration. No haptics (deferred).
 - **2026-10-17:** M1.1 beat clock built: clock, metronome, tap judging, calibration, and the `/dev/beat.html` debug page. Waiting on the phone test.
 - **2026-10-17:** Upgraded to Node 24, Vite 8, Vitest 5 and ESLint 10. The audit is clean.
