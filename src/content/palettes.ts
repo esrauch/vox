@@ -15,6 +15,8 @@ export const common = {
   slimeGreen: '#9cff2e',
   bone: '#f7f1e3',
   ink: '#2b2140',
+  /** Warnings: a throw that isn't allowed. */
+  danger: '#e8344e',
   white: '#ffffff',
 } as const satisfies Record<string, Hex>;
 

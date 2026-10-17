@@ -4,15 +4,9 @@ import { tuning } from '../content/tuning';
 import { COLS, END_ROW, ROWS, SETUP_ROWS, inThrowBand, vec } from '../sim/grid';
 import { tileToWorld } from './view';
 
-/** The quarterback's model. */
-export const QB_MODEL = 'team/qb';
-/** The QB with its throwing arm lowered, once the ball has left its hand. */
-export const QB_THROWN_MODEL = 'team/qbThrown';
-
 /**
  * The static field: a checkerboard of tiles with the setup zone, end zone
- * and throwing band marked, plus the QB. One merged mesh for
- * the tiles keeps the draw-call count low (TECHNICAL.md §5).
+ * and throwing band marked. One instanced mesh for the tiles keeps the draw-call count low (TECHNICAL.md §5).
  */
 export function createField(): THREE.Group {
   const group = new THREE.Group();
@@ -57,8 +51,6 @@ export function createField(): THREE.Group {
     line.position.set(0, 0.005, -edge);
     group.add(line);
   }
-
-  // The QB is drawn by Markers, which swaps its arm up or down with the ball.
 
   return group;
 }
