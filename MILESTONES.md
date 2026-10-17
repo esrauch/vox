@@ -4,7 +4,7 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** M1.3, the minimal render. M1.2 is done. M1.1 still needs an iPhone test, and M1.0 still needs Pages switched to GitHub Actions.
+**Current focus:** try M1.3 on a phone (the camera choice and 60 fps), then M1.4 (the voxel pipeline). Still open: the M1.1 iPhone test, and switching Pages to GitHub Actions.
 
 ---
 
@@ -104,13 +104,17 @@ The base systems everything else is built on. **Each one is built and verified o
 **Changed after testing:** the pocket is now a **single tile** in front of the Big. It's the only Blocker spot, and Blitzers always have to go through it. Before this, a lone Blocker was easy to walk around.
 
 ### M1.3 Minimal render
-- [ ] A three.js scene, the camera (prototype both options), lighting and a checkerboard field.
-- [ ] Plain cubes standing in for units, animated with hops between beats.
-- [ ] Field indicators: the reticle, the landing ring with countdown pips, facing arrows, the throw-range ring.
-- [ ] The DOM overlay: the ball button (pulsing on the beat), the beat bar, the ball pile.
-- [ ] Touch input: tapping a tile places the reticle, tapping the ball button throws, and setup supports dragging.
+- [x] A three.js scene, lighting, and a checkerboard field with the setup zone, end zone, out-of-range rows and pocket marked (`src/render/`).
+- [x] Both cameras: a narrow perspective (default) and orthographic (`?camera=ortho`, or the dev "cam" button). Each is fitted so the whole field sits between the HUD bars.
+- [x] Placeholder cubes for units. They hop in an arc at the start of each beat, squash on landing, tip over when knocked down and shrink away when they die.
+- [x] Field indicators: the reticle, the landing ring with one pip per beat left, facing arrows, the ball's arc. The throw range shows as darker rows.
+- [x] The DOM HUD: the ball button (pulsing on the beat), the beat bar, the ball pile, yards, HIKE/NEXT/AGAIN, "ON BEAT!" pops, and hold-counter badges for the Blocker and the Big.
+- [x] Touch input: tap a tile to aim, tap the ball button to throw on the beat, drag Smalls in setup.
+- [x] The sim steps exactly when each beat is *heard*. If frames stall for more than 2 beats, or the page is hidden, the game **pauses** (RESUME realigns the clock) rather than fast-forwarding.
+- [ ] Choose a camera after trying both on a phone.
+- [ ] Check 60 fps on a real phone.
 
-**Done when:** a single screen is playable in grey boxes on a phone, at 60 fps.
+**Done when:** a single screen is playable in grey boxes on a phone, at 60 fps. *(It plays end to end in the browser at phone size. The real-phone check and the camera choice are still to do.)*
 
 ### M1.4 Voxel pipeline
 - [ ] The `.voxt` text format, with a parser and palette references.
@@ -276,6 +280,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** M1.3 minimal render: the game is playable in grey boxes, with both cameras, the HUD, aiming and throwing on the beat, setup dragging, and pause on stall.
 - **2026-10-17:** Changed the pocket to a single Blocker spot that Blitzers must go through.
 - **2026-10-17:** M1.2 simulation core built and tested (47 tests), plus the screen inspector dev page.
 - **2026-10-17:** Android phone test: −115 ms uncalibrated, good after calibration. No haptics (deferred).

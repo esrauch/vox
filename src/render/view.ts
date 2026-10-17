@@ -1,0 +1,180 @@
+import * as THREE from 'three';
+import { common, hexToNumber } from '../content/palettes';
+import { COLS, ROWS, vec } from '../sim/grid';
+import type { Vec } from '../sim/types';
+
+export type CameraMode = 'perspective' | 'orthographic';
+
+/** Screen space kept free for the HUD, in CSS pixels. */
+export interface Insets {
+  top: number;
+  bottom: number;
+}
+
+/** Grid tile → world position (tile centers). Row 0 is nearest the camera. */
+export function tileToWorld(t: Vec, y = 0): THREE.Vector3 {
+  return new THREE.Vector3(t.x - (COLS - 1) / 2, y, -t.y);
+}
+
+/**
+ * The three.js side of the game: renderer, scene, lights and the fixed ¾
+ * camera, fitted so the whole 9 × 16 field is visible between the HUD bars.
+ */
+export class View {
+  readonly renderer: THREE.WebGLRenderer;
+  readonly scene = new THREE.Scene();
+  camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
+  private mode: CameraMode;
+  private insets: Insets = { top: 0, bottom: 0 };
+  private readonly raycaster = new THREE.Raycaster();
+  private readonly ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+  constructor(
+    readonly canvas: HTMLCanvasElement,
+    mode: CameraMode,
+  ) {
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.scene.background = new THREE.Color(hexToNumber(common.sky));
+
+    this.scene.add(new THREE.HemisphereLight(0xffffff, hexToNumber(common.grassDark), 1.3));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+    sun.position.set(-6, 14, 4);
+    sun.target.position.set(0, 0, -ROWS / 2);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    Object.assign(sun.shadow.camera, {
+      left: -8,
+      right: 8,
+      top: 12,
+      bottom: -12,
+      near: 1,
+      far: 40,
+    });
+    this.scene.add(sun, sun.target);
+
+    this.mode = mode;
+    this.camera = this.makeCamera(mode);
+    new ResizeObserver(() => this.fit()).observe(canvas);
+  }
+
+  get cameraMode(): CameraMode {
+    return this.mode;
+  }
+
+  setCameraMode(mode: CameraMode): void {
+    this.mode = mode;
+    this.camera = this.makeCamera(mode);
+    this.fit();
+  }
+
+  setInsets(insets: Insets): void {
+    this.insets = insets;
+    this.fit();
+  }
+
+  render(): void {
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  /** The grid tile under a screen point (client pixels), or null if off the ground. */
+  tileAt(clientX: number, clientY: number): Vec | null {
+    const rect = this.canvas.getBoundingClientRect();
+    const ndc = new THREE.Vector2(
+      ((clientX - rect.left) / rect.width) * 2 - 1,
+      -((clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    this.raycaster.setFromCamera(ndc, this.camera);
+    const hit = this.raycaster.ray.intersectPlane(this.ground, new THREE.Vector3());
+    if (!hit) return null;
+    return vec(Math.round(hit.x + (COLS - 1) / 2), Math.round(-hit.z));
+  }
+
+  /** A world position → CSS pixels within the canvas (for DOM badges). */
+  toScreen(world: THREE.Vector3): { x: number; y: number } {
+    const p = world.clone().project(this.camera);
+    return {
+      x: ((p.x + 1) / 2) * this.canvas.clientWidth,
+      y: ((1 - p.y) / 2) * this.canvas.clientHeight,
+    };
+  }
+
+  private makeCamera(mode: CameraMode): THREE.PerspectiveCamera | THREE.OrthographicCamera {
+    return mode === 'perspective'
+      ? new THREE.PerspectiveCamera(24, 1, 0.5, 200)
+      : new THREE.OrthographicCamera(-1, 1, 1, -1, 0.5, 200);
+  }
+
+  /**
+   * Fit the field into the area between the HUD insets: aim the camera from
+   * a fixed angle, then pull back (or zoom) until all four corners fit.
+   */
+  private fit(): void {
+    const w = this.canvas.clientWidth;
+    const h = this.canvas.clientHeight;
+    if (w === 0 || h === 0) return;
+    this.renderer.setSize(w, h, false);
+    const availH = Math.max(1, h - this.insets.top - this.insets.bottom);
+
+    const target = new THREE.Vector3(0, 0, -(ROWS - 1) / 2);
+    const pitch = THREE.MathUtils.degToRad(64);
+    const dir = new THREE.Vector3(0, Math.sin(pitch), Math.cos(pitch));
+    const corners = [
+      tileToWorld(vec(-0.5, -0.5)),
+      tileToWorld(vec(COLS - 0.5, -0.5)),
+      tileToWorld(vec(-0.5, ROWS - 0.5)),
+      tileToWorld(vec(COLS - 0.5, ROWS - 0.5)),
+      tileToWorld(vec(COLS / 2, 0), 1.4), // the top of the Big
+    ];
+    const cam = this.camera;
+    const margin = 0.94;
+    const fits = (): boolean =>
+      corners.every((c) => {
+        const p = c.clone().project(cam);
+        return Math.abs(p.x) <= margin && Math.abs(p.y) <= margin;
+      });
+
+    // Fit against the available area first; the view offset then places it below the top inset.
+    cam.clearViewOffset();
+    if (cam instanceof THREE.PerspectiveCamera) {
+      cam.aspect = w / availH;
+      cam.updateProjectionMatrix();
+      let lo = 5;
+      let hi = 200;
+      for (let i = 0; i < 30; i++) {
+        const mid = (lo + hi) / 2;
+        cam.position.copy(target).addScaledVector(dir, mid);
+        cam.lookAt(target);
+        cam.updateMatrixWorld();
+        if (fits()) hi = mid;
+        else lo = mid;
+      }
+      cam.position.copy(target).addScaledVector(dir, hi);
+    } else {
+      cam.position.copy(target).addScaledVector(dir, 60);
+      cam.lookAt(target);
+      cam.updateMatrixWorld();
+      let lo = 1;
+      let hi = 60;
+      for (let i = 0; i < 30; i++) {
+        const mid = (lo + hi) / 2;
+        cam.left = (-mid * w) / availH;
+        cam.right = (mid * w) / availH;
+        cam.top = mid;
+        cam.bottom = -mid;
+        cam.updateProjectionMatrix();
+        if (fits()) hi = mid;
+        else lo = mid;
+      }
+      cam.left = (-hi * w) / availH;
+      cam.right = (hi * w) / availH;
+      cam.top = hi;
+      cam.bottom = -hi;
+    }
+    cam.lookAt(target);
+    cam.setViewOffset(w, availH, 0, -this.insets.top, w, h);
+    cam.updateProjectionMatrix();
+  }
+}

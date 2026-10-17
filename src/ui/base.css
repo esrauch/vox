@@ -43,24 +43,3 @@ body {
 #ui .interactive {
   pointer-events: auto;
 }
-
-.title {
-  margin-top: 12dvh;
-  text-align: center;
-  font-size: clamp(2rem, 10vw, 3.5rem);
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  color: var(--pumpkin);
-  text-shadow:
-    0 4px 0 var(--ink),
-    0 8px 0 rgb(0 0 0 / 0.15);
-}
-
-.build-tag {
-  position: absolute;
-  bottom: calc(env(safe-area-inset-bottom) + 12px);
-  width: 100%;
-  text-align: center;
-  font-size: 0.8rem;
-  opacity: 0.6;
-}
