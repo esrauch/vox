@@ -140,6 +140,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [x] `npm run render-audio`: WAVs, waveform PNGs, peak/RMS levels and a loop-seam check. Plus the `/dev/audio.html` sound board with per-stem mutes.
 - [x] **The first song: "Spooky Surf"**: A-minor Halloween surf rock at 120 BPM, 8 bars (Am Am F E Am Am Dm E). The mix peaks at −2.5 dBFS with a clean loop seam.
 - [ ] **A human listens and approves** the song and the SFX. *(Claude can check levels and seams, but not whether it sounds good.)*
+- [ ] **Note:** the first song needs review before it is considered final; make sure a person listens and signs off on it.
 - [ ] Confirm on a phone that the loop is seamless and stays locked to the beat.
 - [ ] Event SFX (catch, burst…) play when the beat is *heard*, so they land one output-latency late. Scheduling them ahead on the audio clock is for M3 (feel pass).
 
