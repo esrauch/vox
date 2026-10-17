@@ -13,7 +13,7 @@ import { tuning } from '../content/tuning';
 import { createField } from '../render/field';
 import { Markers } from '../render/markers';
 import { UnitViews } from '../render/units';
-import { View, tileToWorld, type CameraMode } from '../render/view';
+import { View, tileToWorld } from '../render/view';
 import { loadSettings } from '../settings';
 import { BIG_POS, eq, inSetupZone } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
@@ -26,8 +26,6 @@ const MAX_CATCH_UP = 2;
 
 export interface GameOptions {
   seed: number;
-  camera: CameraMode;
-  dev: boolean;
 }
 
 export class Game {
@@ -49,22 +47,13 @@ export class Game {
   constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement, options: GameOptions) {
     this.seed = options.seed;
     this.state = createRun(this.seed);
-    this.view = new View(canvas, options.camera);
+    this.view = new View(canvas);
     this.view.scene.add(createField());
     this.units = new UnitViews(this.view.scene);
     this.markers = new Markers(this.view.scene);
     this.hud = new Hud(uiRoot, {
       onBall: (e) => this.onBallButton(e),
       onAction: () => void this.onAction(),
-      ...(options.dev
-        ? {
-            onToggleCamera: () => {
-              const next = this.view.cameraMode === 'perspective' ? 'orthographic' : 'perspective';
-              this.view.setCameraMode(next);
-              this.hud.showJudgement(next, 'offBeat');
-            },
-          }
-        : {}),
     });
 
     this.units.reset(this.state.screen);

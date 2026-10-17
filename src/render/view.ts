@@ -3,8 +3,6 @@ import { common, hexToNumber } from '../content/palettes';
 import { COLS, ROWS, vec } from '../sim/grid';
 import type { Vec } from '../sim/types';
 
-export type CameraMode = 'perspective' | 'orthographic';
-
 /** Screen space kept free for the HUD, in CSS pixels. */
 export interface Insets {
   top: number;
@@ -18,21 +16,18 @@ export function tileToWorld(t: Vec, y = 0): THREE.Vector3 {
 
 /**
  * The three.js side of the game: renderer, scene, lights and the fixed ¾
- * camera, fitted so the whole 9 × 16 field is visible between the HUD bars.
+ * perspective camera (chosen in M1.3), fitted so the whole 9 × 16 field is
+ * visible between the HUD bars.
  */
 export class View {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
-  camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
-  private mode: CameraMode;
+  readonly camera = new THREE.PerspectiveCamera(24, 1, 0.5, 200);
   private insets: Insets = { top: 0, bottom: 0 };
   private readonly raycaster = new THREE.Raycaster();
   private readonly ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-  constructor(
-    readonly canvas: HTMLCanvasElement,
-    mode: CameraMode,
-  ) {
+  constructor(readonly canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
@@ -55,19 +50,7 @@ export class View {
     });
     this.scene.add(sun, sun.target);
 
-    this.mode = mode;
-    this.camera = this.makeCamera(mode);
     new ResizeObserver(() => this.fit()).observe(canvas);
-  }
-
-  get cameraMode(): CameraMode {
-    return this.mode;
-  }
-
-  setCameraMode(mode: CameraMode): void {
-    this.mode = mode;
-    this.camera = this.makeCamera(mode);
-    this.fit();
   }
 
   setInsets(insets: Insets): void {
@@ -101,15 +84,9 @@ export class View {
     };
   }
 
-  private makeCamera(mode: CameraMode): THREE.PerspectiveCamera | THREE.OrthographicCamera {
-    return mode === 'perspective'
-      ? new THREE.PerspectiveCamera(24, 1, 0.5, 200)
-      : new THREE.OrthographicCamera(-1, 1, 1, -1, 0.5, 200);
-  }
-
   /**
    * Fit the field into the area between the HUD insets: aim the camera from
-   * a fixed angle, then pull back (or zoom) until all four corners fit.
+   * a fixed angle, then pull back until all four corners fit.
    */
   private fit(): void {
     const w = this.canvas.clientWidth;
@@ -138,41 +115,19 @@ export class View {
 
     // Fit against the available area first; the view offset then places it below the top inset.
     cam.clearViewOffset();
-    if (cam instanceof THREE.PerspectiveCamera) {
-      cam.aspect = w / availH;
-      cam.updateProjectionMatrix();
-      let lo = 5;
-      let hi = 200;
-      for (let i = 0; i < 30; i++) {
-        const mid = (lo + hi) / 2;
-        cam.position.copy(target).addScaledVector(dir, mid);
-        cam.lookAt(target);
-        cam.updateMatrixWorld();
-        if (fits()) hi = mid;
-        else lo = mid;
-      }
-      cam.position.copy(target).addScaledVector(dir, hi);
-    } else {
-      cam.position.copy(target).addScaledVector(dir, 60);
+    cam.aspect = w / availH;
+    cam.updateProjectionMatrix();
+    let lo = 5;
+    let hi = 200;
+    for (let i = 0; i < 30; i++) {
+      const mid = (lo + hi) / 2;
+      cam.position.copy(target).addScaledVector(dir, mid);
       cam.lookAt(target);
       cam.updateMatrixWorld();
-      let lo = 1;
-      let hi = 60;
-      for (let i = 0; i < 30; i++) {
-        const mid = (lo + hi) / 2;
-        cam.left = (-mid * w) / availH;
-        cam.right = (mid * w) / availH;
-        cam.top = mid;
-        cam.bottom = -mid;
-        cam.updateProjectionMatrix();
-        if (fits()) hi = mid;
-        else lo = mid;
-      }
-      cam.left = (-hi * w) / availH;
-      cam.right = (hi * w) / availH;
-      cam.top = hi;
-      cam.bottom = -hi;
+      if (fits()) hi = mid;
+      else lo = mid;
     }
+    cam.position.copy(target).addScaledVector(dir, hi);
     cam.lookAt(target);
     cam.setViewOffset(w, availH, 0, -this.insets.top, w, h);
     cam.updateProjectionMatrix();

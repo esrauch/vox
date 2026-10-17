@@ -10,8 +10,6 @@ export interface HudHandlers {
   onBall(event: PointerEvent): void;
   /** The context button: HIKE, next screen, or new run. */
   onAction(): void;
-  /** Dev only: switch camera. */
-  onToggleCamera?(): void;
 }
 
 export interface Badge {
@@ -42,7 +40,6 @@ export class Hud {
       <div class="hud-top">
         <div class="hud-balls"></div>
         <div class="hud-yards"></div>
-        ${handlers.onToggleCamera ? '<button class="hud-dev interactive">cam</button>' : ''}
       </div>
       <div class="hud-badges"></div>
       <div class="hud-message"></div>
@@ -82,7 +79,6 @@ export class Hud {
       handlers.onBall(e);
     });
     this.actionButton.addEventListener('click', () => handlers.onAction());
-    root.querySelector('.hud-dev')?.addEventListener('click', () => handlers.onToggleCamera?.());
   }
 
   /** Space the HUD takes at the top and bottom, so the camera can fit the field between. */

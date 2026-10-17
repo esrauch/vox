@@ -94,7 +94,7 @@ This is the riskiest system in the project, so it gets built and tested first.
 
 ## 5. 3D Rendering
 
-- **Camera:** a fixed, angled ¾ view as in *Crossy Road*. **▲ Decision:** perspective with a narrow field of view, versus orthographic. We'll prototype both. A narrow perspective usually looks more toy-like.
+- **Camera:** a fixed, angled ¾ view as in *Crossy Road*. **Decided (M1.3):** perspective with a narrow field of view. Orthographic was prototyped and dropped.
 - **Lighting:** one directional "sun" plus a hemisphere fill. Shadows come from **one shadow-casting light with a small shadow map**, or from fake blob shadows under units if phones struggle.
 - **Materials:** flat-shaded with **vertex colors**. No textures on voxel models.
   - **Exception:** the **ball cubes** (and similar props) carry one tiny texture each, for the face: skull, jack-o'-lantern, ember cracks.
