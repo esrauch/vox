@@ -62,8 +62,8 @@ The base systems everything else is built on. **Each one is built and verified o
 ### M1.0 Project scaffold
 - [x] Vite 8 + TypeScript (strict), ESLint 10 and Prettier, Vitest 5, on Node 24 LTS (pinned in `.nvmrc`, which CI uses too).
 - [x] The folder layout from TECHNICAL.md §19. Folders get created as they're needed.
-- [x] Dev-only pages (`/dev/*`), excluded from production builds.
-- [~] **Deploy to a static host from day one.** A GitHub Pages workflow is ready (`.github/workflows/deploy.yml`). It goes live after one-time setup (Settings → Pages → Source: GitHub Actions) and a push to `main`.
+- [x] Dev pages (`/dev/*`). They're deployed with the game for phone testing, and `npm run build:release` leaves them out.
+- [~] **Deploy to a static host from day one.** A GitHub Pages workflow is ready (`.github/workflows/deploy.yml`). Pages is currently serving the raw branch, which doesn't work. Switch it to Settings → Pages → Source: **GitHub Actions**.
 - [x] An asset manifest, with `check-assets` running in the build.
 
 **Done when:** a "hello cube" page loads on a real phone from a public URL, and tests and lint run. *(The cube page and the checks work locally. The public URL and the phone check are waiting on the deploy.)*

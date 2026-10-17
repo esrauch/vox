@@ -334,7 +334,7 @@ layer 0
   - screen generation (seeded output, solvability);
   - content validation.
 - **Replay tests:** a seed plus a recorded sequence of inputs must give the same outcome. This guards against accidental rule changes.
-- **Dev-only pages and tools:** a debug overlay (fps, draw calls, beat offsets), cheats (skip screen, give cards, set tempo), `/dev/models`, `/dev/audio`, and `/dev/screen?seed=…` to inspect any generated screen.
+- **Dev pages and tools** (deployed alongside the game while we build foundations, so they can be tested on phones; `npm run build:release` leaves them out): a debug overlay (fps, draw calls, beat offsets), cheats (skip screen, give cards, set tempo), `/dev/models`, `/dev/audio`, and `/dev/screen?seed=…` to inspect any generated screen.
 - **Device testing:** a regular check on a real mid-range Android phone and a real iPhone, which covers beat feel, frame rate and touch. Desktop emulation isn't enough for timing.
 
 ---
