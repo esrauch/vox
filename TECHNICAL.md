@@ -146,8 +146,8 @@ This is the riskiest system in the project, so it gets built and tested first.
   - `touch-action: none` on the game surface, plus preventing double-tap zoom, pinch zoom, pull-to-refresh and text selection.
   - The long-press menu is suppressed.
 - **Tap routing:**
-  - **Field taps** go through a raycast to a grid tile, which places the reticle.
-  - **Button taps** (the ball, Hijinks) are handled by DOM elements.
+  - **Aiming:** during play, a press anywhere (the canvas or the throw circle) starts a slingshot pull, using pointer capture. The pull vector maps to a free target point (`tuning.aim.tilesPerPixel`), and the release's `timeStamp` decides which beat the throw resolves on.
+  - **Button taps** (Hijinks, HIKE) are handled by DOM elements.
   - **Setup drags** move players between tiles.
 - **Haptics:** `navigator.vibrate` for throws, catches, fumbles and the beat tick.
   - **Known limitation:** iOS Safari doesn't support vibration. On iOS, the beat has to be readable from visuals and sound alone (it already is by design).
@@ -429,12 +429,12 @@ Everything a future session (human or Claude) needs to carry on without the orig
   - `types.ts`: `RunState`, units, ball states (`at: 'qb' | 'flight' | 'carried' | 'none'`), events.
   - `grid.ts`: 9×16 grid, `QB_POS` (4,0), `inSetupZone`, `inThrowBand` (rows 4–11), `nextToQb`, `stepToward`.
   - `run.ts`: `createRun(seed)`, `setUpScreen`, `dispatch(place | hike | nextScreen)`, `DEFAULT_FORMATION`.
-  - `step.ts`: `step(state, throwTarget?)` advances **one beat** and returns `{state, events}`. The order is in its header comment. Also `throwProblem`, fumbles (lose a ball → **reset the screen to setup**), collisions (the defender wins; Walk-ons without the ball **trade**, taking the defender down too; fend-offs), Blitzer attacks on the QB's counter, landing (Clean Catch, interception, lunge, miss), touchdown, wipeout.
+  - `step.ts`: `step(state, throwTarget?)` advances **one beat** and returns `{state, events}`. The order is in its header comment. Throw targets are **free points** in tile units, and landing picks the closest receiver within the `tuning.catch` radii (perfect/good/ok, widened by Hands). Also `throwProblem`, fumbles (lose a ball → **reset the screen to setup**), collisions (the defender wins; Walk-ons without the ball **trade**, taking the defender down too; fend-offs), Blitzer attacks on the QB's counter, landing (Clean Catch, interception, lunge, miss), touchdown, wipeout.
   - `ai.ts`: per-beat intents (the hop-arrow telegraph): Walk-ons go straight up; Chaser, Blitzer, Wall-er and Picker rules.
   - `stats.ts`: what Hustle, Hands and Heft mean (only the 0 values are decided; 1+ are placeholders). `screen.ts`: a placeholder seeded defender scatter. `replay.ts`: replay from seed and inputs. `rng.ts`: mulberry32 plus `deriveSeed`.
 - **`beat/`**: `clock.ts` (`BeatClock`: audio-clock grid, lookahead scheduling, `position()` in *heard* time via `getOutputTimestamp`, `startAt(bpm, origin)`), `beatMath.ts` (pure maths; `judge()` deliberately never awards On-Beat), `calibration.ts`.
 - **`audio/`**: `mixer.ts` (buses → compressor), `music.ts` (`prepareSong`, `MusicPlayer` with setup/play layers), `sfx.ts` (`SFX` definitions, `prepareSfx`, `SfxPlayer`), `synth/` (`notes.ts` notation, `instruments.ts` voices, `render.ts` offline stem rendering with tail folding), `songs/spookySurf.ts`, `wav.ts`, `context.ts` (unlock, pause on hide).
-- **`render/`**: `view.ts` (renderer, lights `hemi`/`sun`, the fitted perspective camera, fog range, `tileAt`, `toScreen`), `field.ts` (tiles, throwing-band dimming and chalk lines, the QB model, `QB_MODEL`), `units.ts` (unit meshes, hop animation, facing; Wall-ers never rotate), `markers.ts` (ball, reticle, landing ring and pips, the QB's raised-hand ball position), `scenery.ts` (forest floor texture, fog, moonlight, instanced props).
+- **`render/`**: `view.ts` (renderer, lights `hemi`/`sun`, the fitted perspective camera, fog range, `tileAt`, `toScreen`), `field.ts` (tiles, throwing-band dimming and chalk lines, the QB model, `QB_MODEL`), `units.ts` (unit meshes, hop animation, facing; Wall-ers never rotate), `markers.ts` (ball, the free reticle with perfect/ok rings and a marching dashed arc while aiming, landing ring and pips, the QB's raised-hand ball position), `scenery.ts` (forest floor texture, fog, moonlight, instanced props).
 - **`game/game.ts`**: the controller. The sim steps when each beat is *heard*; it pauses if frames stall more than 2 beats or the page is hidden; the music *is* the clock (on HIKE the clock's beat 0 is set on the next beat of the song); SFX hooks; input (tap a tile = reticle, ball button = throw, drag in setup).
 - **`ui/`**: `hud.ts` and `hud.css` (DOM HUD), `base.css`, `paletteVars.ts`.
 - **`content/`**: `palettes.ts` (**the only place colors are defined**: `common`, `team`, `voxel` for model colors, `biomes.forest`), `tuning.ts` (every magic number), `smalls.ts` (the Walk-on and recruit kinds; `returns`, `trades`), `defenders.ts`.
@@ -485,8 +485,8 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 
 ### Testing and verifying changes
 
-- **Rule changes:** add or adjust a sim test first (`playState(...)` + `run(state, n)` + `ofType(events, 'type')`). Remember the timing: Hustle 0 hops on **even beats**, a throw sent with `step(state, target)` leaves on that beat and lands 2 beats later, and **throw targets must be in rows 4–11**.
-- **Visual changes:** `npm run screenshot` (and `-- <seed> play`), then look at the PNG. The Browser pane works too, but **when the pane is hidden its page runs in the background and the game pauses itself** (correctly). For live checks, show the pane (`show_pane: preview`) and drive it through `window.game` in JavaScript, e.g. setting `game.reticle = {x, y}` and dispatching a `pointerdown` on `.hud-ball`.
+- **Rule changes:** add or adjust a sim test first (`playState(...)` + `run(state, n)` + `ofType(events, 'type')`). Remember the timing: Hustle 0 hops on **even beats**, a throw sent with `step(state, target)` leaves on that beat and lands 2 beats later, and **throw targets must be in rows 4–11** (free points from 3.5 to 11.5). Catch quality depends on the distance from the landing point to the receiver's tile.
+- **Visual changes:** `npm run screenshot` (and `-- <seed> play`), then look at the PNG. The Browser pane works too, but **when the pane is hidden its page runs in the background and the game pauses itself** (correctly). For live checks, show the pane (`show_pane: preview`) and drive it through `window.game` in JavaScript, e.g. pressing the mouse anywhere on the field and dragging down to aim (see the Playwright script pattern: `page.mouse.down()`, `move`, `up`).
 - **The browser console keeps old errors** across hot reloads; check timestamps before chasing them.
 
 ### Gotchas

@@ -51,29 +51,26 @@ This gives the game one thing to master: **where and when you throw**.
 
 ---
 
-## Controls: Aim, Then Act
+## Controls: Pull Back and Release
 
-> **Experiment (branch `experiment/slingshot-throw`):** instead of tapping a tile and then the ball button, you **press anywhere on the screen** (the throw circle or the field) **and pull back** (down) from that point to aim. Pulling down aims up the field, and pulling left aims right. A free reticle (not grid-locked) appears with an animated dashed arc to it, and **releasing throws** on the next beat (still 2 beats of flight). Catches have **slop**: the closest receiver within about a tile catches it, rated **perfect / good / ok** by distance (perfect is a Clean Catch). A defender right under the ball and closer than the receiver intercepts. If this sticks, the sections below get rewritten.
-
-**Aiming is the skill.** The beat is the shared clock for the whole screen, but there's no separate "perfect timing" rhythm challenge or judgment UI.
+**Throwing is a slingshot.** You aim by feel and then let go; the beat is the shared clock, but there's no separate "perfect timing" challenge or judgment UI.
 
 | Phase | Input | What it does |
 |---|---|---|
 | **Setup** | **Drag a player** onto a tile of the setup zone | Set your formation. |
 | **Setup** | **Tap HIKE!** | Start the play. |
-| **Play** | **Tap the field** | **Place the target reticle** on that tile. Tap again to move it, as often as you like. |
-| **Play** | **Tap the ball button** | **Throw** to the reticle. The button sits at the bottom center and pulses with the beat, so you can read the rhythm rather than chase a timing window. |
+| **Play** | **Press anywhere and pull back** | **Aim.** Wherever your finger first touches is the anchor. Pulling down aims up the field, and pulling left aims right. A **reticle** appears where the ball would land, with an animated dashed arc from the QB's hand to it. |
+| **Play** | **Release** | **Throw** to the reticle on the next beat. Releasing where you can't throw (outside the middle-half band) cancels. |
 | **After the throw** | **Tap a Hijink icon** | Fire it, either at the reticle or across the whole field (see *Hype and Hijinks*). |
 
 **That's it.** There's nothing to move or steer.
 
-- **The reticle is the single target for everything.** It marks where your next throw will go, and where your Hijinks will hit.
-- **The ball button is the team's ball:** a jack-o'-lantern football. It bounces with the beat, so the game feels locked to the music.
-- **A throw goes to a tile, not a player.** The ball arcs through the air and lands exactly on the reticle's tile. **Leading your receiver** is the skill.
+- **The reticle is a free point, not a tile.** It shows two rings, a small one for a **perfect** catch and a larger one for an **ok** catch, and turns red where a throw isn't allowed. **Leading your receiver** is the skill: put the rings where it will be in two beats.
+- **The throw circle** at the bottom center (the jack-o'-lantern football) still works as a place to start the pull, and it bounces with the beat so the game feels locked to the music.
 - **There's no perfect-timing throw bonus.** A throw resolves on the beat, but the rhythm is a shared timing layer, not a separate score mechanic.
-- **Only the QB throws. There are no laterals.** Once a player catches the ball, it's on its own and has to run it home. The ball button goes dark until the QB has a ball again.
-- **The flight time is the drama.** While the ball is in the air, everyone hops for the landing tile, and you hold your breath.
-- **Thumb layout:** the ball button is at the bottom center with the Hijink icons beside it, and the whole field above is for aiming.
+- **Only the QB throws. There are no laterals.** Once a player catches the ball, it's on its own and has to run it home. You can't aim again until the QB has a ball.
+- **The flight time is the drama.** While the ball is in the air, everyone hops for the landing point, and you hold your breath.
+- **The pull sensitivity** is a tuning value (`tuning.aim`).
 
 ---
 
@@ -95,14 +92,17 @@ Each screen is one field-length climb, in two phases.
 
 - **Everything hops on the beat.** Players, defenders, rolling pumpkins and boars all move one step per beat (or per two beats, for the slow ones). The screen bounces in time: the crowd claps and the jack-o'-lanterns pulse.
 - **Hazards are beat patterns.** For example, a lane of pumpkins rolls every beat and a flytrap snaps shut every fourth beat. You learn a lane the way you learn a riff.
-- **Every throw takes exactly 2 beats.** You can tap the ball button any time. The ball leaves on the **next beat** and lands **2 beats later**, however far it goes. One fixed rhythm makes every throw predictable, so **leading your receiver is counting**: "two hops from now, Pip will be *there*." The **Fast Throw** perk cuts this to **1 beat**, which leaves defenders almost no time to react.
-- **Somebody has to catch it.** When the ball lands:
-  - **One of your players is on the tile:** it's a **Clean Catch**. The receiver gets a boost: it **fends off 1 defender** while it carries the ball (shown by a glowing outline).
-  - **Otherwise, a defender is on the tile:** it's intercepted, and that's a **fumble**.
-  - **Otherwise, one of your players is one tile short and heading toward the landing tile:** it lunges forward and catches it. It's a normal catch, with no boost.
-  - **Otherwise:** it's a miss, and that's also a **fumble**. There are no loose balls and no scrambles. A throw either connects or it costs you a ball.
-  - Defenders only intercept on the exact tile. Only your players get the one-tile lunge.
-- **Throws and Hijinks always happen on a beat.** Tap whenever you like, and the action fires on the **next beat**. Nothing ever happens off the beat.
+- **Every throw takes exactly 2 beats.** You can release any time. The ball leaves on the **next beat** and lands **2 beats later**, however far it goes. One fixed rhythm makes every throw predictable, so **leading your receiver is counting**: "two hops from now, Pip will be *there*." The **Fast Throw** perk cuts this to **1 beat**, which leaves defenders almost no time to react.
+- **Somebody has to catch it, and close is good enough.** When the ball comes down:
+  - **The closest of your players within about a tile catches it**, rated by how close it is to where the ball landed:
+    - **Perfect** (within about ⅓ of a tile): a **Clean Catch**. The receiver **fends off 1 defender** while it carries the ball (shown by a glowing outline).
+    - **Good** (within about ¾ of a tile).
+    - **Ok** (within about 1.15 tiles).
+  - **Hands widens all three rings,** so good catchers are easier to hit.
+  - **A defender right under the ball** (within about 0.6 of a tile) **and closer than your receiver intercepts it**, which is a **fumble**.
+  - **Nobody close enough:** it's a miss, and that's also a **fumble**. There are no loose balls and no scrambles. A throw either connects or it costs you a ball.
+  - The distances are tuning values (`tuning.catch`), and the game pops "PERFECT!", "GOOD!" or "OK".
+- **Throws and Hijinks always happen on a beat.** Release or tap whenever you like, and the action fires on the **next beat**. Nothing ever happens off the beat.
 - **Setup is the break.** During the huddle the music drops to a quiet loop. **HIKE!** brings the beat crashing back in.
 - **The tempo is the difficulty dial.** Each place has its own track and tempo, and the beat picks up as you climb. Boss screens get their own song.
 
@@ -118,10 +118,10 @@ Each screen is one field-length climb, in two phases.
 | **The grid** | A soft checkerboard on the turf, so every tile is obvious. |
 | **Where a unit will hop next** | Every player and defender shows a **small arrow toward the tile it's about to hop to**. Fast units show a double-hop arrow. Models themselves **never turn: they always face the camera** (the one exception is the Witch, who faces the way she's flying). |
 | **Throw range** | **Only the middle half of the field** (rows 4–11 of 16). The bottom quarter is too close to the QB, and the top quarter always has to be run. The rows outside the band are dimmed slightly, with faint chalk lines at its edges. The reticle can't be placed outside it. |
-| **The ball button** | The jack-o'-lantern football at the bottom center, bouncing and glowing in time with the music. |
-| **The reticle** | A bold target on a tile, in your team's color. Before a throw it shows where the ball will go. After a throw, it marks where Hijinks will land. |
-| **Where the ball will land** | The reticle locks in, with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |
-| **Is someone going to be there?** | **Always on.** The target ring lights up in your team's color if one of your players will be able to catch it (on the tile, or one tile short and heading toward it), brighter for a Clean Catch, and red if a defender will intercept. |
+| **The throw circle** | The jack-o'-lantern football at the bottom center, bouncing and glowing in time with the music. You can start a pull from it, or from anywhere else. |
+| **The reticle** | While you pull: a free point in your team's color, with a small *perfect* ring and a larger *ok* ring, and a dashed arc marching from the QB's hand to it. It turns red where you can't throw. |
+| **Where the ball will land** | A landing ring with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |
+| **Is someone going to be there?** | *Not built yet (▲).* The reticle could light up when one of your players will be inside its rings in two beats, and go red if a defender will be closer. |
 | **Hazards** | Every hazard warns **one beat ahead**: a lane flashes before something enters it, and a trap shows countdown pips before it snaps. |
 | **The QB's counter** | **It appears over the QB only once a Blitzer arrives**, pulsing red and ticking down with a crunch on each attack. When it hits 0, you've been sacked. |
 
@@ -141,7 +141,7 @@ Each screen is one field-length climb, in two phases.
 ### 2. Play
 
 - Your players charge upfield. Defenders react, hazards cycle, and Blitzers go for the QB.
-- You **place the reticle**, **tap the pulsing ball** to throw, and then use **Hijinks** while the ball is in flight or being carried.
+- You **pull back to aim** and **release to throw**, and then use **Hijinks** while the ball is in flight or being carried.
 - **Touchdown:** a player carries the ball across the top edge. You get a short celebration (it can be skipped by tapping), the camera scrolls up, and it's time to **draft**.
 
 A screen should take **roughly 15–40 seconds** of play, plus a few seconds of setup.
@@ -281,13 +281,13 @@ Card names and art should be jokes. The draft is part of the comedy, not a sprea
 
 - **You start a run with no Hijinks** and unlock them through the draft, many of them brought by recruits.
 - **Hijinks only work after the throw.** While the QB holds the ball, its hands are full. Once the ball is in the air (or in a carrier's hands), the Hijink icons wake up. This keeps the flow clear: **aim, throw, then wreak havoc**.
-- **Hijinks use the same reticle.** After the throw, **the reticle stays on the landing tile by default**, which is where the action usually is. Tap the field to move it somewhere else, then tap a Hijink icon.
+- **Hijinks aim at the landing point by default,** which is where the action usually is. *(▲ How to re-aim a targeted Hijink after the throw is still open: perhaps the same pull gesture.)*
 - **There are two kinds of Hijink:**
   - **Targeted** ones hit at the reticle, e.g. *Root Awakening* snares a patch around it, and a Witch's *Hex* freezes the defenders there.
   - **Global** ones affect the whole field, e.g. *Fog of War*, or the Ghost's *Spook Through*, which lets everyone slip past defenders for a beat. The reticle doesn't matter for these.
   - Each icon shows which kind it is: targeted icons have a little crosshair.
 - **Hype** is a crowd meter that fills when exciting things happen: long throws, diving catches, Clean Catches and touchdowns. A fumble *drains* it. Each Hijink costs Hype, so a full meter means you can afford something.
-- **▲ Decision:** Recommendation: **at most three Hijink slots**, beside the ball button. When you draft a fourth, it replaces one you already have.
+- **▲ Decision:** Recommendation: **at most three Hijink slots**, beside the throw circle. When you draft a fourth, it replaces one you already have.
 - **Hijinks fire on the next beat, like throws.**
 
 ---
@@ -355,7 +355,7 @@ This is a pillar-level priority, not polish to add at the end.
 **First playable** (the smallest version that proves the fun):
 - The **Haunted Forest**, with Walk-ons, two kinds of recruit, and the four Forest defenders.
 - Two hazard types (one lane, one timed trap).
-- The setup grid, one looping track with everything on the beat, the reticle and the pulsing ball button (throws quantized to the beat), Blitzers and the QB's counter, Walk-on trades, a pile of balls as lives, permadeath for recruits.
+- The setup grid, one looping track with everything on the beat, pull-to-aim throwing with catch slop (throws quantized to the beat), Blitzers and the QB's counter, Walk-on trades, a pile of balls as lives, permadeath for recruits.
 - A draft with **recruit** and **Walk-on upgrade** cards only.
 - Endless screens with a simple difficulty ramp, and a score.
 

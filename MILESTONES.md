@@ -20,7 +20,8 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 - [x] **Wipeout:** lose a ball and restart the screen from setup. Walk-ons return, and dead recruits stay dead.
 - [x] **Draft mix:** always one recruit, one Walk-on upgrade and one other card.
 - [x] **Throw range:** the middle half of the field only (rows 4–11). The bottom and top quarters can't be targeted, shown by slightly dimmed rows and faint chalk lines.
-- [x] **Catching:** a Small catches on its own tile, or lunges one tile ahead. An exact-tile **Clean Catch** lets the receiver fend off 1 defender. Defenders only intercept on the exact tile.
+- [x] **Catching:** *(revised 2026-10-17)* throws land on free points, not tiles. The closest receiver within about a tile catches it, rated perfect, good or ok by distance (perfect is a Clean Catch, and Hands widens the rings). A defender right under the ball and closer than the receiver intercepts.
+- [x] **Throwing controls:** *(2026-10-17)* press anywhere, pull back to aim (a slingshot, with a free reticle and an animated dashed arc), release to throw on the next beat. This replaces tapping a tile and then the ball button.
 - [x] **Catch glow:** always on.
 - [x] **Hazards hit defenders too.**
 - [x] **Blitzers and the Big's counter:** Blitzers head for the Big and attack it from a tile next to it (e.g. every 2 beats). Each attack ticks the Big's counter (3) down, and at 0, while the Big holds the ball, it's a sack (a fumble). Several Blitzers drain it faster. They're irrelevant once the ball is thrown. *(The pocket and Blockers were removed; see GAMEPLAY.md, Future Ideas.)*
@@ -293,6 +294,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Slingshot throwing merged: pull back from anywhere to aim, release to throw; catches have slop and a perfect/good/ok rating.
 - **2026-10-17:** The look: the camera pitched at 58° and characters leaning back 35°, so faces and jerseys read. Marked for a possible tweak in the M3 feel pass.
 - **2026-10-17:** Models always face the camera, and arrows show the next hop. The Witch on a Broom is the exception: she faces the way she flies.
 - **2026-10-17:** TECHNICAL.md §22 added: a handbook for picking the project back up (code map, commands, voxel and audio recipes, readability lessons, gotchas).
