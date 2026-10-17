@@ -149,7 +149,9 @@ export class UnitViews {
       view.arrow.position.set(dx * 0.42, 0.06, -dy * 0.42);
       view.arrow.rotation.y = Math.atan2(-dx, dy);
       // Models are built facing the camera (+z); turn them toward the hop (up the field is -z).
-      view.body.rotation.y = Math.atan2(dx, -dy);
+      // Wall-ers never turn: their spread arms *are* the wall across the row.
+      const turns = !(u.side === 'defender' && u.kind === 'waller');
+      if (turns) view.body.rotation.y = Math.atan2(dx, -dy);
     }
   }
 }

@@ -23,6 +23,8 @@ export class View {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(24, 1, 0.5, 200);
+  readonly hemi: THREE.HemisphereLight;
+  readonly sun: THREE.DirectionalLight;
   private insets: Insets = { top: 0, bottom: 0 };
   private readonly raycaster = new THREE.Raycaster();
   private readonly ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -34,8 +36,10 @@ export class View {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.scene.background = new THREE.Color(hexToNumber(common.sky));
 
-    this.scene.add(new THREE.HemisphereLight(0xffffff, hexToNumber(common.grassDark), 1.3));
+    this.hemi = new THREE.HemisphereLight(0xffffff, hexToNumber(common.grassDark), 1.3);
+    this.scene.add(this.hemi);
     const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+    this.sun = sun;
     sun.position.set(-6, 14, 4);
     sun.target.position.set(0, 0, -ROWS / 2);
     sun.castShadow = true;
@@ -128,6 +132,12 @@ export class View {
       else lo = mid;
     }
     cam.position.copy(target).addScaledVector(dir, hi);
+    // Fog starts just beyond the end zone, so the field stays crisp and the woods fade.
+    if (this.scene.fog instanceof THREE.Fog) {
+      const far = cam.position.distanceTo(tileToWorld(vec(COLS / 2, ROWS)));
+      this.scene.fog.near = far + 1;
+      this.scene.fog.far = far + 22;
+    }
     cam.lookAt(target);
     cam.setViewOffset(w, availH, 0, -this.insets.top, w, h);
     cam.updateProjectionMatrix();

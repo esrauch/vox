@@ -1,0 +1,21 @@
+# A big uncarved pumpkin, sitting in the patch.
+size 9 8 9
+voxel 0.1
+colors
+  p pumpkin
+  P pumpkinDark
+  s stemGreen
+box 1 0 1 7 6 7 p
+box 0 1 1 8 5 7 p
+box 1 1 0 7 5 8 p
+# Ribs.
+box 2 0 0 2 6 0 P
+box 6 0 0 6 6 0 P
+box 2 0 8 2 6 8 P
+box 6 0 8 6 6 8 P
+box 0 1 2 0 5 2 P
+box 0 1 6 0 5 6 P
+box 8 1 2 8 5 2 P
+box 8 1 6 8 5 6 P
+box 4 7 4 4 7 4 s
+box 4 7 5 4 7 5 s

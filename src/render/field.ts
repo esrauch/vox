@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { bigs, common, hexToNumber } from '../content/palettes';
+import { biomes, hexToNumber, type Hex } from '../content/palettes';
 import { tuning } from '../content/tuning';
 import { BIG_POS, COLS, END_ROW, ROWS, SETUP_ROWS, vec } from '../sim/grid';
 import { getGeometry, voxelMaterial } from '../voxel/models';
@@ -16,12 +16,14 @@ export const BIG_MODEL = 'elderBough/big';
 export function createField(): THREE.Group {
   const group = new THREE.Group();
 
-  const light = new THREE.Color(hexToNumber(common.grass));
-  const dark = new THREE.Color(hexToNumber(common.grassDark));
-  const setup = new THREE.Color(0x9be27a);
-  const setupDark = new THREE.Color(0x86d266);
-  const end = new THREE.Color(hexToNumber(bigs.elderBough.accent));
-  const endDark = end.clone().multiplyScalar(0.92);
+  const palette = biomes.forest;
+  const color = (hex: Hex): THREE.Color => new THREE.Color(hexToNumber(hex));
+  const light = color(palette.grass);
+  const dark = color(palette.grassDark);
+  const setup = color(palette.setup);
+  const setupDark = color(palette.setupDark);
+  const end = color(palette.endZone);
+  const endDark = color(palette.endZoneDark);
   const outOfRange = 0.82;
 
   const tile = new THREE.BoxGeometry(1, 0.3, 1);

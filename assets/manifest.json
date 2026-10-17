@@ -42,6 +42,48 @@
       "source": "Original voxel model (Forest Picker: bat), written by Claude",
       "author": "Claude",
       "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestProps/deadTree.voxt",
+      "source": "Original voxel model (Forest prop: dead tree), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestProps/pine.voxt",
+      "source": "Original voxel model (Forest prop: dark pine), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestProps/pumpkin.voxt",
+      "source": "Original voxel model (Forest prop: pumpkin), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestProps/lantern.voxt",
+      "source": "Original voxel model (Forest prop: jack-o'-lantern), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestProps/stump.voxt",
+      "source": "Original voxel model (Forest prop: stump), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestProps/toadstools.voxt",
+      "source": "Original voxel model (Forest prop: toadstool cluster), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestProps/fence.voxt",
+      "source": "Original voxel model (Forest prop: fence segment), written by Claude",
+      "author": "Claude",
+      "license": "original"
     }
   ]
 }

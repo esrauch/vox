@@ -1,0 +1,15 @@
+# An old tree stump with its rings showing.
+size 7 4 7
+voxel 0.12
+colors
+  b bark
+  B barkDark
+  w wood
+  m moss
+box 1 0 1 5 2 5 b
+box 0 0 2 6 0 4 B
+box 2 0 0 4 0 6 B
+box 1 3 1 5 3 5 w
+box 2 3 2 4 3 4 b
+box 3 3 3 3 3 3 w
+box 1 2 1 2 2 2 m

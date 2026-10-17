@@ -1,0 +1,17 @@
+# A dark, pointed pine, for the tree line around the field.
+size 9 18 9
+voxel 0.16
+colors
+  b barkDark
+  g pineDark
+  G pine
+box 4 0 4 4 3 4 b
+box 0 3 0 8 4 8 g
+box 0 5 0 8 5 8 G
+box 1 6 1 7 7 7 g
+box 1 8 1 7 8 7 G
+box 2 9 2 6 10 6 g
+box 2 11 2 6 11 6 G
+box 3 12 3 5 13 5 g
+box 3 14 3 5 14 5 G
+box 4 15 4 4 17 4 g

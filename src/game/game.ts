@@ -14,6 +14,7 @@ import { spookySurf } from '../audio/songs/spookySurf';
 import { BeatClock } from '../beat/clock';
 import { tuning } from '../content/tuning';
 import { createField } from '../render/field';
+import { createForestScenery } from '../render/scenery';
 import { Markers } from '../render/markers';
 import { UnitViews } from '../render/units';
 import { View, tileToWorld } from '../render/view';
@@ -53,7 +54,7 @@ export class Game {
     this.seed = options.seed;
     this.state = createRun(this.seed);
     this.view = new View(canvas);
-    this.view.scene.add(createField());
+    this.view.scene.add(createField(), createForestScenery(this.view.scene, this.view));
     this.units = new UnitViews(this.view.scene);
     this.markers = new Markers(this.view.scene);
     this.hud = new Hud(uiRoot, {
