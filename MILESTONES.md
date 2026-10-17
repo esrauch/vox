@@ -4,7 +4,7 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** testing the M1.1 beat clock on real phones, then M1.2 (the simulation core). M1.0 is done apart from going live on GitHub Pages.
+**Current focus:** M1.2, the simulation core. M1.1 passes on Android after calibration, with the iPhone test still to do. M1.0 is done apart from switching Pages to GitHub Actions.
 
 ---
 
@@ -34,7 +34,7 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 
 ### Missing from the design so far (needed before M5–M8)
 
-- [ ] **Onboarding:** how a first-time player learns setup, the reticle, the ball button and On-Beat, with no tutorial wall. *(Idea: the first few screens of the first run are built to teach one thing each.)*
+- [ ] **Onboarding:** how a first-time player learns setup, the reticle, the ball button and On-Beat, with no tutorial wall. **It must include a first-launch latency calibration** (Android was off by about 115 ms without one). *(Idea: the first few screens of the first run are built to teach one thing each.)*
 - [ ] **The UX flow and wireframes:** title, Big select, setup, play HUD, draft, game over (with the roll call of fallen recruits), pause, settings and calibration.
 - [ ] **Unlock conditions:** how new Bigs and new cards are earned (distance milestones? achievements?).
 - [ ] **Content scope for v1:** how many recruits, Walk-on upgrades, perks and Hijinks each Big gets, and how many biomes there are.
@@ -76,9 +76,14 @@ The base systems everything else is built on. **Each one is built and verified o
 - [x] Audio unlock on first tap, and pause/resume when the tab is hidden or shown.
 - [x] A debug page (`/dev/beat.html`): beat pulse, verdicts, offset histogram, latency readouts, frame time, BPM and window sliders, haptic tick.
 - [x] Unit tests for the beat maths and calibration.
-- [ ] **On a real mid-range Android phone and an iPhone:** does it feel tight, do the offsets match what you feel, and does calibration fix Bluetooth headphones? Then choose the On-Beat window.
+- [x] **Android phone test (2026-10-17):** uncalibrated taps averaged about **−115 ms**, so the reported latency doesn't match what's actually heard. **After calibration it feels good.**
+- [ ] iPhone test, and Bluetooth headphones.
+- [ ] Choose the final On-Beat window (keep ±80 ms until playtests say otherwise).
+- [ ] **Haptic tick doesn't fire on Android** (`navigator.vibrate`). Deferred: investigate in M3 (feel pass).
 
-**Done when:** on a mid-range Android phone and on an iPhone, tapping along *feels* tight, the judged offsets match what you feel, and calibration fixes Bluetooth headphones. *(Everything is built and checked in a desktop browser. The real-phone feel test is still to do.)*
+**Done when:** on a mid-range Android phone and on an iPhone, tapping along *feels* tight, the judged offsets match what you feel, and calibration fixes Bluetooth headphones. *(Android passes after calibration. iPhone and Bluetooth are still to do.)*
+
+**Lesson:** the browser's reported latency can't be trusted, so **every player needs calibrating**. Onboarding (M0, M8) must include a short tap-along calibration on first launch, ideally disguised as a warm-up.
 
 ### M1.2 Simulation core
 - [ ] The grid (about 9 × 16), strips, and the setup zone.
@@ -267,6 +272,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Android phone test: −115 ms uncalibrated, good after calibration. No haptics (deferred).
 - **2026-10-17:** M1.1 beat clock built: clock, metronome, tap judging, calibration, and the `/dev/beat.html` debug page. Waiting on the phone test.
 - **2026-10-17:** Upgraded to Node 24, Vite 8, Vitest 5 and ESLint 10. The audit is clean.
 - **2026-10-17:** M1.0 scaffold built: hello-cube page, checks, tests, asset manifest, Pages workflow.
