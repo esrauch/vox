@@ -121,6 +121,7 @@ Each screen is one field-length climb, in two phases.
 | **The throw circle** | The jack-o'-lantern football at the bottom center, bouncing and glowing in time with the music. You can start a pull from it, or from anywhere else. |
 | **The reticle** | While you pull: a free point in your team's color, with a small *perfect* ring and a larger *ok* ring, and a dashed arc marching from the QB's hand to it. It turns red where you can't throw. |
 | **Where the ball will land** | A landing ring with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |
+| **Who has the ball** | The carrier holds a **bigger football up overhead**, and a **pulsing gold ring** sits on the ground around it. It has to be unmistakable at a glance. |
 | **Is someone going to be there?** | *Not built yet (▲).* The reticle could light up when one of your players will be inside its rings in two beats, and go red if a defender will be closer. |
 | **Hazards** | Every hazard warns **one beat ahead**: a lane flashes before something enters it, and a trap shows countdown pips before it snaps. |
 | **The QB's counter** | **It appears over the QB only once a Blitzer arrives**, pulsing red and ticking down with a crunch on each attack. When it hits 0, you've been sacked. |

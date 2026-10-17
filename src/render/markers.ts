@@ -25,8 +25,10 @@ const QB_OFFSET = new THREE.Vector3(0, 0, 0.15);
 /** The raised hand relative to the QB's feet, leaning back with the character tilt. */
 const HAND = new THREE.Vector3(0.4, HELD_Y, 0.05).applyAxisAngle(X_AXIS, tilt);
 const heldPosition = (): THREE.Vector3 => tileToWorld(QB_POS).add(QB_OFFSET).add(HAND);
-/** Where a carrier holds the ball, relative to its feet: at chest height, leaning with the tilt. */
-const CARRIED = new THREE.Vector3(0, 0.8, 0).applyAxisAngle(X_AXIS, tilt);
+/** Where a carrier holds the ball, relative to its feet: held up overhead, leaning with the tilt. */
+const CARRIED = new THREE.Vector3(0, 1.3, 0.1).applyAxisAngle(X_AXIS, tilt);
+/** The ball is shown bigger while carried, so the carrier is unmistakable. */
+const CARRIED_SCALE = 1.6;
 
 /**
  * The ball and the field indicators that move: the free (not grid-locked)
@@ -45,6 +47,8 @@ export class Markers {
   private readonly arc = new THREE.Group();
   private readonly dashes: THREE.Mesh[] = [];
   private aim: { target: Vec; valid: boolean } | null = null;
+  /** A pulsing ring on the ground around whoever is carrying the ball. */
+  private readonly carrierRing: THREE.Mesh;
   private readonly landing = new THREE.Group();
   private readonly pips: THREE.Mesh[] = [];
 
@@ -91,7 +95,14 @@ export class Markers {
     }
     this.landing.visible = false;
 
-    scene.add(this.ball, this.reticle, this.arc, this.landing);
+    this.carrierRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.42, 0.52, 32),
+      new THREE.MeshBasicMaterial({ color: hexToNumber(team.accent), side: THREE.DoubleSide }),
+    );
+    this.carrierRing.rotation.x = -Math.PI / 2;
+    this.carrierRing.visible = false;
+
+    scene.add(this.ball, this.reticle, this.arc, this.landing, this.carrierRing);
   }
 
   /** While aiming: where the throw would land (a free point in tile units), and whether it's allowed. */
@@ -116,7 +127,7 @@ export class Markers {
       // March the dashes along the arc from the QB's hand to the reticle.
       const from = heldPosition();
       const to = tileToWorld(this.aim.target, 0.1);
-      const march = (time * 1.2) % (1 / DASHES);
+      const march = (time * 0.12) % (1 / DASHES);
       this.dashes.forEach((dash, i) => {
         const t = i / DASHES + march;
         dash.position.lerpVectors(from, to, t);
@@ -125,11 +136,17 @@ export class Markers {
       });
     }
 
+    this.carrierRing.visible = ball.at === 'carried';
+    this.ball.scale.setScalar(ball.at === 'carried' ? CARRIED_SCALE : 1);
     if (ball.at === 'qb') {
       this.ball.position.copy(heldPosition());
     } else if (ball.at === 'carried') {
       const p = units.positionOf(ball.by);
-      if (p) this.ball.position.set(p.x + CARRIED.x, CARRIED.y, p.z + CARRIED.z);
+      if (p) {
+        this.ball.position.set(p.x + CARRIED.x, CARRIED.y, p.z + CARRIED.z);
+        this.carrierRing.position.set(p.x, 0.03, p.z);
+        this.carrierRing.scale.setScalar(1 + Math.abs(Math.sin(time * Math.PI * 2)) * 0.12);
+      }
     } else if (ball.at === 'flight') {
       // A parabola from the QB's hand to the landing tile, timed to the beat.
       const t = Math.min(
