@@ -17,13 +17,13 @@ import { createField } from '../render/field';
 import { createForestScenery } from '../render/scenery';
 import { Markers } from '../render/markers';
 import { UnitViews } from '../render/units';
-import { View, tileToWorld } from '../render/view';
+import { View } from '../render/view';
 import { loadSettings } from '../settings';
 import { COLS, QB_POS, eq, inSetupZone } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { idleStep, step, throwProblem } from '../sim/step';
 import type { RunState, SimEvent, Vec } from '../sim/types';
-import { Hud, type Badge } from '../ui/hud';
+import { Hud } from '../ui/hud';
 
 /** Beats the sim may catch up in one frame before the game pauses instead. */
 const MAX_CATCH_UP = 2;
@@ -108,7 +108,6 @@ export class Game {
     const phase = playing ? Math.max(0, pos.phase) : idle ? idle.phase : 1;
     this.units.update(this.state.screen, beat, phase);
     this.markers.update(this.state.screen, beat + phase, this.units, now / 1000);
-    this.hud.setBadges(this.badges());
     this.view.render();
   }
 
@@ -169,7 +168,7 @@ export class Game {
           if (e.reason === 'sack') this.play('sack');
           this.play('fumble');
           this.play('chant');
-          this.hud.showJudgement('FEE FI FO FUMBLE!', 'bad');
+          this.hud.showJudgement(e.reason === 'sack' ? 'SACKED!' : 'FEE FI FO FUMBLE!', 'bad');
           break;
         case 'touchdown':
           this.play('touchdown');
@@ -221,15 +220,6 @@ export class Game {
       this.aim = null;
       this.markers.setAim(null);
     }
-  }
-
-  /** The QB's counter, shown once a Blitzer is attacking it and it still holds the ball. */
-  private badges(): Badge[] {
-    const { screen } = this.state;
-    const onQb = screen.defenders.some((d) => d.alive && d.engagedSince !== null);
-    if (!onQb || screen.ball.at !== 'qb') return [];
-    const p = this.view.toScreen(tileToWorld(QB_POS, 2.1));
-    return [{ ...p, text: String(screen.qbHold), danger: true }];
   }
 
   // ── Input ───────────────────────────────────────────────────────────────

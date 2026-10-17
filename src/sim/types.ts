@@ -47,8 +47,6 @@ export interface Defender extends UnitBase {
   readonly kind: DefenderKind;
   /** Where a Picker returns to, and a Wall-er's row. */
   readonly home: Vec;
-  /** The beat a Blitzer reached the QB and started attacking it (null = not on the QB). */
-  engagedSince: number | null;
   /** A fixed circuit of tiles this defender loops around (Pickers: a 4×4 box), or null. */
   readonly patrol: readonly Vec[] | null;
   /** Which tile of the patrol it's on. */
@@ -81,8 +79,6 @@ export interface ScreenState {
   readonly smalls: SmallUnit[];
   readonly defenders: Defender[];
   ball: BallState;
-  /** The QB's hold counter for the current ball. */
-  qbHold: number;
   /** Beats ticked during setup, so patrols keep circling before HIKE. */
   idleBeat: number;
 }
@@ -128,8 +124,6 @@ export type SimEvent =
       readonly quality: CatchQuality;
     }
   | { readonly type: 'fumble'; readonly reason: FumbleReason; readonly ballsLeft: number }
-  | { readonly type: 'engaged'; readonly id: number }
-  | { readonly type: 'attack'; readonly id: number; readonly holdLeft: number }
   | { readonly type: 'fendedOff'; readonly id: number; readonly defender: number }
   | { readonly type: 'knockedDown'; readonly id: number }
   | { readonly type: 'died'; readonly id: number; readonly cause: DeathCause }

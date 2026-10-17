@@ -178,7 +178,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [ ] Every indicator from *Reading the Beat*, polished, with hazards telegraphing one beat ahead.
 - [ ] The tombstone and waving ghost when a recruit dies.
 - [ ] **Revisit the look:** the camera pitch (58°) and the characters' backward lean (35°) were chosen from screenshots (2026-10-17). Re-check them on phones, perhaps with a playtester, and tweak `tuning.camera` (try different values with `?pitch=` and `?tilt=`).
-- [ ] Tuning: hop rates, throw range, Blitzer attack rhythm and the QB's counter, and beat alignment.
+- [ ] Tuning: hop rates, throw range, and beat alignment.
 - [ ] A screen-generation solvability check, so no unfair screens get through.
 
 **Done when:** the game is satisfying to watch with the sound off, satisfying to play with the sound on, and playtesters can say *why* they fumbled.
@@ -294,6 +294,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** **SACKED!** happens the moment any defender reaches the QB while it holds the ball. The QB's counter and the Blitzer attack rhythm are gone.
 - **2026-10-17:** The QB lowers its throwing arm the moment the ball leaves its hand (a second model, `team/qbThrown`), and raises it again when it gets a new ball.
 - **2026-10-17:** A throw leaves the QB's hand the moment you release, and its speed is adjusted so it still lands on the beat (2 beats after the next beat).
 - **2026-10-17:** Bats (Pickers) fly a fixed 4×4 box circuit. They start circling during setup and carry on after HIKE, instead of chasing the ball.

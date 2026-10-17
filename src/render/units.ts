@@ -144,8 +144,7 @@ export class UnitViews {
     if (u.downBeats > 0) view.body.position.y = Math.max(view.base * 0.8, 0.25);
 
     // Face where it will hop next.
-    const engaged = u.side === 'defender' && u.engagedSince !== null;
-    view.arrow.visible = !!u.intent && u.downBeats === 0 && !engaged && !dragged;
+    view.arrow.visible = !!u.intent && u.downBeats === 0 && !dragged;
     if (u.intent) {
       const dx = u.intent.x - u.pos.x;
       const dy = u.intent.y - u.pos.y;

@@ -31,7 +31,7 @@ export function createRun(seed: number): RunState {
     screensCleared: 0,
     slots: Array.from({ length: tuning.run.startingSlots }, () => ({ kindId: WALK_ON.id })),
     formation: [],
-    screen: { index: 0, smalls: [], defenders: [], ball: { at: 'qb' }, qbHold: 0, idleBeat: 0 },
+    screen: { index: 0, smalls: [], defenders: [], ball: { at: 'qb' }, idleBeat: 0 },
     nextId: 1,
   };
   setUpScreen(state, 0);
@@ -64,7 +64,6 @@ export function setUpScreen(state: RunState, index: number): void {
     smalls,
     defenders,
     ball: { at: 'qb' },
-    qbHold: tuning.qb.hold,
     idleBeat: 0,
   };
   state.phase = 'setup';

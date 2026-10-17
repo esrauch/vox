@@ -29,8 +29,8 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
       return target ? stepToward(d.pos, target) : null;
     }
     case 'blitzer': {
-      // Blitzers go straight for the QB. Once they're next to it, they stay and attack.
-      return d.engagedSince === null ? stepToward(d.pos, QB_POS) : null;
+      // Blitzers go straight for the QB. Reaching it (while it holds the ball) is a sack.
+      return stepToward(d.pos, QB_POS);
     }
     case 'waller': {
       const target = wallTarget(d, screen);

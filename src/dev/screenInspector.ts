@@ -133,8 +133,6 @@ function render(): void {
         classes.push('qb');
         html = '★';
         if (ball.at === 'qb') html += '<span class="ball">●</span>';
-        const engaged = screen.defenders.some((d) => d.alive && d.engagedSince !== null);
-        if (engaged) html += `<span class="badge">${screen.qbHold}</span>`;
       }
       const unit = [...screen.smalls, ...screen.defenders]
         .filter((u) => eq(u.pos, tile))
@@ -175,7 +173,7 @@ function unitHtml(u: Unit): string {
     return `<span class="small ${state}">${glyph}${fend}${arrow}</span>${carrying}`;
   }
   const glyph = u.alive ? DEFENDER_GLYPH[u.kind] : '✝';
-  return `<span class="defender ${state}">${glyph}${u.engagedSince !== null ? '!' : arrow}</span>`;
+  return `<span class="defender ${state}">${glyph}${arrow}</span>`;
 }
 
 function isCarrier(id: number): boolean {

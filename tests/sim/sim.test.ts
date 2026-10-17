@@ -245,43 +245,41 @@ describe('Bats (Pickers) patrol a 4×4 box', () => {
   });
 });
 
-describe('Blitzers', () => {
+describe('sacks', () => {
   // A runner off to the side, and a Blitzer coming straight down at the QB.
   const blitzSetup = () => playState([{ pos: vec(0, 2) }], [{ kind: 'blitzer', pos: vec(4, 4) }]);
 
-  it('reaches the QB, then sacks it after 3 attacks, one every 2 beats', () => {
-    const r = run(blitzSetup(), 12);
-    expect(ofType(r.events, 'engaged')).toEqual([{ type: 'engaged', id: 200 }]);
-    expect(ofType(r.events, 'attack').map((e) => e.holdLeft)).toEqual([2, 1, 0]);
+  it('a Blitzer sacks the QB on the beat it reaches it', () => {
+    const r = run(blitzSetup(), 6); // hops on beats 2, 4 and 6, to (4, 1)
     expect(ofType(r.events, 'fumble')).toEqual([{ type: 'fumble', reason: 'sack', ballsLeft: 2 }]);
-    expect(r.state.screen.qbHold).toBe(3);
   });
 
   it('does not sack one beat early', () => {
-    expect(ofType(run(blitzSetup(), 11).events, 'fumble')).toHaveLength(0);
+    expect(ofType(run(blitzSetup(), 5).events, 'fumble')).toHaveLength(0);
+  });
+
+  it('any defender next to the QB sacks it', () => {
+    for (const kind of ['chaser', 'waller', 'picker'] as const) {
+      const state = playState([{ pos: vec(0, 2) }], [{ kind, pos: vec(3, 0) }]);
+      // Bats spawn on their box circuit, so put this one beside the QB by hand.
+      Object.assign(state.screen.defenders[0]!, { pos: vec(3, 0), home: vec(3, 0) });
+      const r = step(standStill(state));
+      expect(ofType(r.events, 'fumble')[0]?.reason, kind).toBe('sack');
+    }
+  });
+
+  it('a knocked-down defender next to the QB does not sack it', () => {
+    const state = standStill(playState([{ pos: vec(0, 2) }], [{ kind: 'chaser', pos: vec(3, 0) }]));
+    state.screen.defenders[0]!.downBeats = 2;
+    expect(ofType(step(state).events, 'fumble')).toHaveLength(0);
   });
 
   it('is irrelevant once the ball is thrown', () => {
-    let state = run(blitzSetup(), 6).state; // the Blitzer reaches the QB on beat 6
-    state = step(state, vec(0, 6)).state; // throw on beat 7 to where the runner will be
-    const r = run(state, 4);
+    let state = run(blitzSetup(), 4).state;
+    state = step(state, vec(0, 5)).state; // throw on beat 5, landing on beat 7 where the runner will be
+    const r = run(state, 4); // the Blitzer reaches the QB on beat 6, but the ball is gone
     expect(ofType(r.events, 'caught')).toHaveLength(1);
-    expect(ofType(r.events, 'attack')).toHaveLength(0);
     expect(ofType(r.events, 'fumble')).toHaveLength(0);
-    expect(r.state.screen.qbHold).toBe(3);
-  });
-
-  it('several Blitzers on the QB drain its counter together', () => {
-    const state = playState(
-      [{ pos: vec(0, 2) }],
-      [
-        { kind: 'blitzer', pos: vec(3, 0) },
-        { kind: 'blitzer', pos: vec(5, 0) },
-      ],
-    );
-    const r = run(state, 4);
-    expect(ofType(r.events, 'attack').map((e) => e.holdLeft)).toEqual([2, 1, 0]);
-    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('sack');
   });
 });
 

@@ -122,7 +122,6 @@ Each screen is one field-length climb, in two phases.
 | **Who has the ball** | The carrier holds a **bigger football up overhead**, and a **pulsing gold ring** sits on the ground around it. It has to be unmistakable at a glance. |
 | **Is someone going to be there?** | *Not built yet (▲).* The reticle could light up when one of your players will be inside its rings in two beats, and go red if a defender will be closer. |
 | **Hazards** | Every hazard warns **one beat ahead**: a lane flashes before something enters it, and a trap shows countdown pips before it snaps. |
-| **The QB's counter** | **It appears over the QB only once a Blitzer arrives**, pulsing red and ticking down with a crunch on each attack. When it hits 0, you've been sacked. |
 
 **Readability rules:**
 - **Teams are told apart by shape *and* color,** never by color alone: your team is gold and orange in football helmets, and the forest's defenders are candy purple with no helmets.
@@ -154,7 +153,7 @@ Two kinds of trouble fill each screen. **Neither of them ever has the ball.** Al
 | Kind | Forest local | Each beat, it… | Threat |
 |---|---|---|---|
 | **Chaser** | Garden Gnome | Hops one tile toward your carrier. With no carrier, it hops toward the ball's landing tile while the ball is in flight, and otherwise toward your nearest player. | Tackling your carrier is a fumble. |
-| **Blitzer** | Rhino Beetle | Hops toward the QB. Once it's next to the QB, it stays and **attacks on a rhythm**. | Each attack ticks down the QB's counter. At 0, while the QB still holds the ball, it's a **sack**, which is a fumble. |
+| **Blitzer** | Rhino Beetle | Hops straight toward the QB. | Reaching the QB while it still holds the ball is a **sack**, which is a fumble. |
 | **Wall-er** | Scarecrow | Stays in its row and slides one tile sideways to stay in the column of the nearest player heading its way. | It blocks runners, and acts as a moving wall. |
 | **Picker** | Bat | Flies a fixed 4×4 box circuit (clockwise around the box's edge, one tile per hop). It's **already circling during setup**, so you can time a throw past it, and it carries on from the same spot after HIKE. It never chases the ball. | It intercepts any pass that lands under it. |
 
@@ -203,16 +202,12 @@ Defenders avoid telegraphed hazards, but not perfectly, and **hazards hit them t
 - **When the last ball is gone, the run is over.**
 - **More balls are a draft reward**, and a rare, valuable one. Because lives carry over, every extra ball is a real lifeline.
 
-### Blitzers and the QB's Counter
+### Sacks
 
-Blitzers rush the QB, and the QB holds them off with a **counter**.
-
-- **Blitzers head straight for the QB.** Once one reaches a tile next to it, it stays there and **attacks on a fixed rhythm** (for example, **every 2 beats**).
-- **The QB's counter** is hidden until a Blitzer arrives. Then it appears over the QB, starting at **3**, and **each attack ticks it down by 1**. **If the QB still has the ball when it hits 0, that's a sack, which is a fumble.** For example, one Blitzer attacking every 2 beats gives you **6 beats** to throw.
-- **Ganging up speeds it up.** Every Blitzer next to the QB attacks it, so two Blitzers drain the counter twice as fast.
-- **Once the ball is thrown, Blitzers are irrelevant.** They only threaten a QB that's still holding the ball, and the counter resets for the next ball.
+- **Any defender that reaches the QB sacks it, on the beat it gets there.** "Reaches" means it's up (not knocked down) on a tile touching the QB (left, right or in front) while the QB still holds the ball. **SACKED!** is a fumble. There's no counter and no waiting: the hop arrow pointing at the QB is the whole warning.
+- **Blitzers are the ones that come for it.** They head straight for the QB, so a Blitzer's approach is your clock: a Blitzer 3 tiles away with Hustle 0 gives you 6 beats to throw. Other defenders only sack the QB if their own rule happens to bring them next to it.
+- **Once the ball is thrown, the QB is safe.** Only a QB that's still holding the ball can be sacked.
 - **Nothing stands between the QB and a Blitzer except players in its path.** A Walk-on that runs into a Blitzer trades itself for it (see *Collisions*), so a Walk-on in the right column can take one out before it arrives.
-- **Tuning values:** each Blitzer's attack rhythm (▲ *perhaps its Hustle: Hustle 0 attacks every 2 beats, like it hops*), and the QB's starting counter (3, and a perk could raise it).
 
 So every possession is a few seconds of "throw it, THROW IT," against a receiver who isn't quite open yet.
 
@@ -354,7 +349,7 @@ This is a pillar-level priority, not polish to add at the end.
 **First playable** (the smallest version that proves the fun):
 - The **Haunted Forest**, with Walk-ons, two kinds of recruit, and the four Forest defenders.
 - Two hazard types (one lane, one timed trap).
-- The setup grid, one looping track with everything on the beat, pull-to-aim throwing with catch slop (throws quantized to the beat), Blitzers and the QB's counter, Walk-on trades, a pile of balls as lives, permadeath for recruits.
+- The setup grid, one looping track with everything on the beat, pull-to-aim throwing with catch slop (throws quantized to the beat), Blitzers and instant sacks, Walk-on trades, a pile of balls as lives, permadeath for recruits.
 - A draft with **recruit** and **Walk-on upgrade** cards only.
 - Endless screens with a simple difficulty ramp, and a score.
 

@@ -53,10 +53,6 @@ export const tuning = {
     /** A defender this close, and closer than any receiver, intercepts. */
     intercept: 0.6,
   },
-  qb: {
-    /** The QB's hold counter, per ball: Blitzer attacks tick it down; at 0 it's a sack. */
-    hold: 3,
-  },
   camera: {
     /** Camera pitch in degrees above the horizon. */
     pitch: 58,

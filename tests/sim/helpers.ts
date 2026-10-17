@@ -41,7 +41,6 @@ export function playState(
     smalls: units,
     defenders: createDefenders(defenders, 200),
     ball: { at: 'qb' },
-    qbHold: 3,
     idleBeat: 0,
   };
   state.phase = 'play';

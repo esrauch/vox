@@ -46,7 +46,7 @@ export function step(prev: RunState, throwTarget: Vec | null = null): StepResult
 
   if (throwTarget) tryThrow(state, throwTarget, events);
   resolveMoves(state, events);
-  if (state.phase === 'play') resolveAttacks(state, events);
+  if (state.phase === 'play') checkSack(state, events);
   updateIntents(state.screen);
   if (state.phase === 'play') resolveLanding(state, events);
   if (state.phase === 'play') checkTouchdown(state, events);
@@ -89,12 +89,11 @@ function tryThrow(state: RunState, target: Vec, events: SimEvent[]): void {
 // ── Movement and collisions ────────────────────────────────────────────────
 
 function resolveMoves(state: RunState, events: SimEvent[]): void {
-  const { screen, beat } = state;
+  const { beat } = state;
   const units = liveUnits(state).sort(byId);
   const moving = new Map<number, Vec>();
   for (const u of units) {
     if (u.downBeats > 0 || !u.intent || !inBounds(u.intent) || !actsOn(u.stats, beat)) continue;
-    if (u.side === 'defender' && u.engagedSince !== null) continue;
     moving.set(u.id, u.intent);
   }
   const finalOf = (u: Unit): Vec => moving.get(u.id) ?? u.pos;
@@ -139,14 +138,6 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
     events.push({ type: 'hop', id: u.id, from: u.pos, to });
     u.pos = to;
     if (u.side === 'defender') advancePatrol(u);
-  }
-
-  // A Blitzer that reaches a tile next to the QB stays there and attacks it.
-  for (const d of screen.defenders) {
-    if (d.alive && d.kind === 'blitzer' && d.engagedSince === null && nextToQb(d.pos)) {
-      d.engagedSince = beat;
-      events.push({ type: 'engaged', id: d.id });
-    }
   }
 }
 
@@ -261,23 +252,16 @@ function knockDown(u: Unit, events: SimEvent[]): void {
   events.push({ type: 'knockedDown', id: u.id });
 }
 
-// ── Blitzer attacks ─────────────────────────────────────────────────────────
+// ── Sacks ───────────────────────────────────────────────────────────────────
 
-function resolveAttacks(state: RunState, events: SimEvent[]): void {
-  const { screen, beat } = state;
-  for (const d of [...screen.defenders].sort(byId)) {
-    // Blitzers only threaten a QB that's still holding the ball; once it's thrown they're irrelevant.
-    if (state.phase !== 'play' || screen.ball.at !== 'qb') return;
-    if (d.engagedSince === null || d.engagedSince === beat || !isUp(d) || !actsOn(d.stats, beat)) {
-      continue;
-    }
-    screen.qbHold = Math.max(0, screen.qbHold - 1);
-    events.push({ type: 'attack', id: d.id, holdLeft: screen.qbHold });
-    if (screen.qbHold === 0) {
-      fumble(state, 'sack', events);
-      return; // A sack ends this beat's attacks; the next ball starts fresh.
-    }
-  }
+/**
+ * Any defender that's up and next to the QB while it still holds the ball
+ * sacks it, on the beat it gets there. Once the ball is thrown, the QB is safe.
+ */
+function checkSack(state: RunState, events: SimEvent[]): void {
+  const { screen } = state;
+  if (screen.ball.at !== 'qb') return;
+  if (screen.defenders.some((d) => isUp(d) && nextToQb(d.pos))) fumble(state, 'sack', events);
 }
 
 // ── The ball landing ───────────────────────────────────────────────────────

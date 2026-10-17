@@ -57,7 +57,6 @@ export function createDefenders(spawns: readonly DefenderSpawn[], firstId: numbe
       downBeats: 0,
       hitsTaken: 0,
       intent: null,
-      engagedSince: null,
       patrol,
       patrolIndex: 0,
     };
