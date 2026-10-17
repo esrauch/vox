@@ -59,9 +59,6 @@ export class Game {
     this.units = new UnitViews(this.view.scene);
     this.markers = new Markers(this.view.scene);
     this.hud = new Hud(uiRoot, {
-      onAimStart: (e) => this.onAimStart(e),
-      onAimMove: (e) => this.onAimMove(e),
-      onAimEnd: (e) => this.onAimEnd(e),
       onAction: () => void this.onAction(),
     });
 
@@ -108,7 +105,6 @@ export class Game {
     const phase = playing ? Math.max(0, pos.phase) : 1;
     this.units.update(this.state.screen, beat, phase);
     this.markers.update(this.state.screen, beat + phase, this.units, now / 1000);
-    this.hud.updateBeat(playing ? phase : null);
     this.hud.setBadges(this.badges());
     this.view.render();
   }
@@ -190,7 +186,6 @@ export class Game {
     const { phase, screen } = this.state;
     this.hud.setBalls(this.state.balls);
     this.hud.setYards(yards(this.state), screen.index);
-    this.hud.setBallReady(phase === 'play' && screen.ball.at === 'qb');
     if (phase === 'setup') this.hud.setPrompt('Place your squad', 'HIKE!');
     else if (phase === 'cleared') this.hud.setPrompt('TOUCHDOWN!', 'NEXT');
     else if (phase === 'over') this.hud.setPrompt(`${yards(this.state)} yards`, 'AGAIN');

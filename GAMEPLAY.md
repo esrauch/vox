@@ -16,7 +16,7 @@ Items marked **▲ Decision** are recommendations that are still open to change.
 
 ## The Game in One Breath
 
-Your quarterback stands at the bottom of the screen with the ball. First you **place your players** in the bottom grid. Then the play starts, and you have two kinds of tap: **tap the field to place the target**, and **tap a button to act**: the pulsing ball to throw, and Hijinks after the throw. **Get the ball to the top of the screen** and it's a touchdown. Then the camera scrolls up, there's a new screen and harder defenders, and you **pick a reward**, often a new teammate from the forest. Your plain **Walk-ons** always come back, but the **recruits** you draft stay gone if they go down. The QB starts the run with a pile of **balls**, and those are your lives. Every fumble costs one for good and resets the screen. When the last ball is gone, the run is over. **Go as far as you can.**
+Your quarterback stands at the bottom of the screen with the ball. First you **place your players** in the bottom grid. Then the play starts: **press anywhere and pull back to aim, release to throw**, and use Hijinks after the throw. **Get the ball to the top of the screen** and it's a touchdown. Then the camera scrolls up, there's a new screen and harder defenders, and you **pick a reward**, often a new teammate from the forest. Your plain **Walk-ons** always come back, but the **recruits** you draft stay gone if they go down. The QB starts the run with a pile of **balls**, and those are your lives. Every fumble costs one for good and resets the screen. When the last ball is gone, the run is over. **Go as far as you can.**
 
 ---
 
@@ -66,7 +66,6 @@ This gives the game one thing to master: **where and when you throw**.
 **That's it.** There's nothing to move or steer.
 
 - **The reticle is a free point, not a tile.** It shows two rings, a small one for a **perfect** catch and a larger one for an **ok** catch, and turns red where a throw isn't allowed. **Leading your receiver** is the skill: put the rings where it will be in two beats.
-- **The throw circle** at the bottom center (the jack-o'-lantern football) still works as a place to start the pull, and it bounces with the beat so the game feels locked to the music.
 - **There's no perfect-timing throw bonus.** A throw resolves on the beat, but the rhythm is a shared timing layer, not a separate score mechanic.
 - **Only the QB throws. There are no laterals.** Once a player catches the ball, it's on its own and has to run it home. You can't aim again until the QB has a ball.
 - **The flight time is the drama.** While the ball is in the air, everyone hops for the landing point, and you hold your breath.
@@ -114,11 +113,10 @@ Each screen is one field-length climb, in two phases.
 
 | What | How it's shown |
 |---|---|
-| **The beat itself** | A simple beat pulse and field bounce, enough to read the music without a timing meter. |
+| **The beat itself** | The music, and everything on the field hopping and bouncing in time. There's no beat bar or timing meter. |
 | **The grid** | A soft checkerboard on the turf, so every tile is obvious. |
 | **Where a unit will hop next** | Every player and defender shows a **small arrow toward the tile it's about to hop to**. Fast units show a double-hop arrow. Models themselves **never turn: they always face the camera** (the one exception is the Witch, who faces the way she's flying). |
 | **Throw range** | **Only the middle half of the field** (rows 4–11 of 16). The bottom quarter is too close to the QB, and the top quarter always has to be run. The rows outside the band are dimmed slightly, with faint chalk lines at its edges. The reticle can't be placed outside it. |
-| **The throw circle** | The jack-o'-lantern football at the bottom center, bouncing and glowing in time with the music. You can start a pull from it, or from anywhere else. |
 | **The reticle** | While you pull: a free point in your team's color, with a small *perfect* ring and a larger *ok* ring, and a dashed arc marching from the QB's hand to it. It turns red where you can't throw. |
 | **Where the ball will land** | A landing ring with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |
 | **Who has the ball** | The carrier holds a **bigger football up overhead**, and a **pulsing gold ring** sits on the ground around it. It has to be unmistakable at a glance. |
@@ -288,7 +286,7 @@ Card names and art should be jokes. The draft is part of the comedy, not a sprea
   - **Global** ones affect the whole field, e.g. *Fog of War*, or the Ghost's *Spook Through*, which lets everyone slip past defenders for a beat. The reticle doesn't matter for these.
   - Each icon shows which kind it is: targeted icons have a little crosshair.
 - **Hype** is a crowd meter that fills when exciting things happen: long throws, diving catches, Clean Catches and touchdowns. A fumble *drains* it. Each Hijink costs Hype, so a full meter means you can afford something.
-- **▲ Decision:** Recommendation: **at most three Hijink slots**, beside the throw circle. When you draft a fourth, it replaces one you already have.
+- **▲ Decision:** Recommendation: **at most three Hijink slots**, along the bottom of the screen. When you draft a fourth, it replaces one you already have.
 - **Hijinks fire on the next beat, like throws.**
 
 ---

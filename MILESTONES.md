@@ -294,6 +294,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Removed the rhythm-game HUD (the beat bar and the throw circle): aiming is on the field, and the beat is felt through the music and the bouncing.
 - **2026-10-17:** Slingshot throwing merged: pull back from anywhere to aim, release to throw; catches have slop and a perfect/good/ok rating.
 - **2026-10-17:** The look: the camera pitched at 58° and characters leaning back 35°, so faces and jerseys read. Marked for a possible tweak in the M3 feel pass.
 - **2026-10-17:** Models always face the camera, and arrows show the next hop. The Witch on a Broom is the exception: she faces the way she flies.

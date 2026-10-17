@@ -123,13 +123,13 @@ This is the riskiest system in the project, so it gets built and tested first.
 - **What lives in the DOM:**
   - The title screen and menus.
   - The draft cards and the game-over roll call.
-  - The HUD: the **ball button**, the **Hijink icons**, the Hype meter and the yards.
+  - The HUD: the ball pile, the yards, the **Hijink icons** and the Hype meter. (Aiming happens on the canvas, so the HUD has no throw button.)
   - Settings and credits.
 - **Polish toolkit:**
   - CSS transitions and keyframes, animating only `transform` and `opacity`, which stay smooth on phones.
   - CSS custom properties for team palettes, set from the same palette data as the voxels.
   - SVG for icons and card art.
-- **Syncing UI to the beat:** UI animations that should be on the beat (the ball button's pulse, the beat-bar ticks) are driven from the beat clock in JavaScript. CSS's own timing would drift.
+- **Syncing UI to the beat:** UI animations that should be on the beat (e.g. pulses on Hijink icons) are driven from the beat clock in JavaScript. CSS's own timing would drift.
 - **Phone layout:**
   - Safe-area insets (`env(safe-area-inset-*)`) for notches.
   - The `100dvh` viewport unit for the full screen height.
@@ -146,7 +146,7 @@ This is the riskiest system in the project, so it gets built and tested first.
   - `touch-action: none` on the game surface, plus preventing double-tap zoom, pinch zoom, pull-to-refresh and text selection.
   - The long-press menu is suppressed.
 - **Tap routing:**
-  - **Aiming:** during play, a press anywhere (the canvas or the throw circle) starts a slingshot pull, using pointer capture. The pull vector maps to a free target point (`tuning.aim.tilesPerPixel`), and the release's `timeStamp` decides which beat the throw resolves on.
+  - **Aiming:** during play, a press anywhere on the canvas starts a slingshot pull, using pointer capture. The pull vector maps to a free target point (`tuning.aim.tilesPerPixel`), and the release's `timeStamp` decides which beat the throw resolves on.
   - **Button taps** (Hijinks, HIKE) are handled by DOM elements.
   - **Setup drags** move players between tiles.
 - **Haptics:** `navigator.vibrate` for throws, catches, fumbles and the beat tick.
@@ -265,7 +265,7 @@ layer 0
 ## 12. Asset Pipeline: 2D Sprites and UI Art
 
 - **Created by Claude: SVG.**
-  - Icons, Hijink icons, draft-card frames and art, the beat pulse and buttons, badges.
+  - Icons, Hijink icons, draft-card frames and art, buttons, badges.
   - It scales perfectly, is tiny, can be written as text, and is themed through palette CSS variables.
   - Its style follows the voxel look: chunky, flat colors, bold outlines.
 - **Public-domain or CC0 sources:**
@@ -344,7 +344,7 @@ layer 0
 ## 18. Accessibility
 
 - **Audio latency calibration** (see the beat clock).
-- **Playing on mute:** the beat is always visible (the beat pulse and the bounce) and, where supported, felt (haptics).
+- **Playing on mute:** the beat is always visible (everything bounces on the beat) and, where supported, felt (haptics).
 - **Teams differ by shape *and* color,** and the palettes are checked for color-blind safety.
 - **Reduced motion:** less screen shake, gentler bursts, no camera jolts. It follows the system's `prefers-reduced-motion` setting by default.
 - **Large touch targets** and readable text sizes at phone scale.
@@ -380,7 +380,7 @@ layer 0
 
 1. **Beat-clock spike.** Audio clock, synthesized metronome, tap judging, calibration, all on real phones. If this doesn't feel right, nothing else matters.
 2. **Simulation core.** Grid, hops on the beat, a throw taking 2 beats, catch/interception/miss, fumbles, the pile of balls. All of it unit-tested.
-3. **Minimal render.** Cubes standing in for units, the camera, the reticle, the ball button, the beat pulse.
+3. **Minimal render.** Cubes standing in for units, the camera, the reticle, the HUD.
 4. **The voxel pipeline.** `.voxt` → mesh → preview PNGs. First models: a Walk-on, the QB, the Jack-o'-Lantern ball.
 5. **Synth and the first song.** One Halloween track with stems, plus the core SFX.
 6. **First playable** (as scoped in GAMEPLAY.md). Then iterate on feel.
@@ -435,7 +435,7 @@ Everything a future session (human or Claude) needs to carry on without the orig
 - **`beat/`**: `clock.ts` (`BeatClock`: audio-clock grid, lookahead scheduling, `position()` in *heard* time via `getOutputTimestamp`, `startAt(bpm, origin)`), `beatMath.ts` (pure maths; `judge()` deliberately never awards On-Beat), `calibration.ts`.
 - **`audio/`**: `mixer.ts` (buses → compressor), `music.ts` (`prepareSong`, `MusicPlayer` with setup/play layers), `sfx.ts` (`SFX` definitions, `prepareSfx`, `SfxPlayer`), `synth/` (`notes.ts` notation, `instruments.ts` voices, `render.ts` offline stem rendering with tail folding), `songs/spookySurf.ts`, `wav.ts`, `context.ts` (unlock, pause on hide).
 - **`render/`**: `view.ts` (renderer, lights `hemi`/`sun`, the fitted perspective camera, fog range, `tileAt`, `toScreen`), `field.ts` (tiles, throwing-band dimming and chalk lines, the QB model, `QB_MODEL`), `units.ts` (unit meshes, hop animation, facing; Wall-ers never rotate), `markers.ts` (ball, the free reticle with perfect/ok rings and a marching dashed arc while aiming, landing ring and pips, the QB's raised-hand ball position), `scenery.ts` (forest floor texture, fog, moonlight, instanced props).
-- **`game/game.ts`**: the controller. The sim steps when each beat is *heard*; it pauses if frames stall more than 2 beats or the page is hidden; the music *is* the clock (on HIKE the clock's beat 0 is set on the next beat of the song); SFX hooks; input (tap a tile = reticle, ball button = throw, drag in setup).
+- **`game/game.ts`**: the controller. The sim steps when each beat is *heard*; it pauses if frames stall more than 2 beats or the page is hidden; the music *is* the clock (on HIKE the clock's beat 0 is set on the next beat of the song); SFX hooks; input (press anywhere and pull back to aim, release to throw; drag in setup).
 - **`ui/`**: `hud.ts` and `hud.css` (DOM HUD), `base.css`, `paletteVars.ts`.
 - **`content/`**: `palettes.ts` (**the only place colors are defined**: `common`, `team`, `voxel` for model colors, `biomes.forest`), `tuning.ts` (every magic number), `smalls.ts` (the Walk-on and recruit kinds; `returns`, `trades`), `defenders.ts`.
 - **`voxel/`**: `voxt.ts` (parser), `mesh.ts` (greedy mesher), `models.ts` (loads every `.voxt` through `import.meta.glob`, caches geometry, `voxelMaterial`, `modelHeight`), `vox.ts` (MagicaVoxel import).
@@ -475,7 +475,7 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 - **Models always face the camera** (a design rule since 2026-10-17): turning made a sideways-moving Wall-er read as a stick and hid every player's face mask. Design every model for the front view plus the view from above. The Witch is the one model that turns (left or right).
 - **Faces:** simple and spaced out, with a voxel of skin between features. Dark eyes next to a dark mask merge (the mask went grey). Busy carved faces read as brackets, so prefer a few bold blocks (two eyes and a wide grin).
 - **Color rules:** **our team is gold and orange in helmets**; **every opponent is candy purple and never helmeted**; hazards are their own shapes (orange pumpkins with glowing grins, grey stone, the witch). Never reuse the field's greens on anything that moves.
-- **Keep scenery off the field and clear of the HUD:** props in front of the field crowd the ball button (still a known issue in `scenery.ts`).
+- **Keep scenery off the field and clear of the HUD:** the pumpkins in front of the field sit behind the HUD's bottom area (HIKE and the Hijink icons).
 
 ### How to make audio
 
