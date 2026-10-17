@@ -389,3 +389,111 @@ layer 0
 ## 21. Out of Scope (for now)
 
 Multiplayer, accounts and backends, analytics, localization (we keep text minimal so it stays possible later), native wrappers, and monetization.
+
+---
+
+## 22. Working Notes: How to Pick This Up Again
+
+Everything a future session (human or Claude) needs to carry on without the original conversation. The design lives in THEME.md and GAMEPLAY.md, and progress lives in MILESTONES.md. This section covers **how the code works and how assets get made**.
+
+### State of play (2026-10-17)
+
+- **Done:** M1.0–M1.5 (scaffold, beat clock, simulation, render, voxel pipeline, synth and music), plus the new theme's models: the team, the Forest defenders, props, scenery and hazard models.
+- **Next:** wire the hazards into play (M2): Rolling Pumpkin lanes and Witch on a Broom (rules in GAMEPLAY.md, *Haunted Forest hazards*). Then the draft, two recruits, strip-based screen generation, and recruit death effects.
+- **Open loose ends:** `main` is **not pushed** (this shell has no GitHub credentials; the user pushes with `git -C /home/esr/Code/vox push origin main`). GitHub Pages must be switched to **Settings → Pages → Source: GitHub Actions** (it currently serves the raw branch, which doesn't work). The iPhone beat test and a human listen of the audio are still pending.
+
+### Environment
+
+- **Node 24 LTS** (`.nvmrc`). Vite 8, Vitest 5, ESLint 10, TypeScript 5 strict (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`).
+- **System Chrome** (`/usr/bin/google-chrome`) is driven by `playwright-core` (`channel: 'chrome'`) for every headless tool. No Playwright browser download is needed. WebGL runs headless via `--use-angle=swiftshader --enable-unsafe-swiftshader`.
+- **Dev server:** `npm run dev` (`vite --host`, port 5173). On a phone on the same Wi-Fi: `http://192.168.68.66:5173/` (the game) and `/dev/` (the tools). `.claude/launch.json` has a `dev` config for the Claude desktop Browser pane.
+- **Git:** commit messages end with the `Co-Authored-By` line from the session instructions. Commit freely after a verified step; never push (the user does).
+
+### Commands
+
+| Command | What it does |
+|---|---|
+| `npm run check` | Lint, Prettier check, typecheck, tests, asset-license check. **Run before every commit.** |
+| `npm run build` / `build:release` | The build with dev pages included (for phone testing) / without them. |
+| `npm run preview-models [ids…]` | Headless PNG turntables → `previews/<id>.png`, plus a contact sheet per folder (`previews/sheet-<folder>.png`) **seen from the game's camera pitch**. |
+| `npm run screenshot [seed] [play]` | A headless phone-size (375×812 @2x) capture of the game → `previews/game.png`, or `game-play.png` a moment after HIKE. |
+| `npm run render-audio [song:id \| stem:song/stem \| sfx:id …]` | WAVs plus waveform PNGs in `previews/audio/`, with peak/RMS levels and a loop-seam check. |
+| `npm run import-vox -- file.vox folder/name [voxelSize]` | Convert a MagicaVoxel model into `.voxt`, colors snapped to the palette. |
+
+`previews/` is gitignored output: look at the PNGs with an image viewer (Claude: the Read tool).
+
+### Code map (`src/`)
+
+- **`sim/`**: the pure, deterministic rules. No three.js, no DOM, no `Math.random`.
+  - `types.ts`: `RunState`, units, ball states (`at: 'qb' | 'flight' | 'carried' | 'none'`), events.
+  - `grid.ts`: 9×16 grid, `QB_POS` (4,0), `inSetupZone`, `inThrowBand` (rows 4–11), `nextToQb`, `stepToward`.
+  - `run.ts`: `createRun(seed)`, `setUpScreen`, `dispatch(place | hike | nextScreen)`, `DEFAULT_FORMATION`.
+  - `step.ts`: `step(state, throwTarget?)` advances **one beat** and returns `{state, events}`. The order is in its header comment. Also `throwProblem`, fumbles (lose a ball → **reset the screen to setup**), collisions (the defender wins; Walk-ons without the ball **trade**, taking the defender down too; fend-offs), Blitzer attacks on the QB's counter, landing (Clean Catch, interception, lunge, miss), touchdown, wipeout.
+  - `ai.ts`: per-beat intents (the facing telegraph): Walk-ons go straight up; Chaser, Blitzer, Wall-er and Picker rules.
+  - `stats.ts`: what Hustle, Hands and Heft mean (only the 0 values are decided; 1+ are placeholders). `screen.ts`: a placeholder seeded defender scatter. `replay.ts`: replay from seed and inputs. `rng.ts`: mulberry32 plus `deriveSeed`.
+- **`beat/`**: `clock.ts` (`BeatClock`: audio-clock grid, lookahead scheduling, `position()` in *heard* time via `getOutputTimestamp`, `startAt(bpm, origin)`), `beatMath.ts` (pure maths; `judge()` deliberately never awards On-Beat), `calibration.ts`.
+- **`audio/`**: `mixer.ts` (buses → compressor), `music.ts` (`prepareSong`, `MusicPlayer` with setup/play layers), `sfx.ts` (`SFX` definitions, `prepareSfx`, `SfxPlayer`), `synth/` (`notes.ts` notation, `instruments.ts` voices, `render.ts` offline stem rendering with tail folding), `songs/spookySurf.ts`, `wav.ts`, `context.ts` (unlock, pause on hide).
+- **`render/`**: `view.ts` (renderer, lights `hemi`/`sun`, the fitted perspective camera, fog range, `tileAt`, `toScreen`), `field.ts` (tiles, throwing-band dimming and chalk lines, the QB model, `QB_MODEL`), `units.ts` (unit meshes, hop animation, facing; Wall-ers never rotate), `markers.ts` (ball, reticle, landing ring and pips, the QB's raised-hand ball position), `scenery.ts` (forest floor texture, fog, moonlight, instanced props).
+- **`game/game.ts`**: the controller. The sim steps when each beat is *heard*; it pauses if frames stall more than 2 beats or the page is hidden; the music *is* the clock (on HIKE the clock's beat 0 is set on the next beat of the song); SFX hooks; input (tap a tile = reticle, ball button = throw, drag in setup).
+- **`ui/`**: `hud.ts` and `hud.css` (DOM HUD), `base.css`, `paletteVars.ts`.
+- **`content/`**: `palettes.ts` (**the only place colors are defined**: `common`, `team`, `voxel` for model colors, `biomes.forest`), `tuning.ts` (every magic number), `smalls.ts` (the Walk-on and recruit kinds; `returns`, `trades`), `defenders.ts`.
+- **`voxel/`**: `voxt.ts` (parser), `mesh.ts` (greedy mesher), `models.ts` (loads every `.voxt` through `import.meta.glob`, caches geometry, `voxelMaterial`, `modelHeight`), `vox.ts` (MagicaVoxel import).
+- **`dev/`** plus `/dev/*.html`: the beat-clock page, the screen inspector (`screen.html?seed=N`), the model viewer, the sound board. In dev builds the game is exposed as `window.game` for console debugging.
+
+Tests live in `tests/` and mirror these folders (73 at last count). Simulation tests build exact situations with `tests/sim/helpers.ts` (`playState`, `run`, `small`, `ofType`).
+
+### How to make a voxel model (the recipe that works)
+
+1. **Write `assets-src/voxels/<folder>/<name>.voxt`.** The id is `<folder>/<name>`. Folders: `team/` (our players, the ball), `forest/` (defenders), `forestHazards/`, `forestProps/`. The format is in §11 and at the top of `src/voxel/voxt.ts`. Things to remember:
+   - `size W H D`, then `voxel <units per voxel>`, then `colors` (one character per named color from `palettes.ts`'s `voxel` table; add new colors there, never inline hex).
+   - `slice` grids are **front views**: slice 0 is the front, which faces the camera (+z); rows run top to bottom, columns left to right.
+   - `mirror x` means each row gives the left half *including* the centre column.
+   - `box x0 y0 z0 x1 y1 z1 c` is inclusive, with y up from 0 and z from the front; `.` clears. Steps apply in order. Boxes are easiest for big or blocky things; slices for faces and characters.
+   - Floating things (bats, ghosts) leave empty rows at the bottom.
+2. **Register it** in `assets/manifest.json` (`source: "Original voxel model (…), written by Claude"`, `author: "Claude"`, `license: "original"`). `check-assets` fails the build otherwise.
+3. **Preview it:** `npm run preview-models -- <id>`, then **look at both the turntable and the folder's contact sheet**. Iterate until it reads.
+4. **Use it:** `getGeometry(id)` with `voxelMaterial`. Many copies of a static prop go through an `InstancedMesh` (see `scenery.ts`).
+
+**Sizing that works** (a field tile is 1 unit):
+
+| Kind | Typical size | Example |
+|---|---|---|
+| Players (Walk-on) | 9×14×5 at 0.08 → ~0.7 wide, 1.1 tall | `team/walkOn` |
+| QB | 9×14×5 at 0.1 → 0.9 wide, 1.4 tall | `team/qb` |
+| Defenders | 0.6–0.9 wide, 0.6–1.1 tall | `forest/*` |
+| Ball | 9×5×5 at 0.045 | `team/ball` |
+| Field hazards | about a tile wide | `forestHazards/pumpkin` (9×8×9 at 0.1) |
+| Scenery props | up to 2–3 units tall | `forestProps/pine` (0.16) |
+
+**Readability rules learned the hard way:**
+- **Judge every model from the game's steep camera** (64° pitch; the contact sheet uses it). From there you mostly see the **top**. A big hat or helmet reads; a face on the front barely does.
+  - The first leaf-sprite Walk-on read as just a brown cap, because the cap hid the body.
+  - The first Elder Bough's canopy hid its carved face.
+  - Fix: make the top silhouette carry the identity, and pull overhangs back so faces show.
+- **Thin parts vanish from above:** make wings and similar at least 2 voxels deep.
+- **Things that only move sideways should face the camera:** a Wall-er turned sideways read as a stick, so it never rotates.
+- **Faces:** simple and spaced out, with a voxel of skin between features. Dark eyes next to a dark mask merge (the mask went grey). Busy carved faces read as brackets, so prefer a few bold blocks (two eyes and a wide grin).
+- **Color rules:** **our team is gold and orange in helmets**; **every opponent is candy purple and never helmeted**; hazards are their own shapes (orange pumpkins with glowing grins, grey stone, the witch). Never reuse the field's greens on anything that moves.
+- **Keep scenery off the field and clear of the HUD:** props in front of the field crowd the ball button (still a known issue in `scenery.ts`).
+
+### How to make audio
+
+- **Songs** are TypeScript data (`src/audio/songs/*.ts`), one string per bar per stem. Melodic bars are space-separated tokens (`A3`, `A3+C4+E4`, `-` hold, `.` rest); drum bars are one character per step (`x`, `X` accent, `.`). Set `steps` per bar (8 or 16). `validateSong` reports errors by stem and bar. Each song lists its `layers.setup` (the huddle) and `layers.play` stems. `fx` offers a beat-timed `echo` and `drive`.
+- **SFX** are entries in `SFX` (`src/audio/sfx.ts`): wave or noise, frequency slide, attack/decay, an optional filter sweep, arpeggio `notes`/`noteStep`, `maxVoices`, `jitter`.
+- **Check** with `npm run render-audio`: the song mix should peak around −3 dBFS with the loop-seam jump far below the largest step; effects should land roughly −7 to −16 dBFS peak. **A human must listen** before calling anything done.
+
+### Testing and verifying changes
+
+- **Rule changes:** add or adjust a sim test first (`playState(...)` + `run(state, n)` + `ofType(events, 'type')`). Remember the timing: Hustle 0 hops on **even beats**, a throw sent with `step(state, target)` leaves on that beat and lands 2 beats later, and **throw targets must be in rows 4–11**.
+- **Visual changes:** `npm run screenshot` (and `-- <seed> play`), then look at the PNG. The Browser pane works too, but **when the pane is hidden its page runs in the background and the game pauses itself** (correctly). For live checks, show the pane (`show_pane: preview`) and drive it through `window.game` in JavaScript, e.g. setting `game.reticle = {x, y}` and dispatching a `pointerdown` on `.hud-ball`.
+- **The browser console keeps old errors** across hot reloads; check timestamps before chasing them.
+
+### Gotchas
+
+- **Prettier ignores `*.md` and `*.voxt`.** Code is formatted with `npm run format`, and Python or sed edits to `.ts` files get reformatted afterwards, so don't match on line-wrapped text after a format.
+- **ESLint:** non-null assertions are allowed only in `tests/**` and `src/voxel/**`; unused parameters must start with `_`.
+- **Assets:** every file under `assets/` or `assets-src/` needs a manifest entry (`.gitkeep` and `manifest.json` are ignored).
+- **Dev pages ship in the normal build** (for phone testing over Pages). Links between them must be **relative**, because Pages serves the site under `/vox/`.
+- **Audio** can't start before a user gesture. Songs and SFX are pre-rendered at load at 48 kHz (`RENDER_RATE`) without a context; the `AudioContext` is created on the first tap (HIKE).
+- **Event SFX** play when the beat is *heard*, so they're one output-latency late (an M3 task).
+- **Calibration:** Android measured about −115 ms uncalibrated, and the offset saved by `/dev/beat.html` is used by the game.
