@@ -209,7 +209,7 @@ src/content/
 - **Solvability check:** setup is a puzzle, so a generated screen must be beatable. A cheap simulated check (can *some* formation and throw timing get a player to the top?) rejects unfair screens. It runs at generation time, and in bulk tests during development.
 - **AI** is simple, readable rules, decided once per beat:
   - Each player and defender kind has a small decision function that chooses a target tile.
-  - **Its facing direction is set one beat ahead**, which gives the "faces where it'll hop" telegraph for free.
+  - **Its intent (next tile) is set one beat ahead**, which gives the hop-arrow telegraph for free. Models never turn to face it.
 - **Collisions** are resolved within the simulation step, in a fixed order, so they're deterministic.
 
 ---
@@ -251,7 +251,7 @@ layer 0
 - **`.voxt` is the runtime format.** Vite loads every `.voxt` under `assets-src/voxels/` as text (so edits hot-reload). It's parsed once and greedy-meshed once at load into cached geometry with vertex colors (`src/voxel/`). The models are tiny, so this is fast. If loading ever gets slow, meshing can move into the build.
 - **`.vox` files are converted, not loaded.** `npm run import-vox -- model.vox <id>` turns a MagicaVoxel file into `.voxt`, snapping every color to the nearest named palette color. Everything in the game is then in one format.
 - **Model ids are paths:** `forest/chaser` is `assets-src/voxels/forest/chaser.voxt`. Folders group models by place (`forest`, `forestProps`) or role (`misc`).
-- **Orientation:** a model's front (slice 0) faces the camera. Units turn to face where they're hopping.
+- **Orientation:** a model's front (slice 0) faces the camera, and **models never rotate in play**: an arrow shows each unit's next hop. The only exception is the Witch on a Broom (built facing +x), which faces its flight direction: rotate it 180° when flying left.
 
 ### Preview loop (how Claude sees its work)
 
@@ -429,7 +429,7 @@ Everything a future session (human or Claude) needs to carry on without the orig
   - `grid.ts`: 9×16 grid, `QB_POS` (4,0), `inSetupZone`, `inThrowBand` (rows 4–11), `nextToQb`, `stepToward`.
   - `run.ts`: `createRun(seed)`, `setUpScreen`, `dispatch(place | hike | nextScreen)`, `DEFAULT_FORMATION`.
   - `step.ts`: `step(state, throwTarget?)` advances **one beat** and returns `{state, events}`. The order is in its header comment. Also `throwProblem`, fumbles (lose a ball → **reset the screen to setup**), collisions (the defender wins; Walk-ons without the ball **trade**, taking the defender down too; fend-offs), Blitzer attacks on the QB's counter, landing (Clean Catch, interception, lunge, miss), touchdown, wipeout.
-  - `ai.ts`: per-beat intents (the facing telegraph): Walk-ons go straight up; Chaser, Blitzer, Wall-er and Picker rules.
+  - `ai.ts`: per-beat intents (the hop-arrow telegraph): Walk-ons go straight up; Chaser, Blitzer, Wall-er and Picker rules.
   - `stats.ts`: what Hustle, Hands and Heft mean (only the 0 values are decided; 1+ are placeholders). `screen.ts`: a placeholder seeded defender scatter. `replay.ts`: replay from seed and inputs. `rng.ts`: mulberry32 plus `deriveSeed`.
 - **`beat/`**: `clock.ts` (`BeatClock`: audio-clock grid, lookahead scheduling, `position()` in *heard* time via `getOutputTimestamp`, `startAt(bpm, origin)`), `beatMath.ts` (pure maths; `judge()` deliberately never awards On-Beat), `calibration.ts`.
 - **`audio/`**: `mixer.ts` (buses → compressor), `music.ts` (`prepareSong`, `MusicPlayer` with setup/play layers), `sfx.ts` (`SFX` definitions, `prepareSfx`, `SfxPlayer`), `synth/` (`notes.ts` notation, `instruments.ts` voices, `render.ts` offline stem rendering with tail folding), `songs/spookySurf.ts`, `wav.ts`, `context.ts` (unlock, pause on hide).
@@ -471,7 +471,7 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
   - The first Elder Bough's canopy hid its carved face.
   - Fix: make the top silhouette carry the identity, and pull overhangs back so faces show.
 - **Thin parts vanish from above:** make wings and similar at least 2 voxels deep.
-- **Things that only move sideways should face the camera:** a Wall-er turned sideways read as a stick, so it never rotates.
+- **Models always face the camera** (a design rule since 2026-10-17): turning made a sideways-moving Wall-er read as a stick and hid every player's face mask. Design every model for the front view plus the view from above. The Witch is the one model that turns (left or right).
 - **Faces:** simple and spaced out, with a voxel of skin between features. Dark eyes next to a dark mask merge (the mask went grey). Busy carved faces read as brackets, so prefer a few bold blocks (two eyes and a wide grin).
 - **Color rules:** **our team is gold and orange in helmets**; **every opponent is candy purple and never helmeted**; hazards are their own shapes (orange pumpkins with glowing grins, grey stone, the witch). Never reuse the field's greens on anything that moves.
 - **Keep scenery off the field and clear of the HUD:** props in front of the field crowd the ball button (still a known issue in `scenery.ts`).

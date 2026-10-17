@@ -32,8 +32,9 @@ interface UnitView {
 /**
  * Every Small and defender on the field. Walk-ons and defenders are voxel
  * models; recruits are still placeholder cubes. They hop from their old
- * tile to their new one at the start of each beat, face where they'll hop
- * next, tip over when knocked down and shrink away when they die.
+ * tile to their new one at the start of each beat, always face the camera
+ * (an arrow shows where they'll hop next), tip over when knocked down and
+ * shrink away when they die.
  */
 export class UnitViews {
   private readonly views = new Map<number, UnitView>();
@@ -148,10 +149,7 @@ export class UnitViews {
       const dy = u.intent.y - u.pos.y;
       view.arrow.position.set(dx * 0.42, 0.06, -dy * 0.42);
       view.arrow.rotation.y = Math.atan2(-dx, dy);
-      // Models are built facing the camera (+z); turn them toward the hop (up the field is -z).
-      // Wall-ers never turn: their spread arms *are* the wall across the row.
-      const turns = !(u.side === 'defender' && u.kind === 'waller');
-      if (turns) view.body.rotation.y = Math.atan2(dx, -dy);
     }
+    // Models never turn: they always face the camera, and the arrow shows where they'll hop.
   }
 }

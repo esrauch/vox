@@ -292,6 +292,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Models always face the camera, and arrows show the next hop. The Witch on a Broom is the exception: she faces the way she flies.
 - **2026-10-17:** TECHNICAL.md §22 added: a handbook for picking the project back up (code map, commands, voxel and audio recipes, readability lessons, gotchas).
 - **2026-10-17:** Hazard models built (`forestHazards/`): the grinning Rolling Pumpkin, the Witch on a Broom, the Tombstone and the Drifting Ghost. They aren't in the game yet.
 - **2026-10-17:** Hazards designed: Rolling Pumpkin and Witch on a Broom for M2, Tombstones if time allows, Drifting Ghost later. The rule: one simple shape, one rule, one telegraph.

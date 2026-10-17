@@ -97,7 +97,7 @@ Each screen is one field-length climb, in two phases.
 - **Somebody has to catch it.** When the ball lands:
   - **One of your players is on the tile:** it's a **Clean Catch**. The receiver gets a boost: it **fends off 1 defender** while it carries the ball (shown by a glowing outline).
   - **Otherwise, a defender is on the tile:** it's intercepted, and that's a **fumble**.
-  - **Otherwise, one of your players is one tile short, facing the landing tile:** it lunges forward and catches it. It's a normal catch, with no boost.
+  - **Otherwise, one of your players is one tile short and heading toward the landing tile:** it lunges forward and catches it. It's a normal catch, with no boost.
   - **Otherwise:** it's a miss, and that's also a **fumble**. There are no loose balls and no scrambles. A throw either connects or it costs you a ball.
   - Defenders only intercept on the exact tile. Only your players get the one-tile lunge.
 - **Throws and Hijinks always happen on a beat.** Tap whenever you like, and the action fires on the **next beat**. Nothing ever happens off the beat.
@@ -114,12 +114,12 @@ Each screen is one field-length climb, in two phases.
 |---|---|
 | **The beat itself** | A simple beat pulse and field bounce, enough to read the music without a timing meter. |
 | **The grid** | A soft checkerboard on the turf, so every tile is obvious. |
-| **Where a unit will hop next** | Every player and defender **faces the direction it's about to hop**, as in *Crossy Road*. Fast units show a double-hop arrow. |
+| **Where a unit will hop next** | Every player and defender shows a **small arrow toward the tile it's about to hop to**. Fast units show a double-hop arrow. Models themselves **never turn: they always face the camera** (the one exception is the Witch, who faces the way she's flying). |
 | **Throw range** | **Only the middle half of the field** (rows 4–11 of 16). The bottom quarter is too close to the QB, and the top quarter always has to be run. The rows outside the band are dimmed slightly, with faint chalk lines at its edges. The reticle can't be placed outside it. |
 | **The ball button** | The jack-o'-lantern football at the bottom center, bouncing and glowing in time with the music. |
 | **The reticle** | A bold target on a tile, in your team's color. Before a throw it shows where the ball will go. After a throw, it marks where Hijinks will land. |
 | **Where the ball will land** | The reticle locks in, with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |
-| **Is someone going to be there?** | **Always on.** The target ring lights up in your team's color if one of your players will be able to catch it (on the tile, or one tile short and facing it), brighter for a Clean Catch, and red if a defender will intercept. |
+| **Is someone going to be there?** | **Always on.** The target ring lights up in your team's color if one of your players will be able to catch it (on the tile, or one tile short and heading toward it), brighter for a Clean Catch, and red if a defender will intercept. |
 | **Hazards** | Every hazard warns **one beat ahead**: a lane flashes before something enters it, and a trap shows countdown pips before it snaps. |
 | **The QB's counter** | **It appears over the QB only once a Blitzer arrives**, pulsing red and ticking down with a crunch on each attack. When it hits 0, you've been sacked. |
 
@@ -148,7 +148,7 @@ A screen should take **roughly 15–40 seconds** of play, plus a few seconds of 
 
 Two kinds of trouble fill each screen. **Neither of them ever has the ball.** All they want is to stop you.
 
-**Defenders** are the forest's locals, who don't want a football team tramping through their woods. They **always wear candy purple and never wear helmets**, so they can't be mistaken for your team (see THEME.md, *The Opposition*). Each kind follows one simple rule, decided once per beat, and always faces the tile it's about to hop to. *(▲ Draft spec, to confirm in play.)*
+**Defenders** are the forest's locals, who don't want a football team tramping through their woods. They **always wear candy purple and never wear helmets**, so they can't be mistaken for your team (see THEME.md, *The Opposition*). Each kind follows one simple rule, decided once per beat, and always shows its next hop with an arrow. *(▲ Draft spec, to confirm in play.)*
 
 | Kind | Forest local | Each beat, it… | Threat |
 |---|---|---|---|
@@ -161,16 +161,16 @@ Defenders avoid telegraphed hazards, but not perfectly, and **hazards hit them t
 
 **Hazards** don't react to you. They're beat patterns, like the cars in *Crossy Road*: you learn their rhythm and time your throws and runs around them.
 
-**The readability test for every hazard:** one big, simple voxel shape that reads from the steep camera at phone size, **one rule**, and **one telegraph** (a facing direction, a shadow, a glow). No status effects: a hazard either hits you or it doesn't.
+**The readability test for every hazard:** one big, simple voxel shape that reads from the steep camera at phone size, **one rule**, and **one telegraph** (an arrow, a shadow, a glow). No status effects: a hazard either hits you or it doesn't.
 
 #### Haunted Forest hazards
 
 | Hazard | Shape | Rule | Telegraph | When |
 |---|---|---|---|---|
-| **Rolling Pumpkin** | A big orange pumpkin. | **A ground lane.** A whole row is a pumpkin lane: one to three pumpkins roll along it, one tile per beat (or every 2 beats on a slow lane), each lane in one direction. Anything a pumpkin rolls into, or that hops into one, goes down. Pumpkins are **low**, so passes fly over them. | Each pumpkin faces its next tile; a small arrow at the lane's edge shows its direction. | **M2** |
-| **Witch on a Broom** | A purple pointed hat on a broom, flying high. | **An air lane.** She sweeps across her row every few beats. **Only passes are affected:** a ball crossing her row while she's in it gets snatched, which is a fumble. Runners on the ground are safe. | Her dark shadow on the row, and a flash at the edge the beat before she enters. | **M2** |
+| **Rolling Pumpkin** | A big orange pumpkin. | **A ground lane.** A whole row is a pumpkin lane: one to three pumpkins roll along it, one tile per beat (or every 2 beats on a slow lane), each lane in one direction. Anything a pumpkin rolls into, or that hops into one, goes down. Pumpkins are **low**, so passes fly over them. | Each pumpkin shows an arrow to its next tile; an arrow at the lane's edge shows its direction. | **M2** |
+| **Witch on a Broom** | A purple pointed hat on a broom, flying high. | **An air lane.** She sweeps across her row every few beats. **Only passes are affected:** a ball crossing her row while she's in it gets snatched, which is a fumble. Runners on the ground are safe. | She **faces the way she's flying**, left or right: the only model that turns. Her dark shadow on the row, and a flash at the edge the beat before she enters. | **M2** |
 | **Tombstone** | A grey slab. | **A static obstacle.** Nothing can enter its tile: a Walk-on stops behind it and waits. Passes fly over it. | None needed: it never moves. | M2 if time allows |
-| **Drifting Ghost** | A plain white sheet with two eye holes. | **A slow, tall lane** (a tile every 2 beats). It knocks down players and defenders, and because it's tall it **blocks passes** through its tile: the slow, tall counterpart to the pumpkin. | It faces its next tile. | Later |
+| **Drifting Ghost** | A plain white sheet with two eye holes. | **A slow, tall lane** (a tile every 2 beats). It knocks down players and defenders, and because it's tall it **blocks passes** through its tile: the slow, tall counterpart to the pumpkin. | An arrow shows its next tile. | Later |
 
 **Hazard rules:**
 - **Pure beat patterns.** What a hazard does is set by the beat number alone, so the same screen always plays the same way.

@@ -39,6 +39,7 @@ Inspirations: *Crossy Road* (feel, readability, chunky toy-like look, collectibl
 - **The helmet is the team.** *If it wears our helmet, it's on our side.* Every teammate, rookie or monster, wears the team's football helmet and colors. The forest's opponents never wear helmets.
 - **Two colors carry the readability.** Our team is **gold and orange**. The opposition is always **candy purple**. Nothing on the field should ever leave you wondering whose side it's on.
 - **Destruction is cubes.** Hits burst things into colorful voxel chunks. No blood, ever.
+- **Everyone faces the camera.** Players, defenders and props never turn, even while hopping up the field, so you always see their faces, masks and numbers. Small arrows on the turf show where each will hop next. The one exception is the **Witch on a Broom**, who faces the way she's flying.
 - **Animation is bouncy, not smooth.** Hops, squashes and snappy poses, like toys moved by hand.
 
 ---
