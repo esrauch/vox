@@ -1,0 +1,41 @@
+# The Elder Bough: an ancient treant with a jack-o'-lantern face carved into
+# its trunk, glowing from inside. It never moves.
+size 13 16 9
+voxel 0.1
+colors
+  b bark
+  B barkDark
+  o leafOrange
+  r leafRed
+  y leafGold
+  g glow
+# Roots and trunk.
+box 1 0 1 11 1 7 B
+box 2 2 1 10 10 7 b
+# Branches reaching out, with a tuft of leaves on each tip.
+box 0 7 3 1 8 4 b
+box 11 7 3 12 8 4 b
+box 0 9 3 1 9 4 o
+box 11 9 3 12 9 4 o
+# The autumn canopy: a stepped dome set back over the trunk, so the carved
+# face stays visible from the game's steep camera.
+box 1 10 3 11 10 8 o
+box 0 11 2 12 14 8 o
+box 1 15 3 11 15 7 o
+box 0 11 2 0 14 2 .
+box 12 11 2 12 14 2 .
+box 0 11 8 0 14 8 .
+box 12 11 8 12 14 8 .
+box 0 12 3 2 14 5 r
+box 10 11 6 12 13 8 r
+box 4 15 4 7 15 6 y
+box 9 13 2 11 14 3 y
+box 2 11 2 4 12 2 r
+# The carved face on the front of the trunk (z = 1): square eyes, a nose and a toothy grin.
+box 3 7 1 4 8 1 g
+box 8 7 1 9 8 1 g
+box 6 6 1 6 6 1 g
+box 3 4 1 9 4 1 g
+box 4 3 1 8 3 1 g
+box 5 4 1 5 4 1 b
+box 7 3 1 7 3 1 b

@@ -12,8 +12,9 @@ export default tseslint.config(
     },
   },
   {
-    // Tests build exact situations, so asserting "this exists" is fine there.
-    files: ['tests/**'],
+    // Tests build exact situations, and voxel code indexes fixed-size arrays in
+    // tight loops, so asserting "this exists" is fine in both.
+    files: ['tests/**', 'src/voxel/**'],
     rules: { '@typescript-eslint/no-non-null-assertion': 'off' },
   },
   {

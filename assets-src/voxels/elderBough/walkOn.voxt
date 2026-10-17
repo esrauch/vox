@@ -1,0 +1,37 @@
+# Elder Bough Walk-on: a little leaf sprite wearing an acorn cap.
+# Gold, so it stands out from the green field and the red defenders. The cap
+# is narrower than the body, so the gold still shows from the game's steep camera.
+size 5 7 4
+voxel 0.13
+mirror x
+colors
+  c acornCap
+  s acornStem
+  g leafGold
+  d leafGoldDark
+  k ink
+  b barkDark
+slice 0
+  ...
+  ...
+  .cc
+  gkg
+  ggg
+  dgg
+  .b.
+slice 1-2
+  ..s
+  .cc
+  .cc
+  ggg
+  ggg
+  ggg
+  .b.
+slice 3
+  ...
+  ...
+  .cc
+  ggg
+  ggg
+  ggg
+  ...

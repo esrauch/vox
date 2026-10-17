@@ -2,7 +2,11 @@ import * as THREE from 'three';
 import { bigs, common, hexToNumber } from '../content/palettes';
 import { tuning } from '../content/tuning';
 import { BIG_POS, COLS, END_ROW, ROWS, SETUP_ROWS, vec } from '../sim/grid';
+import { getGeometry, voxelMaterial } from '../voxel/models';
 import { tileToWorld } from './view';
+
+/** The Big's model (only the Elder Bough exists so far). */
+export const BIG_MODEL = 'elderBough/big';
 
 /**
  * The static field: a checkerboard of tiles with the setup zone, end zone,
@@ -41,13 +45,9 @@ export function createField(): THREE.Group {
   }
   group.add(tiles);
 
-  // The Big: a tall placeholder block that never moves.
-  const big = new THREE.Mesh(
-    new THREE.BoxGeometry(1.3, 1.2, 1.0),
-    new THREE.MeshLambertMaterial({ color: 0x8a5a2b }),
-  );
-  // Kept low and set back a little so the Small in front of it stays visible.
-  big.position.copy(tileToWorld(BIG_POS, 0.6)).add(new THREE.Vector3(0, 0, 0.2));
+  // The Big never moves. It faces the camera so its carved face is visible.
+  const big = new THREE.Mesh(getGeometry(BIG_MODEL), voxelMaterial);
+  big.position.copy(tileToWorld(BIG_POS)).add(new THREE.Vector3(0, 0, 0.15));
   big.castShadow = true;
   group.add(big);
 

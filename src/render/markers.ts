@@ -2,12 +2,16 @@ import * as THREE from 'three';
 import { bigs, hexToNumber } from '../content/palettes';
 import { BIG_POS } from '../sim/grid';
 import type { ScreenState, Vec } from '../sim/types';
-import { tileOutline } from './field';
+import { getGeometry, modelHeight, voxelMaterial } from '../voxel/models';
+import { BIG_MODEL, tileOutline } from './field';
 import type { UnitViews } from './units';
 import { tileToWorld } from './view';
 
 const RETICLE_COLOR = hexToNumber(bigs.elderBough.primary);
-const BALL_COLOR = hexToNumber(bigs.elderBough.primary);
+/** The Big's ball model (only the Jack-o'-Lantern exists so far). */
+const BALL_MODEL = 'elderBough/ball';
+/** Where the Big holds the ball: on top of its canopy. */
+const HELD_Y = modelHeight(BIG_MODEL) + 0.02;
 
 /**
  * The ball and the field indicators that move: the reticle, and the landing
@@ -20,10 +24,7 @@ export class Markers {
   private readonly pips: THREE.Mesh[] = [];
 
   constructor(scene: THREE.Scene) {
-    this.ball = new THREE.Mesh(
-      new THREE.BoxGeometry(0.34, 0.34, 0.34),
-      new THREE.MeshLambertMaterial({ color: BALL_COLOR, emissive: 0x552200 }),
-    );
+    this.ball = new THREE.Mesh(getGeometry(BALL_MODEL), voxelMaterial);
     this.ball.castShadow = true;
 
     this.reticle = tileOutline({ x: 0, y: 0 }, RETICLE_COLOR, 0.96);
@@ -61,18 +62,18 @@ export class Markers {
     this.ball.rotation.y = time * 1.5;
 
     if (ball.at === 'big') {
-      this.ball.position.copy(tileToWorld(BIG_POS, 1.45));
+      this.ball.position.copy(tileToWorld(BIG_POS, HELD_Y));
     } else if (ball.at === 'carried') {
       const p = units.positionOf(ball.by);
-      if (p) this.ball.position.set(p.x, 0.85, p.z);
+      if (p) this.ball.position.set(p.x, 0.8, p.z);
     } else if (ball.at === 'flight') {
       // A parabola from the Big's hand to the landing tile, timed to the beat.
       const t = Math.min(
         1,
         Math.max(0, (beatPos - ball.releasedOn) / (ball.landsOn - ball.releasedOn)),
       );
-      const from = tileToWorld(BIG_POS, 1.45);
-      const to = tileToWorld(ball.target, 0.3);
+      const from = tileToWorld(BIG_POS, HELD_Y);
+      const to = tileToWorld(ball.target, 0.6);
       this.ball.position.lerpVectors(from, to, t);
       this.ball.position.y += Math.sin(t * Math.PI) * 3.2;
       this.ball.rotation.x = t * Math.PI * 4;

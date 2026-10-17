@@ -1,4 +1,23 @@
 {
-  "$comment": "Every file under assets/ and assets-src/ needs an entry here. See TECHNICAL.md §14.",
-  "assets": []
+  "$comment": "Every file under assets/ and assets-src/ needs an entry here. See TECHNICAL.md \u00a714.",
+  "assets": [
+    {
+      "path": "assets-src/voxels/elderBough/walkOn.voxt",
+      "source": "Original voxel model (Elder Bough Walk-on), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/elderBough/big.voxt",
+      "source": "Original voxel model (The Elder Bough), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/elderBough/ball.voxt",
+      "source": "Original voxel model (Jack-o'-Lantern ball), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    }
+  ]
 }

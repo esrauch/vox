@@ -249,12 +249,14 @@ layer 0
 
 ### Build and runtime
 
-- **`tools/voxels/build.ts`** converts both formats into one compact runtime file per model (dimensions plus color-index data).
-- **Greedy meshing happens at load time.** The models are tiny, so it's fast, and the geometry is cached. If loading ever gets slow, we can move meshing into the build step.
+- **`.voxt` is the runtime format.** Vite loads every `.voxt` under `assets-src/voxels/` as text (so edits hot-reload). It's parsed once and greedy-meshed once at load into cached geometry with vertex colors (`src/voxel/`). The models are tiny, so this is fast. If loading ever gets slow, meshing can move into the build.
+- **`.vox` files are converted, not loaded.** `npm run import-vox -- model.vox <id>` turns a MagicaVoxel file into `.voxt`, snapping every color to the nearest named palette color. Everything in the game is then in one format.
+- **Model ids are paths:** `elderBough/walkOn` is `assets-src/voxels/elderBough/walkOn.voxt`. Each Big gets a folder.
+- **Orientation:** a model's front (slice 0) faces the camera. Units turn to face where they're hopping.
 
 ### Preview loop (how Claude sees its work)
 
-- **`tools/voxels/preview.ts`** renders each model headlessly (Playwright plus the game's own renderer) to **PNG turntables** (front, ¾ view, side), plus a **contact sheet** of a whole team side by side.
+- **`npm run preview-models`** (`tools/voxels/preview.ts`) renders each model headlessly (playwright-core driving the system Chrome, plus the game's own renderer) to **PNG turntables** in `previews/` (front, ¾ view, side), plus a **contact sheet** per Big folder, seen from the game's camera angle.
 - Claude writes a model, renders the preview, *looks at the PNG*, and iterates. Scale and color comparisons against the rest of the team are part of every review.
 - **A dev-only asset viewer page** (`/dev/models`) does the same thing interactively in the browser.
 

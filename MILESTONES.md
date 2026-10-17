@@ -4,7 +4,7 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** M1.4, the voxel pipeline. Still open: the M1.1 iPhone test, and switching Pages to GitHub Actions.
+**Current focus:** M1.5, the synth and first audio. Still open: the M1.1 iPhone test, and switching Pages to GitHub Actions.
 
 ---
 
@@ -118,14 +118,17 @@ The base systems everything else is built on. **Each one is built and verified o
 **Done when:** a single screen is playable in grey boxes on a phone, at 60 fps. ✅
 
 ### M1.4 Voxel pipeline
-- [ ] The `.voxt` text format, with a parser and palette references.
-- [ ] MagicaVoxel `.vox` import, with colors mapped to the palette.
-- [ ] Greedy meshing, cached geometry, and instancing for repeated units.
-- [ ] Headless previews: PNG turntables and a contact sheet per Big.
-- [ ] The `/dev/models` viewer.
-- [ ] First models: an Elder Bough Walk-on, the Elder Bough, and the Jack-o'-Lantern ball.
+- [x] The `.voxt` text format: size, voxel scale, a mirror, named palette colors, front-view slices with ranges, boxes. The parser gives errors with line numbers (`src/voxel/voxt.ts`).
+- [x] MagicaVoxel `.vox` import: `npm run import-vox` converts to `.voxt` and snaps colors to the palette (`src/voxel/vox.ts`).
+- [x] Greedy meshing with vertex colors and cached geometry (`src/voxel/mesh.ts`, `src/voxel/models.ts`). Every unit of a kind shares one geometry. *(Instancing comes when unit counts call for it.)*
+- [x] Headless previews: `npm run preview-models` writes turntable PNGs and a contact sheet per Big, using the system Chrome.
+- [x] The `/dev/models.html` viewer: a spinning model on a field tile, with size and quad count.
+- [x] First models: the Elder Bough Walk-on (a gold leaf sprite in an acorn cap), the Elder Bough (a treant with a carved jack-o'-lantern face), and the Jack-o'-Lantern ball. All three are in the game.
+- [x] 12 voxel tests: parsing, mirroring, boxes, errors, meshing and winding, and `.vox` import.
 
-**Done when:** Claude can write a `.voxt` model, render a preview, look at it, and iterate, and the result appears in the game.
+**Done when:** Claude can write a `.voxt` model, render a preview, look at it, and iterate, and the result appears in the game. ✅
+
+**Lesson:** models have to be judged **from the game's steep camera**. The first Walk-on read as a brown cap, and the Big's canopy hid its face. The contact sheet now renders at the game's angle.
 
 ### M1.5 Synth and first audio
 - [ ] The mixer (music, SFX and UI buses).
@@ -281,6 +284,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** M1.4 voxel pipeline: `.voxt` format, `.vox` import, greedy meshing, headless previews, and the first three Elder Bough models in the game.
 - **2026-10-17:** M1.3 done: perspective camera chosen, 60 fps confirmed on a phone.
 - **2026-10-17:** Removed the pocket and Blockers (now a Future Idea). Blitzers go straight for the Big. Walk-ons trade themselves with defenders when they don't have the ball.
 - **2026-10-17:** M1.3 minimal render: the game is playable in grey boxes, with both cameras, the HUD, aiming and throwing on the beat, setup dragging, and pause on stall.

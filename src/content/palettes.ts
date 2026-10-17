@@ -37,6 +37,31 @@ export const bigs = {
   },
 } as const satisfies Record<string, Record<'primary' | 'secondary' | 'accent', Hex>>;
 
+/**
+ * Named colors that voxel models (.voxt) refer to. Models use these names,
+ * never raw hex, so changing a color here recolors every model that uses it.
+ */
+export const voxel = {
+  ink: '#2b2140',
+  white: '#ffffff',
+  bone: '#f7f1e3',
+  glow: '#ffd23f',
+  glowHot: '#fff2a8',
+  pumpkin: '#ff8a1f',
+  pumpkinDark: '#e06a10',
+  stemGreen: '#5a8f2e',
+  leafGold: '#ffb627',
+  leafGoldDark: '#e8901a',
+  leafRed: '#e2543b',
+  leafOrange: '#ff7a2f',
+  acornCap: '#9c5a2c',
+  acornStem: '#6b4423',
+  bark: '#7a4e2d',
+  barkDark: '#5a3a22',
+  moss: '#6cc447',
+} as const satisfies Record<string, Hex>;
+
+export type VoxelColor = keyof typeof voxel;
 export type CommonColor = keyof typeof common;
 export type BigId = keyof typeof bigs;
 

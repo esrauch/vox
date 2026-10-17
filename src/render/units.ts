@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import { bigs, common, hexToNumber } from '../content/palettes';
+import { bigs, hexToNumber } from '../content/palettes';
 import { eq } from '../sim/grid';
+import { getGeometry, voxelMaterial } from '../voxel/models';
 import type { DefenderKind, ScreenState, Unit, Vec } from '../sim/types';
 import { tileToWorld } from './view';
 
-const SMALL_COLORS = {
-  runner: hexToNumber(common.candyPurple),
-  recruit: hexToNumber(bigs.elderBough.accent),
-};
+const RECRUIT_COLOR = hexToNumber(bigs.elderBough.accent);
+/** The Walk-on model for the current Big (only the Elder Bough exists so far). */
+const WALK_ON_MODEL = 'elderBough/walkOn';
 const DEFENDER_COLORS: Record<DefenderKind, number> = {
   chaser: 0xe8344e,
   blitzer: 0x9e1030,
@@ -21,6 +21,8 @@ const HOP_SHARE = 0.55;
 interface UnitView {
   readonly root: THREE.Group;
   readonly body: THREE.Mesh;
+  /** Height of the body's origin above the ground: 0 for voxel models, half-height for cubes. */
+  readonly base: number;
   readonly arrow: THREE.Mesh;
   from: Vec;
   to: Vec;
@@ -31,8 +33,9 @@ interface UnitView {
 }
 
 /**
- * Placeholder cubes for every Small and defender (M1.3). They hop from their
- * old tile to their new one at the start of each beat, face where they'll hop
+ * Every Small and defender on the field. Walk-ons are voxel models (M1.4);
+ * recruits and defenders are still placeholder cubes. They hop from their old
+ * tile to their new one at the start of each beat, face where they'll hop
  * next, tip over when knocked down and shrink away when they die.
  */
 export class UnitViews {
@@ -88,22 +91,21 @@ export class UnitViews {
   }
 
   private create(u: Unit): UnitView {
-    const color =
-      u.side === 'defender'
-        ? DEFENDER_COLORS[u.kind]
-        : u.kindId !== 'walkOn'
-          ? SMALL_COLORS.recruit
-          : SMALL_COLORS.runner;
-    const body = new THREE.Mesh(
-      u.side === 'small' ? this.smallBox : this.defenderBox,
-      this.material(color),
-    );
+    const isWalkOn = u.side === 'small' && u.kindId === 'walkOn';
+    const body = isWalkOn
+      ? new THREE.Mesh(getGeometry(WALK_ON_MODEL), voxelMaterial)
+      : new THREE.Mesh(
+          u.side === 'small' ? this.smallBox : this.defenderBox,
+          this.material(u.side === 'defender' ? DEFENDER_COLORS[u.kind] : RECRUIT_COLOR),
+        );
     body.castShadow = true;
+    const base = isWalkOn ? 0 : u.side === 'small' ? 0.275 : 0.375;
     const arrow = new THREE.Mesh(this.arrowGeo, this.arrowMat);
     const root = new THREE.Group();
     root.add(body, arrow);
     this.scene.add(root);
-    return { root, body, arrow, from: u.pos, to: u.pos, diedOn: null, current: tileToWorld(u.pos) };
+    const current = tileToWorld(u.pos);
+    return { root, body, base, arrow, from: u.pos, to: u.pos, diedOn: null, current };
   }
 
   private material(color: number): THREE.MeshLambertMaterial {
@@ -116,8 +118,6 @@ export class UnitViews {
   }
 
   private updateOne(u: Unit, view: UnitView, beat: number, phase: number): void {
-    const half = u.side === 'small' ? 0.275 : 0.375;
-
     if (!u.alive) {
       const dying = view.diedOn === beat;
       view.root.visible = dying;
@@ -141,9 +141,9 @@ export class UnitViews {
     // Squash on landing, tip over when knocked down.
     const land = moving && t >= 1 ? Math.max(0, 1 - (phase - HOP_SHARE) / 0.2) : 0;
     view.body.scale.set(1 + land * 0.15, 1 - land * 0.2, 1 + land * 0.15);
-    view.body.position.y = half * (1 - land * 0.2);
+    view.body.position.y = view.base * (1 - land * 0.2);
     view.body.rotation.z = u.downBeats > 0 ? Math.PI / 2 : 0;
-    if (u.downBeats > 0) view.body.position.y = half * 0.8;
+    if (u.downBeats > 0) view.body.position.y = Math.max(view.base * 0.8, 0.25);
 
     // Face where it will hop next.
     const engaged = u.side === 'defender' && u.engagedSince !== null;
@@ -153,6 +153,8 @@ export class UnitViews {
       const dy = u.intent.y - u.pos.y;
       view.arrow.position.set(dx * 0.42, 0.06, -dy * 0.42);
       view.arrow.rotation.y = Math.atan2(-dx, dy);
+      // Models are built facing the camera (+z); turn them toward the hop (up the field is -z).
+      view.body.rotation.y = Math.atan2(dx, -dy);
     }
   }
 }

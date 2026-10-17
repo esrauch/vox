@@ -103,7 +103,7 @@ export class View {
       tileToWorld(vec(COLS - 0.5, -0.5)),
       tileToWorld(vec(-0.5, ROWS - 0.5)),
       tileToWorld(vec(COLS - 0.5, ROWS - 0.5)),
-      tileToWorld(vec(COLS / 2, 0), 1.4), // the top of the Big
+      tileToWorld(vec(COLS / 2, 0), 1.9), // the top of the Big, with the ball on it
     ];
     const cam = this.camera;
     const margin = 0.94;
