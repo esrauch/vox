@@ -92,6 +92,7 @@ This is the riskiest system in the project, so it gets built and tested first.
 ## 5. 3D Rendering
 
 - **Camera:** a fixed, angled ¾ view as in *Crossy Road*. **Decided (M1.3):** perspective with a narrow field of view. Orthographic was prototyped and dropped.
+- **The look (2026-10-17):** the camera is pitched **58°** above the horizon, and **every character leans back 35°**: a diorama cheat so faces and jerseys read from above. Both live in `tuning.camera`, and the URL can override them for comparisons (`?pitch=` and `?tilt=`; see `src/render/experiments.ts`). Anything a character holds must lean with it (the ball's held and carried positions do). *Possibly to be tweaked in the M3 feel pass.*
 - **Lighting:** one directional "sun" plus a hemisphere fill. Shadows come from **one shadow-casting light with a small shadow map**, or from fake blob shadows under units if phones struggle.
 - **Materials:** flat-shaded with **vertex colors**. No textures on voxel models.
   - **Exception:** the **ball cubes** (and similar props) carry one tiny texture each, for the face: skull, jack-o'-lantern, ember cracks.
@@ -416,7 +417,7 @@ Everything a future session (human or Claude) needs to carry on without the orig
 | `npm run check` | Lint, Prettier check, typecheck, tests, asset-license check. **Run before every commit.** |
 | `npm run build` / `build:release` | The build with dev pages included (for phone testing) / without them. |
 | `npm run preview-models [ids…]` | Headless PNG turntables → `previews/<id>.png`, plus a contact sheet per folder (`previews/sheet-<folder>.png`) **seen from the game's camera pitch**. |
-| `npm run screenshot [seed] [play]` | A headless phone-size (375×812 @2x) capture of the game → `previews/game.png`, or `game-play.png` a moment after HIKE. |
+| `npm run screenshot [seed] [play] [query] [name]` | A headless phone-size (375×812 @2x) capture of the game → `previews/game.png`, or `game-play.png` a moment after HIKE. Extra URL params and an output name allow A/B looks, e.g. `-- 8 play "pitch=58&tilt=35" view-a` → `previews/view-a.png`. |
 | `npm run render-audio [song:id \| stem:song/stem \| sfx:id …]` | WAVs plus waveform PNGs in `previews/audio/`, with peak/RMS levels and a loop-seam check. |
 | `npm run import-vox -- file.vox folder/name [voxelSize]` | Convert a MagicaVoxel model into `.voxt`, colors snapped to the palette. |
 
@@ -466,7 +467,7 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 | Scenery props | up to 2–3 units tall | `forestProps/pine` (0.16) |
 
 **Readability rules learned the hard way:**
-- **Judge every model from the game's steep camera** (64° pitch; the contact sheet uses it). From there you mostly see the **top**. A big hat or helmet reads; a face on the front barely does.
+- **Judge every model from the game's camera:** 58° pitch with characters leaning back 35°. *(The contact sheet still renders at 64° with no tilt, so it's slightly harsher than the game: update `modelViewer.ts` if that matters.)* From there you mostly see the **top**. A big hat or helmet reads; a face on the front barely does.
   - The first leaf-sprite Walk-on read as just a brown cap, because the cap hid the body.
   - The first Elder Bough's canopy hid its carved face.
   - Fix: make the top silhouette carry the identity, and pull overhangs back so faces show.

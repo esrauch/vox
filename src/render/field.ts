@@ -3,6 +3,7 @@ import { biomes, hexToNumber, type Hex } from '../content/palettes';
 import { tuning } from '../content/tuning';
 import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, inThrowBand, vec } from '../sim/grid';
 import { getGeometry, voxelMaterial } from '../voxel/models';
+import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
 /** The quarterback's model. */
@@ -59,8 +60,9 @@ export function createField(): THREE.Group {
 
   // The QB never moves. It faces the camera so its carved face is visible.
   const qb = new THREE.Mesh(getGeometry(QB_MODEL), voxelMaterial);
-  qb.position.copy(tileToWorld(QB_POS)).add(new THREE.Vector3(0, 0, 0.15));
+  qb.position.copy(tileToWorld(QB_POS)).add(new THREE.Vector3(0, 0, 0.15)); // matches QB_OFFSET in markers.ts
   qb.castShadow = true;
+  qb.rotation.x = tilt;
   group.add(qb);
 
   return group;

@@ -39,6 +39,15 @@ export const tuning = {
     /** The QB's hold counter, per ball: Blitzer attacks tick it down; at 0 it's a sack. */
     hold: 3,
   },
+  camera: {
+    /** Camera pitch in degrees above the horizon. */
+    pitch: 58,
+    /**
+     * Characters lean back by this many degrees, a diorama cheat so faces and
+     * jerseys read from the steep camera. (Chosen 2026-10-17; may be revisited.)
+     */
+    tilt: 35,
+  },
   audio: {
     /** Bus levels (0..1). */
     master: 0.9,

@@ -5,6 +5,7 @@ import type { ScreenState, Vec } from '../sim/types';
 import { getGeometry, modelHeight, voxelMaterial } from '../voxel/models';
 import { QB_MODEL, tileOutline } from './field';
 import type { UnitViews } from './units';
+import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
 const RETICLE_COLOR = hexToNumber(team.jersey);
@@ -13,8 +14,14 @@ const BALL_MODEL = 'team/ball';
 /** How high the QB holds the ball: at the top of its raised arm. */
 const HELD_Y = modelHeight(QB_MODEL) + 0.02;
 /** The QB's raised throwing hand, relative to its tile (the model's right arm, slightly forward). */
-const HAND = new THREE.Vector3(0.4, HELD_Y, 0.2);
-const heldPosition = (): THREE.Vector3 => tileToWorld(QB_POS).add(HAND);
+const X_AXIS = new THREE.Vector3(1, 0, 0);
+/** The QB stands slightly forward on its tile (see field.ts). */
+const QB_OFFSET = new THREE.Vector3(0, 0, 0.15);
+/** The raised hand relative to the QB's feet, leaning back with the character tilt. */
+const HAND = new THREE.Vector3(0.4, HELD_Y, 0.05).applyAxisAngle(X_AXIS, tilt);
+const heldPosition = (): THREE.Vector3 => tileToWorld(QB_POS).add(QB_OFFSET).add(HAND);
+/** Where a carrier holds the ball, relative to its feet: at chest height, leaning with the tilt. */
+const CARRIED = new THREE.Vector3(0, 0.8, 0).applyAxisAngle(X_AXIS, tilt);
 
 /**
  * The ball and the field indicators that move: the reticle, and the landing
@@ -68,7 +75,7 @@ export class Markers {
       this.ball.position.copy(heldPosition());
     } else if (ball.at === 'carried') {
       const p = units.positionOf(ball.by);
-      if (p) this.ball.position.set(p.x, 0.8, p.z);
+      if (p) this.ball.position.set(p.x + CARRIED.x, CARRIED.y, p.z + CARRIED.z);
     } else if (ball.at === 'flight') {
       // A parabola from the QB's hand to the landing tile, timed to the beat.
       const t = Math.min(

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { common, hexToNumber } from '../content/palettes';
 import { COLS, ROWS, vec } from '../sim/grid';
+import { experiment } from './experiments';
 import type { Vec } from '../sim/types';
 
 /** Screen space kept free for the HUD, in CSS pixels. */
@@ -101,7 +102,7 @@ export class View {
     const availH = Math.max(1, h - this.insets.top - this.insets.bottom);
 
     const target = new THREE.Vector3(0, 0, -(ROWS - 1) / 2);
-    const pitch = THREE.MathUtils.degToRad(64);
+    const pitch = THREE.MathUtils.degToRad(experiment.pitch);
     const dir = new THREE.Vector3(0, Math.sin(pitch), Math.cos(pitch));
     const corners = [
       tileToWorld(vec(-0.5, -0.5)),

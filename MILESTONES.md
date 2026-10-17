@@ -176,6 +176,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [ ] The full juice list from GAMEPLAY.md: squash and stretch, everything bouncing on the beat, haptics, rhythm cues, sparkle trails, player noises.
 - [ ] Every indicator from *Reading the Beat*, polished, with hazards telegraphing one beat ahead.
 - [ ] The tombstone and waving ghost when a recruit dies.
+- [ ] **Revisit the look:** the camera pitch (58°) and the characters' backward lean (35°) were chosen from screenshots (2026-10-17). Re-check them on phones, perhaps with a playtester, and tweak `tuning.camera` (try different values with `?pitch=` and `?tilt=`).
 - [ ] Tuning: hop rates, throw range, Blitzer attack rhythm and the QB's counter, and beat alignment.
 - [ ] A screen-generation solvability check, so no unfair screens get through.
 
@@ -292,6 +293,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** The look: the camera pitched at 58° and characters leaning back 35°, so faces and jerseys read. Marked for a possible tweak in the M3 feel pass.
 - **2026-10-17:** Models always face the camera, and arrows show the next hop. The Witch on a Broom is the exception: she faces the way she flies.
 - **2026-10-17:** TECHNICAL.md §22 added: a handbook for picking the project back up (code map, commands, voxel and audio recipes, readability lessons, gotchas).
 - **2026-10-17:** Hazard models built (`forestHazards/`): the grinning Rolling Pumpkin, the Witch on a Broom, the Tombstone and the Drifting Ghost. They aren't in the game yet.

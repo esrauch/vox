@@ -3,6 +3,7 @@ import { hexToNumber, team } from '../content/palettes';
 import { eq } from '../sim/grid';
 import { getGeometry, voxelMaterial } from '../voxel/models';
 import type { DefenderKind, ScreenState, Unit, Vec } from '../sim/types';
+import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
 const RECRUIT_COLOR = hexToNumber(team.accent);
@@ -139,6 +140,7 @@ export class UnitViews {
     view.body.scale.set(1 + land * 0.15, 1 - land * 0.2, 1 + land * 0.15);
     view.body.position.y = view.base * (1 - land * 0.2);
     view.body.rotation.z = u.downBeats > 0 ? Math.PI / 2 : 0;
+    view.body.rotation.x = tilt;
     if (u.downBeats > 0) view.body.position.y = Math.max(view.base * 0.8, 0.25);
 
     // Face where it will hop next.

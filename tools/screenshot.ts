@@ -4,6 +4,7 @@
  *
  *   npm run screenshot                 → previews/game.png (setup screen, seed 8)
  *   npm run screenshot -- 3 play       → seed 3, a moment after HIKE!
+ *   npm run screenshot -- 8 play pitch=50 low   → with extra URL params, saved as previews/low.png
  *
  * Uses the system Chrome through playwright-core.
  */
@@ -13,7 +14,7 @@ import { chromium } from 'playwright-core';
 import { createServer } from 'vite';
 
 const ROOT = join(import.meta.dirname, '..');
-const [seed = '8', when = 'setup'] = process.argv.slice(2);
+const [seed = '8', when = 'setup', extraQuery = '', name = ''] = process.argv.slice(2);
 
 const server = await createServer({ root: ROOT, server: { port: 0 }, logLevel: 'error' });
 await server.listen();
@@ -33,14 +34,18 @@ try {
     deviceScaleFactor: 2,
   });
   page.on('pageerror', (e) => console.error(`page error: ${e.message}`));
-  await page.goto(`http://localhost:${port}/?seed=${seed}`);
+  await page.goto(`http://localhost:${port}/?seed=${seed}${extraQuery ? `&${extraQuery}` : ''}`);
   await page.waitForTimeout(1500);
   if (when === 'play') {
     await page.click('.hud-action');
     await page.waitForTimeout(2600);
   }
   mkdirSync(join(ROOT, 'previews'), { recursive: true });
-  const file = join(ROOT, 'previews', when === 'play' ? 'game-play.png' : 'game.png');
+  const file = join(
+    ROOT,
+    'previews',
+    name ? `${name}.png` : when === 'play' ? 'game-play.png' : 'game.png',
+  );
   await page.screenshot({ path: file });
   console.log(file.replace(`${ROOT}/`, ''));
 } finally {
