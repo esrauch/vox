@@ -1,269 +1,145 @@
-# Fee Fi Fo Fumble: Theme
+# Theme
 
-*A giant's chant meets football's worst moment.*
+*Working title: **Fee Fi Fo Fumble** (being revisited; see* Title *below).*
 
-This document is about who, where and what it feels like. It does not cover rules or numbers. Mechanics go in their own doc later.
+This document is about who, where and what it feels like. It does not cover rules or numbers; those live in [GAMEPLAY.md](GAMEPLAY.md).
 
 ---
 
 ## The Pitch in One Breath
 
-A brutal fantasy sport, played in real time on **Halloween**. You are the **Big**: the hulking star quarterback of a team made of tiny creatures who come up to roughly your ankle. They swarm, tackle, scream, get flattened and come back for more. You hold the ball, read the field and make the play. Your little teammates make it work, or they die gloriously trying.
+**A football team playing through a haunted forest.** Your squad starts out as plain, cheerful football players. Screen by screen they fight their way up the field, past gnomes, scarecrows and bats that don't want them there. Along the way, the forest's own creatures join up: a bat in a football helmet, a skeleton in shoulder pads, a pumpkin-head who can really run. Get the ball to the end zone, pick up a new teammate, and keep going until the run falls apart.
 
-**The feel:** snappy, fast, silly and fun. It's closer to *Crossy Road* than to *Blood Bowl*: pick it up in seconds, laugh every few seconds, one more go. **It's a portrait, one-thumb phone game in voxels**, where you climb screen after screen until your run falls apart.
+**The feel:** snappy, fast, silly and fun. It's closer to *Crossy Road* than to *Blood Bowl*: pick it up in seconds, laugh every few seconds, one more go. **It's a portrait, one-thumb phone game in voxels**, and everything moves to the beat of a cheerful Halloween soundtrack.
 
-Inspirations: *Crossy Road* (feel, readability, chunky toy-like look, collectible characters), *Crypt of the NecroDancer* (everything moves to the beat), *Blood Bowl* (the premise: fantasy football with team identity), *Pikmin* and *Overlord* (a big leader with a swarm of small, lovable followers), and the general comedy of a giant trying to be a precise athlete.
+Inspirations: *Crossy Road* (feel, readability, chunky toy-like look, collectible characters), *Crypt of the NecroDancer* (everything moves to the beat), *Blood Bowl* (fantasy football), and the joy of a team of misfits that somehow works.
 
 ## Core Fantasy
 
-- **You are the franchise.** You're the biggest thing on the field and the only one who can see the whole play. Everyone else is a blur of tiny legs at your feet.
-- **Your team adores you (mostly).** The smalls cheer when you throw well and sulk when you step on them. They have personalities: a few of them have names, and the crowd knows those names.
-- **Scale is the joke and the drama.** All it takes to sack you is one tiny Blitzer bonking your shin, and down you go like a felled tree. A pass from you can land on a single small, catching a ball the size of its whole body.
+- **You run the play.** You're the quarterback, standing in the backfield: the one who sees the whole field and decides where the ball goes.
+- **A team of nobodies becomes a team of monsters.** You start with a squad of identical rookies. By the end of a good run your roster is a bat, a werewolf, a mummy and two rookies who refuse to quit, all in matching helmets.
+- **Every new teammate is a little story.** A bat that joined on screen 4 and caught the winning pass on screen 11 is *your* bat.
 - **Chaos you can steer.** You can't control everything, and that's the point. You set up the play and adapt as it falls apart.
 
 ## Tone
 
-- **Slapstick violence with no cruelty.** Smalls get punted, squashed, set on fire and buried. Most hits just knock them into voxel bits that click back together, dazed and sometimes assembled wrong. When a Small really dies, it gets a tiny tombstone and a little ghost that waves goodbye. It's sad for exactly one second.
-- **The game is a dance.** Everything on the field hops in time with the music, a cheerful Halloween soundtrack with a big, clear beat. Even the dead have rhythm.
-- **Snappy above all.** Everything is quick: quick screens, quick celebrations, quick restarts. Silliness happens in seconds, not in cutscenes.
-- **Sports broadcast energy.** Announcers, crowd chants, rivalries, trash talk, replays of the stupidest moments.
-- **Each team is a joke told with a straight face.** The undead take this sport *very* seriously.
-- **Cheerful, always.** Even the undead and the volcano are *cute*. The darkest thing in the game is a slightly sad tombstone.
+- **Slapstick violence with no cruelty.** Players get flattened, punted and buried in leaves. A hit bursts them into voxel bits that click back together. When a teammate really goes down, it gets a tiny tombstone and a little ghost that waves goodbye. It's sad for exactly one second.
+- **The game is a dance.** Everything on the field hops in time with the music. Even the dead have rhythm.
+- **Snappy above all.** Quick screens, quick celebrations, quick restarts. Silliness happens in seconds, not in cutscenes.
+- **Sports-broadcast energy.** Announcers, crowd chants, replays of the stupidest moments.
+- **Spooky, never scary.** It's a haunted forest at dusk, but the monsters are cute, the pumpkins grin, and the darkest thing in the game is a slightly sad tombstone.
 
 ## Art Direction
 
-**Just like *Crossy Road*: bright, happy colors and simple voxel art, dressed for Halloween.**
+**Simple voxel art like *Crossy Road*, set in a haunted forest at dusk.**
 
-- **Simple voxels.** Low voxel counts, chunky proportions and flat colors. No textures, no fine detail. A Small is only a handful of cubes, and a Big is a bigger, blockier handful.
-- **Bright Halloween palette.** Pumpkin orange, candy purple, slime green and bone white, under a sunny autumn sky. It's a cheerful Halloween *afternoon*, not a dark night: everything stays bright and readable on a phone. Jack-o'-lanterns glow anyway.
-- **Simple lighting.** One sun, soft drop shadows, and a toy-diorama look. No grime, no gloom, no realism.
-- **Silhouette first.** Every Small, Big and hazard is recognizable from its shape and color alone, at phone size, at a glance.
-- **Team colors carry the readability.** Your team and theirs need to be instantly different, even when twenty of them are piled up.
-- **Destruction is cubes.** Hits burst things into colorful voxel chunks that bounce and click back together. No blood, ever. A death is a puff of cubes and a cartoon ghost.
-- **Animation is bouncy, not smooth.** Hops, squashes and snappy poses, like little toys being moved by hand.
+- **Simple voxels.** Low voxel counts, chunky proportions and flat colors. No textures, no fine detail.
+- **Haunted dusk, still readable.** A mossy, dark-green field, a leaf-strewn forest floor, fog in the trees, moonlit purple light and glowing jack-o'-lanterns. It's spooky, but the players on the field always pop.
+- **Silhouette first.** Every player, opponent and hazard is recognizable from its shape and color alone, at phone size, from the game's steep camera.
+- **The helmet is the team.** *If it wears our helmet, it's on our side.* Every teammate, rookie or monster, wears the team's football helmet and colors. The forest's opponents never wear helmets.
+- **Two colors carry the readability.** Our team is **gold and orange**. The opposition is always **candy purple**. Nothing on the field should ever leave you wondering whose side it's on.
+- **Destruction is cubes.** Hits burst things into colorful voxel chunks. No blood, ever.
+- **Animation is bouncy, not smooth.** Hops, squashes and snappy poses, like toys moved by hand.
 
-**Each team stays cheerful in its own way:**
+---
 
-| Team | Palette | Feels like |
+## Our Team
+
+### Rookies
+
+**Every run starts with the same squad of vanilla football players**: identical rookies in gold helmets and orange jerseys. They're plain, keen and expendable, and they always turn up again for the next screen however many times they get flattened. (The model is `misc/footballPlayer`.)
+
+*Name to settle: "Walk-ons" (the current name in the rules) or "Rookies".*
+
+### Recruits: the forest joins the team
+
+As the run goes on, **creatures of the haunted forest join the team, and every one of them puts on a football helmet**. Each recruit replaces a rookie, is better at something, and is precious: if a recruit goes down, it's gone for good, and a rookie takes its place.
+
+Candidates (each wearing the team helmet, with a role you can read from its shape):
+
+| Recruit | Good at | Look |
 |---|---|---|
-| Graveyard | Lavender, mint green, bone white | Halloween candy, not horror |
-| Woodfolk | Pumpkin orange, autumn red, golden yellow, moss green | A pumpkin patch in a storybook |
-| Mountain | Ember orange, cherry red, warm grey, gold | A Halloween bonfire with attitude |
+| **Bat** | Catching passes out of the air | Wings spread, hovering, with a tiny helmet. |
+| **Skeleton** | Getting back up after a hit | Bones in shoulder pads, which rattle apart and click back together. |
+| **Pumpkin-head** | Running | A jack-o'-lantern head under the helmet, glowing through the face mask. |
+| **Werewolf** | Breaking tackles | Big, hairy, the helmet barely fits. |
+| **Mummy** | Holding onto the ball | Wrapped up tight, trailing a bandage. |
+| **Ghost** | Slipping past defenders | A sheet with a helmet floating on top. |
+| **Black Cat** | Speed and lucky catches | Low and quick, tail up. |
+| **Witch** | Trick plays | A pointy hat squashed under the helmet. |
+| **Frankenstein's Monster** | Raw strength | Square, green, bolts poking out of the helmet. |
+| **Owl** | Seeing the whole field | Round, wide-eyed, wings folded. |
+
+### The ball
+
+**A jack-o'-lantern football.** It's the team's ball and the game's icon. *(The current model is the cube Jack-o'-Lantern; a football-shaped pumpkin is worth trying.)*
 
 ---
 
-## The Bigs and the Smalls
+## The Opposition: the Haunted Forest
 
-Every run is one **Big** plus a squad of **Smalls**.
+**The forest's locals don't want a football team tramping through their woods.** They're the defenders: wild creatures, never in helmets, always in candy purple.
 
-**The Big** is you, and **you pick it at the start of a run**. Each Big is a one-of-a-kind legend from its homeland, and it brings that homeland's whole theme with it: its ball, its colors, and the kinds of Smalls who'll want to join. A Big never moves. It stands rooted at the bottom of the field like a monument, and it's the team's arm and its brain. Everything it does, it does with one enormous throw.
-
-**The Smalls** come in two flavors:
-- **Walk-ons** are the plain, cheerful rank and file. Every run starts with the same squad of them. They're identical and vanilla, but dressed up in the Big's theme. They always turn up again for the next screen, however many times they get flattened.
-- **Recruits** are the special Smalls from the Big's homeland: the Rattlebones, Pixies and Cinder Imps of the world. They're stronger, stranger and individually precious in the "oh no, not Pip" sense. A recruit who dies is gone for good, and a Walk-on takes its place.
-
----
-
-## The Teams
-
-Three starting Bigs, each bringing a homeland with a style and an attitude. In play, "the team" simply means your Big's theme: its Walk-ons and its recruits. Names are drafts, and alternatives are listed.
-
-### The Undead Ringers — *Graveyard*
-
-> *"We've got all the time in the world. Literally."*
-
-**Style:** Slow, relentless, grabby. They don't outrun you; they *outlast* you. They pile on, grab ankles, refuse to stay down, and win by burying the other team in bodies.
-
-**Home:** A cheerful cemetery pitch. Tombstones for yard markers, pastel mist curling over bright grass, jack-o'-lanterns grinning along the sidelines, and an organ playing an upbeat fight song.
-
-**The Big: The Groundskeeper.** A huge, stitched-together ghoul with a shovel slung over one shoulder. Polite, patient and deeply unhurried. It has buried every one of its teammates at least once.
-
-**Recruits:**
-- **Rattlebones**: tiny skeletons. They fall apart when hit and reassemble, sometimes wrongly.
-- **Shamblers**: zombie gnomes. Slow, sticky, hard to shake off once they latch on.
-- **Wisps**: little ghosts that drift through crowds. Not strong, but very hard to knock down. You can't tackle what isn't there.
-- **Grave Rats**: skittering little runners, and the only quick thing in the graveyard. They have sticky paws for catching.
-
-**Walk-ons:** little kids in bedsheet ghost costumes. *Probably* kids.
-
-**Personality:** Grim pride, dad jokes about death, and zero sense of urgency.
-
-*Signature Hijink flavor:* rising, grabbing and creeping, in **Night of the Living Dead**, **Grave Robbery** and **Fog of War**.
-
-**Name candidates** (★ = favorites):
-- ★ **The Stiff Arms**: a real football move, and they're stiffs.
-- ★ **Sudden Death**: the overtime term, and also just what they are.
-- **The Half-Backs**: a real position, half a body, and back from the dead. *(Contested with the Halflings.)*
-- **Ghoul Line**, **The Decomposers**, **Grave Expectations**, **Rest in Pieces**, **The Coffin Dodgers**, **The Crypt Keepers**, **Six Feet Under Par**, **Rigor Motors**, **Post-Mortem**, **Dead Ball Era**, **The Mortal Locks**
-- Home field: **The Bone Zone**.
-
----
-
-### The Twig Leaguers — *Woodfolk*
-
-> *"Catch us if you can. You can't."*
-
-**Style:** Passing and running, with feints, misdirection and fast breaks. They are fragile and they know it, so they never stand still long enough to get hit. When they *do* get hit, they scatter like leaves.
-
-**Home:** A pumpkin patch in an autumn forest, ringed by enormous trees in red and gold. The crowd watches from the branches, and the end zones are piles of leaves.
-
-**The Big: The Elder Bough.** An ancient, creaky treant with a jack-o'-lantern face carved into its trunk, glowing from inside. It hasn't moved in three hundred years, and it doesn't plan to start now. It's surprisingly gentle with its hands and has an arm like a catapult. Prone to long pauses mid-sentence.
-
-**Recruits:**
-- **Pixies**: fast and flighty, with the best hands on the field.
-- **Acorns**: little nut-folk who curl up and roll to dodge.
-- **Squirrel Riders**: tiny jockeys on squirrels. Fastest thing in the league, and terrible at stopping.
-- **Toadstools**: mushroom-folk who puff spores, confuse opponents and get in the way.
-
-**Walk-ons:** little leaf sprites wearing acorn caps.
-
-**Personality:** Showboating, playful and a little smug. They treat the game like a dance the other team is bad at.
-
-*Signature Hijink flavor:* vanishing and misdirection, in **Leaf It Out**, **Root Awakening** and **Pollen Count**.
-
-**Name candidates** (★ = favorites):
-- ★ **Gourd Line**: goal line, and very Halloween.
-- ★ **Squash Bucklers**: swashbucklers.
-- ★ **Moss Valuable Players**: MVP.
-- **The Gourdians**, **Pumpkin Spice Squad**
-- ★ **The Oak-land Raiders**
-- **The Forest Gumps**: fast, and they just keep running.
-- **The Petal Pushers**: ironic for a team that can't push anyone.
-- **Sprout of Bounds**, **The Branch Managers**, **The Bark Side**, **The Leaf Blowers**, **Out of the Woods**, **Fir-st Down**, **The Thicket Scalpers**, **The Trunk Show**, **Pine Tar**, **The Hail Marigolds**
-
----
-
-### The Kiln Joys — *Mountain*
-
-> *"Hit it until it stops moving. Then hit it again, for luck."*
-
-**Style:** Fiery and bashy. They're hotheads, *literally*. They charge, slam, burn and break formations by force. The plan is usually "through."
-
-**Home:** A sunny volcanic arena on a mountainside, decked out like a giant Halloween bonfire. Bright orange lava channels mark the sidelines, and the crowd sits on warm rocks toasting marshmallows.
-
-**The Big: The Slagfather.** A walking forge of cracked basalt with magma glowing in the seams. Loud, proud, and quick to anger. It throws the ball like it's angry at it.
-
-**Recruits:**
-- **Cinder Imps**: tiny fire demons. Explosive tempers, sometimes literally.
-- **Kobolds**: scrappy, shouty and numerous. They love a pile-on.
-- **Rocklings**: pebble-gnomes. Small, dense and very hard to move.
-- **Salamanders**: quick lizards that leave scorch trails behind them.
-
-**Walk-ons:** little soot sprites, round lumps of coal with stubby legs.
-
-**Personality:** Big noise, big hits and big grudges. Every game is a blood feud and every play is personal.
-
-*Signature Hijink flavor:* fire and force, in **Hot Potato**, **Eruption** and **Avalanche**.
-
-**Name candidates** (★ = favorites):
-- ★ **Basalt & Battery**: assault and battery.
-- ★ **Trick or Heat**
-- ★ **Bad to the Boulder**
-- **The Firing Squad**: kilns fire things.
-- **The Flame Throwers**: ironic, given their low Hands.
-- **Magma Cum Laude**, **Smelter Skelter**, **The Rock Bottoms**, **Peak Performers**, **The Pyro Maniacs**, **Scorch Bearers**, **Rock 'Em Sock 'Em**, **The Hot Heads**, **Fault Line**
-
----
-
-## The Ball
-
-**Every team plays with its own ball, and every ball is a cube.** Each one is a single voxel block with a very simple painted face, so it reads instantly at phone size and spins nicely in the air.
-
-| Team | Ball | The cube |
+| Defender kind | Forest local | Look |
 |---|---|---|
-| Graveyard | **The Skull** | A bone-white cube with two black eye squares and a row of teeth. |
-| Woodfolk | **The Jack-o'-Lantern** | An orange cube with a carved triangle face glowing yellow from inside, and a tiny green stem. |
-| Mountain | **The Ember** | A dark red cube with glowing orange cracks, which puffs a little smoke. |
-| Halflings *(future)* | **The Sandwich** | A cube with stripes of bread, lettuce, cheese and tomato on its sides, and a toothpick with an olive on top. Somebody always takes a bite after a score. *(Alternatives: a cheese wheel, a pork pie, a fruitcake.)* |
+| **Chaser** | **Garden Gnome** | A tall pointy hat, a beard, arms out. |
+| **Blitzer** | **Rhino Beetle** | Low, wide and horned, a little battering ram. |
+| **Wall-er** | **Scarecrow** | Arms spread wide along its crossbar, a literal wall. |
+| **Picker** | **Bat** | Hovering with its wings spread, to snatch passes out of the air. |
 
-- **You carry your own team's ball.** It's part of the team's identity, like a mascot.
-- **The Big keeps a pile of them,** and the pile is your lives. A heap of skulls, a stack of pumpkins, a smoldering mound of embers: you can see how much trouble you're in just by looking at it.
-- **The ball has personality but no rules attached** (to start with). The Skull chatters its teeth when it's thrown, the Jack-o'-Lantern's glow flickers when it's caught, and the Ember sizzles when you hold it too long.
-- **The Jack-o'-Lantern is the game's icon.** It's the default ball on the title screen, and the face of Fee Fi Fo Fumble.
+*Note: a Bat is both a defender and a recruit candidate. The helmet rule tells them apart (a wild purple bat versus our helmeted gold bat), but if it's confusing in play, the Picker could become an Owl or a Crow instead.*
 
----
+**Hazards** belong to the forest too: rolling pumpkins, snapping flytraps, stampeding boars, logs on the river.
 
-## The Defenders
-
-**Defenders are the locals of each biome**, defending their turf, and **every one of them wears candy purple**. Purple reads as "not us" against your gold squad, the green field and the orange pumpkins, so you can always tell sides apart at a glance. Each defender kind gets its own creature in each biome, with a silhouette that says what it does.
-
-| Kind | Forest (pumpkin patch) | Graveyard *(later)* | Mountain *(later)* |
-|---|---|---|---|
-| **Chaser** | **Garden Gnome**: a tall pointy hat, a beard, arms out. | *TBD* | *TBD* |
-| **Blitzer** | **Rhino Beetle**: low, wide and horned, a little battering ram. | *TBD* | *TBD* |
-| **Wall-er** | **Scarecrow**: arms spread wide along its crossbar, a literal wall. | *TBD* | *TBD* |
-| **Picker** | **Bat**: hovering with its wings spread, to snatch passes out of the air. | *TBD* | *TBD* |
+**Later, more haunted places:** a graveyard, a witch's swamp, a haunted manor. Each has its own locals and hazards, but it's always the same team, picking up recruits along the way.
 
 ---
 
-## Attributes (in the abstract)
+## Attributes
 
-Every Small and every defender is described by **three attributes**: the **Three H's**. (Bigs are the exception: they're legends, not stat lines. A Big's character comes from its homeland, not from numbers.) In play they're simple numbers starting at 0. Walk-ons are a perfectly average 0 / 0 / 0. These are *character* traits first: they should tell you who someone is before they tell you any numbers. A player should be able to guess a Small's attributes from its silhouette.
+Every player and every defender is described by **three attributes**, the **Three H's**: whole numbers starting at 0. Rookies are a perfectly average 0 / 0 / 0, and recruits are better in one or two.
 
 | Attribute | What it means | Who's known for it |
 |---|---|---|
-| **Hustle** | Speed and get-up-and-go: how fast you move, how fast you start, how quickly you react. | Squirrel Riders, Salamanders |
-| **Hands** | Everything to do with catching: how easy a Small is to hit with a pass. | Pixies, Grave Rats |
-| **Heft** | Toughness: how much punishment you can take before a knockdown becomes something worse. (Breaking *through* defenders is a separate gift: some Smalls **fend them off**.) | Kobolds, Rocklings, Cinder Imps |
-
-"Fragile" just means low Heft. Trickery, sneakiness and anything else a team is *known* for live in its **Hijinks** (below), not in the attributes.
-
-### Team shapes
-
-| Team | Hustle | Hands | Heft |
-|---|---|---|---|
-| Undead Ringers | low | **high** | low |
-| Twig Leaguers | **high** | **high** | low |
-| Kiln Joys | mid | low | **high** |
-
-**The Undead Ringers have no Heft.** They're rotten, brittle bones and loose flesh, and they fall apart when they're hit. Their high Hands is *grabby*, not graceful: clutching, stripping the ball and refusing to let go. The rest of what makes them the Graveyard comes from their nature and their Hijinks. They don't hit hard and they don't stay standing, but they **don't stay down** either, and there are always more of them crawling toward you. They lose every collision and win the war of attrition.
-
-That also cleanly separates them from the Kiln Joys, the only bruisers among the three: the mountain *breaks* you, and the graveyard *wears you down*.
-
----
+| **Hustle** | Speed: how often you hop. | Black Cat, Pumpkin-head |
+| **Hands** | Catching: how easy you are to hit with a pass. | Bat, Mummy |
+| **Heft** | Toughness: how many hits you can take. | Werewolf, Frankenstein's Monster |
 
 ## Hijinks (team powers)
 
-**Hijinks** are signature, dramatic, activated tricks that work like ultimates in other games. They're the moments the announcers lose their minds over. **Each Big has one Hijink.** You roar the signal, and the whole team does the thing. A team's Hijinks are the pool its different Bigs draw from, so picking a Big means picking a Hijink.
+**Hijinks** are dramatic, screen-filling tricks the team can pull off after the throw, like ultimates in other games. They're unlocked through the draft, and many will come from recruits: the Witch hexes a lane, the Ghost lets everyone slip through defenders for a beat, the Owl spots every defender's next move.
 
-Hijinks are where a team's *cleverness* lives, and they're the main lever for team identity beyond the three attributes.
+*Name to consider: **"Trick Plays"**. It's a real football term, and it's Halloween ("trick or treat").*
 
-- **They're thematic first.** A Hijink should look and sound like its team. You should be able to tell who pulled it off with the sound turned down.
-- **They bend the game, but only briefly.** A Hijink is a burst of chaos or a swing in momentum, not a permanent edge.
-- **They balance the roster.** A team with modest attributes can have stronger Hijinks. A powerhouse team might have blunt, simple ones.
+---
 
-Example Hijinks (names and ideas, not mechanics):
+## Title
 
-**Undead Ringers**
-- **Night of the Living Dead**: every downed Small on the team claws its way back up at once.
-- **Grave Robbery**: hands burst out of the turf around the ball carrier and grab.
-- **Fog of War**: graveyard mist rolls over the field, and the other team loses track of who's where.
+**Fee Fi Fo Fumble** is still a candidate, but it comes from the giant-quarterback idea, which is gone. Candidates that pun on Halloween/haunted *and* football:
 
-**Twig Leaguers**
-- **Leaf It Out**: the whole team bursts into a swirl of leaves and reforms somewhere else.
-- **Root Awakening**: vines erupt across a patch of the field and snare whoever's standing on it.
-- **Pollen Count**: a spore cloud that hides where the pass is going.
-
-**Kiln Joys**
-- **Hot Potato**: the ball goes red-hot, and whoever's holding it has a very bad time.
-- **Eruption**: the ground splits and everyone nearby goes flying.
-- **Avalanche**: the whole front line charges at once, and nobody stops until they hit something.
-
-### Future example: the Halflings
-
-> **The Second Breakfast Club**: *"We're not small. You're just tall."*
-
-Low attributes across the board: not fast, not strong, not tough, with decent hands at best. But they have the **best Hijinks in the league**: sneakier and better timed. They win games they have no business winning. Their Big might be a hired ogre who's mostly in it for the catering.
-
-**Name candidates:** **The Second Breakfast Club**, **The Half-Backs** *(contested with the Graveyard)*, **The Short Stacks**, **Small Fry**.
-
-Hijink ideas: **Elevenses** (the whole team stops for a snack and recovers), **Pocket Pass** (the ball vanishes into someone's waistcoat; who has it?), **Hobbit Forming** (they're suddenly everywhere at once).
+| Title | The pun |
+|---|---|
+| ★ **Field of Screams** | *Field of Dreams*, haunted. |
+| ★ **Fourth & Ghoul** | Fourth and goal. |
+| ★ **Hike & Shriek** | Hide and seek, plus the snap. |
+| ★ **Trick Play** | A football trick play, plus trick-or-treat. |
+| **Ghoul Line** | The goal line. |
+| **Boo-tball** | Football, booed. |
+| **Gourd Line** | The goal line, made of pumpkins. |
+| **Haunted Huddle** | Self-explanatory, and alliterative. |
+| **The Boo Zone** | The end zone. |
+| **Fright Formation** | A formation, frightened. |
+| **Hail Mary Shelley** | The Hail Mary pass, plus *Frankenstein*'s author. |
+| **Gridiron Graveyard** | Alliterative, very on the nose. |
+| **Pumpkin Punt** | Alliterative. |
+| **Night of the Living Ball** | *Night of the Living Dead*. |
 
 ## Open Questions
 
-- **Spare title puns** to reuse inside the game: *Fiend Zone*, *Ogre-Time*, *Grim Receiver* (a graveyard position?), *Gnome Field Advantage* (a Hijink or an achievement?), *Gridirons & Dragons*, *Ankle Biters*, *Stomping Grounds*, *Fourth & Inches*.
-- **Is the "Fumble" moment a feature?** When a Big drops the ball, the crowd could chant "FEE! FI! FO! FUMBLE!"
-- **Who are the boss Bigs?** Enemy Bigs show up on boss screens. Are they the other teams' Bigs, or a separate rogues' gallery?
-- **Where is the climb going?** An endless field, a mountain, a league ladder? Is there a joke at the top that nobody ever reaches?
-- **A hall of fame for fallen Smalls?** Each run could end with a roll call of its dead.
-- **Future teams** to keep in mind, so the three above don't use up every niche: Halflings (above), swamp (sticky, poisonous), sky/birdfolk (aerial game), clockwork (rigid set-plays), sea (slippery).
+- **The title** (see above).
+- **"Walk-ons" or "Rookies"** for the vanilla players?
+- **"Hijinks" or "Trick Plays"** for the team powers?
+- **Who is the quarterback?** A rookie in the backfield, or a special player that's always there? It's the one player who never moves.
+- **What makes runs different from each other** now that there's no Big to choose? Perhaps the team's colors and name, a starting recruit, or a coach.
+- **Is the Bat both a defender and a recruit,** or should the Picker change?
+- **What is the climb toward?** The far side of the forest? A haunted stadium? Is there a joke at the top that nobody ever reaches?
