@@ -24,7 +24,7 @@ export function playState(
   state.slots = smalls.map((s) => ({ kindId: s.kindId ?? WALK_ON.id }));
   const units: SmallUnit[] = smalls.map((spec, i) => {
     const kind = smallKind(spec.kindId ?? WALK_ON.id);
-    const blocker = spec.pos.y === 0 || isPocket(spec.pos);
+    const blocker = isPocket(spec.pos);
     return {
       id: 100 + i,
       side: 'small',

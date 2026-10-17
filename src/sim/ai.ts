@@ -30,8 +30,7 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
     }
     case 'blitzer': {
       if (d.engaged) return null;
-      const target = blitzTarget(d, screen);
-      return target ? stepToward(d.pos, target) : null;
+      return stepToward(d.pos, blitzTarget());
     }
     case 'waller': {
       const target = wallTarget(d, screen);
@@ -56,14 +55,9 @@ function chaseTarget(d: Defender, screen: ScreenState): Vec | null {
   );
 }
 
-/** Blitzers head for the nearest free pocket tile; if every one is guarded, they go through a Blocker. */
-function blitzTarget(d: Defender, screen: ScreenState): Vec | null {
-  const blockerAt = (t: Vec): boolean =>
-    screen.smalls.some((s) => s.alive && s.role === 'blocker' && eq(s.pos, t));
-  const blitzerAt = (t: Vec): boolean =>
-    screen.defenders.some((o) => o.id !== d.id && o.alive && o.kind === 'blitzer' && eq(o.pos, t));
-  const free = POCKET.filter((t) => !blockerAt(t) && !blitzerAt(t));
-  return nearestTile(d.pos, free.length > 0 ? free : POCKET.filter(blockerAt));
+/** Blitzers always head for the pocket, so they have to go through the Blocker standing in it. */
+function blitzTarget(): Vec {
+  return POCKET;
 }
 
 /** Wall-ers hold their row and slide into the column of the nearest Small coming their way. */
@@ -82,10 +76,4 @@ function wallTarget(d: Defender, screen: ScreenState): Vec | null {
 function nearest(from: Vec, units: readonly SmallUnit[]): Vec | null {
   const best = [...units].sort((a, b) => dist(from, a.pos) - dist(from, b.pos) || a.id - b.id)[0];
   return best ? best.pos : null;
-}
-
-function nearestTile(from: Vec, tiles: readonly Vec[]): Vec | null {
-  return (
-    [...tiles].sort((a, b) => dist(from, a) - dist(from, b) || a.y - b.y || a.x - b.x)[0] ?? null
-  );
 }

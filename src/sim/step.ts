@@ -142,7 +142,7 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
     u.pos = to;
   }
 
-  // A Blitzer that reaches a free pocket tile engages the Big.
+  // A Blitzer that reaches the pocket engages the Big.
   for (const d of screen.defenders) {
     if (d.alive && d.kind === 'blitzer' && !d.engaged && isPocket(d.pos)) {
       d.engaged = { target: 'big', since: beat };

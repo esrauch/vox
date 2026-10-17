@@ -23,7 +23,7 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 - [x] **Catching:** a Small catches on its own tile, or lunges one tile ahead. An exact-tile **Clean Catch** lets the receiver fend off 1 defender. Defenders only intercept on the exact tile.
 - [x] **Catch glow:** always on.
 - [x] **Hazards hit defenders too.**
-- [x] **The pocket:** **Blitzers** (formerly Climbers) rush the Big. Each **Blocker** (formerly a guard) has a hold counter, and each Blitzer attack (e.g. every 2 beats) ticks it down. At 0 the Blocker is beaten, and several Blitzers drain it faster. The Big has its own counter, starting at 3 and shown only once a Blitzer arrives. If it hits 0 while the Big holds the ball, it's a sack (a fumble).
+- [x] **The pocket:** a **single tile** directly in front of the Big. It's the only Blocker spot (so there's at most one Blocker), and Blitzers always have to go through it. The Blocker has a hold counter that each Blitzer attack (e.g. every 2 beats) ticks down, and several adjacent Blitzers drain it faster. Once a Blitzer is in the pocket, the Big's counter (3) appears, and if it hits 0 while the Big holds the ball, it's a sack (a fumble).
 - [x] **Collisions:** the defender always wins against Walk-ons. Some units **fend off N defenders**.
 - [x] **Bigs have no stats.** Choosing a Big only sets the theme and the draft pool. The Big improves only through perks.
 - [x] **The stat scale:** every Small and defender has Hustle, Hands and Heft as whole numbers from 0. Walk-ons are 0/0/0. Hustle 0 hops every 2 beats, Hands 0 catches on its own tile or 1 ahead, and Heft 0 dies on the first hit.
@@ -86,7 +86,7 @@ The base systems everything else is built on. **Each one is built and verified o
 **Lesson:** the browser's reported latency can't be trusted, so **every player needs calibrating**. Onboarding (M0, M8) must include a short tap-along calibration on first launch, ideally disguised as a warm-up.
 
 ### M1.2 Simulation core
-- [x] The grid (9 × 16), the setup zone (bottom 3 rows), the pocket tiles and the end row (`src/sim/grid.ts`). *Typed strips are deferred to M2, along with hazards.*
+- [x] The grid (9 × 16), the setup zone (bottom 3 rows), the pocket (one tile in front of the Big) and the end row (`src/sim/grid.ts`). *Typed strips are deferred to M2, along with hazards.*
 - [x] Units with Hustle, Hands and Heft. They hop on the beat and face their next hop (`src/sim/stats.ts`, `src/sim/ai.ts`). The 0 values follow the decisions; the 1+ values are placeholders.
 - [x] Setup actions (place, with swapping and a remembered formation), hike, and next screen. Throws resolve on the beat they're passed to `step()`.
 - [x] Throws: a fixed 2-beat flight, a maximum range row, and rejected throws.
@@ -101,7 +101,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Done when:** a whole screen can be played headlessly in tests, from setup through touchdown or fumble, and replays come out the same every time. ✅
 
-**Noticed while testing:** a Blitzer heads for the nearest *free* pocket tile, so a single Blocker is easy to walk around, and you need several Blockers to really seal the pocket. Revisit in M2 playtesting. Should Blitzers always go through the nearest Blocker instead?
+**Changed after testing:** the pocket is now a **single tile** in front of the Big. It's the only Blocker spot, and Blitzers always have to go through it. Before this, a lone Blocker was easy to walk around.
 
 ### M1.3 Minimal render
 - [ ] A three.js scene, the camera (prototype both options), lighting and a checkerboard field.
@@ -276,6 +276,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Changed the pocket to a single Blocker spot that Blitzers must go through.
 - **2026-10-17:** M1.2 simulation core built and tested (47 tests), plus the screen inspector dev page.
 - **2026-10-17:** Android phone test: −115 ms uncalibrated, good after calibration. No haptics (deferred).
 - **2026-10-17:** M1.1 beat clock built: clock, metronome, tap judging, calibration, and the `/dev/beat.html` debug page. Waiting on the phone test.

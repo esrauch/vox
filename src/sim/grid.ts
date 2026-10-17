@@ -31,13 +31,14 @@ export function dist(a: Vec, b: Vec): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
-/** The tiles touching the Big (including diagonals). A Blitzer standing on one engages the Big. */
-export const POCKET: readonly Vec[] = [-1, 0, 1]
-  .flatMap((dx) => [0, 1].map((dy) => vec(BIG_POS.x + dx, BIG_POS.y + dy)))
-  .filter((v) => inBounds(v) && !eq(v, BIG_POS));
+/**
+ * The pocket: the single tile directly in front of the Big. It's the only
+ * place a Blocker can stand, and the only way a Blitzer can reach the Big.
+ */
+export const POCKET: Vec = vec(BIG_POS.x, BIG_POS.y + 1);
 
 export function isPocket(v: Vec): boolean {
-  return POCKET.some((p) => eq(p, v));
+  return eq(v, POCKET);
 }
 
 /**

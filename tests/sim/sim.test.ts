@@ -44,13 +44,13 @@ describe('setup', () => {
     expect(state.formation[0]).toEqual(vec(0, 0));
   });
 
-  it('makes back-row and pocket Smalls into Blockers on hike', () => {
+  it('makes only the Small in the pocket a Blocker on hike', () => {
     const state = createRun(1);
     dispatch(state, { type: 'place', slot: 0, tile: vec(0, 0) });
     dispatch(state, { type: 'hike' });
     const roles = state.screen.smalls.map((s) => [key(s.pos), s.role]);
-    expect(roles).toContainEqual(['0,0', 'blocker']); // back row
-    expect(roles).toContainEqual(['4,1', 'blocker']); // pocket (default formation)
+    expect(roles).toContainEqual(['0,0', 'runner']); // the back row runs too
+    expect(roles).toContainEqual(['4,1', 'blocker']); // the pocket (default formation)
     expect(roles).toContainEqual(['3,2', 'runner']);
     expect(state.phase).toBe('play');
   });
@@ -153,7 +153,7 @@ describe('collisions', () => {
 });
 
 describe('Blitzers and the pocket', () => {
-  // A Walk-on Blocker on the pocket tile above the Big, a runner off to the side,
+  // A Walk-on Blocker in the pocket above the Big, a runner off to the side,
   // and a Blitzer coming straight down.
   const blitzSetup = () =>
     playState([{ pos: vec(4, 1) }, { pos: vec(0, 2) }], [{ kind: 'blitzer', pos: vec(4, 4) }]);
@@ -169,6 +169,17 @@ describe('Blitzers and the pocket', () => {
     expect(bigAttacks.map((e) => e.holdLeft)).toEqual([2, 1, 0]);
     expect(ofType(r.events, 'fumble')).toEqual([{ type: 'fumble', reason: 'sack', ballsLeft: 2 }]);
     expect(r.state.screen.bigHold).toBe(3);
+  });
+
+  it('always goes through the Blocker, even coming from the side', () => {
+    const state = playState(
+      [{ pos: vec(4, 1) }, { pos: vec(0, 2) }],
+      [{ kind: 'blitzer', pos: vec(1, 1) }],
+    );
+    const r = run(state, 8);
+    const engaged = ofType(r.events, 'engaged');
+    expect(engaged[0]?.target).toEqual({ target: 'small', id: 100, since: 6 });
+    expect(engaged.some((e) => e.target.target === 'big')).toBe(false);
   });
 
   it('does not sack one beat early', () => {

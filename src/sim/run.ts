@@ -107,8 +107,8 @@ function place(state: RunState, slot: number, tile: Vec): SimEvent[] {
 function hike(state: RunState): SimEvent[] {
   if (state.phase !== 'setup') return [];
   for (const s of state.screen.smalls) {
-    // Smalls in the back row or on a pocket tile stay home as Blockers.
-    s.role = s.pos.y === 0 || isPocket(s.pos) ? 'blocker' : 'runner';
+    // The Small in the pocket (the tile in front of the Big) stays home as the Blocker.
+    s.role = isPocket(s.pos) ? 'blocker' : 'runner';
     s.hold = s.role === 'blocker' ? blockerHold(s.stats) : 0;
   }
   state.phase = 'play';

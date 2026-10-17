@@ -158,7 +158,7 @@ function render(): void {
   buttons.next.disabled = state.phase !== 'cleared';
   help.textContent =
     state.phase === 'setup'
-      ? 'Setup: tap a Small, then a tile in the bottom 3 rows. Back row and red pocket tiles make Blockers.'
+      ? 'Setup: tap a Small, then a tile in the bottom 3 rows. The red pocket tile makes a Blocker.'
       : state.phase === 'play'
         ? 'Tap a tile to queue a throw for the next beat (lands 2 beats later). Step or Auto to advance.'
         : state.phase === 'cleared'
