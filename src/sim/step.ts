@@ -25,6 +25,7 @@ import { COLS, END_ROW, eq, inBounds, key, nextToQb } from './grid';
 import { setUpScreen, yards } from './run';
 import { actsOn, hitsSurvived } from './stats';
 import type {
+  BeatInput,
   CatchQuality,
   DeathCause,
   Defender,
@@ -32,17 +33,14 @@ import type {
   HitResult,
   RunState,
   SimEvent,
+  SimResult,
+  ThrowProblem,
   PlayerUnit,
   Unit,
   Vec,
 } from './types';
 
-export interface StepResult {
-  readonly state: RunState;
-  readonly events: SimEvent[];
-}
-
-export function step(prev: RunState, throwTarget: Vec | null = null): StepResult {
+export function step(prev: RunState, input: BeatInput = {}): SimResult {
   const state = structuredClone(prev);
   const events: SimEvent[] = [];
   state.beat += 1;
@@ -53,7 +51,7 @@ export function step(prev: RunState, throwTarget: Vec | null = null): StepResult
   }
   for (const u of liveUnits(state)) if (u.downBeats > 0) u.downBeats--;
 
-  if (throwTarget) tryThrow(state, throwTarget, events);
+  if (input.throwAt) tryThrow(state, input.throwAt, events);
   resolveMoves(state, events);
   if (state.phase === 'play') checkSack(state, events);
   updateIntents(state.screen);
@@ -74,13 +72,13 @@ const isUp = (u: Unit): boolean => u.alive && u.downBeats === 0;
 // ── Throwing ────────────────────────────────────────────────────────────────
 
 /** Why a throw to `target` isn't allowed right now, or null if it is. */
-export function throwProblem(state: RunState, target: Vec): string | null {
-  if (state.phase !== 'play') return 'not in play';
-  if (state.screen.ball.at !== 'qb') return 'the QB has no ball';
+export function throwProblem(state: RunState, target: Vec): ThrowProblem | null {
+  if (state.phase !== 'play') return 'notInPlay';
+  if (state.screen.ball.at !== 'qb') return 'noBall';
   // Targets are free points in tile units (not grid-locked); the band is rows minRow..maxRow inclusive.
-  if (target.x < -0.5 || target.x > COLS - 0.5) return 'off the field';
-  if (target.y > tuning.throw.maxRow + 0.5) return 'out of range';
-  if (target.y < tuning.throw.minRow - 0.5) return 'too close';
+  if (target.x < -0.5 || target.x > COLS - 0.5) return 'offField';
+  if (target.y > tuning.throw.maxRow + 0.5) return 'tooFar';
+  if (target.y < tuning.throw.minRow - 0.5) return 'tooClose';
   return null;
 }
 
@@ -323,8 +321,17 @@ function catchBall(
  * starting tiles, and the QB holding the next ball. Dead recruits stay dead.
  */
 function fumble(state: RunState, reason: FumbleReason, events: SimEvent[]): void {
+  loseBall(state, events, (ballsLeft) => ({ type: 'fumble', reason, ballsLeft }));
+}
+
+/** Take a ball off the pile, report why, then reset the screen (or end the run on the last one). */
+function loseBall(
+  state: RunState,
+  events: SimEvent[],
+  lost: (ballsLeft: number) => SimEvent,
+): void {
   state.balls = Math.max(0, state.balls - 1);
-  events.push({ type: 'fumble', reason, ballsLeft: state.balls });
+  events.push(lost(state.balls));
   if (state.balls === 0) {
     endRun(state, events);
     return;
@@ -346,14 +353,7 @@ function checkTouchdown(state: RunState, events: SimEvent[]): void {
 /** If every player on the field is dead: lose a ball and restart the screen from setup. */
 function checkWipeout(state: RunState, events: SimEvent[]): void {
   if (state.screen.players.some((s) => s.alive)) return;
-  state.balls = Math.max(0, state.balls - 1);
-  events.push({ type: 'wipeout', ballsLeft: state.balls });
-  if (state.balls === 0) {
-    endRun(state, events);
-    return;
-  }
-  setUpScreen(state, state.screen.index);
-  events.push({ type: 'screenStarted', index: state.screen.index });
+  loseBall(state, events, (ballsLeft) => ({ type: 'wipeout', ballsLeft }));
 }
 
 function endRun(state: RunState, events: SimEvent[]): void {

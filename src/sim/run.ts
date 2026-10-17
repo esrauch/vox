@@ -7,7 +7,7 @@ import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
 import { eq, inSetupZone, vec } from './grid';
 import { createDefenders, generateSpawns } from './screen';
-import type { Action, RunState, SimEvent, PlayerUnit, Vec } from './types';
+import type { Action, RunState, SimEvent, SimResult, PlayerUnit, Vec } from './types';
 
 /** Where each slot starts if the player hasn't placed it. */
 export const DEFAULT_FORMATION: readonly Vec[] = [
@@ -72,8 +72,16 @@ function formationTile(state: RunState, slot: number): Vec {
   return state.formation[slot] ?? DEFAULT_FORMATION[slot] ?? vec(slot % 9, 2);
 }
 
-/** Apply a setup or between-screen action. Invalid actions are ignored. */
-export function dispatch(state: RunState, action: Action): SimEvent[] {
+/**
+ * Apply a setup or between-screen action. Pure, like step(): returns the new
+ * state and what happened. Invalid actions change nothing.
+ */
+export function dispatch(prev: RunState, action: Action): SimResult {
+  const state = structuredClone(prev);
+  return { state, events: apply(state, action) };
+}
+
+function apply(state: RunState, action: Action): SimEvent[] {
   switch (action.type) {
     case 'place':
       return place(state, action.slot, action.tile);

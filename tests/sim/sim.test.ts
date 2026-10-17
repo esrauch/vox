@@ -27,27 +27,29 @@ describe('creating a run', () => {
 
 describe('setup', () => {
   it('places players only inside the setup zone, swapping with an occupant', () => {
-    const state = createRun(1);
+    let state = createRun(1);
     const [a, b] = state.screen.players;
     const aPos = a!.pos;
     const bPos = b!.pos;
-    dispatch(state, { type: 'place', slot: a!.slot, tile: vec(0, 9) });
+    state = dispatch(state, { type: 'place', slot: a!.slot, tile: vec(0, 9) }).state;
     expect(player(state, a!.id).pos).toEqual(aPos);
-    dispatch(state, { type: 'place', slot: a!.slot, tile: bPos });
+    state = dispatch(state, { type: 'place', slot: a!.slot, tile: bPos }).state;
     expect(player(state, a!.id).pos).toEqual(bPos);
     expect(player(state, b!.id).pos).toEqual(aPos);
   });
 
   it('remembers the formation for the next screen', () => {
-    const state = createRun(1);
-    dispatch(state, { type: 'place', slot: 0, tile: vec(0, 0) });
+    let state = createRun(1);
+    state = dispatch(state, { type: 'place', slot: 0, tile: vec(0, 0) }).state;
     expect(state.formation[0]).toEqual(vec(0, 0));
   });
 
   it('starts play on hike, with every player heading straight up', () => {
-    const state = createRun(1);
-    expect(dispatch(state, { type: 'hike' })).toEqual([{ type: 'hiked' }]);
+    const before = createRun(1);
+    const { state, events } = dispatch(before, { type: 'hike' });
+    expect(events).toEqual([{ type: 'hiked' }]);
     expect(state.phase).toBe('play');
+    expect(before.phase).toBe('setup'); // actions are pure, like step()
     expect(state.screen.players.every((s) => eq(s.intent, vec(s.pos.x, s.pos.y + 1)))).toBe(true);
   });
 });
@@ -72,22 +74,23 @@ describe('hopping on the beat', () => {
 describe('throwing and catching', () => {
   it('only allows throws into the middle half of the field', () => {
     const state = playState([{ pos: vec(1, 2) }]);
-    const reason = (y: number) => ofType(step(state, vec(1, y)).events, 'throwRejected')[0]?.reason;
-    expect(reason(12)).toBe('out of range'); // the top quarter has to be run
-    expect(reason(3)).toBe('too close'); // the bottom quarter is too close
+    const reason = (y: number) =>
+      ofType(step(state, { throwAt: vec(1, y) }).events, 'throwRejected')[0]?.reason;
+    expect(reason(12)).toBe('tooFar'); // the top quarter has to be run
+    expect(reason(3)).toBe('tooClose'); // the bottom quarter is too close
     expect(reason(4)).toBeUndefined();
     expect(reason(11)).toBeUndefined();
   });
 
   it('rejects a throw while the ball is in the air', () => {
     const state = playState([{ pos: vec(1, 2) }]);
-    const thrown = step(state, vec(1, 5));
-    const again = step(thrown.state, vec(1, 4));
-    expect(ofType(again.events, 'throwRejected')[0]?.reason).toBe('the QB has no ball');
+    const thrown = step(state, { throwAt: vec(1, 5) });
+    const again = step(thrown.state, { throwAt: vec(1, 4) });
+    expect(ofType(again.events, 'throwRejected')[0]?.reason).toBe('noBall');
   });
 
   it('lands 2 beats after release; right on the receiver is a perfect (Clean) catch', () => {
-    const r1 = step(playState([{ pos: vec(1, 3) }]), vec(1, 4));
+    const r1 = step(playState([{ pos: vec(1, 3) }]), { throwAt: vec(1, 4) });
     expect(ofType(r1.events, 'thrown')[0]?.landsOn).toBe(3);
     const r3 = run(r1.state, 2);
     expect(ofType(r3.events, 'caught')).toEqual([
@@ -100,8 +103,10 @@ describe('throwing and catching', () => {
   it('throws land anywhere; how close the receiver is sets the catch quality', () => {
     // The receiver will be on (1, 4) when the ball lands on beat 3.
     const quality = (x: number, y: number) =>
-      ofType(run(step(playState([{ pos: vec(1, 3) }]), vec(x, y)).state, 2).events, 'caught')[0]
-        ?.quality;
+      ofType(
+        run(step(playState([{ pos: vec(1, 3) }]), { throwAt: vec(x, y) }).state, 2).events,
+        'caught',
+      )[0]?.quality;
     expect(quality(1.2, 4.1)).toBe('perfect');
     expect(quality(1.5, 4.4)).toBe('good');
     expect(quality(1, 5)).toBe('ok'); // a whole tile ahead
@@ -110,12 +115,12 @@ describe('throwing and catching', () => {
 
   it('a defender right under the ball, closer than the receiver, intercepts it', () => {
     const state = standStill(playState([{ pos: vec(1, 3) }], [{ kind: 'picker', pos: vec(2, 6) }]));
-    const r = run(step(state, vec(1.9, 5.8)).state, 2);
+    const r = run(step(state, { throwAt: vec(1.9, 5.8) }).state, 2);
     expect(ofType(r.events, 'fumble')[0]?.reason).toBe('interception');
   });
 
   it('counts a ball landing on an empty tile as a fumble', () => {
-    const r1 = step(playState([{ pos: vec(1, 2) }]), vec(6, 6));
+    const r1 = step(playState([{ pos: vec(1, 2) }]), { throwAt: vec(6, 6) });
     const r3 = run(r1.state, 2);
     expect(ofType(r3.events, 'fumble')).toEqual([{ type: 'fumble', reason: 'miss', ballsLeft: 2 }]);
     expect(r3.state.screen.ball).toEqual({ at: 'qb' });
@@ -124,11 +129,11 @@ describe('throwing and catching', () => {
   it('a fumble resets the whole screen to setup with the next ball', () => {
     // Run the Walk-ons upfield, then lose the ball: everything goes back to the start.
     let state = createRun(5);
-    dispatch(state, { type: 'hike' });
+    state = dispatch(state, { type: 'hike' }).state;
     const startTiles = state.screen.players.map((s) => key(s.pos));
     const defenderTiles = state.screen.defenders.map((d) => key(d.pos));
     state = run(state, 4).state;
-    const r = run(step(state, vec(0, 11)).state, 2);
+    const r = run(step(state, { throwAt: vec(0, 11) }).state, 2);
     expect(ofType(r.events, 'fumble')).toHaveLength(1);
     expect(ofType(r.events, 'screenStarted')).toEqual([{ type: 'screenStarted', index: 0 }]);
     expect(r.state.phase).toBe('setup');
@@ -141,7 +146,7 @@ describe('throwing and catching', () => {
   it('counts a defender on the landing tile as an interception', () => {
     const state = standStill(playState([{ pos: vec(1, 2) }], [{ kind: 'picker', pos: vec(6, 6) }]));
     const bat = state.screen.defenders[0]!.pos;
-    const r = run(step(state, bat).state, 2);
+    const r = run(step(state, { throwAt: bat }).state, 2);
     expect(ofType(r.events, 'fumble')[0]?.reason).toBe('interception');
   });
 });
@@ -240,7 +245,7 @@ describe('Bats (Pickers) patrol a 4×4 box', () => {
     const bat = state.screen.defenders[0]!;
     expect(bat.patrolIndex).toBe(2);
     expect(bat.pos).not.toEqual(start);
-    dispatch(state, { type: 'hike' });
+    state = dispatch(state, { type: 'hike' }).state;
     const after = run(state, 2).state.screen.defenders[0]!;
     expect(after.patrolIndex).toBe(3);
     expect(after.pos).toEqual(bat.patrol![3]);
@@ -271,8 +276,8 @@ describe('the global beat', () => {
   });
 
   it('carries on through HIKE without resetting', () => {
-    const state = run(createRun(1), 3).state;
-    dispatch(state, { type: 'hike' });
+    let state = run(createRun(1), 3).state;
+    state = dispatch(state, { type: 'hike' }).state;
     expect(state.beat).toBe(3);
     expect(step(state).state.beat).toBe(4);
   });
@@ -309,7 +314,7 @@ describe('sacks', () => {
 
   it('is irrelevant once the ball is thrown', () => {
     let state = run(blitzSetup(), 4).state;
-    state = step(state, vec(0, 5)).state; // throw on beat 5, landing on beat 7 where the runner will be
+    state = step(state, { throwAt: vec(0, 5) }).state; // throw on beat 5, landing on beat 7 where the runner will be
     const r = run(state, 4); // the Blitzer reaches the QB on beat 6, but the ball is gone
     expect(ofType(r.events, 'caught')).toHaveLength(1);
     expect(ofType(r.events, 'fumble')).toHaveLength(0);
@@ -323,8 +328,7 @@ describe('touchdowns, wipeouts and the end of a run', () => {
     const r = run(state, 2);
     expect(ofType(r.events, 'touchdown')).toEqual([{ type: 'touchdown', id: 100, yards: 10 }]);
     expect(r.state.phase).toBe('cleared');
-    const next = structuredClone(r.state);
-    dispatch(next, { type: 'nextScreen' });
+    const next = dispatch(r.state, { type: 'nextScreen' }).state;
     expect(next.phase).toBe('setup');
     expect(next.screen.index).toBe(1);
     expect(next.screen.players.every((s) => s.alive)).toBe(true);
@@ -353,7 +357,7 @@ describe('touchdowns, wipeouts and the end of a run', () => {
   it('ends the run when the last ball is lost', () => {
     const state = playState([{ pos: vec(1, 2) }]);
     state.balls = 1;
-    const r = run(step(state, vec(6, 6)).state, 2);
+    const r = run(step(state, { throwAt: vec(6, 6) }).state, 2);
     expect(r.state.phase).toBe('over');
     expect(ofType(r.events, 'gameOver')).toHaveLength(1);
     expect(step(r.state).events).toHaveLength(0);
@@ -376,19 +380,19 @@ describe('determinism', () => {
   it('never modifies the state passed to step()', () => {
     const state = playState([{ pos: vec(1, 2) }], [{ kind: 'chaser', pos: vec(1, 6) }]);
     const before = JSON.stringify(state);
-    step(state, vec(1, 3));
+    step(state, { throwAt: vec(1, 3) });
     expect(JSON.stringify(state)).toBe(before);
   });
 
   it('keeps its invariants through long random runs', () => {
     for (let seed = 1; seed <= 25; seed++) {
       let state = createRun(seed);
-      dispatch(state, { type: 'hike' });
+      state = dispatch(state, { type: 'hike' }).state;
       for (let beat = 0; beat < 200 && state.phase !== 'over'; beat++) {
-        if (state.phase === 'cleared') dispatch(state, { type: 'nextScreen' });
-        if (state.phase === 'setup') dispatch(state, { type: 'hike' });
-        const throwAt = beat % 7 === 0 ? vec((seed + beat) % 9, 2 + (beat % 10)) : null;
-        state = step(state, throwAt).state;
+        if (state.phase === 'cleared') state = dispatch(state, { type: 'nextScreen' }).state;
+        if (state.phase === 'setup') state = dispatch(state, { type: 'hike' }).state;
+        const input = beat % 7 === 0 ? { throwAt: vec((seed + beat) % 9, 2 + (beat % 10)) } : {};
+        state = step(state, input).state;
         const live = [...state.screen.players, ...state.screen.defenders].filter((u) => u.alive);
         // Defenders never share a tile (Players may).
         const tiles = live.filter((u) => u.side === 'defender').map((u) => key(u.pos));

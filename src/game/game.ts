@@ -23,8 +23,17 @@ import { View } from '../render/view';
 import { COLS, QB_POS, eq, inSetupZone } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
-import type { RunState, SimEvent, Vec } from '../sim/types';
+import type { RunState, SimEvent, ThrowProblem, Vec } from '../sim/types';
 import { Hud } from '../ui/hud';
+
+/** What to tell the player when a throw isn't allowed. */
+const THROW_PROBLEM_TEXT: Readonly<Record<ThrowProblem, string>> = {
+  notInPlay: 'not in play',
+  noBall: 'no ball',
+  offField: 'off the field',
+  tooFar: 'out of range',
+  tooClose: 'too close',
+};
 
 export interface GameOptions {
   seed: number;
@@ -110,7 +119,7 @@ export class Game {
     if (throwAt) this.queuedThrow = null;
 
     const prev = this.state;
-    const result = step(prev, throwAt);
+    const result = step(prev, throwAt ? { throwAt } : {});
     this.state = result.state;
     if (result.events.some((e) => e.type === 'screenStarted')) {
       this.resetUnits();
@@ -152,7 +161,7 @@ export class Game {
           this.hud.pop('WIPEOUT!', 'bad');
           break;
         case 'throwRejected':
-          this.hud.pop(e.reason, 'bad');
+          this.hud.pop(THROW_PROBLEM_TEXT[e.reason], 'bad');
           break;
         default:
           break;
@@ -231,9 +240,9 @@ export class Game {
       await unlockAudio();
     } else if (phase === 'setup') {
       // The beat is already running: players start on their next hop beat.
-      dispatch(this.state, { type: 'hike' });
+      this.state = dispatch(this.state, { type: 'hike' }).state;
     } else if (phase === 'cleared') {
-      dispatch(this.state, { type: 'nextScreen' });
+      this.state = dispatch(this.state, { type: 'nextScreen' }).state;
       this.resetUnits();
     } else if (phase === 'over') {
       this.seed++;
@@ -273,8 +282,10 @@ export class Game {
     this.aim = null;
     this.markers.setAim(null);
     if (!aim || this.paused || this.state.phase !== 'play') return;
-    if (!aim.valid) {
-      if (aim.target.y > tuning.throw.minRow - 0.5) this.hud.pop('out of range', 'bad');
+    const problem = throwProblem(this.state, aim.target);
+    if (problem) {
+      // Letting go short of the throwing band just cancels; anywhere else, say why.
+      if (problem !== 'tooClose') this.hud.pop(THROW_PROBLEM_TEXT[problem], 'bad');
       return;
     }
     // The sim throws on the next beat and the ball lands flightBeats after
@@ -328,7 +339,8 @@ export class Game {
       return;
     }
     if (!this.drag) return;
-    dispatch(this.state, { type: 'place', slot: this.drag.slot, tile: this.drag.tile });
+    const place = { type: 'place', slot: this.drag.slot, tile: this.drag.tile } as const;
+    this.state = dispatch(this.state, place).state;
     this.drag = null;
     this.units.setDragging(null);
     this.resetUnits();

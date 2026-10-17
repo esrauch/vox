@@ -7,7 +7,7 @@ import { tuning } from '../content/tuning';
 import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, inThrowBand, vec } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
-import type { RunState, SimEvent, Unit, Vec } from '../sim/types';
+import type { RunState, SimEvent, SimResult, Unit, Vec } from '../sim/types';
 
 const $ = <T extends HTMLElement>(id: string): T => {
   const el = document.getElementById(id);
@@ -50,9 +50,9 @@ for (let y = ROWS - 1; y >= 0; y--) {
   cells[y] = row;
 }
 
-buttons.hike.addEventListener('click', () => act(dispatch(state, { type: 'hike' })));
+buttons.hike.addEventListener('click', () => take(dispatch(state, { type: 'hike' })));
 buttons.step.addEventListener('click', advance);
-buttons.next.addEventListener('click', () => act(dispatch(state, { type: 'nextScreen' })));
+buttons.next.addEventListener('click', () => take(dispatch(state, { type: 'nextScreen' })));
 buttons.reset.addEventListener('click', () => {
   seed = Number(seedInput.value) || 1;
   history.replaceState(null, '', `?seed=${seed}`);
@@ -76,7 +76,7 @@ function onTile(tile: Vec): void {
     const here = state.screen.players.find((s) => eq(s.pos, tile));
     if (selectedSlot === null) selectedSlot = here?.slot ?? null;
     else {
-      dispatch(state, { type: 'place', slot: selectedSlot, tile });
+      state = dispatch(state, { type: 'place', slot: selectedSlot, tile }).state;
       selectedSlot = null;
     }
   } else if (state.phase === 'play') {
@@ -92,8 +92,13 @@ function advance(): void {
     stopAuto();
     return;
   }
-  const result = step(state, queuedThrow);
+  const result = step(state, queuedThrow ? { throwAt: queuedThrow } : {});
   queuedThrow = null;
+  take(result);
+}
+
+/** Adopt a step or action's new state and log what happened. */
+function take(result: SimResult): void {
   state = result.state;
   act(result.events);
 }

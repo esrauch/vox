@@ -95,7 +95,7 @@ export interface RunState {
   nextId: number;
 }
 
-/** Actions outside the beat: setup and moving between screens. Throws go to step(). */
+/** Actions outside the beat: setup and moving between screens. Throws go to step() as BeatInput. */
 export type Action =
   | { readonly type: 'place'; readonly slot: number; readonly tile: Vec }
   | { readonly type: 'hike' }
@@ -109,12 +109,27 @@ export type FumbleReason = 'sack' | 'miss' | 'interception' | 'tackle';
 export type DeathCause = 'defender' | 'walkOn';
 export type HitResult = 'down' | 'dead';
 
-/** Everything that happened during a step, for the renderer, audio and tests. */
+/** What the player does on a beat. Hijinks will join the throw here. */
+export interface BeatInput {
+  /** Throw the ball to this free point (tile units), if the QB has it. */
+  readonly throwAt?: Vec;
+}
+
+/** Why a throw isn't allowed. The UI turns these into words. */
+export type ThrowProblem = 'notInPlay' | 'noBall' | 'offField' | 'tooFar' | 'tooClose';
+
+/** The result of a beat step or an action: the new state (the old one is untouched) and what happened. */
+export interface SimResult {
+  readonly state: RunState;
+  readonly events: SimEvent[];
+}
+
+/** Everything that happened during a step or action, for the renderer, audio and tests. */
 export type SimEvent =
   | { readonly type: 'hiked' }
   | { readonly type: 'hop'; readonly id: number; readonly from: Vec; readonly to: Vec }
   | { readonly type: 'thrown'; readonly target: Vec; readonly landsOn: number }
-  | { readonly type: 'throwRejected'; readonly target: Vec; readonly reason: string }
+  | { readonly type: 'throwRejected'; readonly target: Vec; readonly reason: ThrowProblem }
   | {
       readonly type: 'caught';
       readonly id: number;
