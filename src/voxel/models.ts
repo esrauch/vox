@@ -12,7 +12,7 @@ const sources = import.meta.glob('/assets-src/voxels/**/*.voxt', {
   eager: true,
 }) as Record<string, string>;
 
-/** Model id = path under assets-src/voxels without the extension, e.g. "elderBough/walkOn". */
+/** Model id = path under assets-src/voxels without the extension, e.g. "team/walkOn". */
 const byId = new Map(
   Object.entries(sources).map(([path, text]) => [
     path.replace(/^\/assets-src\/voxels\//, '').replace(/\.voxt$/, ''),

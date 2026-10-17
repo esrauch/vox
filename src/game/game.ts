@@ -19,7 +19,7 @@ import { Markers } from '../render/markers';
 import { UnitViews } from '../render/units';
 import { View, tileToWorld } from '../render/view';
 import { loadSettings } from '../settings';
-import { BIG_POS, eq, inSetupZone } from '../sim/grid';
+import { QB_POS, eq, inSetupZone } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
 import type { RunState, SimEvent, Vec } from '../sim/types';
@@ -184,7 +184,7 @@ export class Game {
     const { phase, screen } = this.state;
     this.hud.setBalls(this.state.balls);
     this.hud.setYards(yards(this.state), screen.index);
-    this.hud.setBallReady(phase === 'play' && screen.ball.at === 'big');
+    this.hud.setBallReady(phase === 'play' && screen.ball.at === 'qb');
     if (phase === 'setup') this.hud.setPrompt('Place your squad', 'HIKE!');
     else if (phase === 'cleared') this.hud.setPrompt('TOUCHDOWN!', 'NEXT');
     else if (phase === 'over') this.hud.setPrompt(`${yards(this.state)} yards`, 'AGAIN');
@@ -193,13 +193,13 @@ export class Game {
     this.markers.setReticle(phase === 'play' ? this.reticle : null);
   }
 
-  /** The Big's counter, shown once a Blitzer is attacking it and it still holds the ball. */
+  /** The QB's counter, shown once a Blitzer is attacking it and it still holds the ball. */
   private badges(): Badge[] {
     const { screen } = this.state;
-    const onBig = screen.defenders.some((d) => d.alive && d.engagedSince !== null);
-    if (!onBig || screen.ball.at !== 'big') return [];
-    const p = this.view.toScreen(tileToWorld(BIG_POS, 2.1));
-    return [{ ...p, text: String(screen.bigHold), danger: true }];
+    const onQb = screen.defenders.some((d) => d.alive && d.engagedSince !== null);
+    if (!onQb || screen.ball.at !== 'qb') return [];
+    const p = this.view.toScreen(tileToWorld(QB_POS, 2.1));
+    return [{ ...p, text: String(screen.qbHold), danger: true }];
   }
 
   // ── Input ───────────────────────────────────────────────────────────────
@@ -274,7 +274,7 @@ export class Game {
 
   private onBallButton(e: PointerEvent): void {
     if (this.state.phase !== 'play' || !this.clock?.running) return;
-    if (this.state.screen.ball.at !== 'big') return;
+    if (this.state.screen.ball.at !== 'qb') return;
     if (!this.reticle) {
       this.hud.showJudgement('Tap the field to aim', 'bad');
       return;
@@ -300,7 +300,7 @@ export class Game {
       }
     } else if (this.state.phase === 'play') {
       const problem = throwProblem(
-        { ...this.state, screen: { ...this.state.screen, ball: { at: 'big' } } },
+        { ...this.state, screen: { ...this.state.screen, ball: { at: 'qb' } } },
         tile,
       );
       if (problem) {

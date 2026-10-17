@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import { bigs, hexToNumber } from '../content/palettes';
+import { hexToNumber, team } from '../content/palettes';
 import { eq } from '../sim/grid';
 import { getGeometry, voxelMaterial } from '../voxel/models';
 import type { DefenderKind, ScreenState, Unit, Vec } from '../sim/types';
 import { tileToWorld } from './view';
 
-const RECRUIT_COLOR = hexToNumber(bigs.elderBough.accent);
-/** The Walk-on model for the current Big (only the Elder Bough exists so far). */
-const WALK_ON_MODEL = 'elderBough/walkOn';
+const RECRUIT_COLOR = hexToNumber(team.accent);
+/** The vanilla rookie football player. */
+const WALK_ON_MODEL = 'team/walkOn';
 /** Defenders are the biome's locals; only the Forest exists so far. */
 const BIOME = 'forest';
 const defenderModel = (kind: DefenderKind): string => `${BIOME}/${kind}`;

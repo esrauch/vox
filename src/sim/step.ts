@@ -5,9 +5,9 @@
  *
  * Order within a beat:
  *   1. Knocked-down units recover a little.
- *   2. A throw tapped for this beat leaves the Big's hand.
+ *   2. A throw tapped for this beat leaves the QB's hand.
  *   3. Units hop (on their hop beats) and collisions resolve.
- *   4. Blitzers next to the Big attack it (only while it holds the ball).
+ *   4. Blitzers next to the QB attack it (only while it holds the ball).
  *   5. A ball due this beat lands: catch, interception or miss.
  *   6. Touchdown and wipeout checks.
  *   7. Everyone decides next beat's hop (the telegraph).
@@ -15,7 +15,7 @@
 import { smallKind } from '../content/smalls';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
-import { BIG_POS, END_ROW, dist, eq, inBounds, key, nextToBig } from './grid';
+import { QB_POS, END_ROW, dist, eq, inBounds, key, nextToQb } from './grid';
 import { setUpScreen, yards } from './run';
 import { actsOn, catchTiles, facingOf, hitsSurvived } from './stats';
 import type {
@@ -66,9 +66,9 @@ const isUp = (u: Unit): boolean => u.alive && u.downBeats === 0;
 /** Why a throw to `target` isn't allowed right now, or null if it is. */
 export function throwProblem(state: RunState, target: Vec): string | null {
   if (state.phase !== 'play') return 'not in play';
-  if (state.screen.ball.at !== 'big') return 'the Big has no ball';
+  if (state.screen.ball.at !== 'qb') return 'the QB has no ball';
   if (!inBounds(target)) return 'off the field';
-  if (eq(target, BIG_POS)) return 'that is the Big';
+  if (eq(target, QB_POS)) return 'that is the QB';
   if (target.y > tuning.throw.maxRow) return 'out of range';
   return null;
 }
@@ -138,9 +138,9 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
     u.pos = to;
   }
 
-  // A Blitzer that reaches a tile next to the Big stays there and attacks it.
+  // A Blitzer that reaches a tile next to the QB stays there and attacks it.
   for (const d of screen.defenders) {
-    if (d.alive && d.kind === 'blitzer' && d.engagedSince === null && nextToBig(d.pos)) {
+    if (d.alive && d.kind === 'blitzer' && d.engagedSince === null && nextToQb(d.pos)) {
       d.engagedSince = beat;
       events.push({ type: 'engaged', id: d.id });
     }
@@ -234,14 +234,14 @@ function knockDown(u: Unit, events: SimEvent[]): void {
 function resolveAttacks(state: RunState, events: SimEvent[]): void {
   const { screen, beat } = state;
   for (const d of [...screen.defenders].sort(byId)) {
-    // Blitzers only threaten a Big that's still holding the ball; once it's thrown they're irrelevant.
-    if (state.phase !== 'play' || screen.ball.at !== 'big') return;
+    // Blitzers only threaten a QB that's still holding the ball; once it's thrown they're irrelevant.
+    if (state.phase !== 'play' || screen.ball.at !== 'qb') return;
     if (d.engagedSince === null || d.engagedSince === beat || !isUp(d) || !actsOn(d.stats, beat)) {
       continue;
     }
-    screen.bigHold = Math.max(0, screen.bigHold - 1);
-    events.push({ type: 'attack', id: d.id, holdLeft: screen.bigHold });
-    if (screen.bigHold === 0) {
+    screen.qbHold = Math.max(0, screen.qbHold - 1);
+    events.push({ type: 'attack', id: d.id, holdLeft: screen.qbHold });
+    if (screen.qbHold === 0) {
       fumble(state, 'sack', events);
       return; // A sack ends this beat's attacks; the next ball starts fresh.
     }
@@ -297,7 +297,7 @@ function catchBall(state: RunState, s: SmallUnit, clean: boolean, events: SimEve
 /**
  * Lose the ball in play for good. If any are left on the pile, the whole
  * screen resets to setup: every Walk-on back, the defenders back at their
- * starting tiles, and the Big holding the next ball. Dead recruits stay dead.
+ * starting tiles, and the QB holding the next ball. Dead recruits stay dead.
  */
 function fumble(state: RunState, reason: FumbleReason, events: SimEvent[]): void {
   state.balls = Math.max(0, state.balls - 1);

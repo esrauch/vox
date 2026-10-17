@@ -3,7 +3,7 @@
  * Smalls in setup, and queue throws by tapping tiles. Open /dev/screen.html?seed=N.
  */
 import { tuning } from '../content/tuning';
-import { BIG_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, vec } from '../sim/grid';
+import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, vec } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
 import type { RunState, SimEvent, Unit, Vec } from '../sim/types';
@@ -38,7 +38,7 @@ let autoTimer: ReturnType<typeof setInterval> | null = null;
 
 seedInput.value = String(seed);
 
-// Rows are drawn top (end zone) to bottom (the Big).
+// Rows are drawn top (end zone) to bottom (the QB).
 const cells: HTMLDivElement[][] = [];
 for (let y = ROWS - 1; y >= 0; y--) {
   const row: HTMLDivElement[] = [];
@@ -129,12 +129,12 @@ function render(): void {
       if (selected && eq(selected.pos, tile)) classes.push('selected');
 
       let html = '';
-      if (eq(tile, BIG_POS)) {
-        classes.push('big');
+      if (eq(tile, QB_POS)) {
+        classes.push('qb');
         html = '★';
-        if (ball.at === 'big') html += '<span class="ball">●</span>';
+        if (ball.at === 'qb') html += '<span class="ball">●</span>';
         const engaged = screen.defenders.some((d) => d.alive && d.engagedSince !== null);
-        if (engaged) html += `<span class="badge">${screen.bigHold}</span>`;
+        if (engaged) html += `<span class="badge">${screen.qbHold}</span>`;
       }
       const unit = [...screen.smalls, ...screen.defenders]
         .filter((u) => eq(u.pos, tile))

@@ -60,7 +60,7 @@ header a {
   filter: saturate(0.4) brightness(0.85);
 }
 
-.cell.big {
+.cell.qb {
   background: #ff8a1f;
   color: white;
 }

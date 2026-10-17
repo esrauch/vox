@@ -3,7 +3,7 @@
  * running the game (TECHNICAL.md §11, the preview loop).
  *
  *   npm run preview-models              every model, plus a contact sheet per folder
- *   npm run preview-models -- elderBough/walkOn   just these models
+ *   npm run preview-models -- team/walkOn   just these models
  *
  * Writes previews/<id>.png (front, ¾ and side) and previews/sheet-<folder>.png.
  * Uses the system Chrome through playwright-core, so no browser download is needed.

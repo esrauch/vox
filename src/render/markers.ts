@@ -1,17 +1,20 @@
 import * as THREE from 'three';
-import { bigs, hexToNumber } from '../content/palettes';
-import { BIG_POS } from '../sim/grid';
+import { hexToNumber, team } from '../content/palettes';
+import { QB_POS } from '../sim/grid';
 import type { ScreenState, Vec } from '../sim/types';
 import { getGeometry, modelHeight, voxelMaterial } from '../voxel/models';
-import { BIG_MODEL, tileOutline } from './field';
+import { QB_MODEL, tileOutline } from './field';
 import type { UnitViews } from './units';
 import { tileToWorld } from './view';
 
-const RETICLE_COLOR = hexToNumber(bigs.elderBough.primary);
-/** The Big's ball model (only the Jack-o'-Lantern exists so far). */
-const BALL_MODEL = 'elderBough/ball';
-/** Where the Big holds the ball: on top of its canopy. */
-const HELD_Y = modelHeight(BIG_MODEL) + 0.02;
+const RETICLE_COLOR = hexToNumber(team.jersey);
+/** The team's ball: the jack-o'-lantern football. */
+const BALL_MODEL = 'team/ball';
+/** How high the QB holds the ball: at the top of its raised arm. */
+const HELD_Y = modelHeight(QB_MODEL) + 0.02;
+/** The QB's raised throwing hand, relative to its tile (the model's right arm, slightly forward). */
+const HAND = new THREE.Vector3(0.4, HELD_Y, 0.2);
+const heldPosition = (): THREE.Vector3 => tileToWorld(QB_POS).add(HAND);
 
 /**
  * The ball and the field indicators that move: the reticle, and the landing
@@ -61,18 +64,18 @@ export class Markers {
     this.landing.visible = ball.at === 'flight';
     this.ball.rotation.y = time * 1.5;
 
-    if (ball.at === 'big') {
-      this.ball.position.copy(tileToWorld(BIG_POS, HELD_Y));
+    if (ball.at === 'qb') {
+      this.ball.position.copy(heldPosition());
     } else if (ball.at === 'carried') {
       const p = units.positionOf(ball.by);
       if (p) this.ball.position.set(p.x, 0.8, p.z);
     } else if (ball.at === 'flight') {
-      // A parabola from the Big's hand to the landing tile, timed to the beat.
+      // A parabola from the QB's hand to the landing tile, timed to the beat.
       const t = Math.min(
         1,
         Math.max(0, (beatPos - ball.releasedOn) / (ball.landsOn - ball.releasedOn)),
       );
-      const from = tileToWorld(BIG_POS, HELD_Y);
+      const from = heldPosition();
       const to = tileToWorld(ball.target, 0.6);
       this.ball.position.lerpVectors(from, to, t);
       this.ball.position.y += Math.sin(t * Math.PI) * 3.2;

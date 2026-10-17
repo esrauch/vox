@@ -18,24 +18,12 @@ export const common = {
   white: '#ffffff',
 } as const satisfies Record<string, Hex>;
 
-/** Per-Big theme palettes (THEME.md, Art Direction). */
-export const bigs = {
-  groundskeeper: {
-    primary: '#b9a7ff', // lavender
-    secondary: '#8ff0c8', // mint green
-    accent: '#f7f1e3', // bone white
-  },
-  elderBough: {
-    primary: '#ff8a1f', // pumpkin orange
-    secondary: '#e2543b', // autumn red
-    accent: '#ffd23f', // golden yellow
-  },
-  slagfather: {
-    primary: '#ff6b1a', // ember orange
-    secondary: '#e8344e', // cherry red
-    accent: '#ffc94a', // gold
-  },
-} as const satisfies Record<string, Record<'primary' | 'secondary' | 'accent', Hex>>;
+/** The team's colors: every teammate, rookie or recruit, wears them (THEME.md, Art Direction). */
+export const team = {
+  helmet: '#ffb627', // gold
+  jersey: '#ff8a1f', // pumpkin orange
+  accent: '#ffd23f', // golden yellow
+} as const satisfies Record<string, Hex>;
 
 /**
  * Named colors that voxel models (.voxt) refer to. Models use these names,
@@ -102,7 +90,6 @@ export type BiomeId = keyof typeof biomes;
 
 export type VoxelColor = keyof typeof voxel;
 export type CommonColor = keyof typeof common;
-export type BigId = keyof typeof bigs;
 
 /** Convert a palette hex string to a 0xRRGGBB number for three.js. */
 export function hexToNumber(hex: Hex): number {

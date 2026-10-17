@@ -2,7 +2,7 @@
  * Per-beat decisions (GAMEPLAY.md, What's in the Way). Every unit's intent is
  * decided one beat ahead, so it always faces where it's about to hop.
  */
-import { BIG_POS, END_ROW, dist, eq, stepToward, vec } from './grid';
+import { QB_POS, END_ROW, dist, eq, stepToward, vec } from './grid';
 import type { Defender, ScreenState, SmallUnit, Vec } from './types';
 
 const isActive = (u: { alive: boolean; downBeats: number }): boolean =>
@@ -12,7 +12,7 @@ export function updateIntents(screen: ScreenState): void {
   for (const s of screen.smalls) s.intent = s.alive ? smallIntent(s) : null;
   for (const d of screen.defenders) {
     const intent = d.alive ? defenderIntent(d, screen) : null;
-    d.intent = intent && !eq(intent, BIG_POS) && !eq(intent, d.pos) ? intent : null;
+    d.intent = intent && !eq(intent, QB_POS) && !eq(intent, d.pos) ? intent : null;
   }
 }
 
@@ -29,8 +29,8 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
       return target ? stepToward(d.pos, target) : null;
     }
     case 'blitzer': {
-      // Blitzers go straight for the Big. Once they're next to it, they stay and attack.
-      return d.engagedSince === null ? stepToward(d.pos, BIG_POS) : null;
+      // Blitzers go straight for the QB. Once they're next to it, they stay and attack.
+      return d.engagedSince === null ? stepToward(d.pos, QB_POS) : null;
     }
     case 'waller': {
       const target = wallTarget(d, screen);

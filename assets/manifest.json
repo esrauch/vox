@@ -2,24 +2,6 @@
   "$comment": "Every file under assets/ and assets-src/ needs an entry here. See TECHNICAL.md \u00a714.",
   "assets": [
     {
-      "path": "assets-src/voxels/elderBough/walkOn.voxt",
-      "source": "Original voxel model (Elder Bough Walk-on), written by Claude",
-      "author": "Claude",
-      "license": "original"
-    },
-    {
-      "path": "assets-src/voxels/elderBough/big.voxt",
-      "source": "Original voxel model (The Elder Bough), written by Claude",
-      "author": "Claude",
-      "license": "original"
-    },
-    {
-      "path": "assets-src/voxels/elderBough/ball.voxt",
-      "source": "Original voxel model (Jack-o'-Lantern ball), written by Claude",
-      "author": "Claude",
-      "license": "original"
-    },
-    {
       "path": "assets-src/voxels/forest/chaser.voxt",
       "source": "Original voxel model (Forest Chaser: garden gnome), written by Claude",
       "author": "Claude",
@@ -86,8 +68,20 @@
       "license": "original"
     },
     {
-      "path": "assets-src/voxels/misc/footballPlayer.voxt",
-      "source": "Original voxel model (football player), written by Claude",
+      "path": "assets-src/voxels/team/walkOn.voxt",
+      "source": "Original voxel model (Walk-on: rookie football player), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/team/qb.voxt",
+      "source": "Original voxel model (quarterback), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/team/ball.voxt",
+      "source": "Original voxel model (jack-o'-lantern football), written by Claude",
       "author": "Claude",
       "license": "original"
     }

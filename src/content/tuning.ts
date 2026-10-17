@@ -28,11 +28,11 @@ export const tuning = {
   throw: {
     /** Beats from release to landing (the Fast Throw perk makes it 1). */
     flightBeats: 2,
-    /** The highest row the Big can throw to; the rows above must be run. */
+    /** The highest row the QB can throw to; the rows above must be run. */
     maxRow: 12,
   },
-  big: {
-    /** The Big's hold counter, per ball: Blitzer attacks tick it down; at 0 it's a sack. */
+  qb: {
+    /** The QB's hold counter, per ball: Blitzer attacks tick it down; at 0 it's a sack. */
     hold: 3,
   },
   audio: {

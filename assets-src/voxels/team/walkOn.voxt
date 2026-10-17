@@ -1,5 +1,6 @@
-# A classic football player: gold helmet with a white stripe and face mask,
-# orange jersey with a number 1, shoulder pads, white pants, socks and cleats.
+# Walk-on: a vanilla rookie football player in the team colors. Gold striped
+# helmet with a grey face mask, shoulder pads, an orange number-1 jersey, white
+# pants, socks and cleats.
 size 9 14 5
 voxel 0.08
 mirror x

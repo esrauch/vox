@@ -3,7 +3,7 @@
  * beat by step() (TECHNICAL.md §3). Nothing here knows about rendering or audio.
  *
  * Coordinates: x is the column (0 = left), y is the row (0 = bottom, where the
- * Big stands; the top row is the end zone).
+ * QB stands; the top row is the end zone).
  */
 
 export interface Vec {
@@ -47,14 +47,14 @@ export interface Defender extends UnitBase {
   readonly kind: DefenderKind;
   /** Where a Picker returns to, and a Wall-er's row. */
   readonly home: Vec;
-  /** The beat a Blitzer reached the Big and started attacking it (null = not on the Big). */
+  /** The beat a Blitzer reached the QB and started attacking it (null = not on the QB). */
   engagedSince: number | null;
 }
 
 export type Unit = SmallUnit | Defender;
 
 export type BallState =
-  | { readonly at: 'big' }
+  | { readonly at: 'qb' }
   | {
       readonly at: 'flight';
       readonly target: Vec;
@@ -77,8 +77,8 @@ export interface ScreenState {
   readonly smalls: SmallUnit[];
   readonly defenders: Defender[];
   ball: BallState;
-  /** The Big's hold counter for the current ball. */
-  bigHold: number;
+  /** The QB's hold counter for the current ball. */
+  qbHold: number;
 }
 
 export interface RunState {

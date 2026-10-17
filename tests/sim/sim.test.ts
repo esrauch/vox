@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TEST_RECRUIT } from '../../src/content/smalls';
-import { BIG_POS, SETUP_ROWS, eq, key, vec } from '../../src/sim/grid';
+import { QB_POS, SETUP_ROWS, eq, key, vec } from '../../src/sim/grid';
 import { replay, type Input } from '../../src/sim/replay';
 import { createRun, dispatch } from '../../src/sim/run';
 import { generateSpawns } from '../../src/sim/screen';
@@ -76,7 +76,7 @@ describe('throwing and catching', () => {
     expect(ofType(tooFar.events, 'throwRejected')[0]?.reason).toBe('out of range');
     const thrown = step(state, vec(1, 3));
     const again = step(thrown.state, vec(1, 4));
-    expect(ofType(again.events, 'throwRejected')[0]?.reason).toBe('the Big has no ball');
+    expect(ofType(again.events, 'throwRejected')[0]?.reason).toBe('the QB has no ball');
   });
 
   it('lands 2 beats after release; a Small on the tile makes a Clean Catch', () => {
@@ -100,7 +100,7 @@ describe('throwing and catching', () => {
     const r1 = step(playState([{ pos: vec(1, 2) }]), vec(6, 6));
     const r3 = run(r1.state, 2);
     expect(ofType(r3.events, 'fumble')).toEqual([{ type: 'fumble', reason: 'miss', ballsLeft: 2 }]);
-    expect(r3.state.screen.ball).toEqual({ at: 'big' });
+    expect(r3.state.screen.ball).toEqual({ at: 'qb' });
   });
 
   it('a fumble resets the whole screen to setup with the next ball', () => {
@@ -194,15 +194,15 @@ describe('collisions', () => {
 });
 
 describe('Blitzers', () => {
-  // A runner off to the side, and a Blitzer coming straight down at the Big.
+  // A runner off to the side, and a Blitzer coming straight down at the QB.
   const blitzSetup = () => playState([{ pos: vec(0, 2) }], [{ kind: 'blitzer', pos: vec(4, 4) }]);
 
-  it('reaches the Big, then sacks it after 3 attacks, one every 2 beats', () => {
+  it('reaches the QB, then sacks it after 3 attacks, one every 2 beats', () => {
     const r = run(blitzSetup(), 12);
     expect(ofType(r.events, 'engaged')).toEqual([{ type: 'engaged', id: 200 }]);
     expect(ofType(r.events, 'attack').map((e) => e.holdLeft)).toEqual([2, 1, 0]);
     expect(ofType(r.events, 'fumble')).toEqual([{ type: 'fumble', reason: 'sack', ballsLeft: 2 }]);
-    expect(r.state.screen.bigHold).toBe(3);
+    expect(r.state.screen.qbHold).toBe(3);
   });
 
   it('does not sack one beat early', () => {
@@ -210,16 +210,16 @@ describe('Blitzers', () => {
   });
 
   it('is irrelevant once the ball is thrown', () => {
-    let state = run(blitzSetup(), 6).state; // the Blitzer reaches the Big on beat 6
+    let state = run(blitzSetup(), 6).state; // the Blitzer reaches the QB on beat 6
     state = step(state, vec(0, 6)).state; // throw on beat 7 to where the runner will be
     const r = run(state, 4);
     expect(ofType(r.events, 'caught')).toHaveLength(1);
     expect(ofType(r.events, 'attack')).toHaveLength(0);
     expect(ofType(r.events, 'fumble')).toHaveLength(0);
-    expect(r.state.screen.bigHold).toBe(3);
+    expect(r.state.screen.qbHold).toBe(3);
   });
 
-  it('several Blitzers on the Big drain its counter together', () => {
+  it('several Blitzers on the QB drain its counter together', () => {
     const state = playState(
       [{ pos: vec(0, 2) }],
       [
@@ -310,7 +310,7 @@ describe('determinism', () => {
         // Defenders never share a tile (Smalls may).
         const tiles = live.filter((u) => u.side === 'defender').map((u) => key(u.pos));
         expect(new Set(tiles).size).toBe(tiles.length);
-        expect(live.some((u) => eq(u.pos, BIG_POS))).toBe(false);
+        expect(live.some((u) => eq(u.pos, QB_POS))).toBe(false);
         expect(state.balls).toBeGreaterThanOrEqual(0);
       }
     }

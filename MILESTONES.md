@@ -156,7 +156,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** prove the fun. It's rough, but it's a whole run.
 
-- [ ] **Swap in the new theme's models:** football-player Walk-ons (`misc/footballPlayer`), a QB model, and a jack-o'-lantern football. The Elder Bough treant and leaf-sprite Walk-ons are still in the game.
+- [x] **Swap in the new theme's models:** football-player Walk-ons (`team/walkOn`), a bigger QB in reversed colors with its throwing arm up (`team/qb`), and a jack-o'-lantern football (`team/ball`). The old Elder Bough models are removed, and the code now says QB instead of Big.
 - [ ] The Haunted Forest, Walk-ons, and **two recruit kinds** (e.g. the Bat and the Pumpkin-head, in team helmets).
 - [ ] One biome, generic defenders (all four kinds), and two hazards (one lane, one timed trap).
 - [ ] Endless screens from strip-based generation, with a simple difficulty ramp.
@@ -292,6 +292,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** New team models in the game: football-player Walk-ons, the QB and the jack-o'-lantern football. "Big" is renamed to "QB" in the code.
 - **2026-10-17:** Theme reworked: a football team in a haunted forest, with no Bigs or Smalls. The game is now called **Fourth & Ghoul**. GAMEPLAY.md and TECHNICAL.md are updated to match. *(Items checked off before this point use the old words: the Big is now the QB, and Smalls are now players.)*
 - **2026-10-17:** Defenders are biome locals in candy purple. The Forest set (gnome Chaser, rhino-beetle Blitzer, scarecrow Wall-er, bat Picker) is modelled and in the game.
 - **2026-10-17:** Playtest changes: a fumble now resets the whole screen to setup, and Smalls no longer block each other.

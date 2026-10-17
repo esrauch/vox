@@ -7,8 +7,8 @@ export const SETUP_ROWS = tuning.grid.setupRows;
 /** The top row. A carrier reaching it scores. */
 export const END_ROW = ROWS - 1;
 
-/** The Big stands at the middle of the bottom row and never moves. */
-export const BIG_POS: Vec = { x: Math.floor(COLS / 2), y: 0 };
+/** The QB stands at the middle of the bottom row and never moves. */
+export const QB_POS: Vec = { x: Math.floor(COLS / 2), y: 0 };
 
 export const vec = (x: number, y: number): Vec => ({ x, y });
 export const eq = (a: Vec | null | undefined, b: Vec | null | undefined): boolean =>
@@ -23,7 +23,7 @@ export function inBounds(v: Vec): boolean {
 }
 
 export function inSetupZone(v: Vec): boolean {
-  return inBounds(v) && v.y < SETUP_ROWS && !eq(v, BIG_POS);
+  return inBounds(v) && v.y < SETUP_ROWS && !eq(v, QB_POS);
 }
 
 /** Manhattan distance: units hop in the four directions. */
@@ -31,9 +31,9 @@ export function dist(a: Vec, b: Vec): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
-/** Whether a tile touches the Big (up, left or right). A Blitzer standing there attacks it. */
-export function nextToBig(v: Vec): boolean {
-  return dist(v, BIG_POS) === 1;
+/** Whether a tile touches the QB (up, left or right). A Blitzer standing there attacks it. */
+export function nextToQb(v: Vec): boolean {
+  return dist(v, QB_POS) === 1;
 }
 
 /**

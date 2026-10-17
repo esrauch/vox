@@ -1,16 +1,16 @@
 import * as THREE from 'three';
 import { biomes, hexToNumber, type Hex } from '../content/palettes';
 import { tuning } from '../content/tuning';
-import { BIG_POS, COLS, END_ROW, ROWS, SETUP_ROWS, vec } from '../sim/grid';
+import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, vec } from '../sim/grid';
 import { getGeometry, voxelMaterial } from '../voxel/models';
 import { tileToWorld } from './view';
 
-/** The Big's model (only the Elder Bough exists so far). */
-export const BIG_MODEL = 'elderBough/big';
+/** The quarterback's model. */
+export const QB_MODEL = 'team/qb';
 
 /**
  * The static field: a checkerboard of tiles with the setup zone, end zone,
- * out-of-range rows marked, plus the Big. One merged mesh for
+ * out-of-range rows marked, plus the QB. One merged mesh for
  * the tiles keeps the draw-call count low (TECHNICAL.md §5).
  */
 export function createField(): THREE.Group {
@@ -47,11 +47,11 @@ export function createField(): THREE.Group {
   }
   group.add(tiles);
 
-  // The Big never moves. It faces the camera so its carved face is visible.
-  const big = new THREE.Mesh(getGeometry(BIG_MODEL), voxelMaterial);
-  big.position.copy(tileToWorld(BIG_POS)).add(new THREE.Vector3(0, 0, 0.15));
-  big.castShadow = true;
-  group.add(big);
+  // The QB never moves. It faces the camera so its carved face is visible.
+  const qb = new THREE.Mesh(getGeometry(QB_MODEL), voxelMaterial);
+  qb.position.copy(tileToWorld(QB_POS)).add(new THREE.Vector3(0, 0, 0.15));
+  qb.castShadow = true;
+  group.add(qb);
 
   return group;
 }

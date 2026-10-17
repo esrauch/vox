@@ -1,7 +1,7 @@
 /**
  * Convert a MagicaVoxel .vox file into a .voxt model.
  *
- *   npm run import-vox -- path/to/model.vox elderBough/tree [voxelSize]
+ *   npm run import-vox -- path/to/model.vox forestProps/tree [voxelSize]
  *
  * Writes assets-src/voxels/<id>.voxt. Remember to add the source and license
  * to assets/manifest.json (check-assets will remind you).
