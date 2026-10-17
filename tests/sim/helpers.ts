@@ -42,6 +42,7 @@ export function playState(
     defenders: createDefenders(defenders, 200),
     ball: { at: 'qb' },
     qbHold: 3,
+    idleBeat: 0,
   };
   state.phase = 'play';
   state.beat = 0;
@@ -69,3 +70,10 @@ export const small = (state: RunState, id: number): SmallUnit => {
 
 export const ofType = <T extends SimEvent['type']>(events: SimEvent[], type: T) =>
   events.filter((e): e is Extract<SimEvent, { type: T }> => e.type === type);
+
+/** Pin every defender in place (no patrol), for tests that need a stationary one. */
+export function standStill(state: RunState): RunState {
+  for (const d of state.screen.defenders) Object.assign(d, { patrol: null });
+  updateIntents(state.screen);
+  return state;
+}

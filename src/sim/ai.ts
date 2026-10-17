@@ -37,6 +37,9 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
       return target ? stepToward(d.pos, target) : null;
     }
     case 'picker':
+      // A Picker (the Bat) loops its box circuit, whatever the ball does: a
+      // pattern you learn, and it picks off any pass that comes down under it.
+      if (d.patrol) return patrolNext(d);
       return stepToward(
         d.pos,
         screen.ball.at === 'flight' ? landingTile(screen.ball.target) : d.home,
@@ -76,4 +79,10 @@ function nearest(from: Vec, units: readonly SmallUnit[]): Vec | null {
 /** Throws land on free points; defenders head for the tile the ball comes down on. */
 function landingTile(target: Vec): Vec {
   return vec(Math.round(target.x), Math.round(target.y));
+}
+
+/** The next tile of a defender's patrol circuit. */
+export function patrolNext(d: Defender): Vec | null {
+  if (!d.patrol || d.patrol.length === 0) return null;
+  return d.patrol[(d.patrolIndex + 1) % d.patrol.length] ?? null;
 }

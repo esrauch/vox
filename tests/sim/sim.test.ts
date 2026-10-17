@@ -3,9 +3,9 @@ import { TEST_RECRUIT } from '../../src/content/smalls';
 import { QB_POS, SETUP_ROWS, eq, key, vec } from '../../src/sim/grid';
 import { replay, type Input } from '../../src/sim/replay';
 import { createRun, dispatch } from '../../src/sim/run';
-import { generateSpawns } from '../../src/sim/screen';
-import { step } from '../../src/sim/step';
-import { ofType, playState, run, small } from './helpers';
+import { boxCircuit, createDefenders, generateSpawns } from '../../src/sim/screen';
+import { idleStep, step } from '../../src/sim/step';
+import { ofType, playState, run, small, standStill } from './helpers';
 
 describe('creating a run', () => {
   it('starts in setup with 3 balls and 5 Walk-on slots', () => {
@@ -109,7 +109,7 @@ describe('throwing and catching', () => {
   });
 
   it('a defender right under the ball, closer than the receiver, intercepts it', () => {
-    const state = playState([{ pos: vec(1, 3) }], [{ kind: 'picker', pos: vec(2, 6) }]);
+    const state = standStill(playState([{ pos: vec(1, 3) }], [{ kind: 'picker', pos: vec(2, 6) }]));
     const r = run(step(state, vec(1.9, 5.8)).state, 2);
     expect(ofType(r.events, 'fumble')[0]?.reason).toBe('interception');
   });
@@ -139,7 +139,7 @@ describe('throwing and catching', () => {
   });
 
   it('counts a defender on the landing tile as an interception', () => {
-    const state = playState([{ pos: vec(1, 2) }], [{ kind: 'picker', pos: vec(6, 6) }]);
+    const state = standStill(playState([{ pos: vec(1, 2) }], [{ kind: 'picker', pos: vec(6, 6) }]));
     const r = run(step(state, vec(6, 6)).state, 2);
     expect(ofType(r.events, 'fumble')[0]?.reason).toBe('interception');
   });
@@ -208,6 +208,40 @@ describe('collisions', () => {
     expect(small(r.state, 100).pos).toEqual(vec(2, 4));
     expect(small(r.state, 100).fendOff).toBe(0);
     expect(r.state.screen.ball).toEqual({ at: 'carried', by: 100 });
+  });
+});
+
+describe('Bats (Pickers) patrol a 4×4 box', () => {
+  it('builds a clockwise 12-tile circuit that stays on the field', () => {
+    const circuit = boxCircuit(vec(8, 14));
+    expect(circuit).toHaveLength(12);
+    expect(new Set(circuit.map(key)).size).toBe(12);
+    for (const t of circuit) {
+      expect(t.x).toBeGreaterThanOrEqual(0);
+      expect(t.x).toBeLessThan(9);
+      expect(t.y).toBeGreaterThanOrEqual(SETUP_ROWS);
+      expect(t.y).toBeLessThan(15);
+    }
+    // Each step is one tile in one of the four directions, and it loops.
+    circuit.forEach((t, i) => {
+      const n = circuit[(i + 1) % circuit.length]!;
+      expect(Math.abs(n.x - t.x) + Math.abs(n.y - t.y)).toBe(1);
+    });
+  });
+
+  it('circles during setup, before HIKE, and keeps going from there after', () => {
+    let state = createRun(1);
+    state.screen.defenders.splice(0, state.screen.defenders.length);
+    state.screen.defenders.push(...createDefenders([{ kind: 'picker', pos: vec(2, 6) }], 900));
+    const start = state.screen.defenders[0]!.pos;
+    for (let i = 0; i < 4; i++) state = idleStep(state).state; // two hops (Hustle 0)
+    const bat = state.screen.defenders[0]!;
+    expect(bat.patrolIndex).toBe(2);
+    expect(bat.pos).not.toEqual(start);
+    dispatch(state, { type: 'hike' });
+    const after = run(state, 2).state.screen.defenders[0]!;
+    expect(after.patrolIndex).toBe(3);
+    expect(after.pos).toEqual(bat.patrol![3]);
   });
 });
 

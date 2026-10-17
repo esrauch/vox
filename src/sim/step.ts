@@ -14,7 +14,7 @@
  */
 import { smallKind } from '../content/smalls';
 import { tuning } from '../content/tuning';
-import { updateIntents } from './ai';
+import { patrolNext, updateIntents } from './ai';
 import { COLS, END_ROW, eq, inBounds, key, nextToQb } from './grid';
 import { setUpScreen, yards } from './run';
 import { actsOn, hitsSurvived } from './stats';
@@ -138,6 +138,7 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
     if (!u.alive || !to) continue;
     events.push({ type: 'hop', id: u.id, from: u.pos, to });
     u.pos = to;
+    if (u.side === 'defender') advancePatrol(u);
   }
 
   // A Blitzer that reaches a tile next to the QB stays there and attacks it.
@@ -147,6 +148,35 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
       events.push({ type: 'engaged', id: d.id });
     }
   }
+}
+
+/** After a hop, a patrolling defender moves on to the next tile of its circuit. */
+function advancePatrol(d: Defender): void {
+  if (!d.patrol) return;
+  const next = (d.patrolIndex + 1) % d.patrol.length;
+  if (eq(d.patrol[next], d.pos)) d.patrolIndex = next;
+}
+
+/**
+ * A beat ticked during setup, before HIKE: patrolling defenders keep
+ * circling so you can watch the pattern while you plan. Nothing else moves.
+ */
+export function idleStep(prev: RunState): StepResult {
+  const state = structuredClone(prev);
+  const events: SimEvent[] = [];
+  if (state.phase !== 'setup') return { state, events };
+  const screen = state.screen;
+  screen.idleBeat += 1;
+  for (const d of screen.defenders) {
+    if (!d.alive || !d.patrol || !actsOn(d.stats, screen.idleBeat)) continue;
+    const to = patrolNext(d);
+    if (!to) continue;
+    events.push({ type: 'hop', id: d.id, from: d.pos, to });
+    d.pos = to;
+    advancePatrol(d);
+  }
+  updateIntents(screen);
+  return { state, events };
 }
 
 /**

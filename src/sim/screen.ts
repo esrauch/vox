@@ -43,17 +43,42 @@ export function generateSpawns(seed: number, index: number): DefenderSpawn[] {
 }
 
 export function createDefenders(spawns: readonly DefenderSpawn[], firstId: number): Defender[] {
-  return spawns.map((spawn, i) => ({
-    id: firstId + i,
-    side: 'defender',
-    kind: spawn.kind,
-    pos: spawn.pos,
-    home: spawn.pos,
-    stats: DEFENDER_STATS[spawn.kind],
-    alive: true,
-    downBeats: 0,
-    hitsTaken: 0,
-    intent: null,
-    engagedSince: null,
-  }));
+  return spawns.map((spawn, i) => {
+    const patrol = spawn.kind === 'picker' ? boxCircuit(spawn.pos) : null;
+    const start = patrol?.[0] ?? spawn.pos;
+    return {
+      id: firstId + i,
+      side: 'defender',
+      kind: spawn.kind,
+      pos: start,
+      home: start,
+      stats: DEFENDER_STATS[spawn.kind],
+      alive: true,
+      downBeats: 0,
+      hitsTaken: 0,
+      intent: null,
+      engagedSince: null,
+      patrol,
+      patrolIndex: 0,
+    };
+  });
+}
+
+/** The size of a Picker's square patrol. */
+const BOX = 4;
+
+/**
+ * A 4×4 box of tiles, walked clockwise around its edge (12 tiles), with its
+ * bottom-left corner near `near` but kept on the field and out of the setup
+ * zone and end zone.
+ */
+export function boxCircuit(near: Vec): Vec[] {
+  const x0 = Math.max(0, Math.min(COLS - BOX, near.x));
+  const y0 = Math.max(SETUP_ROWS, Math.min(END_ROW - BOX, near.y));
+  const out: Vec[] = [];
+  for (let y = y0; y < y0 + BOX - 1; y++) out.push(vec(x0, y)); // up the left side
+  for (let x = x0; x < x0 + BOX - 1; x++) out.push(vec(x, y0 + BOX - 1)); // along the top
+  for (let y = y0 + BOX - 1; y > y0; y--) out.push(vec(x0 + BOX - 1, y)); // down the right side
+  for (let x = x0 + BOX - 1; x > x0; x--) out.push(vec(x, y0)); // back along the bottom
+  return out;
 }

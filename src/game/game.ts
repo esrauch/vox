@@ -21,7 +21,7 @@ import { View, tileToWorld } from '../render/view';
 import { loadSettings } from '../settings';
 import { COLS, QB_POS, eq, inSetupZone } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
-import { step, throwProblem } from '../sim/step';
+import { idleStep, step, throwProblem } from '../sim/step';
 import type { RunState, SimEvent, Vec } from '../sim/types';
 import { Hud, type Badge } from '../ui/hud';
 
@@ -48,6 +48,8 @@ export class Game {
   /** Sim beat = clock beat + offset (the clock restarts from 0 on hike and on resume). */
   private beatOffset = 0;
   private paused = false;
+  /** The setup-phase clock that keeps patrols circling before HIKE (null outside setup). */
+  private idle: { start: number } | null = null;
   private music: MusicPlayer | null = null;
   private sfx: SfxPlayer | null = null;
 
@@ -62,7 +64,7 @@ export class Game {
       onAction: () => void this.onAction(),
     });
 
-    this.units.reset(this.state.screen);
+    this.resetUnits();
     this.syncHud();
     const refit = (): void => this.view.setInsets(this.hud.insets());
     window.addEventListener('resize', refit);
@@ -101,12 +103,30 @@ export class Game {
     if (this.state.phase !== 'play' && this.clock?.running) this.clock.stop();
 
     const playing = this.state.phase === 'play' && !this.paused && pos !== null;
-    const beat = playing ? pos.index : this.state.beat;
-    const phase = playing ? Math.max(0, pos.phase) : 1;
+    const idle = this.state.phase === 'setup' ? this.idleTick(now) : null;
+    const beat = playing ? pos.index : idle ? idle.beat : this.state.beat;
+    const phase = playing ? Math.max(0, pos.phase) : idle ? idle.phase : 1;
     this.units.update(this.state.screen, beat, phase);
     this.markers.update(this.state.screen, beat + phase, this.units, now / 1000);
     this.hud.setBadges(this.badges());
     this.view.render();
+  }
+
+  /**
+   * During setup, patrolling defenders (the Bats) keep circling at the song's
+   * tempo, so the pattern is already running when you HIKE. Returns the
+   * current setup beat and how far through it we are, for animation.
+   */
+  private idleTick(now: number): { beat: number; phase: number } {
+    const beatMs = 60_000 / spookySurf.bpm;
+    this.idle ??= { start: now - this.state.screen.idleBeat * beatMs };
+    const elapsed = (now - this.idle.start) / beatMs;
+    while (this.state.screen.idleBeat < Math.floor(elapsed) && !this.drag) {
+      const prev = this.state;
+      this.state = idleStep(prev).state;
+      this.units.beginBeat(prev.screen, this.state.screen, this.state.screen.idleBeat);
+    }
+    return { beat: this.state.screen.idleBeat, phase: elapsed % 1 };
   }
 
   private stepBeat(): void {
@@ -119,7 +139,7 @@ export class Game {
     const result = step(prev, throwAt);
     this.state = result.state;
     if (result.events.some((e) => e.type === 'screenStarted')) {
-      this.units.reset(this.state.screen);
+      this.resetUnits();
     } else {
       this.units.beginBeat(prev.screen, this.state.screen, this.state.beat);
     }
@@ -164,6 +184,12 @@ export class Game {
           break;
       }
     }
+  }
+
+  /** Rebuild every unit view (a new or restarted screen) and restart the setup clock. */
+  private resetUnits(): void {
+    this.units.reset(this.state.screen);
+    this.idle = null;
   }
 
   private play(id: SfxId): void {
@@ -265,12 +291,12 @@ export class Game {
       await this.startBeat();
     } else if (phase === 'cleared') {
       dispatch(this.state, { type: 'nextScreen' });
-      this.units.reset(this.state.screen);
+      this.resetUnits();
     } else if (phase === 'over') {
       this.seed++;
       this.state = createRun(this.seed);
       this.aim = null;
-      this.units.reset(this.state.screen);
+      this.resetUnits();
       await this.startSetupMusic();
     }
     this.syncHud();
@@ -358,6 +384,6 @@ export class Game {
     dispatch(this.state, { type: 'place', slot: this.drag.slot, tile: this.drag.tile });
     this.drag = null;
     this.units.setDragging(null);
-    this.units.reset(this.state.screen);
+    this.resetUnits();
   }
 }

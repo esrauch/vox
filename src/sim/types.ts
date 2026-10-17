@@ -49,6 +49,10 @@ export interface Defender extends UnitBase {
   readonly home: Vec;
   /** The beat a Blitzer reached the QB and started attacking it (null = not on the QB). */
   engagedSince: number | null;
+  /** A fixed circuit of tiles this defender loops around (Pickers: a 4×4 box), or null. */
+  readonly patrol: readonly Vec[] | null;
+  /** Which tile of the patrol it's on. */
+  patrolIndex: number;
 }
 
 export type Unit = SmallUnit | Defender;
@@ -79,6 +83,8 @@ export interface ScreenState {
   ball: BallState;
   /** The QB's hold counter for the current ball. */
   qbHold: number;
+  /** Beats ticked during setup, so patrols keep circling before HIKE. */
+  idleBeat: number;
 }
 
 export interface RunState {

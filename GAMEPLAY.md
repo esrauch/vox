@@ -132,7 +132,7 @@ Each screen is one field-length climb, in two phases.
 ### 1. Setup (the huddle)
 
 - The new screen is revealed, and **you can see everything** before you commit: every defender on its starting tile and every hazard lane.
-- **Setup is a little puzzle.** You read the board and place your players to beat it. A defender's *kind* tells you what it'll do: a Chaser will come at your carrier, a Wall-er holds its row, a Picker guards a passing lane. **Hazards keep cycling during setup**, so you can see the rhythm of a lane before you send someone into it.
+- **Setup is a little puzzle.** You read the board and place your players to beat it. A defender's *kind* tells you what it'll do: a Chaser will come at your carrier, a Wall-er holds its row, a Picker circles a box of sky, guarding the passes under it. **Hazards keep cycling during setup**, so you can see the rhythm of a lane before you send someone into it.
 - **Drag your players onto tiles of the setup zone.**
 - **Where a player starts decides what it does.** Each one runs up its own **column**, doing the job its kind does. Walk-ons all run. Placement is how you aim them: at open lanes, or straight at a defender you want taken out.
 - **Snappy defaults:** last screen's formation is pre-filled, so a quick look and a tap on **HIKE!** is enough.
@@ -156,7 +156,7 @@ Two kinds of trouble fill each screen. **Neither of them ever has the ball.** Al
 | **Chaser** | Garden Gnome | Hops one tile toward your carrier. With no carrier, it hops toward the ball's landing tile while the ball is in flight, and otherwise toward your nearest player. | Tackling your carrier is a fumble. |
 | **Blitzer** | Rhino Beetle | Hops toward the QB. Once it's next to the QB, it stays and **attacks on a rhythm**. | Each attack ticks down the QB's counter. At 0, while the QB still holds the ball, it's a **sack**, which is a fumble. |
 | **Wall-er** | Scarecrow | Stays in its row and slides one tile sideways to stay in the column of the nearest player heading its way. | It blocks runners, and acts as a moving wall. |
-| **Picker** | Bat | Stays near its home tile. Once a ball is thrown, it hops toward the landing tile, as fast as its Hustle allows. | It intercepts. |
+| **Picker** | Bat | Flies a fixed 4×4 box circuit (clockwise around the box's edge, one tile per hop). It's **already circling during setup**, so you can time a throw past it, and it carries on from the same spot after HIKE. It never chases the ball. | It intercepts any pass that lands under it. |
 
 Defenders avoid telegraphed hazards, but not perfectly, and **hazards hit them too**, so you can bait a Chaser into a pumpkin lane.
 
