@@ -37,7 +37,10 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
       return target ? stepToward(d.pos, target) : null;
     }
     case 'picker':
-      return stepToward(d.pos, screen.ball.at === 'flight' ? screen.ball.target : d.home);
+      return stepToward(
+        d.pos,
+        screen.ball.at === 'flight' ? landingTile(screen.ball.target) : d.home,
+      );
   }
 }
 
@@ -48,7 +51,7 @@ function chaseTarget(d: Defender, screen: ScreenState): Vec | null {
     const carrier = screen.smalls.find((s) => s.id === ball.by);
     if (carrier?.alive) return carrier.pos;
   }
-  if (ball.at === 'flight') return ball.target;
+  if (ball.at === 'flight') return landingTile(ball.target);
   return nearest(d.pos, screen.smalls.filter(isActive));
 }
 
@@ -68,4 +71,9 @@ function wallTarget(d: Defender, screen: ScreenState): Vec | null {
 function nearest(from: Vec, units: readonly SmallUnit[]): Vec | null {
   const best = [...units].sort((a, b) => dist(from, a.pos) - dist(from, b.pos) || a.id - b.id)[0];
   return best ? best.pos : null;
+}
+
+/** Throws land on free points; defenders head for the tile the ball comes down on. */
+function landingTile(target: Vec): Vec {
+  return vec(Math.round(target.x), Math.round(target.y));
 }

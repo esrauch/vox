@@ -15,10 +15,11 @@
 import { smallKind } from '../content/smalls';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
-import { QB_POS, END_ROW, dist, eq, inBounds, key, nextToQb } from './grid';
+import { COLS, END_ROW, eq, inBounds, key, nextToQb } from './grid';
 import { setUpScreen, yards } from './run';
-import { actsOn, catchTiles, facingOf, hitsSurvived } from './stats';
+import { actsOn, hitsSurvived } from './stats';
 import type {
+  CatchQuality,
   DeathCause,
   Defender,
   FumbleReason,
@@ -67,10 +68,10 @@ const isUp = (u: Unit): boolean => u.alive && u.downBeats === 0;
 export function throwProblem(state: RunState, target: Vec): string | null {
   if (state.phase !== 'play') return 'not in play';
   if (state.screen.ball.at !== 'qb') return 'the QB has no ball';
-  if (!inBounds(target)) return 'off the field';
-  if (eq(target, QB_POS)) return 'that is the QB';
-  if (target.y > tuning.throw.maxRow) return 'out of range';
-  if (target.y < tuning.throw.minRow) return 'too close';
+  // Targets are free points in tile units (not grid-locked); the band is rows minRow..maxRow inclusive.
+  if (target.x < -0.5 || target.x > COLS - 0.5) return 'off the field';
+  if (target.y > tuning.throw.maxRow + 0.5) return 'out of range';
+  if (target.y < tuning.throw.minRow - 0.5) return 'too close';
   return null;
 }
 
@@ -256,41 +257,45 @@ function resolveLanding(state: RunState, events: SimEvent[]): void {
   const ball = screen.ball;
   if (ball.at !== 'flight' || ball.landsOn !== beat) return;
   const target = ball.target;
+  const away = (p: Vec): number => Math.hypot(p.x - target.x, p.y - target.y);
 
-  const onTile = screen.smalls.filter((s) => isUp(s) && eq(s.pos, target)).sort(byId)[0];
-  if (onTile) {
-    catchBall(state, onTile, true, events);
-    return;
-  }
-  if (screen.defenders.some((d) => isUp(d) && eq(d.pos, target))) {
+  // The best receiver: the closest of your players within its catch radius.
+  const receiver = screen.smalls
+    .filter((s) => isUp(s) && away(s.pos) <= catchRadius(s, 'ok'))
+    .sort((a, b) => away(a.pos) - away(b.pos) || a.id - b.id)[0];
+  // A defender right under the ball, and closer than the receiver, picks it off.
+  const picker = screen.defenders
+    .filter((d) => isUp(d) && away(d.pos) <= tuning.catch.intercept)
+    .sort((a, b) => away(a.pos) - away(b.pos) || a.id - b.id)[0];
+  if (picker && (!receiver || away(picker.pos) < away(receiver.pos))) {
     fumble(state, 'interception', events);
     return;
   }
-  const tileFree = !liveUnits(state).some((u) => eq(u.pos, target));
-  const lunger = screen.smalls
-    .filter(
-      (s) =>
-        tileFree &&
-        isUp(s) &&
-        catchTiles(s.pos, facingOf(s.pos, s.intent), s.stats)
-          .slice(1)
-          .some((t) => eq(t, target)),
-    )
-    .sort((a, b) => dist(a.pos, target) - dist(b.pos, target) || a.id - b.id)[0];
-  if (lunger) {
-    events.push({ type: 'hop', id: lunger.id, from: lunger.pos, to: target });
-    lunger.pos = target;
-    catchBall(state, lunger, false, events);
+  if (!receiver) {
+    fumble(state, 'miss', events);
     return;
   }
-  fumble(state, 'miss', events);
+  const d = away(receiver.pos);
+  const quality: CatchQuality =
+    d <= catchRadius(receiver, 'perfect')
+      ? 'perfect'
+      : d <= catchRadius(receiver, 'good')
+        ? 'good'
+        : 'ok';
+  catchBall(state, receiver, quality, events);
 }
 
-/** A catch. On the exact tile it's a Clean Catch, and the receiver can fend off one defender. */
-function catchBall(state: RunState, s: SmallUnit, clean: boolean, events: SimEvent[]): void {
+/** How far from a receiver a ball can land and still be caught at a given quality (Hands widens it). */
+export function catchRadius(s: SmallUnit, quality: CatchQuality): number {
+  return tuning.catch[quality] + s.stats.hands * tuning.catch.perHands;
+}
+
+/** A catch. A perfect one is a Clean Catch: the receiver can fend off one defender. */
+function catchBall(state: RunState, s: SmallUnit, quality: CatchQuality, events: SimEvent[]): void {
   state.screen.ball = { at: 'carried', by: s.id };
+  const clean = quality === 'perfect';
   if (clean) s.fendOff += 1;
-  events.push({ type: 'caught', id: s.id, clean });
+  events.push({ type: 'caught', id: s.id, clean, quality });
 }
 
 // ── Fumbles, touchdowns, wipeouts ─────────────────────────────────────────

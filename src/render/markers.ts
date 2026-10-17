@@ -3,12 +3,17 @@ import { hexToNumber, team } from '../content/palettes';
 import { QB_POS } from '../sim/grid';
 import type { ScreenState, Vec } from '../sim/types';
 import { getGeometry, modelHeight, voxelMaterial } from '../voxel/models';
-import { QB_MODEL, tileOutline } from './field';
+import { tuning } from '../content/tuning';
+import { QB_MODEL } from './field';
 import type { UnitViews } from './units';
 import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
 const RETICLE_COLOR = hexToNumber(team.jersey);
+const BAD_COLOR = 0xe8344e;
+/** How many dashes make up the aiming arc, and how high it arcs. */
+const DASHES = 18;
+const ARC_HEIGHT = 3.2;
 /** The team's ball: the jack-o'-lantern football. */
 const BALL_MODEL = 'team/ball';
 /** How high the QB holds the ball: at the top of its raised arm. */
@@ -24,12 +29,22 @@ const heldPosition = (): THREE.Vector3 => tileToWorld(QB_POS).add(QB_OFFSET).add
 const CARRIED = new THREE.Vector3(0, 0.8, 0).applyAxisAngle(X_AXIS, tilt);
 
 /**
- * The ball and the field indicators that move: the reticle, and the landing
- * ring with one pip per beat until the ball lands (GAMEPLAY.md, Reading the Beat).
+ * The ball and the field indicators that move: the free (not grid-locked)
+ * reticle with an animated dashed arc while aiming, and the landing ring with
+ * one pip per beat until the ball lands.
  */
 export class Markers {
   private readonly ball: THREE.Mesh;
-  private readonly reticle: THREE.Mesh;
+  private readonly reticle = new THREE.Group();
+  private readonly reticleMat = new THREE.MeshBasicMaterial({
+    color: RETICLE_COLOR,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.9,
+  });
+  private readonly arc = new THREE.Group();
+  private readonly dashes: THREE.Mesh[] = [];
+  private aim: { target: Vec; valid: boolean } | null = null;
   private readonly landing = new THREE.Group();
   private readonly pips: THREE.Mesh[] = [];
 
@@ -37,8 +52,28 @@ export class Markers {
     this.ball = new THREE.Mesh(getGeometry(BALL_MODEL), voxelMaterial);
     this.ball.castShadow = true;
 
-    this.reticle = tileOutline({ x: 0, y: 0 }, RETICLE_COLOR, 0.96);
+    // The reticle: rings at the "perfect" and "ok" catch distances, plus a centre dot.
+    for (const [inner, outer] of [
+      [tuning.catch.perfect - 0.05, tuning.catch.perfect],
+      [tuning.catch.ok - 0.05, tuning.catch.ok],
+    ] as const) {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(inner, outer, 40), this.reticleMat);
+      ring.rotation.x = -Math.PI / 2;
+      this.reticle.add(ring);
+    }
+    const dot = new THREE.Mesh(new THREE.CircleGeometry(0.07, 16), this.reticleMat);
+    dot.rotation.x = -Math.PI / 2;
+    this.reticle.add(dot);
     this.reticle.visible = false;
+
+    // The aiming arc: small dashes along the throw's path, marching toward the target.
+    const dashGeo = new THREE.BoxGeometry(0.09, 0.09, 0.09);
+    for (let i = 0; i < DASHES; i++) {
+      const dash = new THREE.Mesh(dashGeo, this.reticleMat);
+      this.dashes.push(dash);
+      this.arc.add(dash);
+    }
+    this.arc.visible = false;
 
     const ring = new THREE.Mesh(
       new THREE.RingGeometry(0.3, 0.4, 24),
@@ -56,12 +91,18 @@ export class Markers {
     }
     this.landing.visible = false;
 
-    scene.add(this.ball, this.reticle, this.landing);
+    scene.add(this.ball, this.reticle, this.arc, this.landing);
   }
 
-  setReticle(tile: Vec | null): void {
-    this.reticle.visible = tile !== null;
-    if (tile) this.reticle.position.copy(tileToWorld(tile, 0.02));
+  /** While aiming: where the throw would land (a free point in tile units), and whether it's allowed. */
+  setAim(aim: { target: Vec; valid: boolean } | null): void {
+    this.aim = aim;
+    this.reticle.visible = aim !== null;
+    this.arc.visible = aim !== null;
+    if (aim) {
+      this.reticle.position.copy(tileToWorld(aim.target, 0.03));
+      this.reticleMat.color.set(aim.valid ? RETICLE_COLOR : BAD_COLOR);
+    }
   }
 
   /** `beatPos` is the current beat plus its phase, e.g. 12.4. */
@@ -70,6 +111,19 @@ export class Markers {
     this.ball.visible = ball.at !== 'none';
     this.landing.visible = ball.at === 'flight';
     this.ball.rotation.y = time * 1.5;
+
+    if (this.aim) {
+      // March the dashes along the arc from the QB's hand to the reticle.
+      const from = heldPosition();
+      const to = tileToWorld(this.aim.target, 0.1);
+      const march = (time * 1.2) % (1 / DASHES);
+      this.dashes.forEach((dash, i) => {
+        const t = i / DASHES + march;
+        dash.position.lerpVectors(from, to, t);
+        dash.position.y += Math.sin(t * Math.PI) * ARC_HEIGHT;
+        dash.visible = t <= 1;
+      });
+    }
 
     if (ball.at === 'qb') {
       this.ball.position.copy(heldPosition());
@@ -85,7 +139,7 @@ export class Markers {
       const from = heldPosition();
       const to = tileToWorld(ball.target, 0.6);
       this.ball.position.lerpVectors(from, to, t);
-      this.ball.position.y += Math.sin(t * Math.PI) * 3.2;
+      this.ball.position.y += Math.sin(t * Math.PI) * ARC_HEIGHT;
       this.ball.rotation.x = t * Math.PI * 4;
 
       this.landing.position.copy(tileToWorld(ball.target, 0.03));

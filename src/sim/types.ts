@@ -101,6 +101,9 @@ export type Action =
   | { readonly type: 'hike' }
   | { readonly type: 'nextScreen' };
 
+/** How close the receiver was to where the ball came down. A perfect catch is a Clean Catch. */
+export type CatchQuality = 'perfect' | 'good' | 'ok';
+
 export type FumbleReason = 'sack' | 'miss' | 'interception' | 'tackle';
 /** What killed a unit: a defender, a Blitzer, or (for defenders) a Walk-on trading itself. */
 export type DeathCause = 'defender' | 'blitzer' | 'walkOn';
@@ -112,7 +115,12 @@ export type SimEvent =
   | { readonly type: 'hop'; readonly id: number; readonly from: Vec; readonly to: Vec }
   | { readonly type: 'thrown'; readonly target: Vec; readonly landsOn: number }
   | { readonly type: 'throwRejected'; readonly target: Vec; readonly reason: string }
-  | { readonly type: 'caught'; readonly id: number; readonly clean: boolean }
+  | {
+      readonly type: 'caught';
+      readonly id: number;
+      readonly clean: boolean;
+      readonly quality: CatchQuality;
+    }
   | { readonly type: 'fumble'; readonly reason: FumbleReason; readonly ballsLeft: number }
   | { readonly type: 'engaged'; readonly id: number }
   | { readonly type: 'attack'; readonly id: number; readonly holdLeft: number }

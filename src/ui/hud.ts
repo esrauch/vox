@@ -6,8 +6,13 @@
 import './hud.css';
 
 export interface HudHandlers {
-  /** The ball button: throw to the reticle. Gets the raw pointer event for timing. */
-  onBall(event: PointerEvent): void;
+  /**
+   * The throw circle: press on it, pull back (down) to aim, release to throw.
+   * Each gets the raw pointer event (the release's timestamp decides the beat).
+   */
+  onAimStart(event: PointerEvent): void;
+  onAimMove(event: PointerEvent): void;
+  onAimEnd(event: PointerEvent): void;
   /** The context button: HIKE, next screen, or new run. */
   onAction(): void;
 }
@@ -47,7 +52,7 @@ export class Hud {
       <div class="hud-bottom">
         <div class="hud-beatbar"><div class="hud-beat-target"></div></div>
         <div class="hud-controls">
-          <button class="hud-ball interactive" aria-label="Throw"><span></span></button>
+          <button class="hud-ball interactive" aria-label="Pull back to throw"><span></span></button>
           <button class="hud-action interactive"></button>
         </div>
       </div>`;
@@ -76,8 +81,13 @@ export class Hud {
 
     this.ballButton.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      handlers.onBall(e);
+      // Keep receiving moves and the release even when the finger leaves the circle.
+      this.ballButton.setPointerCapture(e.pointerId);
+      handlers.onAimStart(e);
     });
+    this.ballButton.addEventListener('pointermove', (e) => handlers.onAimMove(e));
+    this.ballButton.addEventListener('pointerup', (e) => handlers.onAimEnd(e));
+    this.ballButton.addEventListener('pointercancel', (e) => handlers.onAimEnd(e));
     this.actionButton.addEventListener('click', () => handlers.onAction());
   }
 

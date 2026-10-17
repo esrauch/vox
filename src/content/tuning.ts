@@ -35,6 +35,24 @@ export const tuning = {
     minRow: 4,
     maxRow: 11,
   },
+  aim: {
+    /** Slingshot aiming: how far the target moves per pixel of pull. */
+    tilesPerPixel: 0.055,
+  },
+  catch: {
+    /**
+     * Throws land anywhere (not grid-locked); a receiver catches if it's close
+     * enough to where the ball comes down. Distances are in tiles, from the
+     * landing point to the receiver's tile centre.
+     */
+    perfect: 0.35,
+    good: 0.75,
+    ok: 1.15,
+    /** Each point of Hands widens every catch radius by this much. */
+    perHands: 0.3,
+    /** A defender this close, and closer than any receiver, intercepts. */
+    intercept: 0.6,
+  },
   qb: {
     /** The QB's hold counter, per ball: Blitzer attacks tick it down; at 0 it's a sack. */
     hold: 3,

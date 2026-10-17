@@ -19,7 +19,7 @@ import { Markers } from '../render/markers';
 import { UnitViews } from '../render/units';
 import { View, tileToWorld } from '../render/view';
 import { loadSettings } from '../settings';
-import { QB_POS, eq, inSetupZone } from '../sim/grid';
+import { COLS, QB_POS, eq, inSetupZone } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
 import type { RunState, SimEvent, Vec } from '../sim/types';
@@ -40,7 +40,8 @@ export class Game {
   private readonly hud: Hud;
   private readonly settings = loadSettings();
   private clock: BeatClock | null = null;
-  private reticle: Vec | null = null;
+  /** Aiming with the throw circle: where the pull started (screen px) and where it points. */
+  private aim: { startX: number; startY: number; target: Vec; valid: boolean } | null = null;
   private queuedThrow: { beat: number; target: Vec } | null = null;
   private drag: { id: number; slot: number; tile: Vec } | null = null;
   private seed: number;
@@ -58,7 +59,9 @@ export class Game {
     this.units = new UnitViews(this.view.scene);
     this.markers = new Markers(this.view.scene);
     this.hud = new Hud(uiRoot, {
-      onBall: (e) => this.onBallButton(e),
+      onAimStart: (e) => this.onAimStart(e),
+      onAimMove: (e) => this.onAimMove(e),
+      onAimEnd: (e) => this.onAimEnd(e),
       onAction: () => void this.onAction(),
     });
 
@@ -137,8 +140,11 @@ export class Game {
           this.play('throw');
           break;
         case 'caught':
-          this.play(e.clean ? 'cleanCatch' : 'catch');
-          this.hud.showJudgement(e.clean ? 'CLEAN CATCH!' : 'Caught!', 'onBeat');
+          this.play(e.quality === 'perfect' ? 'cleanCatch' : 'catch');
+          this.hud.showJudgement(
+            e.quality === 'perfect' ? 'PERFECT!' : e.quality === 'good' ? 'GOOD!' : 'OK',
+            'onBeat',
+          );
           break;
         case 'died':
           this.play('burst');
@@ -190,7 +196,10 @@ export class Game {
     else if (phase === 'over') this.hud.setPrompt(`${yards(this.state)} yards`, 'AGAIN');
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
     else this.hud.setPrompt(null, null);
-    this.markers.setReticle(phase === 'play' ? this.reticle : null);
+    if (phase !== 'play' && this.aim) {
+      this.aim = null;
+      this.markers.setAim(null);
+    }
   }
 
   /** The QB's counter, shown once a Blitzer is attacking it and it still holds the ball. */
@@ -265,18 +274,43 @@ export class Game {
     } else if (phase === 'over') {
       this.seed++;
       this.state = createRun(this.seed);
-      this.reticle = null;
+      this.aim = null;
       this.units.reset(this.state.screen);
       await this.startSetupMusic();
     }
     this.syncHud();
   }
 
-  private onBallButton(e: PointerEvent): void {
+  private onAimStart(e: PointerEvent): void {
     if (this.state.phase !== 'play' || !this.clock?.running) return;
     if (this.state.screen.ball.at !== 'qb') return;
-    if (!this.reticle) {
-      this.hud.showJudgement('Tap the field to aim', 'bad');
+    this.aim = { startX: e.clientX, startY: e.clientY, target: QB_POS, valid: false };
+    this.onAimMove(e);
+  }
+
+  /**
+   * Slingshot aiming: pulling down aims up the field, pulling left aims right.
+   * The target is a free point (not grid-locked) in tile units.
+   */
+  private onAimMove(e: PointerEvent): void {
+    if (!this.aim) return;
+    const k = tuning.aim.tilesPerPixel;
+    const x = Math.max(-0.5, Math.min(COLS - 0.5, QB_POS.x - (e.clientX - this.aim.startX) * k));
+    const y = Math.max(0, QB_POS.y + (e.clientY - this.aim.startY) * k);
+    const target = { x, y };
+    const valid = throwProblem(this.state, target) === null;
+    this.aim = { ...this.aim, target, valid };
+    this.markers.setAim({ target, valid });
+  }
+
+  /** Releasing throws, on the next beat, if the aim is valid; otherwise it cancels. */
+  private onAimEnd(e: PointerEvent): void {
+    const aim = this.aim;
+    this.aim = null;
+    this.markers.setAim(null);
+    if (!aim || !this.clock?.running || this.state.phase !== 'play') return;
+    if (!aim.valid) {
+      if (aim.target.y > tuning.throw.minRow - 0.5) this.hud.showJudgement('out of range', 'bad');
       return;
     }
     const result = this.clock.judgeTap(
@@ -286,7 +320,7 @@ export class Game {
     );
     if (!result) return;
     const beat = Math.max(result.resolvesOn, this.state.beat + 1);
-    this.queuedThrow = { beat, target: this.reticle };
+    this.queuedThrow = { beat, target: aim.target };
   }
 
   private onPointerDown(e: PointerEvent): void {
@@ -298,17 +332,6 @@ export class Game {
         this.drag = { id: small.id, slot: small.slot, tile };
         this.units.setDragging({ id: small.id, tile });
       }
-    } else if (this.state.phase === 'play') {
-      const problem = throwProblem(
-        { ...this.state, screen: { ...this.state.screen, ball: { at: 'qb' } } },
-        tile,
-      );
-      if (problem) {
-        this.hud.showJudgement(problem, 'bad');
-        return;
-      }
-      this.reticle = tile;
-      this.markers.setReticle(tile);
     }
   }
 

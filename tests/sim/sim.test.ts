@@ -86,21 +86,32 @@ describe('throwing and catching', () => {
     expect(ofType(again.events, 'throwRejected')[0]?.reason).toBe('the QB has no ball');
   });
 
-  it('lands 2 beats after release; a Small on the tile makes a Clean Catch', () => {
+  it('lands 2 beats after release; right on the receiver is a perfect (Clean) catch', () => {
     const r1 = step(playState([{ pos: vec(1, 3) }]), vec(1, 4));
     expect(ofType(r1.events, 'thrown')[0]?.landsOn).toBe(3);
     const r3 = run(r1.state, 2);
-    expect(ofType(r3.events, 'caught')).toEqual([{ type: 'caught', id: 100, clean: true }]);
+    expect(ofType(r3.events, 'caught')).toEqual([
+      { type: 'caught', id: 100, clean: true, quality: 'perfect' },
+    ]);
     expect(r3.state.screen.ball).toEqual({ at: 'carried', by: 100 });
     expect(small(r3.state, 100).fendOff).toBe(1);
   });
 
-  it('lets a Small one tile short, facing the ball, lunge for it (no Clean Catch bonus)', () => {
-    const r1 = step(playState([{ pos: vec(1, 3) }]), vec(1, 5));
-    const r3 = run(r1.state, 2);
-    expect(ofType(r3.events, 'caught')).toEqual([{ type: 'caught', id: 100, clean: false }]);
-    expect(small(r3.state, 100).pos).toEqual(vec(1, 5));
-    expect(small(r3.state, 100).fendOff).toBe(0);
+  it('throws land anywhere; how close the receiver is sets the catch quality', () => {
+    // The receiver will be on (1, 4) when the ball lands on beat 3.
+    const quality = (x: number, y: number) =>
+      ofType(run(step(playState([{ pos: vec(1, 3) }]), vec(x, y)).state, 2).events, 'caught')[0]
+        ?.quality;
+    expect(quality(1.2, 4.1)).toBe('perfect');
+    expect(quality(1.5, 4.4)).toBe('good');
+    expect(quality(1, 5)).toBe('ok'); // a whole tile ahead
+    expect(quality(1, 5.5)).toBeUndefined(); // too far: a miss
+  });
+
+  it('a defender right under the ball, closer than the receiver, intercepts it', () => {
+    const state = playState([{ pos: vec(1, 3) }], [{ kind: 'picker', pos: vec(2, 6) }]);
+    const r = run(step(state, vec(1.9, 5.8)).state, 2);
+    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('interception');
   });
 
   it('counts a ball landing on an empty tile as a fumble', () => {
