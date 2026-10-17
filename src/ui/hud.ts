@@ -7,7 +7,8 @@ import './hud.css';
 
 export interface HudHandlers {
   /**
-   * The throw circle: press on it, pull back (down) to aim, release to throw.
+   * Aiming: press anywhere (the throw circle or the field), pull back (down)
+   * to aim, release to throw.
    * Each gets the raw pointer event (the release's timestamp decides the beat).
    */
   onAimStart(event: PointerEvent): void;

@@ -53,7 +53,7 @@ This gives the game one thing to master: **where and when you throw**.
 
 ## Controls: Aim, Then Act
 
-> **Experiment (branch `experiment/slingshot-throw`):** instead of tapping a tile and then the ball button, you **press the throw circle and pull back** (down) to aim. Pulling down aims up the field, and pulling left aims right. A free reticle (not grid-locked) appears with an animated dashed arc to it, and **releasing throws** on the next beat (still 2 beats of flight). Catches have **slop**: the closest receiver within about a tile catches it, rated **perfect / good / ok** by distance (perfect is a Clean Catch). A defender right under the ball and closer than the receiver intercepts. If this sticks, the sections below get rewritten.
+> **Experiment (branch `experiment/slingshot-throw`):** instead of tapping a tile and then the ball button, you **press anywhere on the screen** (the throw circle or the field) **and pull back** (down) from that point to aim. Pulling down aims up the field, and pulling left aims right. A free reticle (not grid-locked) appears with an animated dashed arc to it, and **releasing throws** on the next beat (still 2 beats of flight). Catches have **slop**: the closest receiver within about a tile catches it, rated **perfect / good / ok** by distance (perfect is a Clean Catch). A defender right under the ball and closer than the receiver intercepts. If this sticks, the sections below get rewritten.
 
 **Aiming is the skill.** The beat is the shared clock for the whole screen, but there's no separate "perfect timing" rhythm challenge or judgment UI.
 

@@ -73,8 +73,8 @@ export class Game {
 
     canvas.addEventListener('pointerdown', (e) => this.onPointerDown(e));
     canvas.addEventListener('pointermove', (e) => this.onPointerMove(e));
-    canvas.addEventListener('pointerup', () => this.onPointerUp());
-    canvas.addEventListener('pointercancel', () => this.onPointerUp());
+    canvas.addEventListener('pointerup', (e) => this.onPointerUp(e));
+    canvas.addEventListener('pointercancel', (e) => this.onPointerUp(e));
     installVisibilityPause((hidden) => {
       if (hidden) this.pause();
     });
@@ -324,6 +324,12 @@ export class Game {
   }
 
   private onPointerDown(e: PointerEvent): void {
+    // In play, a drag that starts anywhere on the screen aims a throw, slingshot-style.
+    if (this.state.phase === 'play') {
+      this.view.canvas.setPointerCapture(e.pointerId);
+      this.onAimStart(e);
+      return;
+    }
     const tile = this.view.tileAt(e.clientX, e.clientY);
     if (!tile) return;
     if (this.state.phase === 'setup') {
@@ -336,6 +342,10 @@ export class Game {
   }
 
   private onPointerMove(e: PointerEvent): void {
+    if (this.aim) {
+      this.onAimMove(e);
+      return;
+    }
     if (!this.drag) return;
     const tile = this.view.tileAt(e.clientX, e.clientY);
     if (tile && inSetupZone(tile)) {
@@ -344,7 +354,11 @@ export class Game {
     }
   }
 
-  private onPointerUp(): void {
+  private onPointerUp(e: PointerEvent): void {
+    if (this.aim) {
+      this.onAimEnd(e);
+      return;
+    }
     if (!this.drag) return;
     dispatch(this.state, { type: 'place', slot: this.drag.slot, tile: this.drag.tile });
     this.drag = null;
