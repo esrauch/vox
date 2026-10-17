@@ -54,25 +54,19 @@ Inspirations: *Crossy Road* (feel, readability, chunky toy-like look, collectibl
 
 ## The Bigs and the Smalls
 
-Every team is one **Big** plus a squad of **Smalls**.
+Every run is one **Big** plus a squad of **Smalls**.
 
-**The Big** is you. Each team's Big is a one-of-a-kind legend from its homeland, and the face of the franchise. A Big never moves. It stands rooted at the bottom of the field like a monument, and it's the team's arm and its brain. Everything it does, it does with one enormous throw.
+**The Big** is you, and **you pick it at the start of a run**. Each Big is a one-of-a-kind legend from its homeland, and it brings that homeland's whole theme with it: its ball, its colors, and the kinds of Smalls who'll want to join. A Big never moves. It stands rooted at the bottom of the field like a monument, and it's the team's arm and its brain. Everything it does, it does with one enormous throw.
 
-**The Smalls** are the rest of the roster. They come in a few *kinds* per team (like positions), and each kind has an obvious role you can read from its silhouette. They are numerous, replaceable in the team sense, and individually precious in the "oh no, not Pip" sense.
-
-**There's no fixed squad size.** How many Smalls a team fields is part of its identity:
-- **The Graveyard** is a horde. There are always more, and more keep crawling out of the ground.
-- **The Woodfolk** field a nimble handful, where every one of them matters.
-- **The Mountain** brings fewer, denser, angrier bodies.
-- **The Halflings** bring the whole extended family.
-
-The count changes through a run: Smalls die and stay dead, and new ones join between screens. The Graveyard's dead sometimes crawl back up.
+**The Smalls** come in two flavors:
+- **Walk-ons** are the plain, cheerful rank and file. Every run starts with the same squad of them. They're identical and vanilla, but dressed up in the Big's theme. They always turn up again for the next screen, however many times they get flattened.
+- **Recruits** are the special Smalls from the Big's homeland: the Rattlebones, Pixies and Cinder Imps of the world. They're stronger, stranger and individually precious in the "oh no, not Pip" sense. A recruit who dies is gone for good, and a Walk-on takes its place.
 
 ---
 
 ## The Teams
 
-Three starting teams, each with a home, a style and an attitude. Names are drafts, and alternatives are listed.
+Three starting Bigs, each bringing a homeland with a style and an attitude. In play, "the team" simply means your Big's theme: its Walk-ons and its recruits. Names are drafts, and alternatives are listed.
 
 ### The Undead Ringers — *Graveyard*
 
@@ -84,11 +78,13 @@ Three starting teams, each with a home, a style and an attitude. Names are draft
 
 **The Big: The Groundskeeper.** A huge, stitched-together ghoul with a shovel slung over one shoulder. Polite, patient and deeply unhurried. It has buried every one of its teammates at least once.
 
-**The Smalls:**
+**Recruits:**
 - **Rattlebones**: tiny skeletons. They fall apart when hit and reassemble, sometimes wrongly.
 - **Shamblers**: zombie gnomes. Slow, sticky, hard to shake off once they latch on.
 - **Wisps**: little ghosts that drift through crowds. Not strong, but very hard to knock down. You can't tackle what isn't there.
 - **Grave Rats**: skittering little runners, and the only quick thing in the graveyard. They have sticky paws for catching.
+
+**Walk-ons:** little kids in bedsheet ghost costumes. *Probably* kids.
 
 **Personality:** Grim pride, dad jokes about death, and zero sense of urgency.
 
@@ -113,11 +109,13 @@ Three starting teams, each with a home, a style and an attitude. Names are draft
 
 **The Big: The Elder Bough.** An ancient, creaky treant with a jack-o'-lantern face carved into its trunk, glowing from inside. It hasn't moved in three hundred years, and it doesn't plan to start now. It's surprisingly gentle with its hands and has an arm like a catapult. Prone to long pauses mid-sentence.
 
-**The Smalls:**
+**Recruits:**
 - **Pixies**: fast and flighty, with the best hands on the field.
 - **Acorns**: little nut-folk who curl up and roll to dodge.
 - **Squirrel Riders**: tiny jockeys on squirrels. Fastest thing in the league, and terrible at stopping.
 - **Toadstools**: mushroom-folk who puff spores, confuse opponents and get in the way.
+
+**Walk-ons:** little leaf sprites wearing acorn caps.
 
 **Personality:** Showboating, playful and a little smug. They treat the game like a dance the other team is bad at.
 
@@ -145,11 +143,13 @@ Three starting teams, each with a home, a style and an attitude. Names are draft
 
 **The Big: The Slagfather.** A walking forge of cracked basalt with magma glowing in the seams. Loud, proud, and quick to anger. It throws the ball like it's angry at it.
 
-**The Smalls:**
+**Recruits:**
 - **Cinder Imps**: tiny fire demons. Explosive tempers, sometimes literally.
 - **Kobolds**: scrappy, shouty and numerous. They love a pile-on.
 - **Rocklings**: pebble-gnomes. Small, dense and very hard to move.
 - **Salamanders**: quick lizards that leave scorch trails behind them.
+
+**Walk-ons:** little soot sprites, round lumps of coal with stubby legs.
 
 **Personality:** Big noise, big hits and big grudges. Every game is a blood feud and every play is personal.
 
@@ -250,7 +250,7 @@ Hijink ideas: **Elevenses** (the whole team stops for a snack and recovers), **P
 
 - **Spare title puns** to reuse inside the game: *Fiend Zone*, *Ogre-Time*, *Grim Receiver* (a graveyard position?), *Gnome Field Advantage* (a Hijink or an achievement?), *Gridirons & Dragons*, *Ankle Biters*, *Stomping Grounds*, *Fourth & Inches*.
 - **Is the "Fumble" moment a feature?** When a Big drops the ball, the crowd could chant "FEE! FI! FO! FUMBLE!"
-- **What range of squad sizes still reads clearly on screen?** That is, how small can a nimble handful be, and how big can a horde get before it's just noise?
+- **What do we call the default Smalls?** The working name is **Walk-ons** (the football term for an unrecruited player). Alternatives: *Trick-or-Treaters*, *Benchwarmers*, *Scrubs*, *Practice Squad*, *Pee-Wees*.
 - **Who are the boss Bigs?** Enemy Bigs show up on boss screens. Are they the other teams' Bigs, or a separate rogues' gallery?
 - **Where is the climb going?** An endless field, a mountain, a league ladder? Is there a joke at the top that nobody ever reaches?
 - **A hall of fame for fallen Smalls?** Each run could end with a roll call of its dead.

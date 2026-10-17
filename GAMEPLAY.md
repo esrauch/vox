@@ -10,7 +10,7 @@ Items marked **▲ Decision** are recommendations that are still open to change.
 
 ## The Game in One Breath
 
-You're the Big, planted at the bottom of the screen with the ball. First you **place your Smalls** in the bottom grid. Then the play starts, and you have two kinds of tap: **tap the field to place the target**, and **tap a button to act**: the pulsing ball to throw, and Hijinks after the throw. **Get the ball to the top of the screen** and it's a touchdown. Then the camera scrolls up, there's a new screen and harder defenders, and you **pick a reward**. Your Smalls can die, and the dead stay dead. The Big starts the run with a pile of **balls**, and those are your lives. Every fumble costs one for good. When the last ball is gone, the run is over. **Go as far as you can.**
+You're the Big, planted at the bottom of the screen with the ball. First you **place your Smalls** in the bottom grid. Then the play starts, and you have two kinds of tap: **tap the field to place the target**, and **tap a button to act**: the pulsing ball to throw, and Hijinks after the throw. **Get the ball to the top of the screen** and it's a touchdown. Then the camera scrolls up, there's a new screen and harder defenders, and you **pick a reward**. You pick your **Big** at the start, and it themes everything. Your plain **Walk-ons** always come back, but the special **recruits** you draft stay dead if they die. The Big starts the run with a pile of **balls**, and those are your lives. Every fumble costs one for good. When the last ball is gone, the run is over. **Go as far as you can.**
 
 ---
 
@@ -33,7 +33,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 **A Big can never score.** The ball has to cross the top of the screen in the hands (or mouth, or jaws) of a Small. The Big's job is to **get it to a Small who can get it there**.
 
-That's what makes the Smalls precious. **If you run out of Smalls, you can't score**, and the run is effectively over.
+That's what makes the Smalls matter. Your **Walk-ons** always return for the next screen, so you never run out for good. But if everyone on the field dies mid-screen, it costs you a ball (see *Wipeout*).
 
 ---
 
@@ -60,7 +60,7 @@ This gives the game one thing to master: **where and when you throw**.
 **That's it.** There's nothing to move or steer.
 
 - **The reticle is the single target for everything.** It marks where your next throw will go, and where your Hijinks will hit.
-- **The ball button is your team's ball:** a pumpkin, a skull, an ember. It bounces on every beat, glowing brightest *on* the beat, which is when you want to tap it.
+- **The ball button is your Big's ball:** a pumpkin, a skull, an ember. It bounces on every beat, glowing brightest *on* the beat, which is when you want to tap it.
 - **A throw goes to a tile, not a player.** The ball arcs through the air and lands exactly on the reticle's tile. **Leading your receiver** is the skill.
 - **Only the Big throws. There are no laterals.** Once a Small catches the ball, it's on its own and has to run it home. The ball button goes dark until the Big has a ball again, either after a touchdown or a fumble.
 - **The flight time is the drama.** While the ball is in the air, everyone hops for the landing tile, and you hold your breath.
@@ -110,7 +110,7 @@ Each screen is one field-length climb, in two phases.
 | **The grid** | A soft checkerboard on the turf, so every tile is obvious. |
 | **Where a unit will hop next** | Every Small and defender **faces the direction it's about to hop**, as in *Crossy Road*. Fast units show a double-hop arrow. |
 | **Throw range** | A ring around the Big. It shrinks visibly as climbers pile on. The reticle can't be placed outside it. |
-| **The ball button** | Your team's ball at the bottom center, bouncing and glowing in time. It's brightest exactly on the beat. |
+| **The ball button** | Your Big's ball at the bottom center, bouncing and glowing in time. It's brightest exactly on the beat. |
 | **The reticle** | A bold target on a tile, in your team's color. Before a throw it shows where the ball will go. After a throw, it marks where Hijinks will land. |
 | **Where the ball will land** | The reticle locks in, with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |
 | **Is someone going to be there?** | The target ring lights up in your team's color if one of your Smalls will hop onto the tile in time, and red if a defender will. |
@@ -191,14 +191,35 @@ So every possession is a few seconds of "throw it, THROW IT," against a receiver
 
 ---
 
-## The Smalls
+## The Squad: Walk-ons and Recruits
 
-- **They run themselves**, starting from the cell you put them in. Each kind has a single, obvious job you can read from its silhouette: runners sprint up their column, blockers crash into the nearest defender, decoys draw defenders away, and guards (in the back row) protect the Big.
+### Pick a Big, get a theme
+
+**At the start of a run you choose only your Big.** That one choice themes the whole run: the **ball** (the Groundskeeper throws the Skull, the Elder Bough the Jack-o'-Lantern, the Slagfather the Ember), how your Walk-ons look, and **which recruits and perks show up in the draft**.
+
+### Walk-ons
+
+- **Every run starts with the same squad of Walk-ons.** They're vanilla, identical Smalls with middling Hustle, Hands and Heft, and one simple job: run up their column. If they're placed in the back row, they guard the Big instead.
+- **They're dressed in your Big's theme** (see THEME.md), but that's cosmetic. A Walk-on is a Walk-on.
+- **Walk-ons always come back.** A Walk-on that dies is out for the rest of that screen, but it's back for the next one. **You never drop to zero.**
+- **Walk-on upgrades** are draft cards that improve **every** Walk-on for the rest of the run: +Hustle, +Hands, +Heft, or a new trick for all of them.
+
+### Recruits
+
+- **A recruit replaces one of your Walk-ons.** Recruits are your Big's special Smalls: Rattlebones and Grave Rats for the Groundskeeper, Pixies and Squirrel Riders for the Elder Bough, Cinder Imps and Rocklings for the Slagfather. Each one has a sharper job and better stats.
+- **Recruits don't come back.** If a recruit dies, it's gone for good, and **its slot goes back to a Walk-on** at the next screen. It's tiny tombstone, a ghost that waves, and the crowd goes "awww."
+- That's the risk and reward of the squad: **recruits are what make a run strong, and losing them is what makes a run fall apart**, while the Walk-ons are a safety net that never runs out.
+
+### On the field
+
+- **Smalls run themselves**, starting from the tile you put them in. Each kind has a single, obvious job you can read from its silhouette.
 - **Knocked down:** an ordinary hit knocks a Small down. It bursts into voxel bits, pops back together and keeps going.
-- **Dead:** a hit that's *too big* for its Heft kills it, and it stays dead for the rest of the run. Big hits, hazards, enemy Bigs and lava can all do it. A tiny tombstone pops up and a little ghost floats away, waving.
-- **Squad size changes through the run.** It shrinks through deaths and grows through drafts. Your starting squad depends on your team (the Graveyard's horde, the Woodfolk's handful).
+- **Dead:** a hit that's *too big* for its Heft kills it, through big hits, hazards or enemy Bigs.
+- **▲ Wipeout:** if every Small on the field is dead, you **lose a ball**, and the screen restarts from setup with the Walk-ons back. Recruits who died stay dead.
 
-**Graveyard twist:** this is the one team for whom death isn't final. Their dead Smalls have a chance to **crawl back out of the ground** on the next screen. It's their whole identity, right in the run structure.
+**▲ Decision:** the squad has a fixed number of **slots**. Recommendation: start with about **5**, with "+1 slot" as a rare draft card.
+
+**All Bigs are built the same.** They have the same slot count and the same base rules, and differ only in theme and pool. **Later, Bigs can come as variants that share a homeland:** a Ghost, a Skeleton and a Vampire might all use the Graveyard pool, each with its own twist.
 
 ---
 
@@ -206,21 +227,26 @@ So every possession is a few seconds of "throw it, THROW IT," against a receiver
 
 After every touchdown, you go trick-or-treating: choose **one of three cards**. It's one tap and then straight into the next screen.
 
+**The cards come from your Big's pool.** Every Big has its own recruits, Walk-on upgrades, perks and Hijinks, so a Groundskeeper run and an Elder Bough run grow into very different squads.
+
 ▲ *Decision:* most cards are **Treats** (pure upgrades). Occasionally a **Trick** shows up instead: a strong card with a funny downside, e.g. "+2 Hustle for every Small, but the ball is on fire."
 
-**One card is always a new Small.** It's usually a basic kind from your team. Sometimes it's a rare or better one, and occasionally a **mercenary** from another team.
+▲ *Decision:* the three cards are usually **one recruit, one Walk-on upgrade and one other card**, so every draft offers a clear choice: a new star, a stronger base squad, or something else.
 
-The other two are drawn at random from:
+Card types:
 
 | Card type | Examples |
 |---|---|
-| **Stat upgrades** | +Hustle for all your Runners, +Hands for your Big, +Heft for one named Small. |
-| **Better Smalls** | Promote one Small to a veteran version. |
+| **Recruits** | A special Small from your Big's pool. It replaces a Walk-on, and if it dies it's gone. |
+| **Walk-on upgrades** | +Hustle, +Hands or +Heft for *every* Walk-on, or a new trick for all of them. |
+| **Recruit upgrades** | Promote one recruit to a veteran version. |
+| **Big upgrades** | +Hands (range) or +Heft (carry more climbers) for your Big. |
+| **+1 slot** | One more Walk-on in the squad. It's rare. |
 | **Hijinks** | Unlock a new Hijink, or power up one you already have. |
 | **Fast Throw** | Throws land in 1 beat instead of 2. |
 | **Perfect Spiral** | On-Beat throws can't be intercepted. |
 | **Extra balls** | +1 ball on the pile. It's rare and precious. |
-| **Perks** | Passive quirks with punny names, e.g. **Butterfingers Insurance** (the first fumble of each screen is free) or **Second String** (a dead Small sometimes comes back). |
+| **Perks** | Passive quirks with punny names, e.g. **Butterfingers Insurance** (the first fumble of each screen is free) or **Second String** (a dead recruit sometimes comes back). |
 
 Card names and art should be jokes. The draft is part of the comedy, not a spreadsheet.
 
@@ -255,16 +281,15 @@ Card names and art should be jokes. The draft is part of the comedy, not a sprea
 
 - **Score = distance.** Each screen is worth **10 yards**. "Best: 340 yards" shows on the main screen, as in *Crossy Road*.
 - **Light meta progression**, collected rather than grinded:
-  - New **Bigs** to unlock, each with its own look and a starting Hijink (a vampire Groundskeeper, a cactus treant, a pebble who insists it counts as a Big).
-  - New **teams** to unlock (the Halflings).
-  - New card types joining the draft pool.
+  - New **Bigs** to unlock. Each one is a whole new theme: a ball, a Walk-on look, and its own pool of recruits, perks and Hijinks. Examples: the Halflings' hired ogre, a vampire, a cactus treant, a pebble who insists it counts as a Big.
+  - New cards joining each Big's pool.
 - Nothing pay-to-win. Meta unlocks give you **variety, not power**.
 
 ---
 
 ## How the Attributes Show Up
 
-The Three H's apply to the Big and every Small. They show up only as **pips on cards and on team select**. Everything else is learned by feel.
+The Three H's apply to the Big and every Small. They show up only as **pips on cards and on the Big-select screen**. Everything else is learned by feel.
 
 | Attribute | You feel it when… |
 |---|---|
@@ -291,15 +316,15 @@ This is a pillar-level priority, not polish to add at the end.
 ## Scope: "Small" Game
 
 **First playable** (the smallest version that proves the fun):
-- One team (**Woodfolk**: the clearest passing game).
+- One Big (**the Elder Bough**: the clearest passing game), with Walk-ons and two kinds of recruit.
 - One biome, with generic defenders and two hazard types (one lane, one timed trap).
 - The setup grid, one looping track with everything on the beat, the reticle and the pulsing ball button (throws quantized to the beat), climbers and the pocket, a pile of balls as lives, permadeath.
-- A draft with **new Small** and **stat upgrade** cards only.
+- A draft with **recruit** and **Walk-on upgrade** cards only.
 - Endless screens with a simple difficulty ramp, and a score.
 
-**Then:** Hijinks and Hype, perks, a second and third team, biomes, boss screens.
+**Then:** Hijinks and Hype, perks, a second and third Big, biomes, boss screens.
 
-**Later:** unlockable Bigs, mercenaries, the Halflings, daily runs with a shared seed.
+**Later:** more unlockable Bigs (the Halflings' ogre), daily runs with a shared seed.
 
 ---
 
@@ -313,5 +338,4 @@ This is a pillar-level priority, not polish to add at the end.
 - **Should the "someone will be there" target-ring hint stay forever?** It makes throws very readable, but it might make them *too* easy. It could become an early-game crutch or a perk instead.
 - **Is the setup zone a fixed size?** Opening up more rows could be an upgrade, letting you start Smalls further up the field.
 - **A Toss Hijink?** The Big grabs a Small and flings it to a spot. The old "fling" move could live on as a Hijink.
-- **Is the starting squad size a team trait,** and how small can the Woodfolk's handful be before one bad screen ends a run?
-- **Should balls ever get rules?** Each team's ball (Skull, Jack-o'-Lantern, Ember) is cosmetic for now. Later, a ball could be a draft card or perk, e.g. swapping to a Skull that bites defenders.
+- **Should balls ever get rules?** Each Big's ball (Skull, Jack-o'-Lantern, Ember) is cosmetic for now. Later, a ball could be a draft card or perk, e.g. swapping to a Skull that bites defenders.
