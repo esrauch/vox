@@ -159,23 +159,35 @@ Two kinds of trouble fill each screen. **Neither of them ever has the ball.** Al
 
 Defenders avoid telegraphed hazards, but not perfectly, and **hazards hit them too**, so you can bait a Chaser into a pumpkin lane.
 
-**Hazards** don't react to you. They're traps and patterns, like the cars in *Crossy Road*. You learn their rhythm and time your throws and runs around them:
-- **Lanes** of things crossing the screen at a steady pace.
-- **Timed traps** that open and shut, rise and fall.
-- **Terrain** that slows, trips or sinks you.
+**Hazards** don't react to you. They're beat patterns, like the cars in *Crossy Road*: you learn their rhythm and time your throws and runs around them.
 
-| Place | Lanes | Timed traps | Terrain |
-|---|---|---|---|
-| **Haunted Forest** | Rolling pumpkins, stampeding boars, a river of logs to hop | Snapping flytraps, falling acorns, popping scarecrows | Leaf piles, brambles, roots |
-| **Graveyard** *(later)* | Runaway coffins, a hearse, a parade of ghosts | Graves that open and snap shut, a swinging scythe | Mud, fog |
-| **Witch's Swamp, Haunted Manor** *(later)* | *TBD* | *TBD* | *TBD* |
+**The readability test for every hazard:** one big, simple voxel shape that reads from the steep camera at phone size, **one rule**, and **one telegraph** (a facing direction, a shadow, a glow). No status effects: a hazard either hits you or it doesn't.
 
-**Hazards and the rules:**
-- **They take down players, and defenders too.** Hazards are the most common cause of losing players, so a well-timed run gets *through* a lane and a bad one gets flattened. A defender wandering into a lane gets flattened just the same.
-- **If a hazard hits your carrier, it drops the ball.** That's a fumble, and you lose that ball.
-- **Hazards never reach the QB.** The bottom grid is always safe ground. Hazards live up the field.
-- **Throws can be blocked.** A ball in the air can hit something tall passing through a lane (a boulder, a hearse) and drop.
-- **Telegraph everything.** Every hazard shows a warning before it moves (a rumble, a shadow, a glow), so losing a player feels fair and funny, not cheap.
+#### Haunted Forest hazards
+
+| Hazard | Shape | Rule | Telegraph | When |
+|---|---|---|---|---|
+| **Rolling Pumpkin** | A big orange pumpkin. | **A ground lane.** A whole row is a pumpkin lane: one to three pumpkins roll along it, one tile per beat (or every 2 beats on a slow lane), each lane in one direction. Anything a pumpkin rolls into, or that hops into one, goes down. Pumpkins are **low**, so passes fly over them. | Each pumpkin faces its next tile; a small arrow at the lane's edge shows its direction. | **M2** |
+| **Witch on a Broom** | A purple pointed hat on a broom, flying high. | **An air lane.** She sweeps across her row every few beats. **Only passes are affected:** a ball crossing her row while she's in it gets snatched, which is a fumble. Runners on the ground are safe. | Her dark shadow on the row, and a flash at the edge the beat before she enters. | **M2** |
+| **Tombstone** | A grey slab. | **A static obstacle.** Nothing can enter its tile: a Walk-on stops behind it and waits. Passes fly over it. | None needed: it never moves. | M2 if time allows |
+| **Drifting Ghost** | A plain white sheet with two eye holes. | **A slow, tall lane** (a tile every 2 beats). It knocks down players and defenders, and because it's tall it **blocks passes** through its tile: the slow, tall counterpart to the pumpkin. | It faces its next tile. | Later |
+
+**Hazard rules:**
+- **Pure beat patterns.** What a hazard does is set by the beat number alone, so the same screen always plays the same way.
+- **Learn it before HIKE.** During setup, hazards loop through their cycle on the huddle music. At **HIKE!** the pattern starts from its first beat, so what you saw is what you get.
+- **One beat of warning, always.** Nothing moves without telegraphing it first, so losing a player feels fair and funny, not cheap.
+- **They hit everyone.** A hit is a normal hit (a Heft 0 Walk-on goes down), for your players and for defenders. A carrier that gets hit drops the ball, which is a fumble.
+- **Upfield only.** Hazards never appear in the setup rows or the end zone, and never reach the QB.
+- **▲ Pumpkins wrap around:** one rolling off one edge comes back in at the other, so a lane's whole pattern is always visible.
+- **▲ Who walks into them depends on the kind:**
+  - **Walk-ons are dumb** and hop straight in.
+  - **Chasers and Blitzers are reckless** and charge through, so you can bait them into a lane.
+  - **Wall-ers and Pickers are careful** and wait a beat rather than step into a hazard.
+- **Setup becomes a timing puzzle.** Walk-ons hop every 2 beats, so a player's starting row and column decide exactly when and where it reaches each lane.
+
+**Later places** bring their own hazards (a graveyard's runaway coffins, for example), designed to the same readability test.
+
+**Hazards and difficulty:** early screens have one slow pumpkin lane. Later screens add faster lanes, more pumpkins, the witch over the passing lanes, and hazards combined with defenders (say, a Wall-er just behind a pumpkin lane).
 
 **Screens are built from horizontal strips**, much as *Crossy Road* builds its road: open turf, defender zones and hazard lanes stacked on top of each other. Mixing up those strips is how screens get both variety and difficulty.
 

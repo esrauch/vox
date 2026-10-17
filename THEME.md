@@ -89,7 +89,7 @@ Candidates (each wearing the team helmet, with a role you can read from its shap
 
 *Note: a Bat is both a defender and a recruit candidate. The helmet rule tells them apart (a wild purple bat versus our helmeted gold bat), but if it's confusing in play, the Picker could become an Owl or a Crow instead.*
 
-**Hazards** belong to the forest too: rolling pumpkins, snapping flytraps, stampeding boars, logs on the river.
+**Hazards** belong to the forest too, each one a single simple shape: **rolling pumpkins** tumbling along the turf, a **witch on a broom** swooping over the passing lanes, **tombstones** in the way, and later **drifting ghosts**.
 
 **Later, more haunted places:** a graveyard, a witch's swamp, a haunted manor. Each has its own locals and hazards, but it's always the same team, picking up recruits along the way.
 

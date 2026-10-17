@@ -158,7 +158,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 - [x] **Swap in the new theme's models:** football-player Walk-ons (`team/walkOn`), a bigger QB in reversed colors with its throwing arm up (`team/qb`), and a jack-o'-lantern football (`team/ball`). The old Elder Bough models are removed, and the code now says QB instead of Big.
 - [ ] The Haunted Forest, Walk-ons, and **two recruit kinds** (e.g. the Bat and the Pumpkin-head, in team helmets).
-- [ ] One biome, generic defenders (all four kinds), and two hazards (one lane, one timed trap).
+- [ ] The Haunted Forest's hazards: **Rolling Pumpkin** (ground lane) and **Witch on a Broom** (air lane that snatches passes), plus **Tombstones** (static obstacles) if time allows. Each needs a model, a beat pattern, a one-beat telegraph and a setup-phase preview.
 - [ ] Endless screens from strip-based generation, with a simple difficulty ramp.
 - [ ] A draft with **recruit** and **Walk-on upgrade** cards only, in a plain UI.
 - [ ] The pile of balls, wipeouts, game over, and a score in yards.
@@ -229,7 +229,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** a run that changes as you go.
 
-- [ ] Three biomes (Graveyard, Forest, Mountain), each with its own strips, hazards, defenders, palette and song (with its own tempo).
+- [ ] A second haunted place (the graveyard), with its own strips, hazards, defenders, palette and song (with its own tempo), after the Haunted Forest.
 - [ ] Biome transitions and their order (from M0).
 - [ ] Boss screens with giant forest bosses, plus a boss song.
 - [ ] A difficulty curve that hits the target run lengths: about 2 minutes early, about 10 for a good run, 20+ for a legendary one.
@@ -292,6 +292,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Hazards designed: Rolling Pumpkin and Witch on a Broom for M2, Tombstones if time allows, Drifting Ghost later. The rule: one simple shape, one rule, one telegraph.
 - **2026-10-17:** Throws are limited to the middle half of the field, subtly marked on the turf.
 - **2026-10-17:** New team models in the game: football-player Walk-ons, the QB and the jack-o'-lantern football. "Big" is renamed to "QB" in the code.
 - **2026-10-17:** Theme reworked: a football team in a haunted forest, with no Bigs or Smalls. The game is now called **Fourth & Ghoul**. GAMEPLAY.md and TECHNICAL.md are updated to match. *(Items checked off before this point use the old words: the Big is now the QB, and Smalls are now players.)*
