@@ -286,11 +286,6 @@ export class Game {
     if (!result) return;
     const beat = Math.max(result.resolvesOn, this.state.beat + 1);
     this.queuedThrow = { beat, target: this.reticle };
-    const ms = Math.round(result.offset * 1000);
-    if (result.judgement === 'onBeat') {
-      this.play('onBeat');
-      this.hud.showJudgement('ON BEAT!', 'onBeat');
-    } else this.hud.showJudgement(ms < 0 ? 'early' : 'late', 'offBeat');
   }
 
   private onPointerDown(e: PointerEvent): void {

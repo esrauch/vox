@@ -79,16 +79,13 @@ This is the riskiest system in the project, so it gets built and tested first.
 - **The audio clock is the master clock.** The beat comes from `AudioContext.currentTime` and the track's BPM, never from `requestAnimationFrame` or `setTimeout`.
 - **Scheduling uses lookahead** (the standard "two clocks" pattern). A short timer schedules audio events slightly ahead of time, at exact audio-clock times. The renderer asks "what beat is it, and how far through it are we?" every frame, and animates to match.
 - **The simulation steps exactly on each beat boundary.** Actions you tapped during beat *N* are queued and resolve at beat *N+1*. That's how "everything happens on the beat" works.
-- **Judging On-Beat taps:**
-  - Each tap's timestamp (`event.timeStamp`) is mapped to audio time, using `AudioContext.getOutputTimestamp()` to line the two clocks up.
-  - The offset to the nearest beat decides the **On-Beat** bonus.
-  - The window is a tuning value, generous by default.
+- **Beat alignment is not a score mechanic.** There is no separate "perfect timing" judgment or tap window to reward. The music is the shared timing source, and the UI simply reflects it.
 - **Latency compensation:**
   - `outputLatency` and `baseLatency` are taken into account where the browser reports them.
-  - A **calibration screen** ("tap along to the beat") sets a per-device offset, saved in settings. This is essential with Bluetooth headphones.
+  - Device-specific offset checks remain possible for the clock, but they are for sync quality, not a perfect-timing system.
 - **Audio unlock:** mobile browsers only start audio after a user gesture. The title screen's first tap creates and resumes the `AudioContext`.
 - **Pausing:** when the tab is hidden, the game pauses and suspends the audio context. Resuming starts with a short count-in before play continues.
-- **Debug overlay (dev only):** shows the current beat, the offset of each tap, the measured latency and the frame time.
+- **Debug overlay (dev only):** shows the current beat, the measured latency and the frame time.
 
 ---
 
@@ -125,8 +122,8 @@ This is the riskiest system in the project, so it gets built and tested first.
 - **What lives in the DOM:**
   - The title screen and menus.
   - Big select, the draft cards and the game-over roll call.
-  - The HUD: the **beat bar**, the **ball button**, the **Hijink icons**, the Hype meter and the yards.
-  - Settings, calibration and credits.
+  - The HUD: the **ball button**, the **Hijink icons**, the Hype meter and the yards.
+  - Settings and credits.
 - **Polish toolkit:**
   - CSS transitions and keyframes, animating only `transform` and `opacity`, which stay smooth on phones.
   - CSS custom properties for team palettes, set from the same palette data as the voxels.
@@ -196,7 +193,7 @@ src/content/
   hazards.ts      // hazard types and their beat patterns
   biomes.ts       // strip sets, hazard pools, song, palette
   cards.ts        // draft cards: Treats, Tricks, perks
-  hijinks.ts      // Hijinks: targeted/global, Hype cost, effect, On-Beat bonus
+  hijinks.ts      // Hijinks: targeted/global, Hype cost, effect, rhythm bonus
   tuning.ts       // every magic number in one place
 ```
 
@@ -266,7 +263,7 @@ layer 0
 ## 12. Asset Pipeline: 2D Sprites and UI Art
 
 - **Created by Claude: SVG.**
-  - Icons, Hijink icons, draft-card frames and art, the beat bar and buttons, badges.
+  - Icons, Hijink icons, draft-card frames and art, the beat pulse and buttons, badges.
   - It scales perfectly, is tiny, can be written as text, and is themed through palette CSS variables.
   - Its style follows the voxel look: chunky, flat colors, bold outlines.
 - **Public-domain or CC0 sources:**
@@ -345,7 +342,7 @@ layer 0
 ## 18. Accessibility
 
 - **Audio latency calibration** (see the beat clock).
-- **Playing on mute:** the beat is always visible (the beat bar and the bounce) and, where supported, felt (haptics).
+- **Playing on mute:** the beat is always visible (the beat pulse and the bounce) and, where supported, felt (haptics).
 - **Teams differ by shape *and* color,** and the palettes are checked for color-blind safety.
 - **Reduced motion:** less screen shake, gentler bursts, no camera jolts. It follows the system's `prefers-reduced-motion` setting by default.
 - **Large touch targets** and readable text sizes at phone scale.
@@ -381,7 +378,7 @@ layer 0
 
 1. **Beat-clock spike.** Audio clock, synthesized metronome, tap judging, calibration, all on real phones. If this doesn't feel right, nothing else matters.
 2. **Simulation core.** Grid, hops on the beat, a throw taking 2 beats, catch/interception/miss, fumbles, the pile of balls. All of it unit-tested.
-3. **Minimal render.** Cubes standing in for units, the camera, the reticle, the ball button, the beat bar.
+3. **Minimal render.** Cubes standing in for units, the camera, the reticle, the ball button, the beat pulse.
 4. **The voxel pipeline.** `.voxt` → mesh → preview PNGs. First models: Woodfolk Smalls, the Elder Bough, the Jack-o'-Lantern.
 5. **Synth and the first song.** One Halloween track with stems, plus the core SFX.
 6. **First playable** (as scoped in GAMEPLAY.md). Then iterate on feel.

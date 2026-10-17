@@ -96,17 +96,45 @@ describe('throwing and catching', () => {
     expect(small(r3.state, 100).fendOff).toBe(0);
   });
 
-  it('counts a ball landing on an empty tile as a fumble, and the Big takes the next ball', () => {
+  it('counts a ball landing on an empty tile as a fumble', () => {
     const r1 = step(playState([{ pos: vec(1, 2) }]), vec(6, 6));
     const r3 = run(r1.state, 2);
     expect(ofType(r3.events, 'fumble')).toEqual([{ type: 'fumble', reason: 'miss', ballsLeft: 2 }]);
     expect(r3.state.screen.ball).toEqual({ at: 'big' });
   });
 
+  it('a fumble resets the whole screen to setup with the next ball', () => {
+    // Run the Walk-on upfield, then miss: everything goes back to the start.
+    let state = createRun(5);
+    dispatch(state, { type: 'hike' });
+    const startTiles = state.screen.smalls.map((s) => key(s.pos));
+    const defenderTiles = state.screen.defenders.map((d) => key(d.home));
+    state = run(state, 4).state;
+    const r = run(step(state, vec(0, 12)).state, 2);
+    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('miss');
+    expect(ofType(r.events, 'screenStarted')).toEqual([{ type: 'screenStarted', index: 0 }]);
+    expect(r.state.phase).toBe('setup');
+    expect(r.state.balls).toBe(2);
+    expect(r.state.screen.smalls.every((s) => s.alive)).toBe(true);
+    expect(r.state.screen.smalls.map((s) => key(s.pos))).toEqual(startTiles);
+    expect(r.state.screen.defenders.map((d) => key(d.pos))).toEqual(defenderTiles);
+  });
+
   it('counts a defender on the landing tile as an interception', () => {
     const state = playState([{ pos: vec(1, 2) }], [{ kind: 'picker', pos: vec(6, 6) }]);
     const r = run(step(state, vec(6, 6)).state, 2);
     expect(ofType(r.events, 'fumble')[0]?.reason).toBe('interception');
+  });
+});
+
+describe('Smalls never block each other', () => {
+  it('a carrier behind a Walk-on that has stopped at the top still scores', () => {
+    const state = playState([{ pos: vec(2, 13) }, { pos: vec(2, 14) }]);
+    state.screen.ball = { at: 'carried', by: 100 };
+    const r = run(state, 4);
+    expect(ofType(r.events, 'touchdown')).toHaveLength(1);
+    expect(small(r.state, 100).pos).toEqual(vec(2, 15));
+    expect(small(r.state, 101).pos).toEqual(vec(2, 15)); // sharing the end-zone tile
   });
 });
 
@@ -279,10 +307,9 @@ describe('determinism', () => {
         const throwAt = beat % 7 === 0 ? vec((seed + beat) % 9, 2 + (beat % 10)) : null;
         state = step(state, throwAt).state;
         const live = [...state.screen.smalls, ...state.screen.defenders].filter((u) => u.alive);
-        for (const side of ['small', 'defender']) {
-          const tiles = live.filter((u) => u.side === side).map((u) => key(u.pos));
-          expect(new Set(tiles).size).toBe(tiles.length);
-        }
+        // Defenders never share a tile (Smalls may).
+        const tiles = live.filter((u) => u.side === 'defender').map((u) => key(u.pos));
+        expect(new Set(tiles).size).toBe(tiles.length);
         expect(live.some((u) => eq(u.pos, BIG_POS))).toBe(false);
         expect(state.balls).toBeGreaterThanOrEqual(0);
       }

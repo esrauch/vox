@@ -125,15 +125,15 @@ export class Hud {
     const running = phase !== null;
     this.beatBar.classList.toggle('running', running);
     if (!running) return;
-    const width = this.beatBar.clientWidth / 2;
-    const spacing = width / (TICKS_EACH_SIDE + 0.5);
+
+    const width = this.beatBar.clientWidth;
+    const spacing = width / (this.ticks.length + 1);
     this.ticks.forEach((tick, i) => {
-      const k = (i % TICKS_EACH_SIDE) + 1;
-      const side = i < TICKS_EACH_SIDE ? -1 : 1;
-      const offset = (k - phase) * spacing * side;
+      const offset = (i - (this.ticks.length - 1) / 2) * spacing;
       tick.style.transform = `translateX(${offset}px)`;
-      tick.style.opacity = String(Math.min(1, (TICKS_EACH_SIDE + 0.5 - (k - phase)) / 1.5));
+      tick.style.opacity = '0.8';
     });
+
     const kick = Math.pow(1 - phase, 3);
     this.ballButton.style.setProperty('--kick', kick.toFixed(3));
   }

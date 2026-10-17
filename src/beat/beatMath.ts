@@ -43,9 +43,14 @@ export function resolveBeat(grid: BeatGrid, t: number): number {
 
 export type Judgement = 'onBeat' | 'offBeat';
 
-/** On-Beat if the tap is within ±`window` seconds of the nearest beat. */
-export function judge(offset: number, window: number): Judgement {
-  return Math.abs(offset) <= window ? 'onBeat' : 'offBeat';
+/**
+ * The gameplay no longer awards a separate perfect-timing result.
+ * The beat is the shared timing layer, not a score mechanic, so this returns
+ * a neutral off-beat result for compatibility while the action itself still
+ * resolves on the beat clock.
+ */
+export function judge(_offset: number, _window: number): Judgement {
+  return 'offBeat';
 }
 
 /** A paired reading of the audio clock and the performance clock (AudioContext.getOutputTimestamp). */

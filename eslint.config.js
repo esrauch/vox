@@ -10,6 +10,10 @@ export default tseslint.config(
     languageOptions: {
       globals: { ...globals.browser },
     },
+    rules: {
+      // Parameters named with a leading underscore are intentionally unused.
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
   },
   {
     // Tests build exact situations, and voxel code indexes fixed-size arrays in

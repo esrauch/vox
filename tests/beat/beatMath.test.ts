@@ -61,9 +61,9 @@ describe('resolveBeat', () => {
 });
 
 describe('judge', () => {
-  it('is On-Beat inside the window and off-beat outside it', () => {
-    expect(judge(0.05, 0.08)).toBe('onBeat');
-    expect(judge(-0.08, 0.08)).toBe('onBeat');
+  it('does not award a perfect-timing result anymore', () => {
+    expect(judge(0.05, 0.08)).toBe('offBeat');
+    expect(judge(-0.08, 0.08)).toBe('offBeat');
     expect(judge(0.081, 0.08)).toBe('offBeat');
   });
 });

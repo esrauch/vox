@@ -45,23 +45,24 @@ This gives the game one thing to master: **where and when you throw**.
 
 ---
 
-## Controls: Aim, Then Time
+## Controls: Aim, Then Act
 
-**Aiming and timing are separate taps.** You aim at your leisure, then put all your attention on hitting the beat.
+**Aiming is the skill.** The beat is the shared clock for the whole screen, but there is no separate "perfect timing" rhythm challenge or judgment UI.
 
 | Phase | Input | What it does |
 |---|---|---|
 | **Setup** | **Drag a Small** into a tile of the setup zone | Set your formation. |
 | **Setup** | **Tap HIKE!** | Start the play. |
 | **Play** | **Tap the field** | **Place the target reticle** on that tile. Tap again to move it, as often as you like. |
-| **Play** | **Tap the pulsing ball** | **Throw** to the reticle. The ball button sits at the bottom center and pulses on the beat. |
+| **Play** | **Tap the ball button** | **Throw** to the reticle. The button sits at the bottom center and pulses with the beat so you can read the rhythm, not chase a perfect timing window. |
 | **After the throw** | **Tap a Hijink icon** | Fire it, either at the reticle or across the whole field (see *Hype and Hijinks*). |
 
 **That's it.** There's nothing to move or steer.
 
 - **The reticle is the single target for everything.** It marks where your next throw will go, and where your Hijinks will hit.
-- **The ball button is your Big's ball:** a pumpkin, a skull, an ember. It bounces on every beat, glowing brightest *on* the beat, which is when you want to tap it.
+- **The ball button is your Big's ball:** a pumpkin, a skull, an ember. It bounces with the beat so the game feels locked to the music without asking for a perfect tap window.
 - **A throw goes to a tile, not a player.** The ball arcs through the air and lands exactly on the reticle's tile. **Leading your receiver** is the skill.
+- **There is no perfect-timing throw bonus.** A throw resolves on the beat, but the rhythm is a shared timing layer, not a separate score mechanic.
 - **Only the Big throws. There are no laterals.** Once a Small catches the ball, it's on its own and has to run it home. The ball button goes dark until the Big has a ball again, either after a touchdown or a fumble.
 - **The flight time is the drama.** While the ball is in the air, everyone hops for the landing tile, and you hold your breath.
 - **Thumb layout:** the ball button is at the bottom center with the Hijink icons beside it, and the whole field above is for aiming.
@@ -93,10 +94,9 @@ Each screen is one field-length climb, in two phases.
   - **Otherwise, your Small is one tile short, facing the landing tile:** it lunges forward and catches it. It's a normal catch, with no boost.
   - **Otherwise:** it's a miss, and that's also a **fumble**. There are no loose balls and no scrambles. A throw either connects or it costs you a ball.
   - Defenders only intercept on the exact tile. Only your Smalls get the one-tile lunge.
+- **The direct-on-square catch is still a real mechanic.** A receiver who is already on the landing square gets the strongest outcome, while the one-square lead can still matter for timing and lane control. The game remains readable without adding a separate "perfect timing" reward.
 - **Throws and Hijinks always happen on a beat.** Tap whenever you like, and the action fires on the **next beat**. Nothing ever happens off the beat.
-- **Tap close to a beat for an On-Beat bonus.** The closer your tap is to the beat itself, the better. Off-beat taps still work, so the game is never unplayable if you lose the rhythm. Rhythm is a skill bonus, not a gate.
-  - **On-Beat throw:** the throw itself is unchanged, but it **charges your Hijinks**, giving a big chunk of Hype. Rhythm feeds your powers. ▲ *Decision:* the alternative was making an On-Beat throw **uninterceptable**. Recommendation: make that a perk instead (**Perfect Spiral**: On-Beat throws can't be intercepted). That way the base bonus never decides whether a throw connects, but rhythm-heavy builds can lean into it.
-  - **On-Beat Hijink:** the Hijink hits **harder**: a bigger area, a longer effect, or a partial Hype refund, whichever suits that Hijink. Rhythm makes your powers better.
+- **There is no perfect-timing bonus.** The music and the field share the same beat, and you're reading that rhythm, not trying to hit a tiny perfect window. A twitchy timing meter is intentionally not part of the design.
 - **Setup is the break.** During the huddle the music drops to a quiet loop. **HIKE!** brings the beat crashing back in.
 - **The tempo is the difficulty dial.** Each biome has its own track and tempo, and the beat picks up as you climb. Boss screens get their own song.
 
@@ -108,17 +108,16 @@ Each screen is one field-length climb, in two phases.
 
 | What | How it's shown |
 |---|---|
-| **The beat itself** | A beat bar along the bottom edge, as in *NecroDancer*: ticks slide in toward a pulsing jack-o'-lantern in the center. The whole field gives a small bounce on every beat. |
+| **The beat itself** | A simple beat pulse and field bounce, enough to read the music without a timing-meter overlay. |
 | **The grid** | A soft checkerboard on the turf, so every tile is obvious. |
 | **Where a unit will hop next** | Every Small and defender **faces the direction it's about to hop**, as in *Crossy Road*. Fast units show a double-hop arrow. |
 | **Throw range** | A ring around the Big. It covers most of the screen but **never reaches the top rows**, so the last stretch always has to be run. The reticle can't be placed outside it. |
-| **The ball button** | Your Big's ball at the bottom center, bouncing and glowing in time. It's brightest exactly on the beat. |
+| **The ball button** | Your Big's ball at the bottom center, bouncing and glowing in time with the music. It reads the rhythm without creating a timing-score layer. |
 | **The reticle** | A bold target on a tile, in your team's color. Before a throw it shows where the ball will go. After a throw, it marks where Hijinks will land. |
 | **Where the ball will land** | The reticle locks in, with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |
 | **Is someone going to be there?** | **Always on.** The target ring lights up in your team's color if one of your Smalls will be able to catch it (on the tile, or one tile short and facing it), brighter for a Clean Catch, and red if a defender will intercept. |
 | **Hazards** | Every hazard warns **one beat ahead**: a lane flashes before something enters it, and a trap shows countdown pips before it snaps. |
 | **The Big's counter** | **It appears over the Big only once a Blitzer arrives**, pulsing red and ticking down with a crunch on each attack. Attacking Blitzers flash on the beat they strike. When it hits 0, you've been sacked. |
-| **On-Beat taps** | An "ON BEAT!" pop, a sparkle trail and a beat-synced *thwump*. The Hype meter visibly jumps. |
 
 **Readability rules:**
 - **Teams are told apart by shape *and* color,** never by color alone.
@@ -185,7 +184,7 @@ Hazards are themed by biome:
 
 - **The count carries over for the whole run.** It never resets between screens.
 - **A fumble loses the ball in play for good.** The defense runs off with it, or it gets smashed. Fumbles happen when a Blitzer sacks the Big, a throw lands on an empty tile, a defender catches a throw, or a carrier gets tackled or flattened by a hazard.
-- **Then play continues with the next ball.** The Big grabs a fresh one from the pile and you keep going on the same screen. Your Smalls stay where they are, so there's no setup phase again.
+- **Then the whole screen resets.** It's back to setup with the next ball: every Walk-on returns to its place, the defenders go back to their starting tiles, and you get to re-plan. Recruits who died stay dead. *(Continuing mid-screen left Walk-ons too far upfield to throw to, and the run just drained away.)*
 - Each fumble comes with a slow-motion beat, *"FEE! FI! FO! FUMBLE!"*, and a gasp from the crowd as the pile shrinks.
 - **When the last ball is gone, the run is over.**
 - **More balls are a draft reward**, and a rare, valuable one. Because lives carry over, every extra ball is a real lifeline.
@@ -227,6 +226,7 @@ So every possession is a few seconds of "throw it, THROW IT," against a receiver
 ### On the field
 
 - **Smalls run themselves**, starting from the tile you put them in. Each kind has a single, obvious job you can read from its silhouette.
+- **Smalls never block each other.** They can share a tile and hop past one another, so a carrier is never stuck behind a teammate.
 - **Walk-ons are dumb.** A Walk-on runner hops straight up its column on every beat, **even into a defender or a hazard**. Keeping it alive is *your* job: place it in a clear column, or throw it the ball before it gets there. Smarter footwork (sidestepping, waiting) is something recruits and Walk-on upgrades can add.
 - **Collisions:** when a Small and a defender run into each other, **the defender wins**. A tackled carrier drops the ball, which is a fumble.
   - **Walk-ons trade.** A Walk-on **without the ball** that runs into a defender dies, but **takes the defender down with it**. That opens up a strategy: **stack Walk-ons in a column**, so the first clears the way for the ones behind. A Walk-on carrying the ball doesn't trade: it's simply tackled.
@@ -262,7 +262,6 @@ Card types:
 | **+1 slot** | One more Walk-on in the squad. It's rare. |
 | **Hijinks** | Unlock a new Hijink, or power up one you already have. |
 | **Fast Throw** | Throws land in 1 beat instead of 2. |
-| **Perfect Spiral** | On-Beat throws can't be intercepted. |
 | **Extra balls** | +1 ball on the pile. It's rare and precious. |
 | **Perks** | Passive quirks with punny names, e.g. **Butterfingers Insurance** (the first fumble of each screen is free) or **Second String** (a dead recruit sometimes comes back). |
 
@@ -279,9 +278,9 @@ Card names and art should be jokes. The draft is part of the comedy, not a sprea
   - **Targeted** ones hit at the reticle, e.g. *Root Awakening* snares a patch around it, and *Eruption* blasts it.
   - **Global** ones affect the whole field, e.g. *Fog of War*, or *Night of the Living Dead*. The reticle doesn't matter for these.
   - Each icon shows which kind it is: targeted icons have a little crosshair.
-- **Hype** is a crowd meter that fills when exciting things happen: **On-Beat throws** (the main source), long throws, diving catches, touchdowns. A fumble *drains* it. Each Hijink costs Hype, so a full meter means you can afford something.
+- **Hype** is a crowd meter that fills when exciting things happen: long throws, diving catches, clean catches and touchdowns. A fumble *drains* it. Each Hijink costs Hype, so a full meter means you can afford something.
 - **▲ Decision:** Recommendation: **at most three Hijink slots**, beside the ball button. When you draft a fourth, it replaces one you already have.
-- **Hijinks fire on the next beat, like throws.** If you tap one On-Beat, it hits harder (see *The Beat*).
+- **Hijinks fire on the next beat, like throws.** The flow stays rhythmic without adding a separate perfect-timing reward.
 
 ---
 
@@ -376,7 +375,7 @@ Designs we tried or considered and set aside. They aren't in the game, but they'
 ## Open Questions
 
 - **Should playing with the sound off be supported?** Plenty of phone games are played on mute. The beat is also visible (bouncing) and felt (haptic ticks), but is that enough?
-- **How strict should On-Beat be?** A generous window keeps the game casual. Recommendation: generous, with tighter windows offered as a perk or a challenge mode.
+- **How much beat guidance should the UI provide?** The rhythm should stay readable without turning the whole game into a timing challenge.
 
 - **Should the "someone will be there" target-ring hint stay forever?** It makes throws very readable, but it might make them *too* easy. It could become an early-game crutch or a perk instead.
 - **Is the setup zone a fixed size?** Opening up more rows could be an upgrade, letting you start Smalls further up the field.

@@ -128,6 +128,9 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
     }
   }
 
+  // A tackle fumble resets the screen; the old units are gone, so stop here.
+  if (state.phase !== 'play') return;
+
   for (const u of units) {
     const to = moving.get(u.id);
     if (!u.alive || !to) continue;
@@ -145,13 +148,14 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
 }
 
 /**
- * Two units on the same side can't share a tile or swap places. Units that
- * aren't moving keep their tile; among movers, the lower id wins.
+ * Two defenders can't share a tile or swap places. Defenders that aren't
+ * moving keep their tile; among movers, the lower id wins. Smalls never block
+ * each other: they can share a tile and hop past one another.
  */
 function cancelSameSideConflicts(units: readonly Unit[], moving: Map<number, Vec>): void {
   for (let changed = true; changed;) {
     changed = false;
-    for (const side of ['small', 'defender'] as const) {
+    for (const side of ['defender'] as const) {
       const sideUnits = units.filter((u) => u.side === side && u.alive);
       const claimed = new Set(sideUnits.filter((u) => !moving.has(u.id)).map((u) => key(u.pos)));
       for (const u of sideUnits) {
@@ -290,7 +294,11 @@ function catchBall(state: RunState, s: SmallUnit, clean: boolean, events: SimEve
 
 // ── Fumbles, touchdowns, wipeouts ─────────────────────────────────────────
 
-/** Lose the ball in play for good. The Big takes the next one from the pile, if any are left. */
+/**
+ * Lose the ball in play for good. If any are left on the pile, the whole
+ * screen resets to setup: every Walk-on back, the defenders back at their
+ * starting tiles, and the Big holding the next ball. Dead recruits stay dead.
+ */
 function fumble(state: RunState, reason: FumbleReason, events: SimEvent[]): void {
   state.balls = Math.max(0, state.balls - 1);
   events.push({ type: 'fumble', reason, ballsLeft: state.balls });
@@ -298,8 +306,8 @@ function fumble(state: RunState, reason: FumbleReason, events: SimEvent[]): void
     endRun(state, events);
     return;
   }
-  state.screen.ball = { at: 'big' };
-  state.screen.bigHold = tuning.big.hold;
+  setUpScreen(state, state.screen.index);
+  events.push({ type: 'screenStarted', index: state.screen.index });
 }
 
 function checkTouchdown(state: RunState, events: SimEvent[]): void {

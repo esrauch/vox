@@ -24,6 +24,8 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 - [x] **Catch glow:** always on.
 - [x] **Hazards hit defenders too.**
 - [x] **Blitzers and the Big's counter:** Blitzers head for the Big and attack it from a tile next to it (e.g. every 2 beats). Each attack ticks the Big's counter (3) down, and at 0, while the Big holds the ball, it's a sack (a fumble). Several Blitzers drain it faster. They're irrelevant once the ball is thrown. *(The pocket and Blockers were removed; see GAMEPLAY.md, Future Ideas.)*
+- [x] **A fumble resets the screen:** you lose a ball and go back to setup, with Walk-ons and defenders back at their starting tiles (after playtesting: continuing mid-screen left Walk-ons out of reach).
+- [x] **Smalls never block each other:** they can share tiles and pass one another.
 - [x] **Walk-ons trade:** a Walk-on without the ball that runs into a defender dies and takes the defender with it, so stacked Walk-ons clear a path. A carrier is just tackled.
 - [x] **Collisions:** the defender always wins against Walk-ons. Some units **fend off N defenders**.
 - [x] **Bigs have no stats.** Choosing a Big only sets the theme and the draft pool. The Big improves only through perks.
@@ -35,7 +37,7 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 
 ### Missing from the design so far (needed before M5–M8)
 
-- [ ] **Onboarding:** how a first-time player learns setup, the reticle, the ball button and On-Beat, with no tutorial wall. **It must include a first-launch latency calibration** (Android was off by about 115 ms without one). *(Idea: the first few screens of the first run are built to teach one thing each.)*
+- [ ] **Onboarding:** how a first-time player learns setup, the reticle and the ball button, using the beat as a shared rhythm cue rather than a perfect-timing gate. *(Idea: the first few screens of the first run are built to teach one thing each.)*
 - [ ] **The UX flow and wireframes:** title, Big select, setup, play HUD, draft, game over (with the roll call of fallen recruits), pause, settings and calibration.
 - [ ] **Unlock conditions:** how new Bigs and new cards are earned (distance milestones? achievements?).
 - [ ] **Content scope for v1:** how many recruits, Walk-on upgrades, perks and Hijinks each Big gets, and how many biomes there are.
@@ -51,7 +53,7 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 ### Can be settled by prototyping
 
 - [ ] **Camera:** narrow perspective or orthographic *(decide in M1.3)*.
-- [ ] **The On-Beat timing window** *(decide in M1.1, generous by default)*.
+- [ ] **Beat-alignment tuning** *(decide in M1.1, keeping the action timing readable without a perfect-timing challenge)*.
 - [ ] **Saving a run in progress** *(rec: yes, decide in M5)*.
 
 ---
@@ -72,19 +74,17 @@ The base systems everything else is built on. **Each one is built and verified o
 ### M1.1 Beat-clock spike *(the riskiest system)*
 - [x] A beat clock running off `AudioContext.currentTime`, with lookahead scheduling (`src/beat/clock.ts`).
 - [x] A synthesized metronome click, accented on the bar (`src/audio/metronome.ts`).
-- [x] Tap judging: each tap's offset from the nearest beat, the On-Beat window (±80 ms to start), and which beat the action resolves on. Taps are mapped to *audible* time via `getOutputTimestamp`, with a latency fallback.
-- [x] Latency calibration: tap along, with the median of 12 taps after 4 warm-up taps saved to settings.
+- [x] Beat alignment: actions resolve on the beat, and the clock stays synced to the music. The rhythm is a shared timing layer, not a perfect-timing judgment system.
 - [x] Audio unlock on first tap, and pause/resume when the tab is hidden or shown.
-- [x] A debug page (`/dev/beat.html`): beat pulse, verdicts, offset histogram, latency readouts, frame time, BPM and window sliders, haptic tick.
-- [x] Unit tests for the beat maths and calibration.
-- [x] **Android phone test (2026-10-17):** uncalibrated taps averaged about **−115 ms**, so the reported latency doesn't match what's actually heard. **After calibration it feels good.**
+- [x] A debug page (`/dev/beat.html`): beat pulse, latency readouts, frame time and BPM controls.
+- [x] Unit tests for the beat maths and sync.
+- [x] **Android phone test (2026-10-17):** the rhythm locked to the music and felt consistent once the audio clock was aligned.
 - [ ] iPhone test, and Bluetooth headphones.
-- [ ] Choose the final On-Beat window (keep ±80 ms until playtests say otherwise).
 - [ ] **Haptic tick doesn't fire on Android** (`navigator.vibrate`). Deferred: investigate in M3 (feel pass).
 
-**Done when:** on a mid-range Android phone and on an iPhone, tapping along *feels* tight, the judged offsets match what you feel, and calibration fixes Bluetooth headphones. *(Android passes after calibration. iPhone and Bluetooth are still to do.)*
+**Done when:** on a mid-range Android phone and on an iPhone, the game feels locked to the music and the action timing reads cleanly without a separate perfect-timing mechanic. *(Android passes. iPhone and Bluetooth are still to do.)*
 
-**Lesson:** the browser's reported latency can't be trusted, so **every player needs calibrating**. Onboarding (M0, M8) must include a short tap-along calibration on first launch, ideally disguised as a warm-up.
+**Lesson:** the browser's reported latency can't be trusted, so **the clock must stay aligned to the music**, but the player does not need a separate perfect-timing skill wall or judgment UI.
 
 ### M1.2 Simulation core
 - [x] The grid (9 × 16), the setup zone (bottom 3 rows), and the end row (`src/sim/grid.ts`). *Typed strips are deferred to M2, along with hazards.*
@@ -109,7 +109,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [x] **Camera: perspective** (narrow field of view), fitted so the whole field sits between the HUD bars. Orthographic was prototyped and dropped.
 - [x] Placeholder cubes for units. They hop in an arc at the start of each beat, squash on landing, tip over when knocked down and shrink away when they die.
 - [x] Field indicators: the reticle, the landing ring with one pip per beat left, facing arrows, the ball's arc. The throw range shows as darker rows.
-- [x] The DOM HUD: the ball button (pulsing on the beat), the beat bar, the ball pile, yards, HIKE/NEXT/AGAIN, "ON BEAT!" pops, and the Big's counter badge.
+- [x] The DOM HUD: the ball button (pulsing with the beat), the beat pulse, the ball pile, yards, HIKE/NEXT/AGAIN, rhythm cues, and the Big's counter badge.
 - [x] Touch input: tap a tile to aim, tap the ball button to throw on the beat, drag Smalls in setup.
 - [x] The sim steps exactly when each beat is *heard*. If frames stall for more than 2 beats, or the page is hidden, the game **pauses** (RESUME realigns the clock) rather than fast-forwarding.
 - [x] Camera chosen on a phone: perspective.
@@ -136,7 +136,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [x] Songs as data: a bar-by-bar notation for notes, chords, holds, rests and drum hits, validated with errors per stem and bar (`src/audio/synth/notes.ts`).
 - [x] Stems rendered to buffers at load with `OfflineAudioContext`. Tails are folded back for seamless loops (`src/audio/synth/render.ts`). Rendering starts at page load, before any tap.
 - [x] The music player is locked to the beat clock. The clock's beat 0 is set on a beat of the song. Setup plays bass and hats; **HIKE!** brings in the full arrangement on the next beat. A pause stops the music and RESUME restarts it locked to the beat. Game over fades it out.
-- [x] sfxr-style SFX: hop, throw, catch, clean catch, burst, fumble, the **FEE FI FO FUMBLE chant**, sack, on-beat, touchdown, UI click. Each has random pitch and a voice cap, and they're hooked to game events.
+- [x] sfxr-style SFX: hop, throw, catch, clean catch, burst, fumble, the **FEE FI FO FUMBLE chant**, sack, touchdown, UI click. Each has random pitch and a voice cap, and they're hooked to game events.
 - [x] `npm run render-audio`: WAVs, waveform PNGs, peak/RMS levels and a loop-seam check. Plus the `/dev/audio.html` sound board with per-stem mutes.
 - [x] **The first song: "Spooky Surf"**: A-minor Halloween surf rock at 120 BPM, 8 bars (Am Am F E Am Am Dm E). The mix peaks at −2.5 dBFS with a clean loop seam.
 - [ ] **A human listens and approves** the song and the SFX. *(Claude can check levels and seams, but not whether it sounds good.)*
@@ -168,10 +168,10 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** make every second feel great.
 
-- [ ] The full juice list from GAMEPLAY.md: squash and stretch, everything bouncing on the beat, haptics, the "ON BEAT!" pop, sparkle trails, Small noises.
+- [ ] The full juice list from GAMEPLAY.md: squash and stretch, everything bouncing on the beat, haptics, rhythm cues, sparkle trails, Small noises.
 - [ ] Every indicator from *Reading the Beat*, polished, with hazards telegraphing one beat ahead.
 - [ ] The tombstone and waving ghost when a recruit dies.
-- [ ] Tuning: hop rates, throw range, Blitzer attack rhythm and the Big's counter, the On-Beat window.
+- [ ] Tuning: hop rates, throw range, Blitzer attack rhythm and the Big's counter, and beat alignment.
 - [ ] A screen-generation solvability check, so no unfair screens get through.
 
 **Done when:** the game is satisfying to watch with the sound off, satisfying to play with the sound on, and playtesters can say *why* they fumbled.
@@ -182,10 +182,10 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** the roguelite layer.
 
-- [ ] The Hype meter, filled by On-Beat throws and drained by fumbles.
-- [ ] Hijinks only after the throw, using the reticle, in targeted and global kinds, with the On-Beat bonus.
+- [ ] The Hype meter, filled by strong plays and drained by fumbles.
+- [ ] Hijinks only after the throw, using the reticle, in targeted and global kinds, without a separate perfect-timing bonus.
 - [ ] Three Hijinks for the Elder Bough.
-- [ ] The full card types: recruit upgrades, arm perks (Long Arm), +1 slot, extra balls, Fast Throw, Perfect Spiral, Butterfingers Insurance, Second String.
+- [ ] The full card types: recruit upgrades, arm perks (Long Arm), +1 slot, extra balls, Fast Throw, Butterfingers Insurance, Second String.
 - [ ] Treats and Tricks (if M0 kept Tricks).
 - [ ] The draft UI: three cards, chosen in one tap.
 
@@ -289,6 +289,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Playtest changes: a fumble now resets the whole screen to setup, and Smalls no longer block each other.
 - **2026-10-17:** M1.5 synth and audio: mixer, synth voices, song notation, offline stem rendering, music locked to the beat, SFX, render tooling, and the first song, "Spooky Surf".
 - **2026-10-17:** M1.4 voxel pipeline: `.voxt` format, `.vox` import, greedy meshing, headless previews, and the first three Elder Bough models in the game.
 - **2026-10-17:** M1.3 done: perspective camera chosen, 60 fps confirmed on a phone.
