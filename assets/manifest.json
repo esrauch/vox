@@ -1,0 +1,4 @@
+{
+  "$comment": "Every file under assets/ and assets-src/ needs an entry here. See TECHNICAL.md §14.",
+  "assets": []
+}

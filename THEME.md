@@ -18,7 +18,7 @@ Inspirations: *Crossy Road* (feel, readability, chunky toy-like look, collectibl
 
 - **You are the franchise.** You're the biggest thing on the field and the only one who can see the whole play. Everyone else is a blur of tiny legs at your feet.
 - **Your team adores you (mostly).** The smalls cheer when you throw well and sulk when you step on them. They have personalities: a few of them have names, and the crowd knows those names.
-- **Scale is the joke and the drama.** A tackle on you takes six of the other team's smalls hanging off your arm. A pass from you can land on a single small, catching a ball the size of its whole body.
+- **Scale is the joke and the drama.** All it takes to sack you is one tiny Blitzer bonking your shin, and down you go like a felled tree. A pass from you can land on a single small, catching a ball the size of its whole body.
 - **Chaos you can steer.** You can't control everything, and that's the point. You set up the play and adapt as it falls apart.
 
 ## Tone
@@ -185,13 +185,13 @@ Three starting Bigs, each bringing a homeland with a style and an attitude. In p
 
 ## Attributes (in the abstract)
 
-Every creature on the field, Big or Small, is described by **three attributes**: the **Three H's**. These are *character* traits first: they should tell you who someone is before they tell you any numbers. A player should be able to guess a Small's attributes from its silhouette.
+Every Small and every defender is described by **three attributes**: the **Three H's**. (Bigs are the exception: they're legends, not stat lines. A Big's character comes from its homeland, not from numbers.) In play they're simple numbers starting at 0. Walk-ons are a perfectly average 0 / 0 / 0. These are *character* traits first: they should tell you who someone is before they tell you any numbers. A player should be able to guess a Small's attributes from its silhouette.
 
 | Attribute | What it means | Who's known for it |
 |---|---|---|
 | **Hustle** | Speed and get-up-and-go: how fast you move, how fast you start, how quickly you react. | Squirrel Riders, Salamanders |
-| **Hands** | Everything to do with the ball: throwing, catching, scooping it off the ground, holding on to it, and ripping it away from someone else. | Pixies, Grave Rats, every Big |
-| **Heft** | Physical force, both giving and taking: shoving, tackling, knocking things over, and not getting knocked over or broken yourself. | Kobolds, Rocklings, Cinder Imps |
+| **Hands** | Everything to do with catching: how easy a Small is to hit with a pass. | Pixies, Grave Rats |
+| **Heft** | Toughness: how much punishment you can take before a knockdown becomes something worse. (Breaking *through* defenders is a separate gift: some Smalls **fend them off**.) | Kobolds, Rocklings, Cinder Imps |
 
 "Fragile" just means low Heft. Trickery, sneakiness and anything else a team is *known* for live in its **Hijinks** (below), not in the attributes.
 
@@ -250,7 +250,6 @@ Hijink ideas: **Elevenses** (the whole team stops for a snack and recovers), **P
 
 - **Spare title puns** to reuse inside the game: *Fiend Zone*, *Ogre-Time*, *Grim Receiver* (a graveyard position?), *Gnome Field Advantage* (a Hijink or an achievement?), *Gridirons & Dragons*, *Ankle Biters*, *Stomping Grounds*, *Fourth & Inches*.
 - **Is the "Fumble" moment a feature?** When a Big drops the ball, the crowd could chant "FEE! FI! FO! FUMBLE!"
-- **What do we call the default Smalls?** The working name is **Walk-ons** (the football term for an unrecruited player). Alternatives: *Trick-or-Treaters*, *Benchwarmers*, *Scrubs*, *Practice Squad*, *Pee-Wees*.
 - **Who are the boss Bigs?** Enemy Bigs show up on boss screens. Are they the other teams' Bigs, or a separate rogues' gallery?
 - **Where is the climb going?** An endless field, a mountain, a league ladder? Is there a joke at the top that nobody ever reaches?
 - **A hall of fame for fallen Smalls?** Each run could end with a roll call of its dead.

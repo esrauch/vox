@@ -88,9 +88,11 @@ Each screen is one field-length climb, in two phases.
 - **Hazards are beat patterns.** For example, a lane of coffins slides every beat, a grave snaps shut every fourth beat, and a geyser blows on the "and" of three. You learn a lane the way you learn a riff.
 - **Every throw takes exactly 2 beats.** You can tap the ball button any time. The ball leaves on the **next beat** and lands **2 beats later**, however far it goes. One fixed rhythm makes every throw predictable, so **leading your receiver is counting**: "two hops from now, Pip will be *there*." The **Fast Throw** perk cuts this to **1 beat**, which leaves defenders almost no time to react.
 - **Somebody has to catch it.** When the ball lands:
-  - **Your Small is on the tile:** it's a catch, and play goes on.
-  - **A defender is on the tile:** it's intercepted, and that's a **fumble**.
-  - **Nobody is on the tile:** it's a miss, and that's also a **fumble**. There are no loose balls and no scrambles. A throw either connects or it costs you a ball.
+  - **Your Small is on the tile:** it's a **Clean Catch**. The receiver gets a boost: it **fends off 1 defender** while it carries the ball (shown by a glowing outline).
+  - **Otherwise, a defender is on the tile:** it's intercepted, and that's a **fumble**.
+  - **Otherwise, your Small is one tile short, facing the landing tile:** it lunges forward and catches it. It's a normal catch, with no boost.
+  - **Otherwise:** it's a miss, and that's also a **fumble**. There are no loose balls and no scrambles. A throw either connects or it costs you a ball.
+  - Defenders only intercept on the exact tile. Only your Smalls get the one-tile lunge.
 - **Throws and Hijinks always happen on a beat.** Tap whenever you like, and the action fires on the **next beat**. Nothing ever happens off the beat.
 - **Tap close to a beat for an On-Beat bonus.** The closer your tap is to the beat itself, the better. Off-beat taps still work, so the game is never unplayable if you lose the rhythm. Rhythm is a skill bonus, not a gate.
   - **On-Beat throw:** the throw itself is unchanged, but it **charges your Hijinks**, giving a big chunk of Hype. Rhythm feeds your powers. ▲ *Decision:* the alternative was making an On-Beat throw **uninterceptable**. Recommendation: make that a perk instead (**Perfect Spiral**: On-Beat throws can't be intercepted). That way the base bonus never decides whether a throw connects, but rhythm-heavy builds can lean into it.
@@ -109,13 +111,13 @@ Each screen is one field-length climb, in two phases.
 | **The beat itself** | A beat bar along the bottom edge, as in *NecroDancer*: ticks slide in toward a pulsing jack-o'-lantern in the center. The whole field gives a small bounce on every beat. |
 | **The grid** | A soft checkerboard on the turf, so every tile is obvious. |
 | **Where a unit will hop next** | Every Small and defender **faces the direction it's about to hop**, as in *Crossy Road*. Fast units show a double-hop arrow. |
-| **Throw range** | A ring around the Big. It shrinks visibly as climbers pile on. The reticle can't be placed outside it. |
+| **Throw range** | A ring around the Big. It covers most of the screen but **never reaches the top rows**, so the last stretch always has to be run. The reticle can't be placed outside it. |
 | **The ball button** | Your Big's ball at the bottom center, bouncing and glowing in time. It's brightest exactly on the beat. |
 | **The reticle** | A bold target on a tile, in your team's color. Before a throw it shows where the ball will go. After a throw, it marks where Hijinks will land. |
 | **Where the ball will land** | The reticle locks in, with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |
-| **Is someone going to be there?** | The target ring lights up in your team's color if one of your Smalls will hop onto the tile in time, and red if a defender will. |
+| **Is someone going to be there?** | **Always on.** The target ring lights up in your team's color if one of your Smalls will be able to catch it (on the tile, or one tile short and facing it), brighter for a Clean Catch, and red if a defender will intercept. |
 | **Hazards** | Every hazard warns **one beat ahead**: a lane flashes before something enters it, and a trap shows countdown pips before it snaps. |
-| **How buried the Big is** | Climbers are visible on its body, plus a short row of "buried" pips. When they're full, it's a fumble. |
+| **Blitz counters** | Every Blocker shows its **hold counter** as a number badge, and it ticks down with a crunch on each Blitzer attack. Attacking Blitzers flash on the beat they strike. The pocket tiles are outlined. **The Big's counter appears only once a Blitzer arrives**, pulsing red as it drops. When it hits 0, you've been sacked. |
 | **On-Beat taps** | An "ON BEAT!" pop, a sparkle trail and a beat-synced *thwump*. The Hype meter visibly jumps. |
 
 **Readability rules:**
@@ -128,13 +130,13 @@ Each screen is one field-length climb, in two phases.
 - The new screen is revealed, and **you can see everything** before you commit: every defender in its starting tile and every hazard lane.
 - **Setup is a little puzzle.** You read the board and place Smalls to beat it. A defender's *kind* tells you what it'll do: a Chaser will come at your carrier, a Wall-er holds its row, a Picker guards a passing lane. **Hazards keep cycling during setup**, so you can see the rhythm of a lane before you send someone into it.
 - **Drag your surviving Smalls into tiles of the setup zone.**
-- **Where a Small starts decides what it does.** Each Small runs up its own **column**, doing the job its kind does. A Small placed in the **back row stays home to protect the Big** from climbers.
+- **Where a Small starts decides what it does.** Each Small runs up its own **column**, doing the job its kind does. A Small placed in the **back row stays home as a Blocker**, buying time against Blitzers.
 - So the central trade-off is: **send more Smalls up the field, or keep more back to protect the Big?**
 - **Snappy defaults:** last screen's formation is pre-filled, so a quick look and a tap on **HIKE!** is enough.
 
 ### 2. Play
 
-- Your Smalls charge upfield. Defenders react, hazards cycle, and climbers go for the Big.
+- Your Smalls charge upfield. Defenders react, hazards cycle, and Blitzers go for the Big.
 - You **place the reticle**, **tap the pulsing ball** on the beat to throw, and then use **Hijinks** while the ball is in flight or being carried.
 - **Touchdown:** a Small carries the ball across the top edge. You get a short celebration (it can be skipped by tapping), the camera scrolls up, and it's time to **draft**.
 
@@ -144,11 +146,16 @@ A screen should take **roughly 15–40 seconds** of play, plus a few seconds of 
 
 Two kinds of trouble fill each screen. **Neither of them ever has the ball.** All they want is to stop you.
 
-**Defenders** react to you. They're the AI opposition:
-- **Chasers** run at your carrier.
-- **Climbers** go for the Big and bury it. Your back-row Smalls exist to stop them.
-- **Wall-ers** hold a line and block lanes.
-- **Pickers** lurk near passing lanes and try to intercept.
+**Defenders** react to you. They're the AI opposition. Each kind follows one simple rule, decided once per beat, and always faces the tile it's about to hop to. *(▲ Draft spec, to confirm in play.)*
+
+| Kind | Each beat, it… | Threat |
+|---|---|---|
+| **Chaser** | Hops one tile toward your carrier. With no carrier, it hops toward the ball's landing tile while the ball is in flight, and otherwise toward the nearest Small. | Tackling your carrier is a fumble. |
+| **Blitzer** | Hops toward the Big. When it runs into a Blocker, it stops and **attacks on a rhythm**, ticking the Blocker's counter down. | When it reaches the Big, it ticks down the Big's counter. At 0, it's a **sack**, which is a fumble. |
+| **Wall-er** | Stays in its row and slides one tile sideways to stay in the column of the nearest Small heading its way. | It blocks runners, and acts as a moving wall. |
+| **Picker** | Stays near its home tile. Once a ball is thrown, it hops toward the landing tile, as fast as its Hustle allows. | It intercepts. |
+
+Defenders avoid telegraphed hazards, but not perfectly, and **hazards hit them too**, so you can bait a Chaser into a coffin lane.
 
 **Hazards** don't react to you. They're traps and patterns, like the cars in *Crossy Road*. You learn their rhythm and time your throws and runs around them:
 - **Lanes** of things crossing the screen at a steady pace.
@@ -164,7 +171,7 @@ Hazards are themed by biome:
 | **Mountain** | Lava flows, mine carts, tumbling boulders | Geysers, falling rocks | Cracked ground, ice |
 
 **Hazards and the rules:**
-- **They kill Smalls.** Hazards are the most common cause of permadeath, so a well-timed run gets *through* a lane and a bad one gets flattened.
+- **They kill Smalls, and defenders too.** Hazards are the most common cause of death, so a well-timed run gets *through* a lane and a bad one gets flattened. A defender wandering into a lane gets flattened just the same.
 - **If a hazard hits your carrier, it drops the ball.** That's a fumble, and you lose that ball.
 - **Hazards never reach the Big.** The bottom grid is always safe ground. Hazards live up the field.
 - **Throws can be blocked.** A ball in the air can hit something tall passing through a lane (a hearse, a boulder) and drop.
@@ -177,7 +184,7 @@ Hazards are themed by biome:
 **The Big starts the run with a pile of N balls** (skulls, jack-o'-lanterns, embers, depending on the team), stacked right beside it at the bottom of the screen. **The pile is your life counter.** There's no separate interface for it; you can just *see* how many you have left.
 
 - **The count carries over for the whole run.** It never resets between screens.
-- **A fumble loses the ball in play for good.** The defense runs off with it, or it gets smashed. Fumbles happen when the Big gets buried, a throw lands on an empty tile, a defender catches a throw, or a carrier gets tackled or flattened by a hazard.
+- **A fumble loses the ball in play for good.** The defense runs off with it, or it gets smashed. Fumbles happen when a Blitzer sacks the Big, a throw lands on an empty tile, a defender catches a throw, or a carrier gets tackled or flattened by a hazard.
 - **Then play continues with the next ball.** The Big grabs a fresh one from the pile and you keep going on the same screen. Your Smalls stay where they are, so there's no setup phase again.
 - Each fumble comes with a slow-motion beat, *"FEE! FI! FO! FUMBLE!"*, and a gasp from the crowd as the pile shrinks.
 - **When the last ball is gone, the run is over.**
@@ -185,7 +192,16 @@ Hazards are themed by biome:
 
 ### The Pocket
 
-While the Big holds the ball, climbers sneak past your back row and **climb onto it**. Each one hanging on **shrinks your throwing range**, which is shown as a ring on the field that gets smaller. When enough are on, the Big is **buried** and fumbles. The Big can't shake them off; only your protecting Smalls can knock them away (or a Hijink).
+Blitzers rush the Big. What stands in their way is a series of **counters**.
+
+- **Blockers** are Smalls you place in the back row or on the **pocket tiles** next to the Big. Every Blocker carries a **hold counter**, a number shown on a little badge over its head.
+- **When a Blitzer hops into a Blocker, it stops and starts attacking.** A Blitzer attacks on a fixed rhythm (for example, **every 2 beats**), and **each attack ticks the Blocker's counter down by 1**.
+- **At 0, the Blocker is beaten.** It loses the collision (a Walk-on Blocker, at Heft 0, dies), and the Blitzer carries on toward the Big. **Blockers only buy time.**
+- **Ganging up speeds it up.** Every Blitzer attacking the same Blocker ticks its counter, so two Blitzers drain it twice as fast.
+- **The Big has a counter too.** It's hidden until a Blitzer reaches a pocket tile. Then it appears over the Big, starting at **3**, and every Blitzer attack ticks it down. **If the Big still has the ball when it hits 0, that's a sack, which is a fumble.** For example, one Blitzer attacking every 2 beats against the Big's 3 gives you **6 beats** to throw.
+- **Once the ball is thrown, Blitzers stop mattering.** They only threaten a Big that's still holding the ball, and the Big's counter resets for the next ball.
+- **Tuning values:** each Blitzer's attack rhythm (▲ *perhaps its Hustle: Hustle 0 attacks every 2 beats, like it hops*), each Blocker's starting counter (▲ *perhaps Heft + 1, so a Walk-on holds for exactly one attack*), and the Big's starting counter (3, and a perk could raise it).
+- The puzzle: **every Blocker you add is a runner you don't have**, and every beat they buy is a beat for your receiver to get open.
 
 So every possession is a few seconds of "throw it, THROW IT," against a receiver who isn't quite open yet.
 
@@ -199,7 +215,7 @@ So every possession is a few seconds of "throw it, THROW IT," against a receiver
 
 ### Walk-ons
 
-- **Every run starts with the same squad of Walk-ons.** They're vanilla, identical Smalls with middling Hustle, Hands and Heft, and one simple job: run up their column. If they're placed in the back row, they guard the Big instead.
+- **Every run starts with the same squad of Walk-ons.** They're vanilla, identical Smalls with **Hustle 0, Hands 0, Heft 0**, and one simple job: run up their column. If they're placed in the back row, they act as Blockers for the Big instead.
 - **They're dressed in your Big's theme** (see THEME.md), but that's cosmetic. A Walk-on is a Walk-on.
 - **Walk-ons always come back.** A Walk-on that dies is out for the rest of that screen, but it's back for the next one. **You never drop to zero.**
 - **Walk-on upgrades** are draft cards that improve **every** Walk-on for the rest of the run: +Hustle, +Hands, +Heft, or a new trick for all of them.
@@ -213,11 +229,14 @@ So every possession is a few seconds of "throw it, THROW IT," against a receiver
 ### On the field
 
 - **Smalls run themselves**, starting from the tile you put them in. Each kind has a single, obvious job you can read from its silhouette.
-- **Knocked down:** an ordinary hit knocks a Small down. It bursts into voxel bits, pops back together and keeps going.
-- **Dead:** a hit that's *too big* for its Heft kills it, through big hits, hazards or enemy Bigs.
-- **▲ Wipeout:** if every Small on the field is dead, you **lose a ball**, and the screen restarts from setup with the Walk-ons back. Recruits who died stay dead.
+- **Walk-ons are dumb.** A Walk-on runner hops straight up its column on every beat, **even into a defender or a hazard**. Keeping it alive is *your* job: place it in a clear column, or throw it the ball before it gets there. Smarter footwork (sidestepping, waiting) is something recruits and Walk-on upgrades can add.
+- **Collisions:** when a Small and a defender run into each other, **the defender wins**. A tackled carrier drops the ball, which is a fumble.
+  - **The exception is "fends off".** Some Smalls (recruits, upgraded Walk-ons, or any receiver after a Clean Catch) can **fend off N defenders**. Each fend-off knocks the defender down instead and uses up one charge. It's the main property that makes recruits and upgrades feel strong.
+- **Getting hit:** a hit is losing a collision, or being struck by a hazard or an enemy Big. **Heft decides what a hit does.** At Heft 0 (every Walk-on), the first hit kills. What higher Heft buys (knockdowns instead of death, absorbing hits) is still *TBD*.
+- **Knocked down** (for Smalls with enough Heft): the Small bursts into voxel bits, pops back together after a beat or two, and keeps going.
+- **Wipeout:** if every Small on the field is dead, you **lose a ball**, and the screen restarts from setup with the Walk-ons back. Recruits who died stay dead.
 
-**▲ Decision:** the squad has a fixed number of **slots**. Recommendation: start with about **5**, with "+1 slot" as a rare draft card.
+The squad has **5 slots** to start with, with "+1 slot" as a rare draft card. Every run starts with **3 balls** on the pile.
 
 **All Bigs are built the same.** They have the same slot count and the same base rules, and differ only in theme and pool. **Later, Bigs can come as variants that share a homeland:** a Ghost, a Skeleton and a Vampire might all use the Graveyard pool, each with its own twist.
 
@@ -231,7 +250,7 @@ After every touchdown, you go trick-or-treating: choose **one of three cards**. 
 
 ▲ *Decision:* most cards are **Treats** (pure upgrades). Occasionally a **Trick** shows up instead: a strong card with a funny downside, e.g. "+2 Hustle for every Small, but the ball is on fire."
 
-▲ *Decision:* the three cards are usually **one recruit, one Walk-on upgrade and one other card**, so every draft offers a clear choice: a new star, a stronger base squad, or something else.
+The three cards are always **one recruit, one Walk-on upgrade and one other card**, so every draft offers a clear choice: a new star, a stronger base squad, or something else.
 
 Card types:
 
@@ -240,7 +259,7 @@ Card types:
 | **Recruits** | A special Small from your Big's pool. It replaces a Walk-on, and if it dies it's gone. |
 | **Walk-on upgrades** | +Hustle, +Hands or +Heft for *every* Walk-on, or a new trick for all of them. |
 | **Recruit upgrades** | Promote one recruit to a veteran version. |
-| **Big upgrades** | +Hands (range) or +Heft (carry more climbers) for your Big. |
+| **Arm perks** | Bigs have no stats, so the Big gets stronger through perks, e.g. **Long Arm** (bigger throwing range). |
 | **+1 slot** | One more Walk-on in the squad. It's rare. |
 | **Hijinks** | Unlock a new Hijink, or power up one you already have. |
 | **Fast Throw** | Throws land in 1 beat instead of 2. |
@@ -289,13 +308,23 @@ Card names and art should be jokes. The draft is part of the comedy, not a sprea
 
 ## How the Attributes Show Up
 
-The Three H's apply to the Big and every Small. They show up only as **pips on cards and on the Big-select screen**. Everything else is learned by feel.
+**Every Small and every defender has Hustle, Hands and Heft.** They're **whole numbers starting at 0**. What a stat *means* can depend on the kind of unit, but **0 is always the plain baseline**, and every point above it is an upgrade.
 
-| Attribute | You feel it when… |
-|---|---|
-| **Hustle** | How often a Small hops. Slow ones hop every other beat, normal ones every beat, and the fastest (Squirrel Riders) cover two tiles per beat. Bigs don't use Hustle, since every throw takes 2 beats. Making throws faster is the **Fast Throw** perk. |
-| **Hands** | Catches stick. A *very* high-Hands Small can dive for a ball that lands on the tile next to it, which is the one way to rescue a near-miss. A high-Hands carrier also doesn't get the ball stripped. **A Big with high Hands has a bigger throwing range.** |
-| **Heft** | Somebody wins a collision. Most importantly, **high-Heft Smalls survive hits that would kill others.** **A Big with high Heft can carry more climbers** before it's buried. |
+**Bigs have no stats.** Every Big is mechanically identical: the same throwing range, and the same 2-beat throw. **Choosing a Big only decides what happens later:** the theme, and the pool of recruits, perks and Hijinks the draft offers. The Big itself gets stronger only through perks (Long Arm, Fast Throw…).
+
+Players see the stats as **pips on cards and on the setup screen**. Everything else they learn by feel.
+
+**Walk-ons are 0 / 0 / 0.**
+
+| Attribute | For Smalls, at **0** | For Smalls, at 1+ | For other units |
+|---|---|---|---|
+| **Hustle** | Hops **every 2 beats**. | *TBD.* Faster hopping, up to the fastest recruits covering two tiles per beat. | Defenders hop the same way. |
+| **Hands** | Catches on **its own tile, or 1 tile ahead**. | *TBD.* More catch reach, e.g. diagonal lunges. | For defenders: *TBD* (perhaps interception reach). |
+| **Heft** | **Dies on the first hit.** | *TBD.* Surviving hits, e.g. a knockdown instead of death. | For defenders: *TBD*. |
+
+**Fends off** is separate from all three: it's a property that lets a unit beat N defenders in collisions. Heft is about *surviving* a hit, and fends off is about *winning* one.
+
+▲ *The meaning of 1+ for each stat, and the defenders' values, get decided during M1.2 and M2 tuning.*
 
 ---
 
@@ -318,7 +347,7 @@ This is a pillar-level priority, not polish to add at the end.
 **First playable** (the smallest version that proves the fun):
 - One Big (**the Elder Bough**: the clearest passing game), with Walk-ons and two kinds of recruit.
 - One biome, with generic defenders and two hazard types (one lane, one timed trap).
-- The setup grid, one looping track with everything on the beat, the reticle and the pulsing ball button (throws quantized to the beat), climbers and the pocket, a pile of balls as lives, permadeath.
+- The setup grid, one looping track with everything on the beat, the reticle and the pulsing ball button (throws quantized to the beat), Blitzers and the pocket, a pile of balls as lives, permadeath.
 - A draft with **recruit** and **Walk-on upgrade** cards only.
 - Endless screens with a simple difficulty ramp, and a score.
 
@@ -333,8 +362,6 @@ This is a pillar-level priority, not polish to add at the end.
 - **Should playing with the sound off be supported?** Plenty of phone games are played on mute. The beat is also visible (bouncing) and felt (haptic ticks), but is that enough?
 - **How strict should On-Beat be?** A generous window keeps the game casual. Recommendation: generous, with tighter windows offered as a perk or a challenge mode.
 
-- **Do hazards hurt defenders too?** That would allow clever plays, like baiting a chaser into a lava lane.
-- **Can the Big throw all the way to the top?** If so, a Small that's already near the top could score instantly. Recommendation: the Big's range covers most of the screen but not all of it, so the last stretch always has to be *run*.
 - **Should the "someone will be there" target-ring hint stay forever?** It makes throws very readable, but it might make them *too* easy. It could become an early-game crutch or a perk instead.
 - **Is the setup zone a fixed size?** Opening up more rows could be an upgrade, letting you start Smalls further up the field.
 - **A Toss Hijink?** The Big grabs a Small and flings it to a spot. The old "fling" move could live on as a Hijink.

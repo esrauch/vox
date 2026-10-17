@@ -4,7 +4,7 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** M0, the open design decisions. M1 can start in parallel, since foundations don't depend on most of these.
+**Current focus:** M1.1, the beat-clock spike. M1.0 is done apart from going live on GitHub Pages. The remaining M0 items aren't needed until M5–M8.
 
 ---
 
@@ -14,17 +14,23 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 
 ### Needed before the first playable (M2)
 
-- [ ] **Name for the default Smalls** *(rec: Walk-ons)*
-- [ ] **Starting slots** *(rec: 5, with "+1 slot" as a rare card)*
-- [ ] **Starting number of balls** (lives) *(no rec yet: try 3 and tune)*
-- [ ] **The wipeout rule** *(rec: if every Small on the field dies, lose a ball and restart the screen from setup)*
-- [ ] **How the draft is made up** *(rec: one recruit, one Walk-on upgrade, one other card)*
-- [ ] **Throw range** *(rec: the Big can reach most of the screen but never the top row, so the last stretch is always run)*
-- [ ] **Diving catches** *(rec: only a very high-Hands Small can catch a ball landing on the tile next to it)*
-- [ ] **The "someone will be there" glow on the target ring:** always on, early runs only, or a perk?
-- [ ] **How climbers reach the Big:** what exactly stops them, and what lets them through, when Walk-ons are guarding in the back row.
-- [ ] **The full list of defender kinds and their per-beat rules** (Chaser, Climber, Wall-er, Picker): a short spec for each.
-- [ ] **Whether hazards hurt defenders** *(no rec yet)*
+- [x] **Name for the default Smalls:** Walk-ons.
+- [x] **Starting slots:** 5, with "+1 slot" as a rare card.
+- [x] **Starting balls:** 3.
+- [x] **Wipeout:** lose a ball and restart the screen from setup. Walk-ons return, and dead recruits stay dead.
+- [x] **Draft mix:** always one recruit, one Walk-on upgrade and one other card.
+- [x] **Throw range:** most of the screen, never the top rows.
+- [x] **Catching:** a Small catches on its own tile, or lunges one tile ahead. An exact-tile **Clean Catch** lets the receiver fend off 1 defender. Defenders only intercept on the exact tile.
+- [x] **Catch glow:** always on.
+- [x] **Hazards hit defenders too.**
+- [x] **The pocket:** **Blitzers** (formerly Climbers) rush the Big. Each **Blocker** (formerly a guard) has a hold counter, and each Blitzer attack (e.g. every 2 beats) ticks it down. At 0 the Blocker is beaten, and several Blitzers drain it faster. The Big has its own counter, starting at 3 and shown only once a Blitzer arrives. If it hits 0 while the Big holds the ball, it's a sack (a fumble).
+- [x] **Collisions:** the defender always wins against Walk-ons. Some units **fend off N defenders**.
+- [x] **Bigs have no stats.** Choosing a Big only sets the theme and the draft pool. The Big improves only through perks.
+- [x] **The stat scale:** every Small and defender has Hustle, Hands and Heft as whole numbers from 0. Walk-ons are 0/0/0. Hustle 0 hops every 2 beats, Hands 0 catches on its own tile or 1 ahead, and Heft 0 dies on the first hit.
+- [ ] **What 1+ means** for each stat, and the stat values for defenders. *(Decide during M1.2 and M2 tuning.)*
+- [~] **Defender kinds and per-beat rules:** a draft spec is in GAMEPLAY.md (Chaser, Blitzer, Wall-er, Picker). Confirm it during M2 playtesting.
+- [x] **Hands is catch reach:** the own tile plus one ahead, and high Hands adds diagonal lunges.
+- [x] **Walk-ons are dumb:** they hop straight up their column, even into danger. Recruits and upgrades can add smarter footwork.
 
 ### Missing from the design so far (needed before M5–M8)
 
@@ -54,13 +60,13 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 The base systems everything else is built on. **Each one is built and verified on its own**, before any of them are combined into a game.
 
 ### M1.0 Project scaffold
-- [ ] Vite + TypeScript (strict), ESLint and Prettier, Vitest.
-- [ ] The folder layout from TECHNICAL.md §19.
-- [ ] Dev-only pages (`/dev/*`), excluded from production builds.
-- [ ] **Deploy to a static host from day one**, so every milestone can be tested on a real phone from a URL.
-- [ ] An asset manifest, with `check-assets` running in the build.
+- [x] Vite + TypeScript (strict), ESLint and Prettier, Vitest. *(Pinned to Vite 6 and Vitest 3 because the local Node is 21.2. Upgrade Node to 22 LTS, then bump them to the latest versions, which also clears Vitest's dev-only audit warnings.)*
+- [x] The folder layout from TECHNICAL.md §19. Folders get created as they're needed.
+- [x] Dev-only pages (`/dev/*`), excluded from production builds.
+- [~] **Deploy to a static host from day one.** A GitHub Pages workflow is ready (`.github/workflows/deploy.yml`). It goes live after one-time setup (Settings → Pages → Source: GitHub Actions) and a push to `main`.
+- [x] An asset manifest, with `check-assets` running in the build.
 
-**Done when:** a "hello cube" page loads on a real phone from a public URL, and tests and lint run.
+**Done when:** a "hello cube" page loads on a real phone from a public URL, and tests and lint run. *(The cube page and the checks work locally. The public URL and the phone check are waiting on the deploy.)*
 
 ### M1.1 Beat-clock spike *(the riskiest system)*
 - [ ] A beat clock running off `AudioContext.currentTime`, with lookahead scheduling.
@@ -80,7 +86,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [ ] The ball landing: catch, interception or miss. Interceptions and misses are fumbles.
 - [ ] Fumbles and the pile of balls, plus the run ending when the last ball is gone.
 - [ ] Knocked down vs. dead, the Walk-on/recruit slot rules, and wipeouts.
-- [ ] Climbers on the Big: they shrink the throw range and bury the Big.
+- [ ] Blitzers, Blockers and counters: attack rhythm, ganging up, the Big's counter, and sacks.
 - [ ] A seeded RNG, and deterministic replays (seed plus inputs).
 - [ ] Unit tests covering all of the above.
 
@@ -141,7 +147,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [ ] The full juice list from GAMEPLAY.md: squash and stretch, everything bouncing on the beat, haptics, the "ON BEAT!" pop, sparkle trails, Small noises.
 - [ ] Every indicator from *Reading the Beat*, polished, with hazards telegraphing one beat ahead.
 - [ ] The tombstone and waving ghost when a recruit dies.
-- [ ] Tuning: hop rates, throw range, how fast climbers pressure the Big, the On-Beat window.
+- [ ] Tuning: hop rates, throw range, Blitzer attack rhythm and the Blocker and Big counters, the On-Beat window.
 - [ ] A screen-generation solvability check, so no unfair screens get through.
 
 **Done when:** the game is satisfying to watch with the sound off, satisfying to play with the sound on, and playtesters can say *why* they fumbled.
@@ -155,7 +161,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [ ] The Hype meter, filled by On-Beat throws and drained by fumbles.
 - [ ] Hijinks only after the throw, using the reticle, in targeted and global kinds, with the On-Beat bonus.
 - [ ] Three Hijinks for the Elder Bough.
-- [ ] The full card types: recruit upgrades, Big upgrades, +1 slot, extra balls, Fast Throw, Perfect Spiral, Butterfingers Insurance, Second String.
+- [ ] The full card types: recruit upgrades, arm perks (Long Arm), +1 slot, extra balls, Fast Throw, Perfect Spiral, Butterfingers Insurance, Second String.
 - [ ] Treats and Tricks (if M0 kept Tricks).
 - [ ] The draft UI: three cards, chosen in one tap.
 
@@ -259,4 +265,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** M1.0 scaffold built: hello-cube page, checks, tests, asset manifest, Pages workflow.
+- **2026-10-17:** Set the stat scale, with Walk-ons at 0/0/0.
+- **2026-10-17:** Made most of the M0 decisions needed before M2.
 - **2026-10-17:** Plan created. The design docs (THEME, GAMEPLAY, TECHNICAL) were drafted earlier the same day.
