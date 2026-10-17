@@ -1,0 +1,29 @@
+# Witch on a Broom: she flies across her row, high above the turf, facing +x.
+# A big pointed hat and a long broom make her read from far above.
+size 13 13 5
+voxel 0.1
+colors
+  w wood
+  y straw
+  r purpleDark
+  h ink
+  H purple
+  g witchSkin
+  k ink
+# The broom: a long handle with a bristly end at the back.
+box 3 2 2 12 2 2 w
+box 0 1 1 2 3 3 y
+box 2 2 1 2 2 3 w
+# Robe, sitting astride the broom, with boots dangling.
+box 4 3 1 7 6 3 r
+box 6 1 1 7 2 1 k
+box 6 1 3 7 2 3 k
+# Head and long nose.
+box 5 7 1 7 8 3 g
+box 8 7 2 8 7 2 g
+box 7 8 2 7 8 2 k
+# The hat: a wide brim and a tall cone that bends at the tip.
+box 3 9 0 9 9 4 h
+box 5 10 1 7 10 3 H
+box 5 11 2 6 11 2 H
+box 4 12 2 4 12 2 H

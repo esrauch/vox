@@ -1,0 +1,27 @@
+# Rolling Pumpkin: a cranky jack-o'-lantern that rolls along its lane.
+# Its glowing grin sets it apart from the plain pumpkins in the patch off the field.
+size 9 8 9
+voxel 0.1
+colors
+  p pumpkin
+  P pumpkinDark
+  s stemGreen
+  g glow
+  k ink
+box 1 0 1 7 6 7 p
+box 0 1 1 8 5 7 p
+box 1 1 0 7 5 8 p
+box 2 0 8 2 6 8 P
+box 6 0 8 6 6 8 P
+box 0 1 4 0 5 4 P
+box 8 1 4 8 5 4 P
+box 4 7 4 4 7 4 s
+# A big glowing toothy grin and narrowed eyes, so it reads as trouble.
+box 2 4 0 3 4 0 g
+box 5 4 0 6 4 0 g
+box 2 5 0 2 5 0 k
+box 6 5 0 6 5 0 k
+box 1 2 0 7 2 0 g
+box 2 1 0 6 1 0 g
+box 3 2 0 3 2 0 P
+box 5 2 0 5 2 0 P

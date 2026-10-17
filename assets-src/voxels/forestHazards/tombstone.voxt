@@ -1,0 +1,15 @@
+# Tombstone: a static obstacle. Nothing can step onto its tile; passes fly over.
+size 7 9 3
+voxel 0.11
+colors
+  s stone
+  S stoneDark
+  m moss
+box 0 0 0 6 6 2 s
+box 1 7 0 5 7 2 s
+box 2 8 0 4 8 2 s
+# A carved cross and some moss.
+box 3 2 0 3 5 0 S
+box 2 4 0 4 4 0 S
+box 0 0 0 1 1 0 m
+box 5 0 2 6 2 2 m

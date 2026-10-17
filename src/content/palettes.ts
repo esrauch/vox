@@ -60,6 +60,10 @@ export const voxel = {
   pineDark: '#1e4638',
   wood: '#b88a5e',
   woodGrey: '#7d7364',
+  // Hazards.
+  stone: '#8d93a3',
+  stoneDark: '#646a79',
+  witchSkin: '#7fd15a',
 } as const satisfies Record<string, Hex>;
 
 /**

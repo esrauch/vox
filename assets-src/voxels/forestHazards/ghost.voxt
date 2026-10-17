@@ -1,0 +1,18 @@
+# Drifting Ghost (later): a plain white sheet with two eye holes, floating.
+# Tall, so it blocks passes as well as knocking players down.
+size 7 12 7
+voxel 0.11
+colors
+  w white
+  k ink
+box 0 2 0 6 3 6 w
+box 1 4 1 5 10 5 w
+box 2 11 2 4 11 4 w
+# A ragged hem.
+box 0 2 0 0 2 0 .
+box 6 2 6 6 2 6 .
+box 3 2 0 3 2 0 .
+box 0 2 4 0 2 4 .
+# Eyes on the front.
+box 2 7 1 2 8 1 k
+box 4 7 1 4 8 1 k

@@ -292,6 +292,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Hazard models built (`forestHazards/`): the grinning Rolling Pumpkin, the Witch on a Broom, the Tombstone and the Drifting Ghost. They aren't in the game yet.
 - **2026-10-17:** Hazards designed: Rolling Pumpkin and Witch on a Broom for M2, Tombstones if time allows, Drifting Ghost later. The rule: one simple shape, one rule, one telegraph.
 - **2026-10-17:** Throws are limited to the middle half of the field, subtly marked on the turf.
 - **2026-10-17:** New team models in the game: football-player Walk-ons, the QB and the jack-o'-lantern football. "Big" is renamed to "QB" in the code.

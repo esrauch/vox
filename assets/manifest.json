@@ -84,6 +84,30 @@
       "source": "Original voxel model (jack-o'-lantern football), written by Claude",
       "author": "Claude",
       "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestHazards/pumpkin.voxt",
+      "source": "Original voxel model (Forest hazard: Rolling Pumpkin), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestHazards/witch.voxt",
+      "source": "Original voxel model (Forest hazard: Witch on a Broom), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestHazards/tombstone.voxt",
+      "source": "Original voxel model (Forest hazard: Tombstone), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forestHazards/ghost.voxt",
+      "source": "Original voxel model (Forest hazard: Drifting Ghost), written by Claude",
+      "author": "Claude",
+      "license": "original"
     }
   ]
 }
