@@ -122,8 +122,8 @@ export class Game {
   }
 
   private react(events: readonly SimEvent[]): void {
-    const smallIds = new Set(this.state.screen.smalls.map((s) => s.id));
-    if (events.some((e) => e.type === 'hop' && smallIds.has(e.id))) this.play('hop');
+    const playerIds = new Set(this.state.screen.players.map((s) => s.id));
+    if (events.some((e) => e.type === 'hop' && playerIds.has(e.id))) this.play('hop');
     for (const e of events) {
       switch (e.type) {
         case 'thrown':
@@ -301,10 +301,10 @@ export class Game {
     const tile = this.view.tileAt(e.clientX, e.clientY);
     if (!tile) return;
     if (this.state.phase === 'setup') {
-      const small = this.state.screen.smalls.find((s) => eq(s.pos, tile));
-      if (small) {
-        this.drag = { id: small.id, slot: small.slot, tile };
-        this.units.setDragging({ id: small.id, tile });
+      const player = this.state.screen.players.find((s) => eq(s.pos, tile));
+      if (player) {
+        this.drag = { id: player.id, slot: player.slot, tile };
+        this.units.setDragging({ id: player.id, tile });
       }
     }
   }

@@ -1,30 +1,30 @@
-import { smallKind, WALK_ON } from '../../src/content/smalls';
+import { playerKind, WALK_ON } from '../../src/content/players';
 import { updateIntents } from '../../src/sim/ai';
 import { createRun } from '../../src/sim/run';
 import { createDefenders } from '../../src/sim/screen';
 import { step } from '../../src/sim/step';
-import type { DefenderKind, RunState, SimEvent, SmallUnit, Vec } from '../../src/sim/types';
+import type { DefenderKind, RunState, SimEvent, PlayerUnit, Vec } from '../../src/sim/types';
 
-export interface SmallSpec {
+export interface PlayerSpec {
   pos: Vec;
   kindId?: string;
 }
 
 /**
- * A run already in play (beat 0, just hiked) with exactly the given Smalls
+ * A run already in play (beat 0, just hiked) with exactly the given players
  * and defenders, so a test can set up one situation precisely.
  */
 export function playState(
-  smalls: SmallSpec[],
+  players: PlayerSpec[],
   defenders: { kind: DefenderKind; pos: Vec }[] = [],
 ): RunState {
   const state = createRun(1);
-  state.slots = smalls.map((s) => ({ kindId: s.kindId ?? WALK_ON.id }));
-  const units: SmallUnit[] = smalls.map((spec, i) => {
-    const kind = smallKind(spec.kindId ?? WALK_ON.id);
+  state.slots = players.map((s) => ({ kindId: s.kindId ?? WALK_ON.id }));
+  const units: PlayerUnit[] = players.map((spec, i) => {
+    const kind = playerKind(spec.kindId ?? WALK_ON.id);
     return {
       id: 100 + i,
-      side: 'small',
+      side: 'player',
       slot: i,
       kindId: kind.id,
       stats: kind.stats,
@@ -38,7 +38,7 @@ export function playState(
   });
   state.screen = {
     index: 0,
-    smalls: units,
+    players: units,
     defenders: createDefenders(defenders, 200),
     ball: { at: 'qb' },
   };
@@ -60,9 +60,9 @@ export function run(state: RunState, n: number): { state: RunState; events: SimE
   return { state: s, events };
 }
 
-export const small = (state: RunState, id: number): SmallUnit => {
-  const s = state.screen.smalls.find((u) => u.id === id);
-  if (!s) throw new Error(`no small ${id}`);
+export const player = (state: RunState, id: number): PlayerUnit => {
+  const s = state.screen.players.find((u) => u.id === id);
+  if (!s) throw new Error(`no player ${id}`);
   return s;
 };
 

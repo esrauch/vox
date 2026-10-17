@@ -31,7 +31,7 @@ interface UnitView {
 }
 
 /**
- * Every Small and defender on the field. Walk-ons and defenders are voxel
+ * Every player and defender on the field. Walk-ons and defenders are voxel
  * models; recruits are still placeholder cubes. They hop from their old
  * tile to their new one at the start of each beat, always face the camera
  * (an arrow shows where they'll hop next), tip over when knocked down and
@@ -40,7 +40,7 @@ interface UnitView {
 export class UnitViews {
   private readonly views = new Map<number, UnitView>();
   private readonly materials = new Map<number, THREE.MeshLambertMaterial>();
-  private readonly smallBox = new THREE.BoxGeometry(0.55, 0.55, 0.55);
+  private readonly recruitBox = new THREE.BoxGeometry(0.55, 0.55, 0.55);
   private readonly arrowGeo = new THREE.ConeGeometry(0.13, 0.28, 4).rotateX(-Math.PI / 2);
   private readonly arrowMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
   private dragging: { id: number; tile: Vec } | null = null;
@@ -51,7 +51,7 @@ export class UnitViews {
   reset(screen: ScreenState): void {
     for (const v of this.views.values()) this.scene.remove(v.root);
     this.views.clear();
-    for (const u of [...screen.smalls, ...screen.defenders]) this.views.set(u.id, this.create(u));
+    for (const u of [...screen.players, ...screen.defenders]) this.views.set(u.id, this.create(u));
   }
 
   /**
@@ -59,8 +59,8 @@ export class UnitViews {
    * now. `beat` is the beat just resolved.
    */
   beginBeat(prev: ScreenState, next: ScreenState, beat: number): void {
-    const before = new Map([...prev.smalls, ...prev.defenders].map((u) => [u.id, u]));
-    for (const u of [...next.smalls, ...next.defenders]) {
+    const before = new Map([...prev.players, ...prev.defenders].map((u) => [u.id, u]));
+    for (const u of [...next.players, ...next.defenders]) {
       const view = this.views.get(u.id);
       if (!view) continue;
       view.from = before.get(u.id)?.pos ?? u.pos;
@@ -71,7 +71,7 @@ export class UnitViews {
 
   /** Animate to `phase` (0..1) of the current beat. */
   update(screen: ScreenState, beat: number, phase: number): void {
-    for (const u of [...screen.smalls, ...screen.defenders]) {
+    for (const u of [...screen.players, ...screen.defenders]) {
       const view = this.views.get(u.id);
       if (!view) continue;
       this.updateOne(u, view, beat, phase);
@@ -83,7 +83,7 @@ export class UnitViews {
     return this.views.get(id)?.current ?? null;
   }
 
-  /** While dragging in setup, show the Small at the tile under the finger. */
+  /** While dragging in setup, show the player at the tile under the finger. */
   setDragging(drag: { id: number; tile: Vec } | null): void {
     this.dragging = drag;
   }
@@ -94,7 +94,7 @@ export class UnitViews {
       u.side === 'defender' ? defenderModel(u.kind) : u.kindId === 'walkOn' ? WALK_ON_MODEL : null;
     const body = model
       ? new THREE.Mesh(getGeometry(model), voxelMaterial)
-      : new THREE.Mesh(this.smallBox, this.material(RECRUIT_COLOR));
+      : new THREE.Mesh(this.recruitBox, this.material(RECRUIT_COLOR));
     body.castShadow = true;
     const base = model ? 0 : 0.275;
     const arrow = new THREE.Mesh(this.arrowGeo, this.arrowMat);

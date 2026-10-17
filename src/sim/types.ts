@@ -31,12 +31,12 @@ interface UnitBase {
   intent: Vec | null;
 }
 
-export interface SmallUnit extends UnitBase {
-  readonly side: 'small';
-  /** Which squad slot this Small fills. */
+export interface PlayerUnit extends UnitBase {
+  readonly side: 'player';
+  /** Which squad slot this player fills. */
   readonly slot: number;
   readonly kindId: string;
-  /** Defenders this Small can still fend off (e.g. from a Clean Catch). */
+  /** Defenders this player can still fend off (e.g. from a Clean Catch). */
   fendOff: number;
 }
 
@@ -53,7 +53,7 @@ export interface Defender extends UnitBase {
   patrolIndex: number;
 }
 
-export type Unit = SmallUnit | Defender;
+export type Unit = PlayerUnit | Defender;
 
 export type BallState =
   | { readonly at: 'qb' }
@@ -66,7 +66,7 @@ export type BallState =
   | { readonly at: 'carried'; readonly by: number }
   | { readonly at: 'none' };
 
-/** What fills a squad slot: a Walk-on, or a recruit (TECHNICAL.md content: smalls.ts). */
+/** What fills a squad slot: a Walk-on, or a recruit (TECHNICAL.md content: players.ts). */
 export interface Slot {
   kindId: string;
 }
@@ -76,7 +76,7 @@ export type Phase = 'setup' | 'play' | 'cleared' | 'over';
 export interface ScreenState {
   /** Which screen of the run this is (0-based). */
   readonly index: number;
-  readonly smalls: SmallUnit[];
+  readonly players: PlayerUnit[];
   readonly defenders: Defender[];
   ball: BallState;
 }
@@ -89,7 +89,7 @@ export interface RunState {
   balls: number;
   screensCleared: number;
   slots: Slot[];
-  /** Where each slot's Small starts at setup. Remembered between screens. */
+  /** Where each slot's player starts at setup. Remembered between screens. */
   formation: (Vec | null)[];
   screen: ScreenState;
   nextId: number;

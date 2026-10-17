@@ -1,6 +1,6 @@
 import type { Stats } from '../sim/types';
 
-export interface SmallKind {
+export interface PlayerKind {
   readonly id: string;
   readonly name: string;
   readonly stats: Stats;
@@ -16,8 +16,8 @@ export interface SmallKind {
   readonly trades: boolean;
 }
 
-/** The vanilla Small every run starts with (GAMEPLAY.md, Walk-ons). */
-export const WALK_ON: SmallKind = {
+/** The vanilla player every run starts with (GAMEPLAY.md, Walk-ons). */
+export const WALK_ON: PlayerKind = {
   id: 'walkOn',
   name: 'Walk-on',
   stats: { hustle: 0, hands: 0, heft: 0 },
@@ -26,7 +26,7 @@ export const WALK_ON: SmallKind = {
 };
 
 /** Placeholder recruit for testing the slot rules until M2 adds real ones. */
-export const TEST_RECRUIT: SmallKind = {
+export const TEST_RECRUIT: PlayerKind = {
   id: 'testRecruit',
   name: 'Test Recruit',
   stats: { hustle: 1, hands: 1, heft: 1 },
@@ -34,13 +34,13 @@ export const TEST_RECRUIT: SmallKind = {
   trades: false,
 };
 
-export const SMALL_KINDS: Readonly<Record<string, SmallKind>> = {
+export const PLAYER_KINDS: Readonly<Record<string, PlayerKind>> = {
   [WALK_ON.id]: WALK_ON,
   [TEST_RECRUIT.id]: TEST_RECRUIT,
 };
 
-export function smallKind(id: string): SmallKind {
-  const kind = SMALL_KINDS[id];
-  if (!kind) throw new Error(`Unknown Small kind "${id}"`);
+export function playerKind(id: string): PlayerKind {
+  const kind = PLAYER_KINDS[id];
+  if (!kind) throw new Error(`Unknown player kind "${id}"`);
   return kind;
 }

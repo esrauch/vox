@@ -17,7 +17,7 @@
  *   6. Touchdown and wipeout checks.
  *   7. Everyone decides next beat's hop (the telegraph).
  */
-import { smallKind } from '../content/smalls';
+import { playerKind } from '../content/players';
 import { tuning } from '../content/tuning';
 import { patrolNext, updateIntents } from './ai';
 import { COLS, END_ROW, eq, inBounds, key, nextToQb } from './grid';
@@ -31,7 +31,7 @@ import type {
   HitResult,
   RunState,
   SimEvent,
-  SmallUnit,
+  PlayerUnit,
   Unit,
   Vec,
 } from './types';
@@ -63,7 +63,7 @@ export function step(prev: RunState, throwTarget: Vec | null = null): StepResult
 }
 
 function liveUnits(state: RunState): Unit[] {
-  return [...state.screen.smalls, ...state.screen.defenders].filter((u) => u.alive);
+  return [...state.screen.players, ...state.screen.defenders].filter((u) => u.alive);
 }
 
 const byId = (a: { id: number }, b: { id: number }): number => a.id - b.id;
@@ -105,16 +105,16 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
   }
   const finalOf = (u: Unit): Vec => moving.get(u.id) ?? u.pos;
 
-  // Smalls against defenders. A cancelled hop can cause a new conflict, so
+  // Players against defenders. A cancelled hop can cause a new conflict, so
   // repeat until nothing changes (each pair resolves at most once).
-  const smalls = units.filter((u): u is SmallUnit => u.side === 'small');
+  const players = units.filter((u): u is PlayerUnit => u.side === 'player');
   const defenders = units.filter((u): u is Defender => u.side === 'defender');
   const resolved = new Set<string>();
   for (let changed = true; changed;) {
     changed = false;
     cancelDefenderConflicts(units, moving);
     for (const d of defenders) {
-      for (const s of smalls) {
+      for (const s of players) {
         const pair = `${s.id}:${d.id}`;
         if (!s.alive || !d.alive || resolved.has(pair) || state.phase !== 'play') continue;
         const sMoves = moving.has(s.id);
@@ -171,7 +171,7 @@ function patrolStep(state: RunState, events: SimEvent[]): void {
 
 /**
  * Two defenders can't share a tile or swap places. Defenders that aren't
- * moving keep their tile; among movers, the lower id wins. Smalls never block
+ * moving keep their tile; among movers, the lower id wins. Players never block
  * each other: they can share a tile and hop past one another.
  */
 function cancelDefenderConflicts(units: readonly Unit[], moving: Map<number, Vec>): void {
@@ -196,13 +196,13 @@ function cancelDefenderConflicts(units: readonly Unit[], moving: Map<number, Vec
 }
 
 /**
- * A Small and a defender collide. The defender wins, unless the Small can
- * fend it off. A Small that trades (a Walk-on) without the ball takes the
+ * A player and a defender collide. The defender wins, unless the player can
+ * fend it off. A player that trades (a Walk-on) without the ball takes the
  * defender down with it.
  */
 function collide(
   state: RunState,
-  s: SmallUnit,
+  s: PlayerUnit,
   d: Defender,
   moving: Map<number, Vec>,
   events: SimEvent[],
@@ -215,7 +215,7 @@ function collide(
     return;
   }
   const carrying = state.screen.ball.at === 'carried' && state.screen.ball.by === s.id;
-  const trades = !carrying && smallKind(s.kindId).trades;
+  const trades = !carrying && playerKind(s.kindId).trades;
   const result = hit(state, s, 'defender', events);
   const defenderResult = trades ? hit(state, d, 'walkOn', events) : null;
   if (result === 'down') moving.delete(s.id);
@@ -233,9 +233,9 @@ function hit(state: RunState, u: Unit, cause: DeathCause, events: SimEvent[]): H
   u.alive = false;
   u.intent = null;
   events.push({ type: 'died', id: u.id, cause });
-  if (u.side === 'small') {
+  if (u.side === 'player') {
     // A dead recruit is gone for good: its slot reverts to a Walk-on.
-    if (!smallKind(u.kindId).returns) {
+    if (!playerKind(u.kindId).returns) {
       const slot = state.slots[u.slot];
       if (slot) slot.kindId = 'walkOn';
     }
@@ -270,7 +270,7 @@ function resolveLanding(state: RunState, events: SimEvent[]): void {
   const away = (p: Vec): number => Math.hypot(p.x - target.x, p.y - target.y);
 
   // The best receiver: the closest of your players within its catch radius.
-  const receiver = screen.smalls
+  const receiver = screen.players
     .filter((s) => isUp(s) && away(s.pos) <= catchRadius(s, 'ok'))
     .sort((a, b) => away(a.pos) - away(b.pos) || a.id - b.id)[0];
   // A defender right under the ball, and closer than the receiver, picks it off.
@@ -296,12 +296,17 @@ function resolveLanding(state: RunState, events: SimEvent[]): void {
 }
 
 /** How far from a receiver a ball can land and still be caught at a given quality (Hands widens it). */
-export function catchRadius(s: SmallUnit, quality: CatchQuality): number {
+export function catchRadius(s: PlayerUnit, quality: CatchQuality): number {
   return tuning.catch[quality] + s.stats.hands * tuning.catch.perHands;
 }
 
 /** A catch. A perfect one is a Clean Catch: the receiver can fend off one defender. */
-function catchBall(state: RunState, s: SmallUnit, quality: CatchQuality, events: SimEvent[]): void {
+function catchBall(
+  state: RunState,
+  s: PlayerUnit,
+  quality: CatchQuality,
+  events: SimEvent[],
+): void {
   state.screen.ball = { at: 'carried', by: s.id };
   const clean = quality === 'perfect';
   if (clean) s.fendOff += 1;
@@ -329,16 +334,16 @@ function fumble(state: RunState, reason: FumbleReason, events: SimEvent[]): void
 function checkTouchdown(state: RunState, events: SimEvent[]): void {
   const ball = state.screen.ball;
   if (ball.at !== 'carried') return;
-  const carrier = state.screen.smalls.find((s) => s.id === ball.by);
+  const carrier = state.screen.players.find((s) => s.id === ball.by);
   if (!carrier?.alive || carrier.pos.y < END_ROW) return;
   state.screensCleared++;
   state.phase = 'cleared';
   events.push({ type: 'touchdown', id: carrier.id, yards: yards(state) });
 }
 
-/** If every Small on the field is dead: lose a ball and restart the screen from setup. */
+/** If every player on the field is dead: lose a ball and restart the screen from setup. */
 function checkWipeout(state: RunState, events: SimEvent[]): void {
-  if (state.screen.smalls.some((s) => s.alive)) return;
+  if (state.screen.players.some((s) => s.alive)) return;
   state.balls = Math.max(0, state.balls - 1);
   events.push({ type: 'wipeout', ballsLeft: state.balls });
   if (state.balls === 0) {

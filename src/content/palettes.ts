@@ -68,7 +68,7 @@ export const voxel = {
 
 /**
  * Biome moods: the field, the ground around it, the sky, fog and light.
- * Spooky, but bright enough that gold Smalls and purple defenders always pop.
+ * Spooky, but bright enough that gold players and purple defenders always pop.
  */
 export const biomes = {
   forest: {

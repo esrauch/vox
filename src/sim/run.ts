@@ -2,12 +2,12 @@
  * Creating a run, setting up screens, and the non-beat actions (place, hike,
  * next screen). Beats are advanced by step() in step.ts.
  */
-import { smallKind, WALK_ON } from '../content/smalls';
+import { playerKind, WALK_ON } from '../content/players';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
 import { eq, inSetupZone, vec } from './grid';
 import { createDefenders, generateSpawns } from './screen';
-import type { Action, RunState, SimEvent, SmallUnit, Vec } from './types';
+import type { Action, RunState, SimEvent, PlayerUnit, Vec } from './types';
 
 /** Where each slot starts if the player hasn't placed it. */
 export const DEFAULT_FORMATION: readonly Vec[] = [
@@ -31,21 +31,21 @@ export function createRun(seed: number): RunState {
     screensCleared: 0,
     slots: Array.from({ length: tuning.run.startingSlots }, () => ({ kindId: WALK_ON.id })),
     formation: [],
-    screen: { index: 0, smalls: [], defenders: [], ball: { at: 'qb' } },
+    screen: { index: 0, players: [], defenders: [], ball: { at: 'qb' } },
     nextId: 1,
   };
   setUpScreen(state, 0);
   return state;
 }
 
-/** (Re)build a screen in the setup phase: every slot's Small back, defenders at their spawns. */
+/** (Re)build a screen in the setup phase: every slot's player back, defenders at their spawns. */
 export function setUpScreen(state: RunState, index: number): void {
-  const smalls: SmallUnit[] = state.slots.map((slot, i) => {
-    const kind = smallKind(slot.kindId);
+  const players: PlayerUnit[] = state.slots.map((slot, i) => {
+    const kind = playerKind(slot.kindId);
     const pos = formationTile(state, i);
     return {
       id: state.nextId++,
-      side: 'small',
+      side: 'player',
       slot: i,
       kindId: kind.id,
       stats: kind.stats,
@@ -61,7 +61,7 @@ export function setUpScreen(state: RunState, index: number): void {
   state.nextId += defenders.length;
   state.screen = {
     index,
-    smalls,
+    players,
     defenders,
     ball: { at: 'qb' },
   };
@@ -86,15 +86,15 @@ export function dispatch(state: RunState, action: Action): SimEvent[] {
 
 function place(state: RunState, slot: number, tile: Vec): SimEvent[] {
   if (state.phase !== 'setup' || !inSetupZone(tile)) return [];
-  const small = state.screen.smalls.find((s) => s.slot === slot);
-  if (!small) return [];
-  // Placing onto another Small swaps the two.
-  const other = state.screen.smalls.find((s) => s !== small && eq(s.pos, tile));
+  const player = state.screen.players.find((s) => s.slot === slot);
+  if (!player) return [];
+  // Placing onto another player swaps the two.
+  const other = state.screen.players.find((s) => s !== player && eq(s.pos, tile));
   if (other) {
-    other.pos = small.pos;
+    other.pos = player.pos;
     state.formation[other.slot] = other.pos;
   }
-  small.pos = tile;
+  player.pos = tile;
   state.formation[slot] = tile;
   return [];
 }

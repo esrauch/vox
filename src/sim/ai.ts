@@ -3,13 +3,13 @@
  * decided one beat ahead, so it always faces where it's about to hop.
  */
 import { QB_POS, END_ROW, dist, eq, stepToward, vec } from './grid';
-import type { Defender, ScreenState, SmallUnit, Vec } from './types';
+import type { Defender, ScreenState, PlayerUnit, Vec } from './types';
 
 const isActive = (u: { alive: boolean; downBeats: number }): boolean =>
   u.alive && u.downBeats === 0;
 
 export function updateIntents(screen: ScreenState): void {
-  for (const s of screen.smalls) s.intent = s.alive ? smallIntent(s) : null;
+  for (const s of screen.players) s.intent = s.alive ? playerIntent(s) : null;
   for (const d of screen.defenders) {
     const intent = d.alive ? defenderIntent(d, screen) : null;
     d.intent = intent && !eq(intent, QB_POS) && !eq(intent, d.pos) ? intent : null;
@@ -17,7 +17,7 @@ export function updateIntents(screen: ScreenState): void {
 }
 
 /** Walk-ons are dumb: they hop straight up their column, even into danger. */
-function smallIntent(s: SmallUnit): Vec | null {
+function playerIntent(s: PlayerUnit): Vec | null {
   if (s.pos.y >= END_ROW) return null;
   return vec(s.pos.x, s.pos.y + 1);
 }
@@ -47,27 +47,27 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
 function chaseTarget(d: Defender, screen: ScreenState): Vec | null {
   const { ball } = screen;
   if (ball.at === 'carried') {
-    const carrier = screen.smalls.find((s) => s.id === ball.by);
+    const carrier = screen.players.find((s) => s.id === ball.by);
     if (carrier?.alive) return carrier.pos;
   }
   if (ball.at === 'flight') return landingTile(ball.target);
-  return nearest(d.pos, screen.smalls.filter(isActive));
+  return nearest(d.pos, screen.players.filter(isActive));
 }
 
-/** Wall-ers hold their row and slide into the column of the nearest Small coming their way. */
+/** Wall-ers hold their row and slide into the column of the nearest player coming their way. */
 function wallTarget(d: Defender, screen: ScreenState): Vec | null {
-  const below = screen.smalls.filter((s) => isActive(s) && s.pos.y < d.home.y);
+  const below = screen.players.filter((s) => isActive(s) && s.pos.y < d.home.y);
   if (below.length === 0) return null;
   const target = [...below].sort(
     (a, b) =>
       d.home.y - a.pos.y - (d.home.y - b.pos.y) ||
       Math.abs(a.pos.x - d.pos.x) - Math.abs(b.pos.x - d.pos.x) ||
       a.id - b.id,
-  )[0] as SmallUnit;
+  )[0] as PlayerUnit;
   return vec(target.pos.x, d.home.y);
 }
 
-function nearest(from: Vec, units: readonly SmallUnit[]): Vec | null {
+function nearest(from: Vec, units: readonly PlayerUnit[]): Vec | null {
   const best = [...units].sort((a, b) => dist(from, a.pos) - dist(from, b.pos) || a.id - b.id)[0];
   return best ? best.pos : null;
 }

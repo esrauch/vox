@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { TEST_RECRUIT } from '../../src/content/smalls';
+import { TEST_RECRUIT } from '../../src/content/players';
 import { QB_POS, SETUP_ROWS, eq, key, vec } from '../../src/sim/grid';
 import { replay, type Input } from '../../src/sim/replay';
 import { createRun, dispatch } from '../../src/sim/run';
 import { boxCircuit, createDefenders, generateSpawns } from '../../src/sim/screen';
 import { step } from '../../src/sim/step';
-import { ofType, playState, run, small, standStill } from './helpers';
+import { ofType, playState, run, player, standStill } from './helpers';
 
 describe('creating a run', () => {
   it('starts in setup with 3 balls and 5 Walk-on slots', () => {
@@ -14,7 +14,7 @@ describe('creating a run', () => {
     expect(state.balls).toBe(3);
     expect(state.slots).toHaveLength(5);
     expect(state.slots.every((s) => s.kindId === 'walkOn')).toBe(true);
-    expect(state.screen.smalls).toHaveLength(5);
+    expect(state.screen.players).toHaveLength(5);
   });
 
   it('spawns defenders deterministically, outside the setup zone', () => {
@@ -26,16 +26,16 @@ describe('creating a run', () => {
 });
 
 describe('setup', () => {
-  it('places Smalls only inside the setup zone, swapping with an occupant', () => {
+  it('places players only inside the setup zone, swapping with an occupant', () => {
     const state = createRun(1);
-    const [a, b] = state.screen.smalls;
+    const [a, b] = state.screen.players;
     const aPos = a!.pos;
     const bPos = b!.pos;
     dispatch(state, { type: 'place', slot: a!.slot, tile: vec(0, 9) });
-    expect(small(state, a!.id).pos).toEqual(aPos);
+    expect(player(state, a!.id).pos).toEqual(aPos);
     dispatch(state, { type: 'place', slot: a!.slot, tile: bPos });
-    expect(small(state, a!.id).pos).toEqual(bPos);
-    expect(small(state, b!.id).pos).toEqual(aPos);
+    expect(player(state, a!.id).pos).toEqual(bPos);
+    expect(player(state, b!.id).pos).toEqual(aPos);
   });
 
   it('remembers the formation for the next screen', () => {
@@ -44,11 +44,11 @@ describe('setup', () => {
     expect(state.formation[0]).toEqual(vec(0, 0));
   });
 
-  it('starts play on hike, with every Small heading straight up', () => {
+  it('starts play on hike, with every player heading straight up', () => {
     const state = createRun(1);
     expect(dispatch(state, { type: 'hike' })).toEqual([{ type: 'hiked' }]);
     expect(state.phase).toBe('play');
-    expect(state.screen.smalls.every((s) => eq(s.intent, vec(s.pos.x, s.pos.y + 1)))).toBe(true);
+    expect(state.screen.players.every((s) => eq(s.intent, vec(s.pos.x, s.pos.y + 1)))).toBe(true);
   });
 });
 
@@ -56,16 +56,16 @@ describe('hopping on the beat', () => {
   it('hops a Hustle-0 Walk-on every 2 beats, straight up', () => {
     let state = playState([{ pos: vec(1, 2) }]);
     state = run(state, 1).state;
-    expect(small(state, 100).pos).toEqual(vec(1, 2));
+    expect(player(state, 100).pos).toEqual(vec(1, 2));
     state = run(state, 1).state;
-    expect(small(state, 100).pos).toEqual(vec(1, 3));
+    expect(player(state, 100).pos).toEqual(vec(1, 3));
     state = run(state, 2).state;
-    expect(small(state, 100).pos).toEqual(vec(1, 4));
+    expect(player(state, 100).pos).toEqual(vec(1, 4));
   });
 
   it('faces where it will hop next', () => {
     const state = playState([{ pos: vec(1, 2) }]);
-    expect(small(state, 100).intent).toEqual(vec(1, 3));
+    expect(player(state, 100).intent).toEqual(vec(1, 3));
   });
 });
 
@@ -94,7 +94,7 @@ describe('throwing and catching', () => {
       { type: 'caught', id: 100, clean: true, quality: 'perfect' },
     ]);
     expect(r3.state.screen.ball).toEqual({ at: 'carried', by: 100 });
-    expect(small(r3.state, 100).fendOff).toBe(1);
+    expect(player(r3.state, 100).fendOff).toBe(1);
   });
 
   it('throws land anywhere; how close the receiver is sets the catch quality', () => {
@@ -125,7 +125,7 @@ describe('throwing and catching', () => {
     // Run the Walk-ons upfield, then lose the ball: everything goes back to the start.
     let state = createRun(5);
     dispatch(state, { type: 'hike' });
-    const startTiles = state.screen.smalls.map((s) => key(s.pos));
+    const startTiles = state.screen.players.map((s) => key(s.pos));
     const defenderTiles = state.screen.defenders.map((d) => key(d.pos));
     state = run(state, 4).state;
     const r = run(step(state, vec(0, 11)).state, 2);
@@ -133,8 +133,8 @@ describe('throwing and catching', () => {
     expect(ofType(r.events, 'screenStarted')).toEqual([{ type: 'screenStarted', index: 0 }]);
     expect(r.state.phase).toBe('setup');
     expect(r.state.balls).toBe(2);
-    expect(r.state.screen.smalls.every((s) => s.alive)).toBe(true);
-    expect(r.state.screen.smalls.map((s) => key(s.pos))).toEqual(startTiles);
+    expect(r.state.screen.players.every((s) => s.alive)).toBe(true);
+    expect(r.state.screen.players.map((s) => key(s.pos))).toEqual(startTiles);
     expect(r.state.screen.defenders.map((d) => key(d.pos))).toEqual(defenderTiles);
   });
 
@@ -146,14 +146,14 @@ describe('throwing and catching', () => {
   });
 });
 
-describe('Smalls never block each other', () => {
+describe('Players never block each other', () => {
   it('a carrier behind a Walk-on that has stopped at the top still scores', () => {
     const state = playState([{ pos: vec(2, 13) }, { pos: vec(2, 14) }]);
     state.screen.ball = { at: 'carried', by: 100 };
     const r = run(state, 4);
     expect(ofType(r.events, 'touchdown')).toHaveLength(1);
-    expect(small(r.state, 100).pos).toEqual(vec(2, 15));
-    expect(small(r.state, 101).pos).toEqual(vec(2, 15)); // sharing the end-zone tile
+    expect(player(r.state, 100).pos).toEqual(vec(2, 15));
+    expect(player(r.state, 101).pos).toEqual(vec(2, 15)); // sharing the end-zone tile
   });
 });
 
@@ -168,7 +168,7 @@ describe('collisions', () => {
       { type: 'died', id: 100, cause: 'defender' },
       { type: 'died', id: 200, cause: 'walkOn' },
     ]);
-    expect(small(r.state, 100).alive).toBe(false);
+    expect(player(r.state, 100).alive).toBe(false);
     expect(r.state.screen.defenders[0]?.alive).toBe(false);
   });
 
@@ -178,9 +178,9 @@ describe('collisions', () => {
       [{ kind: 'chaser', pos: vec(2, 4) }],
     );
     const r = run(state, 4);
-    expect(small(r.state, 100).alive).toBe(false);
-    expect(small(r.state, 101).alive).toBe(true);
-    expect(small(r.state, 101).pos).toEqual(vec(2, 3));
+    expect(player(r.state, 100).alive).toBe(false);
+    expect(player(r.state, 101).alive).toBe(true);
+    expect(player(r.state, 101).pos).toEqual(vec(2, 3));
   });
 
   it('tackling the carrier is a fumble', () => {
@@ -196,18 +196,18 @@ describe('collisions', () => {
     expect(r.state.screen.defenders[0]?.alive).toBe(true);
   });
 
-  it('a Small that can fend off knocks the defender down instead', () => {
+  it('a player that can fend off knocks the defender down instead', () => {
     const state = playState(
       [{ pos: vec(2, 3) }, { pos: vec(4, 1) }],
       [{ kind: 'chaser', pos: vec(2, 5) }],
     );
     state.screen.ball = { at: 'carried', by: 100 };
-    small(state, 100).fendOff = 1;
+    player(state, 100).fendOff = 1;
     const r = run(state, 2);
     expect(ofType(r.events, 'fendedOff')).toHaveLength(1);
     expect(r.state.screen.defenders[0]?.downBeats).toBeGreaterThan(0);
-    expect(small(r.state, 100).pos).toEqual(vec(2, 4));
-    expect(small(r.state, 100).fendOff).toBe(0);
+    expect(player(r.state, 100).pos).toEqual(vec(2, 4));
+    expect(player(r.state, 100).fendOff).toBe(0);
     expect(r.state.screen.ball).toEqual({ at: 'carried', by: 100 });
   });
 });
@@ -264,7 +264,7 @@ describe('the global beat', () => {
     const r = run(state, 6);
     expect(r.state.beat).toBe(6);
     expect(r.state.phase).toBe('setup');
-    expect(r.state.screen.smalls.map((u) => u.pos)).toEqual(before.smalls.map((u) => u.pos));
+    expect(r.state.screen.players.map((u) => u.pos)).toEqual(before.players.map((u) => u.pos));
     expect(r.state.screen.defenders[0]!.pos).toEqual(before.defenders[0]!.pos);
     expect(r.state.screen.defenders[1]!.pos).not.toEqual(before.defenders[1]!.pos);
     expect(new Set(ofType(r.events, 'hop').map((e) => e.id))).toEqual(new Set([901]));
@@ -327,7 +327,7 @@ describe('touchdowns, wipeouts and the end of a run', () => {
     dispatch(next, { type: 'nextScreen' });
     expect(next.phase).toBe('setup');
     expect(next.screen.index).toBe(1);
-    expect(next.screen.smalls.every((s) => s.alive)).toBe(true);
+    expect(next.screen.players.every((s) => s.alive)).toBe(true);
   });
 
   it('a wipeout costs a ball and restarts the screen from setup, Walk-ons back', () => {
@@ -336,7 +336,7 @@ describe('touchdowns, wipeouts and the end of a run', () => {
     expect(ofType(r.events, 'wipeout')).toEqual([{ type: 'wipeout', ballsLeft: 2 }]);
     expect(r.state.phase).toBe('setup');
     expect(r.state.screen.index).toBe(0);
-    expect(r.state.screen.smalls.every((s) => s.alive)).toBe(true);
+    expect(r.state.screen.players.every((s) => s.alive)).toBe(true);
   });
 
   it('a dead recruit is gone: its slot reverts to a Walk-on', () => {
@@ -344,7 +344,7 @@ describe('touchdowns, wipeouts and the end of a run', () => {
       [{ pos: vec(2, 2), kindId: TEST_RECRUIT.id }, { pos: vec(4, 1) }],
       [{ kind: 'chaser', pos: vec(2, 4) }],
     );
-    small(state, 100).hitsTaken = 1; // Heft 1 survives one hit; this is its second
+    player(state, 100).hitsTaken = 1; // Heft 1 survives one hit; this is its second
     const r = run(state, 2);
     expect(ofType(r.events, 'died').map((e) => e.id)).toEqual([100]);
     expect(r.state.slots[0]?.kindId).toBe('walkOn');
@@ -389,8 +389,8 @@ describe('determinism', () => {
         if (state.phase === 'setup') dispatch(state, { type: 'hike' });
         const throwAt = beat % 7 === 0 ? vec((seed + beat) % 9, 2 + (beat % 10)) : null;
         state = step(state, throwAt).state;
-        const live = [...state.screen.smalls, ...state.screen.defenders].filter((u) => u.alive);
-        // Defenders never share a tile (Smalls may).
+        const live = [...state.screen.players, ...state.screen.defenders].filter((u) => u.alive);
+        // Defenders never share a tile (Players may).
         const tiles = live.filter((u) => u.side === 'defender').map((u) => key(u.pos));
         expect(new Set(tiles).size).toBe(tiles.length);
         expect(live.some((u) => eq(u.pos, QB_POS))).toBe(false);

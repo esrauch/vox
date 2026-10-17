@@ -1,6 +1,6 @@
 /**
  * Dev page for the M1.2 simulation core: step a screen beat by beat, place
- * Smalls in setup, and queue throws by tapping tiles. Open /dev/screen.html?seed=N.
+ * Players in setup, and queue throws by tapping tiles. Open /dev/screen.html?seed=N.
  */
 import { tuning } from '../content/tuning';
 import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, inThrowBand, vec } from '../sim/grid';
@@ -74,7 +74,7 @@ render();
 
 function onTile(tile: Vec): void {
   if (state.phase === 'setup') {
-    const here = state.screen.smalls.find((s) => eq(s.pos, tile));
+    const here = state.screen.players.find((s) => eq(s.pos, tile));
     if (selectedSlot === null) selectedSlot = here?.slot ?? null;
     else {
       dispatch(state, { type: 'place', slot: selectedSlot, tile });
@@ -125,7 +125,7 @@ function render(): void {
       if (!inThrowBand(y)) classes.push('out-of-range');
       if (ball.at === 'flight' && eq(ball.target, tile)) classes.push('target');
       if (eq(queuedThrow, tile)) classes.push('queued');
-      const selected = screen.smalls.find((s) => s.slot === selectedSlot);
+      const selected = screen.players.find((s) => s.slot === selectedSlot);
       if (selected && eq(selected.pos, tile)) classes.push('selected');
 
       let html = '';
@@ -134,7 +134,7 @@ function render(): void {
         html = '★';
         if (ball.at === 'qb') html += '<span class="ball">●</span>';
       }
-      const unit = [...screen.smalls, ...screen.defenders]
+      const unit = [...screen.players, ...screen.defenders]
         .filter((u) => eq(u.pos, tile))
         .sort((a, b) => Number(b.alive) - Number(a.alive))[0];
       if (unit) html += unitHtml(unit);
@@ -155,7 +155,7 @@ function render(): void {
   buttons.next.disabled = state.phase !== 'cleared';
   help.textContent =
     state.phase === 'setup'
-      ? 'Setup: tap a Small, then a tile in the bottom 3 rows.'
+      ? 'Setup: tap a player, then a tile in the bottom 3 rows.'
       : state.phase === 'play'
         ? 'Tap a tile to queue a throw for the next beat (lands 2 beats later). Step or Auto to advance.'
         : state.phase === 'cleared'
@@ -166,11 +166,11 @@ function render(): void {
 function unitHtml(u: Unit): string {
   const arrow = u.intent ? arrowFor(u.pos, u.intent) : '';
   const state = !u.alive ? 'dead' : u.downBeats > 0 ? 'down' : '';
-  if (u.side === 'small') {
+  if (u.side === 'player') {
     const glyph = !u.alive ? '✝' : u.kindId === 'walkOn' ? 'w' : 'R';
     const carrying = state === '' && isCarrier(u.id) ? '<span class="ball">●</span>' : '';
     const fend = u.fendOff > 0 ? '⛨' : '';
-    return `<span class="small ${state}">${glyph}${fend}${arrow}</span>${carrying}`;
+    return `<span class="player ${state}">${glyph}${fend}${arrow}</span>${carrying}`;
   }
   const glyph = u.alive ? DEFENDER_GLYPH[u.kind] : '✝';
   return `<span class="defender ${state}">${glyph}${arrow}</span>`;
