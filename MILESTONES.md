@@ -19,7 +19,7 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 - [x] **Starting balls:** 3.
 - [x] **Wipeout:** lose a ball and restart the screen from setup. Walk-ons return, and dead recruits stay dead.
 - [x] **Draft mix:** always one recruit, one Walk-on upgrade and one other card.
-- [x] **Throw range:** most of the screen, never the top rows.
+- [x] **Throw range:** the middle half of the field only (rows 4–11). The bottom and top quarters can't be targeted, shown by slightly dimmed rows and faint chalk lines.
 - [x] **Catching:** a Small catches on its own tile, or lunges one tile ahead. An exact-tile **Clean Catch** lets the receiver fend off 1 defender. Defenders only intercept on the exact tile.
 - [x] **Catch glow:** always on.
 - [x] **Hazards hit defenders too.**
@@ -292,6 +292,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Throws are limited to the middle half of the field, subtly marked on the turf.
 - **2026-10-17:** New team models in the game: football-player Walk-ons, the QB and the jack-o'-lantern football. "Big" is renamed to "QB" in the code.
 - **2026-10-17:** Theme reworked: a football team in a haunted forest, with no Bigs or Smalls. The game is now called **Fourth & Ghoul**. GAMEPLAY.md and TECHNICAL.md are updated to match. *(Items checked off before this point use the old words: the Big is now the QB, and Smalls are now players.)*
 - **2026-10-17:** Defenders are biome locals in candy purple. The Forest set (gnome Chaser, rhino-beetle Blitzer, scarecrow Wall-er, bat Picker) is modelled and in the game.

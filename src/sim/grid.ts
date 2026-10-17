@@ -22,6 +22,11 @@ export function inBounds(v: Vec): boolean {
   return v.x >= 0 && v.x < COLS && v.y >= 0 && v.y < ROWS;
 }
 
+/** Whether a throw may land on this row: only the middle half of the field. */
+export function inThrowBand(y: number): boolean {
+  return y >= tuning.throw.minRow && y <= tuning.throw.maxRow;
+}
+
 export function inSetupZone(v: Vec): boolean {
   return inBounds(v) && v.y < SETUP_ROWS && !eq(v, QB_POS);
 }

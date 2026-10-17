@@ -28,8 +28,12 @@ export const tuning = {
   throw: {
     /** Beats from release to landing (the Fast Throw perk makes it 1). */
     flightBeats: 2,
-    /** The highest row the QB can throw to; the rows above must be run. */
-    maxRow: 12,
+    /**
+     * Throws can only land in the middle half of the field: the bottom quarter
+     * (rows 0-3) is too close to the QB, and the top quarter (12-15) has to be run.
+     */
+    minRow: 4,
+    maxRow: 11,
   },
   qb: {
     /** The QB's hold counter, per ball: Blitzer attacks tick it down; at 0 it's a sack. */

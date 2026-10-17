@@ -3,7 +3,7 @@
  * Smalls in setup, and queue throws by tapping tiles. Open /dev/screen.html?seed=N.
  */
 import { tuning } from '../content/tuning';
-import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, vec } from '../sim/grid';
+import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, inThrowBand, vec } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
 import type { RunState, SimEvent, Unit, Vec } from '../sim/types';
@@ -122,7 +122,7 @@ function render(): void {
       if ((x + y) % 2 === 1) classes.push('dark');
       if (y < SETUP_ROWS) classes.push('setup');
       if (y === END_ROW) classes.push('end');
-      if (y > tuning.throw.maxRow) classes.push('out-of-range');
+      if (!inThrowBand(y)) classes.push('out-of-range');
       if (ball.at === 'flight' && eq(ball.target, tile)) classes.push('target');
       if (eq(queuedThrow, tile)) classes.push('queued');
       const selected = screen.smalls.find((s) => s.slot === selectedSlot);

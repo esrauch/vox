@@ -115,7 +115,7 @@ Each screen is one field-length climb, in two phases.
 | **The beat itself** | A simple beat pulse and field bounce, enough to read the music without a timing meter. |
 | **The grid** | A soft checkerboard on the turf, so every tile is obvious. |
 | **Where a unit will hop next** | Every player and defender **faces the direction it's about to hop**, as in *Crossy Road*. Fast units show a double-hop arrow. |
-| **Throw range** | It covers most of the screen but **never reaches the top rows**, so the last stretch always has to be run. The reticle can't be placed outside it. |
+| **Throw range** | **Only the middle half of the field** (rows 4–11 of 16). The bottom quarter is too close to the QB, and the top quarter always has to be run. The rows outside the band are dimmed slightly, with faint chalk lines at its edges. The reticle can't be placed outside it. |
 | **The ball button** | The jack-o'-lantern football at the bottom center, bouncing and glowing in time with the music. |
 | **The reticle** | A bold target on a tile, in your team's color. Before a throw it shows where the ball will go. After a throw, it marks where Hijinks will land. |
 | **Where the ball will land** | The reticle locks in, with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |

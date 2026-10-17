@@ -70,6 +70,7 @@ export function throwProblem(state: RunState, target: Vec): string | null {
   if (!inBounds(target)) return 'off the field';
   if (eq(target, QB_POS)) return 'that is the QB';
   if (target.y > tuning.throw.maxRow) return 'out of range';
+  if (target.y < tuning.throw.minRow) return 'too close';
   return null;
 }
 

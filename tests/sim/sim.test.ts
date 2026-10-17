@@ -70,17 +70,24 @@ describe('hopping on the beat', () => {
 });
 
 describe('throwing and catching', () => {
-  it('rejects throws past the top rows, and while the ball is in the air', () => {
+  it('only allows throws into the middle half of the field', () => {
     const state = playState([{ pos: vec(1, 2) }]);
-    const tooFar = step(state, vec(1, 13));
-    expect(ofType(tooFar.events, 'throwRejected')[0]?.reason).toBe('out of range');
-    const thrown = step(state, vec(1, 3));
+    const reason = (y: number) => ofType(step(state, vec(1, y)).events, 'throwRejected')[0]?.reason;
+    expect(reason(12)).toBe('out of range'); // the top quarter has to be run
+    expect(reason(3)).toBe('too close'); // the bottom quarter is too close
+    expect(reason(4)).toBeUndefined();
+    expect(reason(11)).toBeUndefined();
+  });
+
+  it('rejects a throw while the ball is in the air', () => {
+    const state = playState([{ pos: vec(1, 2) }]);
+    const thrown = step(state, vec(1, 5));
     const again = step(thrown.state, vec(1, 4));
     expect(ofType(again.events, 'throwRejected')[0]?.reason).toBe('the QB has no ball');
   });
 
   it('lands 2 beats after release; a Small on the tile makes a Clean Catch', () => {
-    const r1 = step(playState([{ pos: vec(1, 2) }]), vec(1, 3));
+    const r1 = step(playState([{ pos: vec(1, 3) }]), vec(1, 4));
     expect(ofType(r1.events, 'thrown')[0]?.landsOn).toBe(3);
     const r3 = run(r1.state, 2);
     expect(ofType(r3.events, 'caught')).toEqual([{ type: 'caught', id: 100, clean: true }]);
@@ -89,10 +96,10 @@ describe('throwing and catching', () => {
   });
 
   it('lets a Small one tile short, facing the ball, lunge for it (no Clean Catch bonus)', () => {
-    const r1 = step(playState([{ pos: vec(1, 2) }]), vec(1, 4));
+    const r1 = step(playState([{ pos: vec(1, 3) }]), vec(1, 5));
     const r3 = run(r1.state, 2);
     expect(ofType(r3.events, 'caught')).toEqual([{ type: 'caught', id: 100, clean: false }]);
-    expect(small(r3.state, 100).pos).toEqual(vec(1, 4));
+    expect(small(r3.state, 100).pos).toEqual(vec(1, 5));
     expect(small(r3.state, 100).fendOff).toBe(0);
   });
 
@@ -104,14 +111,14 @@ describe('throwing and catching', () => {
   });
 
   it('a fumble resets the whole screen to setup with the next ball', () => {
-    // Run the Walk-on upfield, then miss: everything goes back to the start.
+    // Run the Walk-ons upfield, then lose the ball: everything goes back to the start.
     let state = createRun(5);
     dispatch(state, { type: 'hike' });
     const startTiles = state.screen.smalls.map((s) => key(s.pos));
     const defenderTiles = state.screen.defenders.map((d) => key(d.home));
     state = run(state, 4).state;
-    const r = run(step(state, vec(0, 12)).state, 2);
-    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('miss');
+    const r = run(step(state, vec(0, 11)).state, 2);
+    expect(ofType(r.events, 'fumble')).toHaveLength(1);
     expect(ofType(r.events, 'screenStarted')).toEqual([{ type: 'screenStarted', index: 0 }]);
     expect(r.state.phase).toBe('setup');
     expect(r.state.balls).toBe(2);

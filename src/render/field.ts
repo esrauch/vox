@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { biomes, hexToNumber, type Hex } from '../content/palettes';
 import { tuning } from '../content/tuning';
-import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, vec } from '../sim/grid';
+import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, inThrowBand, vec } from '../sim/grid';
 import { getGeometry, voxelMaterial } from '../voxel/models';
 import { tileToWorld } from './view';
 
@@ -9,8 +9,8 @@ import { tileToWorld } from './view';
 export const QB_MODEL = 'team/qb';
 
 /**
- * The static field: a checkerboard of tiles with the setup zone, end zone,
- * out-of-range rows marked, plus the QB. One merged mesh for
+ * The static field: a checkerboard of tiles with the setup zone, end zone
+ * and throwing band marked, plus the QB. One merged mesh for
  * the tiles keeps the draw-call count low (TECHNICAL.md §5).
  */
 export function createField(): THREE.Group {
@@ -24,7 +24,8 @@ export function createField(): THREE.Group {
   const setupDark = color(palette.setupDark);
   const end = color(palette.endZone);
   const endDark = color(palette.endZoneDark);
-  const outOfRange = 0.82;
+  // Rows a throw can't reach are dimmed a touch: a subtle hint, not a wall.
+  const outOfRange = 0.86;
 
   const tile = new THREE.BoxGeometry(1, 0.3, 1);
   const tiles = new THREE.InstancedMesh(tile, new THREE.MeshLambertMaterial(), COLS * ROWS);
@@ -37,7 +38,7 @@ export function createField(): THREE.Group {
       let color = (odd ? dark : light).clone();
       if (y < SETUP_ROWS) color = (odd ? setupDark : setup).clone();
       if (y === END_ROW) color = (odd ? endDark : end).clone();
-      else if (y > tuning.throw.maxRow) color.multiplyScalar(outOfRange);
+      else if (!inThrowBand(y)) color.multiplyScalar(outOfRange);
       const p = tileToWorld(vec(x, y), -0.15);
       matrix.makeTranslation(p.x, p.y, p.z);
       tiles.setMatrixAt(i, matrix);
@@ -46,6 +47,15 @@ export function createField(): THREE.Group {
     }
   }
   group.add(tiles);
+
+  // Faint chalk lines at the edges of the throwing band.
+  const chalk = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.22 });
+  for (const edge of [tuning.throw.minRow - 0.5, tuning.throw.maxRow + 0.5]) {
+    const line = new THREE.Mesh(new THREE.PlaneGeometry(COLS, 0.06), chalk);
+    line.rotation.x = -Math.PI / 2;
+    line.position.set(0, 0.005, -edge);
+    group.add(line);
+  }
 
   // The QB never moves. It faces the camera so its carved face is visible.
   const qb = new THREE.Mesh(getGeometry(QB_MODEL), voxelMaterial);
