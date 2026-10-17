@@ -58,7 +58,7 @@
   transform: scale(1);
 }
 
-.hud-judge {
+.hud-pop {
   position: absolute;
   bottom: calc(env(safe-area-inset-bottom) + 150px);
   left: 0;
@@ -71,7 +71,7 @@
   text-shadow: 0 3px 0 var(--ink);
 }
 
-.hud-judge.show {
+.hud-pop.show {
   opacity: 1;
   transform: translateY(0);
   transition:
@@ -79,15 +79,11 @@
     transform 0.08s;
 }
 
-.hud-judge.onBeat {
+.hud-pop.good {
   color: var(--slime-green);
 }
 
-.hud-judge.offBeat {
-  color: white;
-}
-
-.hud-judge.bad {
+.hud-pop.bad {
   color: var(--pumpkin);
 }
 
@@ -127,27 +123,4 @@
 
 .hud-action:active {
   translate: 0 3px;
-}
-
-.hud-badges {
-  position: absolute;
-  inset: 0;
-}
-
-.hud-badge {
-  position: absolute;
-  left: 0;
-  top: 0;
-  min-width: 22px;
-  padding: 1px 6px;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 900;
-  color: white;
-  background: var(--ink);
-}
-
-.hud-badge.danger {
-  background: #e8344e;
 }

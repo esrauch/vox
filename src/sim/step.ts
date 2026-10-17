@@ -12,7 +12,7 @@
  *   1. Knocked-down units recover a little.
  *   2. A throw tapped for this beat leaves the QB's hand.
  *   3. Units hop (on their hop beats) and collisions resolve.
- *   4. Blitzers next to the QB attack it (only while it holds the ball).
+ *   4. A defender next to the QB sacks it (only while it holds the ball).
  *   5. A ball due this beat lands: catch, interception or miss.
  *   6. Touchdown and wipeout checks.
  *   7. Everyone decides next beat's hop (the telegraph).

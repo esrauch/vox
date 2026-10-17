@@ -2,8 +2,9 @@
  * "Spooky Surf": the first track. Cheerful Halloween surf rock in A minor at
  * 120 BPM, 8 bars: Am Am F E Am Am Dm E.
  *
- * Setup plays just the bass and hats (the huddle); HIKE! brings in the kick,
- * snare, organ stabs and the twangy lead.
+ * The game plays the full mix (kick, snare, hats, bass, organ stabs and the
+ * twangy lead) continuously; the thinner `setup` mix is only auditioned on the
+ * dev audio board for now.
  */
 import { rep } from '../synth/notes';
 import type { Song } from '../synth/render';

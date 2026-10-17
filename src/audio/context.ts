@@ -17,6 +17,11 @@ export async function unlockAudio(): Promise<AudioContext> {
   return ctx;
 }
 
+/** Suspend the AudioContext (pausing): its clock stops, and so does every beat clock on it. */
+export async function suspendAudio(): Promise<void> {
+  if (ctx?.state === 'running') await ctx.suspend();
+}
+
 /** Suspend audio while the page is hidden and resume when it's visible again. */
 export function installVisibilityPause(onChange?: (hidden: boolean) => void): void {
   document.addEventListener('visibilitychange', () => {

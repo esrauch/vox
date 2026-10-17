@@ -1,20 +1,13 @@
 /**
  * The DOM HUD over the canvas (TECHNICAL.md §6): the ball pile, yards, the
- * setup/next/restart button, message pops, and number badges pinned to things
- * on the field. Aiming happens on the canvas itself (see game.ts).
+ * context button (PLAY, HIKE, NEXT, AGAIN, RESUME) and message pops. Aiming
+ * happens on the canvas itself (see game.ts).
  */
 import './hud.css';
 
 export interface HudHandlers {
-  /** The context button: HIKE, next screen, or new run. */
+  /** The context button: PLAY, HIKE, next screen, new run, or resume. */
   onAction(): void;
-}
-
-export interface Badge {
-  readonly x: number;
-  readonly y: number;
-  readonly text: string;
-  readonly danger?: boolean;
 }
 
 export class Hud {
@@ -24,9 +17,8 @@ export class Hud {
   private readonly message: HTMLElement;
   private readonly bottom: HTMLElement;
   private readonly actionButton: HTMLButtonElement;
-  private readonly judge: HTMLElement;
-  private readonly badges: HTMLElement;
-  private judgeTimer: ReturnType<typeof setTimeout> | undefined;
+  private readonly popEl: HTMLElement;
+  private popTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(root: HTMLElement, handlers: HudHandlers) {
     root.innerHTML = `
@@ -34,9 +26,8 @@ export class Hud {
         <div class="hud-balls"></div>
         <div class="hud-yards"></div>
       </div>
-      <div class="hud-badges"></div>
       <div class="hud-message"></div>
-      <div class="hud-judge"></div>
+      <div class="hud-pop"></div>
       <div class="hud-bottom">
         <div class="hud-controls">
           <button class="hud-action interactive"></button>
@@ -53,8 +44,7 @@ export class Hud {
     this.message = q('.hud-message');
     this.bottom = q('.hud-bottom');
     this.actionButton = q<HTMLButtonElement>('.hud-action');
-    this.judge = q('.hud-judge');
-    this.badges = q('.hud-badges');
+    this.popEl = q('.hud-pop');
 
     this.actionButton.addEventListener('click', () => handlers.onAction());
   }
@@ -90,27 +80,11 @@ export class Hud {
     this.actionButton.hidden = !action;
   }
 
-  showJudgement(text: string, kind: 'onBeat' | 'offBeat' | 'bad'): void {
-    this.judge.textContent = text;
-    this.judge.className = `hud-judge show ${kind}`;
-    clearTimeout(this.judgeTimer);
-    this.judgeTimer = setTimeout(() => (this.judge.className = 'hud-judge'), 550);
-  }
-
-  setBadges(badges: readonly Badge[]): void {
-    while (this.badges.childElementCount < badges.length) {
-      const el = document.createElement('div');
-      el.className = 'hud-badge';
-      this.badges.append(el);
-    }
-    [...this.badges.children].forEach((el, i) => {
-      const badge = badges[i];
-      const node = el as HTMLElement;
-      node.hidden = !badge;
-      if (!badge) return;
-      node.textContent = badge.text;
-      node.classList.toggle('danger', !!badge.danger);
-      node.style.transform = `translate(${badge.x}px, ${badge.y}px) translate(-50%, -100%)`;
-    });
+  /** A short pop above the controls: a catch rating, a fumble, a rejected throw. */
+  pop(text: string, tone: 'good' | 'bad'): void {
+    this.popEl.textContent = text;
+    this.popEl.className = `hud-pop show ${tone}`;
+    clearTimeout(this.popTimer);
+    this.popTimer = setTimeout(() => (this.popEl.className = 'hud-pop'), 550);
   }
 }

@@ -2,12 +2,13 @@
  * The game controller: ties the beat clock, the music, the simulation, the
  * three.js view and the DOM HUD together.
  *
- * One song loops continuously from the first tap, and its beat clock never
- * stops: setup, play and touchdowns all ride the same beats. In play, the
- * simulation steps exactly when the *heard* beat ticks over: each frame, any
- * beats heard since the last frame are stepped.
+ * The tick is the music. Tapping PLAY enters the game: the song starts
+ * looping and its beat clock with it, and neither ever stops. Each frame, the
+ * sim steps every beat that has been *heard* since the last one, in every
+ * phase; the phase only decides who moves (see step.ts). Pausing suspends the
+ * audio, and the beat freezes with it.
  */
-import { installVisibilityPause, unlockAudio } from '../audio/context';
+import { suspendAudio, unlockAudio } from '../audio/context';
 import { getMixer } from '../audio/mixer';
 import { MusicPlayer, RENDER_RATE, prepareSong } from '../audio/music';
 import { SfxPlayer, prepareSfx, type SfxId } from '../audio/sfx';
@@ -19,15 +20,11 @@ import { createForestScenery } from '../render/scenery';
 import { Markers } from '../render/markers';
 import { UnitViews } from '../render/units';
 import { View } from '../render/view';
-import { loadSettings } from '../settings';
 import { COLS, QB_POS, eq, inSetupZone } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
 import type { RunState, SimEvent, Vec } from '../sim/types';
 import { Hud } from '../ui/hud';
-
-/** Beats the sim may catch up in one frame before the game pauses instead. */
-const MAX_CATCH_UP = 2;
 
 export interface GameOptions {
   seed: number;
@@ -39,26 +36,17 @@ export class Game {
   private readonly units: UnitViews;
   private readonly markers: Markers;
   private readonly hud: Hud;
-  private readonly settings = loadSettings();
+  /** The song's beat clock: the global tick. Null until the player enters the game. */
   private clock: BeatClock | null = null;
+  /** The song beat this run's beat 0 fell on: sim beat = song beat - runStart. */
+  private runStart = 0;
   /** Aiming with the throw circle: where the pull started (screen px) and where it points. */
   private aim: { startX: number; startY: number; target: Vec; valid: boolean } | null = null;
   private queuedThrow: { beat: number; target: Vec } | null = null;
   private drag: { id: number; slot: number; tile: Vec } | null = null;
   private seed: number;
-  /**
-   * The global beat: sim beat = source beat + offset, ticking in every phase.
-   * The source is the song's clock once the first tap has started it, and
-   * before that a timer at the song's tempo. The offset is re-anchored only
-   * when the source changes or after a pause, so the sim never jumps.
-   */
-  private beatOffset = 0;
-  private reanchor = true;
-  private source: 'timer' | 'clock' = 'timer';
-  private readonly timerStart = performance.now();
   private paused = false;
   private music: MusicPlayer | null = null;
-  private musicStarting: Promise<void> | null = null;
   private sfx: SfxPlayer | null = null;
 
   constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement, options: GameOptions) {
@@ -78,14 +66,13 @@ export class Game {
     window.addEventListener('resize', refit);
     refit();
 
-    // Audio can only start inside a gesture: the song starts on the first tap anywhere.
-    window.addEventListener('pointerdown', () => void this.startMusic());
     canvas.addEventListener('pointerdown', (e) => this.onPointerDown(e));
     canvas.addEventListener('pointermove', (e) => this.onPointerMove(e));
     canvas.addEventListener('pointerup', (e) => this.onPointerUp(e));
     canvas.addEventListener('pointercancel', (e) => this.onPointerUp(e));
-    installVisibilityPause((hidden) => {
-      if (hidden) this.pause();
+    // Leaving the page pauses: the audio is suspended, so the beat stops too.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') this.pause();
     });
 
     // Rendering the song and effects doesn't need a tap, so start right away.
@@ -98,47 +85,22 @@ export class Game {
   // ── Frame loop ──────────────────────────────────────────────────────────
 
   private frame(now: number): void {
-    const pos = this.beatAt(now);
-    if (this.reanchor && !this.paused) {
-      // The sim's next beat is the source's next beat.
-      this.beatOffset = this.state.beat - pos.index;
-      this.reanchor = false;
-    }
-    const target = pos.index + this.beatOffset;
+    const heard = this.clock?.position(now);
+    const beat = heard ? heard.index - this.runStart : this.state.beat;
+    // Step every beat heard since the last frame. The music never waits, so
+    // neither does the sim: after a hiccup it catches up rather than drifting.
+    while (this.state.beat < beat) this.stepBeat();
 
-    // If frames stalled for more than a couple of beats (the page was covered,
-    // the phone hiccuped), pause play rather than fast-forwarding through
-    // them. Outside play, just pick the beat up from here.
-    if (!this.paused && target - this.state.beat > MAX_CATCH_UP) {
-      if (this.state.phase === 'play') this.pause();
-      else this.beatOffset -= target - this.state.beat;
-    }
-    // Step every beat that has been heard since the last frame, in any phase.
-    while (!this.paused && this.state.beat < pos.index + this.beatOffset) this.stepBeat();
-
-    const beat = this.paused ? this.state.beat : pos.index + this.beatOffset;
-    const phase = this.paused ? 1 : Math.max(0, pos.phase);
+    const phase = heard ? Math.max(0, heard.phase) : 0;
     this.units.update(this.state.screen, beat, phase);
     this.markers.update(this.state.screen, beat + phase, this.units, now / 1000);
     this.view.render();
   }
 
-  /**
-   * Where the global beat source is at a performance-clock moment (ms): the
-   * song's heard beat once it's playing, otherwise a timer at its tempo.
-   * Switching from the timer to the song re-anchors the sim beat.
-   */
-  private beatAt(perfMs: number): { index: number; phase: number } {
-    const clockPos = this.clock?.running ? this.clock.position(perfMs) : null;
-    if (clockPos) {
-      if (this.source === 'timer') {
-        this.source = 'clock';
-        this.reanchor = true;
-      }
-      return clockPos;
-    }
-    const elapsed = (perfMs - this.timerStart) / (60_000 / spookySurf.bpm);
-    return { index: Math.floor(elapsed), phase: elapsed % 1 };
+  /** The sim beat (with its fraction) heard at a performance-clock moment (ms). */
+  private beatPosition(perfMs: number): number {
+    const heard = this.clock?.position(perfMs);
+    return heard ? heard.index - this.runStart + heard.phase : this.state.beat;
   }
 
   private stepBeat(): void {
@@ -169,9 +131,9 @@ export class Game {
           break;
         case 'caught':
           this.play(e.quality === 'perfect' ? 'cleanCatch' : 'catch');
-          this.hud.showJudgement(
+          this.hud.pop(
             e.quality === 'perfect' ? 'PERFECT!' : e.quality === 'good' ? 'GOOD!' : 'OK',
-            'onBeat',
+            'good',
           );
           break;
         case 'died':
@@ -181,16 +143,16 @@ export class Game {
           if (e.reason === 'sack') this.play('sack');
           this.play('fumble');
           this.play('chant');
-          this.hud.showJudgement(e.reason === 'sack' ? 'SACKED!' : 'FEE FI FO FUMBLE!', 'bad');
+          this.hud.pop(e.reason === 'sack' ? 'SACKED!' : 'FEE FI FO FUMBLE!', 'bad');
           break;
         case 'touchdown':
           this.play('touchdown');
           break;
         case 'wipeout':
-          this.hud.showJudgement('WIPEOUT!', 'bad');
+          this.hud.pop('WIPEOUT!', 'bad');
           break;
         case 'throwRejected':
-          this.hud.showJudgement(e.reason, 'bad');
+          this.hud.pop(e.reason, 'bad');
           break;
         default:
           break;
@@ -211,10 +173,11 @@ export class Game {
     const { phase, screen } = this.state;
     this.hud.setBalls(this.state.balls);
     this.hud.setYards(yards(this.state), screen.index);
-    if (phase === 'setup') this.hud.setPrompt('Place your squad', 'HIKE!');
+    if (!this.clock) this.hud.setPrompt('Fourth & Ghoul', 'PLAY');
+    else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
+    else if (phase === 'setup') this.hud.setPrompt('Place your squad', 'HIKE!');
     else if (phase === 'cleared') this.hud.setPrompt('TOUCHDOWN!', 'NEXT');
     else if (phase === 'over') this.hud.setPrompt(`${yards(this.state)} yards`, 'AGAIN');
-    else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
     else this.hud.setPrompt(null, null);
     if (phase !== 'play' && this.aim) {
       this.aim = null;
@@ -224,11 +187,13 @@ export class Game {
 
   // ── Input ───────────────────────────────────────────────────────────────
 
+  /** Suspend the audio, and with it the beat. Everything picks up exactly where it was on RESUME. */
   private pause(): void {
-    if (this.state.phase !== 'play' || this.paused) return;
+    if (!this.clock || this.paused) return;
     this.paused = true;
-    this.queuedThrow = null;
-    this.markers.launch(null);
+    this.aim = null;
+    this.markers.setAim(null);
+    void suspendAudio();
     this.syncHud();
   }
 
@@ -244,40 +209,37 @@ export class Game {
   }
 
   /**
-   * Start the song and its beat clock, once. They then run continuously and
-   * seamlessly through setup, play, touchdowns and new runs: the music is the
-   * clock, and the game lines itself up to it.
+   * Enter the game (the PLAY tap, which is what lets audio start): the song
+   * starts looping, and its clock is the global tick from here on.
    */
-  private startMusic(): Promise<void> {
-    this.musicStarting ??= (async () => {
-      const { ctx, music } = await this.ensureAudio();
-      this.clock ??= new BeatClock(ctx);
-      const origin = ctx.currentTime + 0.1;
-      music.start(origin, 'play');
-      this.clock.startAt(music.song.bpm, origin);
-    })();
-    return this.musicStarting;
+  private async enter(): Promise<void> {
+    const { ctx, music } = await this.ensureAudio();
+    const origin = ctx.currentTime + 0.1;
+    music.start(origin);
+    this.clock = new BeatClock(ctx);
+    this.clock.startAt(music.song.bpm, origin);
+    this.runStart = -this.state.beat;
   }
 
   private async onAction(): Promise<void> {
     this.play('uiClick');
     const { phase } = this.state;
-    if (phase === 'play' && this.paused) {
-      // Pick the beat up from here: the sim's next beat is the song's next beat.
+    if (!this.clock) {
+      await this.enter();
+    } else if (this.paused) {
       this.paused = false;
-      this.reanchor = true;
+      await unlockAudio();
     } else if (phase === 'setup') {
       // The beat is already running: players start on their next hop beat.
       dispatch(this.state, { type: 'hike' });
-      this.queuedThrow = null;
-      this.markers.launch(null);
     } else if (phase === 'cleared') {
       dispatch(this.state, { type: 'nextScreen' });
       this.resetUnits();
     } else if (phase === 'over') {
       this.seed++;
       this.state = createRun(this.seed);
-      this.aim = null;
+      this.runStart = (this.clock.position()?.index ?? 0) - this.state.beat;
+      this.queuedThrow = null;
       this.resetUnits();
     }
     this.syncHud();
@@ -312,14 +274,13 @@ export class Game {
     this.markers.setAim(null);
     if (!aim || this.paused || this.state.phase !== 'play') return;
     if (!aim.valid) {
-      if (aim.target.y > tuning.throw.minRow - 0.5) this.hud.showJudgement('out of range', 'bad');
+      if (aim.target.y > tuning.throw.minRow - 0.5) this.hud.pop('out of range', 'bad');
       return;
     }
-    const pos = this.beatAt(e.timeStamp);
     // The sim throws on the next beat and the ball lands flightBeats after
     // that, but the ball leaves the QB's hand the moment you let go: it flies
     // a little faster or slower so it still lands right on that beat.
-    const releasedAt = Math.max(pos.index + this.beatOffset + pos.phase, this.state.beat);
+    const releasedAt = Math.max(this.beatPosition(e.timeStamp), this.state.beat);
     const beat = Math.max(Math.floor(releasedAt), this.state.beat) + 1;
     this.queuedThrow = { beat, target: aim.target };
     this.markers.launch({
@@ -330,6 +291,7 @@ export class Game {
   }
 
   private onPointerDown(e: PointerEvent): void {
+    if (!this.clock || this.paused) return;
     // In play, a drag that starts anywhere on the screen aims a throw, slingshot-style.
     if (this.state.phase === 'play') {
       this.view.canvas.setPointerCapture(e.pointerId);

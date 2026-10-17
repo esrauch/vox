@@ -1,12 +1,10 @@
 /**
- * Music playback (TECHNICAL.md §8): every stem of the current song loops
- * together as a pre-rendered buffer. Layers fade stems in and out (the setup
- * huddle plays only some; HIKE! brings in the rest), always on the beat grid.
+ * Music playback (TECHNICAL.md §8): the stems of the current song's full mix
+ * (`layers.play`) loop together as pre-rendered buffers. The game starts it
+ * once and it never stops: it's the global tick.
  */
 import type { Mixer } from './mixer';
 import { loopSeconds, renderSong, type Song } from './synth/render';
-
-export type Layer = 'setup' | 'play';
 
 /** The rate songs are rendered at. Rendering doesn't need the live context, so it can start at load. */
 export const RENDER_RATE = 48_000;
@@ -31,9 +29,6 @@ interface Voice {
 
 export class MusicPlayer {
   private voices: Voice[] = [];
-  /** Context time at which the loop was (or would have been) at its start. */
-  private loopStart = 0;
-  private layer: Layer = 'setup';
 
   constructor(
     private readonly ctx: AudioContext,
@@ -46,41 +41,24 @@ export class MusicPlayer {
     return this.voices.length > 0;
   }
 
-  get currentLayer(): Layer {
-    return this.layer;
-  }
-
   /**
    * Start every stem so that `beatInLoop` beats into the song lands exactly at
    * context time `time`.
    */
-  start(time: number, layer: Layer, beatInLoop = 0): void {
+  start(time: number, beatInLoop = 0): void {
     this.stop();
     const loop = loopSeconds(this.song);
     const offset = ((((beatInLoop * 60) / this.song.bpm) % loop) + loop) % loop;
-    this.loopStart = time - offset;
-    this.layer = layer;
-    for (const stem of this.song.stems) {
-      const buffer = this.stems.get(stem.id);
+    for (const id of this.song.layers.play) {
+      const buffer = this.stems.get(id);
       if (!buffer) continue;
       const source = this.ctx.createBufferSource();
       source.buffer = buffer;
       source.loop = true;
       const gain = this.ctx.createGain();
-      gain.gain.value = this.inLayer(stem.id, layer) ? 1 : 0;
       source.connect(gain).connect(this.mixer.music);
       source.start(time, offset);
-      this.voices.push({ stem: stem.id, source, gain });
-    }
-  }
-
-  /** Fade stems in or out to match a layer, landing at context time `time`. */
-  setLayer(layer: Layer, time: number): void {
-    this.layer = layer;
-    for (const v of this.voices) {
-      const target = this.inLayer(v.stem, layer) ? 1 : 0;
-      v.gain.gain.cancelScheduledValues(time);
-      v.gain.gain.setTargetAtTime(target, time, 0.015);
+      this.voices.push({ stem: id, source, gain });
     }
   }
 
@@ -95,19 +73,5 @@ export class MusicPlayer {
       }
     }
     this.voices = [];
-  }
-
-  /** The context time of the first beat at or after `after`. */
-  nextBeatTime(after: number): number {
-    const beat = 60 / this.song.bpm;
-    return this.loopStart + Math.ceil((after - this.loopStart) / beat) * beat;
-  }
-
-  now(): number {
-    return this.ctx.currentTime;
-  }
-
-  private inLayer(stem: string, layer: Layer): boolean {
-    return this.song.layers[layer].includes(stem);
   }
 }

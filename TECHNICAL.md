@@ -83,7 +83,7 @@ This is the riskiest system in the project, so it gets built and tested first.
 - **Latency compensation:**
   - `outputLatency` and `baseLatency` are taken into account where the browser reports them.
   - Device-specific offset checks remain possible for the clock, but they are for sync quality, not a perfect-timing system.
-- **Audio unlock:** mobile browsers only start audio after a user gesture. The title screen's first tap creates and resumes the `AudioContext`.
+- **Audio unlock:** mobile browsers only start audio after a user gesture. For now the title is just the **PLAY** prompt: that tap creates and resumes the `AudioContext`, starts the song, and starts the global tick.
 - **Pausing:** when the tab is hidden, the game pauses and suspends the audio context. Resuming starts with a short count-in before play continues.
 - **Debug overlay (dev only):** shows the current beat, the measured latency and the frame time.
 
@@ -165,7 +165,10 @@ Everything goes through **one `AudioContext`**, with a small mixer: `master → 
 - **▲ Decision: render the songs at load time, not live.** Each song's stems are rendered to `AudioBuffer`s with an `OfflineAudioContext` while the game loads (and cached), then played as perfectly looping buffers.
   - **Why:** it's still all synthesized (no music files, tiny downloads), but it plays back at near-zero CPU cost and with sample-accurate loops.
   - **Live synthesis** stays an option for reactive layers later.
-- **One continuous song:** the full song starts on the first tap anywhere (the audio unlock) and loops seamlessly through setup, play, touchdowns and new runs; it never stops or restarts. Its beat clock starts with it and never stops either, so the music *is* the clock. There's **one global beat** (`state.beat`) that ticks in every phase and never resets; see §22's `step.ts` note. **HIKE!** doesn't touch the beat: it just lets everyone else start acting on the next one. (`MusicPlayer` still supports a stem subset per layer, `setLayer`, if we want a thinner huddle groove back later; it would fade on the beat, not restart.)
+- **The music is the global tick.** Tapping **PLAY** enters the game: the song's full mix starts looping and its beat clock starts with it. Neither ever stops or restarts, through setup, play, touchdowns and new runs. Game ticks are the song's beats: **sim beat = song beat − the run's start beat** (fixed when a run is created). There's nothing else: no timer, no re-anchoring.
+  - **What a tick does depends on the phase**, not whether it happens: before HIKE only the Bats move; after it, everyone does (see §22's `step.ts` note). **HIKE!** doesn't touch the beat.
+  - **Pausing suspends the `AudioContext`.** `BeatClock.heardTime` never runs past `ctx.currentTime`, so the beat freezes with the music and both pick up exactly where they were on **RESUME**. Leaving the page pauses.
+  - **No catch-up limit:** if frames stall while the music plays, the sim steps every beat it missed, so it never drifts from the song.
 - **Notation:** each stem is one string per bar: notes like `A3`, chords like `A3+C4+E4`, `-` to hold, `.` to rest, and `x`/`X` for drum hits (`src/audio/synth/notes.ts`).
 - **Tempo per biome:** each biome's song has its own BPM. Changing tempo means switching songs, which happens on a screen transition, never mid-play.
 - **The chant** ("FEE! FI! FO! FUMBLE!") is a stinger that lands on the beat, made either from synthesized vocal-ish sounds or from a recorded public-domain or CC0 sample.
@@ -433,9 +436,9 @@ Everything a future session (human or Claude) needs to carry on without the orig
   - `ai.ts`: per-beat intents (the hop-arrow telegraph): Walk-ons go straight up; Chaser, Blitzer, Wall-er and Picker rules.
   - `stats.ts`: what Hustle, Hands and Heft mean (only the 0 values are decided; 1+ are placeholders). `screen.ts`: a placeholder seeded defender scatter. `replay.ts`: replay from seed and inputs. `rng.ts`: mulberry32 plus `deriveSeed`.
 - **`beat/`**: `clock.ts` (`BeatClock`: audio-clock grid, lookahead scheduling, `position()` in *heard* time via `getOutputTimestamp`, `startAt(bpm, origin)`), `beatMath.ts` (pure maths; `judge()` deliberately never awards On-Beat), `calibration.ts`.
-- **`audio/`**: `mixer.ts` (buses → compressor), `music.ts` (`prepareSong`, `MusicPlayer`, one continuous loop), `sfx.ts` (`SFX` definitions, `prepareSfx`, `SfxPlayer`), `synth/` (`notes.ts` notation, `instruments.ts` voices, `render.ts` offline stem rendering with tail folding), `songs/spookySurf.ts`, `wav.ts`, `context.ts` (unlock, pause on hide).
+- **`audio/`**: `mixer.ts` (buses → compressor), `music.ts` (`prepareSong`, `MusicPlayer`, the full mix as one continuous loop), `context.ts` (unlock, `suspendAudio`), `sfx.ts` (`SFX` definitions, `prepareSfx`, `SfxPlayer`), `synth/` (`notes.ts` notation, `instruments.ts` voices, `render.ts` offline stem rendering with tail folding), `songs/spookySurf.ts`, `wav.ts`
 - **`render/`**: `view.ts` (renderer, lights `hemi`/`sun`, the fitted perspective camera, fog range, `tileAt`, `toScreen`), `field.ts` (tiles, throwing-band dimming and chalk lines, the QB model, `QB_MODEL`), `units.ts` (unit meshes, hop animation, facing; Wall-ers never rotate), `markers.ts` (ball, the free reticle with perfect/ok rings and a marching dashed arc while aiming, landing ring and pips, the QB's raised-hand ball position), `scenery.ts` (forest floor texture, fog, moonlight, instanced props).
-- **`game/game.ts`**: the controller. The sim steps when each beat is *heard*; it pauses if frames stall more than 2 beats or the page is hidden; the music *is* the clock: `beatAt()` is the beat source (the song's clock from the first tap, a timer at its tempo before that), and sim beat = source beat + `beatOffset`, which is re-anchored only when the source switches or after a pause. Every phase steps on it; SFX hooks; input (press anywhere and pull back to aim, release to throw; drag in setup).
+- **`game/game.ts`**: the controller. The music is the global tick: PLAY (`enter()`) starts the song and its `BeatClock`; each frame the sim steps every beat *heard* since the last, in every phase (sim beat = song beat − `runStart`). Pause = suspend the audio (the beat freezes with it); SFX hooks; input (press anywhere and pull back to aim, release to throw; drag in setup).
 - **`ui/`**: `hud.ts` and `hud.css` (DOM HUD), `base.css`, `paletteVars.ts`.
 - **`content/`**: `palettes.ts` (**the only place colors are defined**: `common`, `team`, `voxel` for model colors, `biomes.forest`), `tuning.ts` (every magic number), `smalls.ts` (the Walk-on and recruit kinds; `returns`, `trades`), `defenders.ts`.
 - **`voxel/`**: `voxt.ts` (parser), `mesh.ts` (greedy mesher), `models.ts` (loads every `.voxt` through `import.meta.glob`, caches geometry, `voxelMaterial`, `modelHeight`), `vox.ts` (MagicaVoxel import).
@@ -479,7 +482,7 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 
 ### How to make audio
 
-- **Songs** are TypeScript data (`src/audio/songs/*.ts`), one string per bar per stem. Melodic bars are space-separated tokens (`A3`, `A3+C4+E4`, `-` hold, `.` rest); drum bars are one character per step (`x`, `X` accent, `.`). Set `steps` per bar (8 or 16). `validateSong` reports errors by stem and bar. Each song lists its `layers.setup` (the huddle) and `layers.play` stems. `fx` offers a beat-timed `echo` and `drive`.
+- **Songs** are TypeScript data (`src/audio/songs/*.ts`), one string per bar per stem. Melodic bars are space-separated tokens (`A3`, `A3+C4+E4`, `-` hold, `.` rest); drum bars are one character per step (`x`, `X` accent, `.`). Set `steps` per bar (8 or 16). `validateSong` reports errors by stem and bar. Each song lists its `layers.play` stems (the mix the game loops) and a thinner `layers.setup` mix, which only the dev audio board uses for now. `fx` offers a beat-timed `echo` and `drive`.
 - **SFX** are entries in `SFX` (`src/audio/sfx.ts`): wave or noise, frequency slide, attack/decay, an optional filter sweep, arpeggio `notes`/`noteStep`, `maxVoices`, `jitter`.
 - **Check** with `npm run render-audio`: the song mix should peak around −3 dBFS with the loop-seam jump far below the largest step; effects should land roughly −7 to −16 dBFS peak. **A human must listen** before calling anything done.
 
@@ -495,6 +498,6 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 - **ESLint:** non-null assertions are allowed only in `tests/**` and `src/voxel/**`; unused parameters must start with `_`.
 - **Assets:** every file under `assets/` or `assets-src/` needs a manifest entry (`.gitkeep` and `manifest.json` are ignored).
 - **Dev pages ship in the normal build** (for phone testing over Pages). Links between them must be **relative**, because Pages serves the site under `/vox/`.
-- **Audio** can't start before a user gesture. Songs and SFX are pre-rendered at load at 48 kHz (`RENDER_RATE`) without a context; the `AudioContext` is created on the first tap (HIKE).
+- **Audio** can't start before a user gesture. Songs and SFX are pre-rendered at load at 48 kHz (`RENDER_RATE`) without a context; the `AudioContext` is created on the PLAY tap.
 - **Event SFX** play when the beat is *heard*, so they're one output-latency late (an M3 task).
 - **Calibration:** Android measured about −115 ms uncalibrated, and the offset saved by `/dev/beat.html` is used by the game.

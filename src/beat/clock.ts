@@ -86,9 +86,13 @@ export class BeatClock {
     return () => this.listeners.delete(listener);
   }
 
-  /** The context time that was audible at a performance-clock moment (ms). */
+  /**
+   * The context time that was audible at a performance-clock moment (ms).
+   * Never past the context's own clock, so while the context is suspended
+   * (paused) the heard time, and every beat, stands still.
+   */
   heardTime(perfMs: number = performance.now()): number {
-    return perfToHeardTime(perfMs, this.outputStamp());
+    return Math.min(perfToHeardTime(perfMs, this.outputStamp()), this.ctx.currentTime);
   }
 
   /** Where the beat is right now, as heard: the renderer animates from this every frame. */

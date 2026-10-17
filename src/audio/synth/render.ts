@@ -37,7 +37,7 @@ export interface Song {
   /** Loop length in bars. Every stem has exactly this many bars. */
   readonly bars: number;
   readonly stems: readonly Stem[];
-  /** Which stems play in each part of the game. */
+  /** Stem mixes: `play` is what the game loops; `setup` is a thinner mix, auditioned on the dev audio board. */
   readonly layers: { readonly setup: readonly string[]; readonly play: readonly string[] };
 }
 
