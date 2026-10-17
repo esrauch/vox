@@ -7,7 +7,7 @@
  *   1. Knocked-down units recover a little.
  *   2. A throw tapped for this beat leaves the Big's hand.
  *   3. Units hop (on their hop beats) and collisions resolve.
- *   4. Engaged Blitzers attack Blockers or the Big.
+ *   4. Blitzers next to the Big attack it (only while it holds the ball).
  *   5. A ball due this beat lands: catch, interception or miss.
  *   6. Touchdown and wipeout checks.
  *   7. Everyone decides next beat's hop (the telegraph).
@@ -15,7 +15,7 @@
 import { smallKind } from '../content/smalls';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
-import { BIG_POS, END_ROW, dist, eq, inBounds, isPocket, key } from './grid';
+import { BIG_POS, END_ROW, dist, eq, inBounds, key, nextToBig } from './grid';
 import { setUpScreen, yards } from './run';
 import { actsOn, catchTiles, facingOf, hitsSurvived } from './stats';
 import type {
@@ -92,7 +92,7 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
   const moving = new Map<number, Vec>();
   for (const u of units) {
     if (u.downBeats > 0 || !u.intent || !inBounds(u.intent) || !actsOn(u.stats, beat)) continue;
-    if (u.side === 'defender' && u.engaged) continue;
+    if (u.side === 'defender' && u.engagedSince !== null) continue;
     moving.set(u.id, u.intent);
   }
   const finalOf = (u: Unit): Vec => moving.get(u.id) ?? u.pos;
@@ -123,13 +123,6 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
           moving.delete(d.id);
           continue;
         }
-        // A Blitzer running into a Blocker stops and engages it.
-        if (d.kind === 'blitzer' && s.role === 'blocker' && !d.engaged) {
-          moving.delete(d.id);
-          d.engaged = { target: 'small', id: s.id, since: beat };
-          events.push({ type: 'engaged', id: d.id, target: d.engaged });
-          continue;
-        }
         collide(state, s, d, moving, events);
       }
     }
@@ -142,11 +135,11 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
     u.pos = to;
   }
 
-  // A Blitzer that reaches the pocket engages the Big.
+  // A Blitzer that reaches a tile next to the Big stays there and attacks it.
   for (const d of screen.defenders) {
-    if (d.alive && d.kind === 'blitzer' && !d.engaged && isPocket(d.pos)) {
-      d.engaged = { target: 'big', since: beat };
-      events.push({ type: 'engaged', id: d.id, target: d.engaged });
+    if (d.alive && d.kind === 'blitzer' && d.engagedSince === null && nextToBig(d.pos)) {
+      d.engagedSince = beat;
+      events.push({ type: 'engaged', id: d.id });
     }
   }
 }
@@ -179,7 +172,11 @@ function cancelSameSideConflicts(units: readonly Unit[], moving: Map<number, Vec
   }
 }
 
-/** A Small and a defender collide. The defender wins, unless the Small can fend it off. */
+/**
+ * A Small and a defender collide. The defender wins, unless the Small can
+ * fend it off. A Small that trades (a Walk-on) without the ball takes the
+ * defender down with it.
+ */
 function collide(
   state: RunState,
   s: SmallUnit,
@@ -195,11 +192,11 @@ function collide(
     return;
   }
   const carrying = state.screen.ball.at === 'carried' && state.screen.ball.by === s.id;
+  const trades = !carrying && smallKind(s.kindId).trades;
   const result = hit(state, s, d.kind === 'blitzer' ? 'blitzer' : 'defender', events);
-  if (result === 'down') {
-    moving.delete(s.id);
-    moving.delete(d.id);
-  }
+  const defenderResult = trades ? hit(state, d, 'walkOn', events) : null;
+  if (result === 'down') moving.delete(s.id);
+  if (result === 'down' || defenderResult === 'down') moving.delete(d.id);
   if (carrying) fumble(state, 'tackle', events);
 }
 
@@ -219,7 +216,6 @@ function hit(state: RunState, u: Unit, cause: DeathCause, events: SimEvent[]): H
       const slot = state.slots[u.slot];
       if (slot) slot.kindId = 'walkOn';
     }
-    releaseBlitzersOn(state, u.id);
   }
   return 'dead';
 }
@@ -229,39 +225,21 @@ function knockDown(u: Unit, events: SimEvent[]): void {
   events.push({ type: 'knockedDown', id: u.id });
 }
 
-function releaseBlitzersOn(state: RunState, smallId: number): void {
-  for (const d of state.screen.defenders) {
-    if (d.engaged?.target === 'small' && d.engaged.id === smallId) d.engaged = null;
-  }
-}
-
 // ── Blitzer attacks ─────────────────────────────────────────────────────────
 
 function resolveAttacks(state: RunState, events: SimEvent[]): void {
   const { screen, beat } = state;
   for (const d of [...screen.defenders].sort(byId)) {
-    const engaged = d.engaged;
-    if (!engaged || !isUp(d) || engaged.since === beat || !actsOn(d.stats, beat)) continue;
-    if (state.phase !== 'play') return;
-
-    if (engaged.target === 'small') {
-      const blocker = screen.smalls.find((s) => s.id === engaged.id);
-      if (!blocker?.alive) {
-        d.engaged = null;
-        continue;
-      }
-      blocker.hold = Math.max(0, blocker.hold - 1);
-      events.push({ type: 'attack', id: d.id, target: engaged, holdLeft: blocker.hold });
-      if (blocker.hold === 0) {
-        events.push({ type: 'blockerBeaten', id: blocker.id, by: d.id });
-        releaseBlitzersOn(state, blocker.id);
-        hit(state, blocker, 'blitzer', events);
-      }
-    } else if (screen.ball.at === 'big') {
-      // Blitzers only threaten a Big that's still holding the ball.
-      screen.bigHold = Math.max(0, screen.bigHold - 1);
-      events.push({ type: 'attack', id: d.id, target: engaged, holdLeft: screen.bigHold });
-      if (screen.bigHold === 0) fumble(state, 'sack', events);
+    // Blitzers only threaten a Big that's still holding the ball; once it's thrown they're irrelevant.
+    if (state.phase !== 'play' || screen.ball.at !== 'big') return;
+    if (d.engagedSince === null || d.engagedSince === beat || !isUp(d) || !actsOn(d.stats, beat)) {
+      continue;
+    }
+    screen.bigHold = Math.max(0, screen.bigHold - 1);
+    events.push({ type: 'attack', id: d.id, holdLeft: screen.bigHold });
+    if (screen.bigHold === 0) {
+      fumble(state, 'sack', events);
+      return; // A sack ends this beat's attacks; the next ball starts fresh.
     }
   }
 }
@@ -306,10 +284,6 @@ function resolveLanding(state: RunState, events: SimEvent[]): void {
 /** A catch. On the exact tile it's a Clean Catch, and the receiver can fend off one defender. */
 function catchBall(state: RunState, s: SmallUnit, clean: boolean, events: SimEvent[]): void {
   state.screen.ball = { at: 'carried', by: s.id };
-  if (s.role === 'blocker') {
-    s.role = 'runner';
-    releaseBlitzersOn(state, s.id);
-  }
   if (clean) s.fendOff += 1;
   events.push({ type: 'caught', id: s.id, clean });
 }
@@ -325,7 +299,7 @@ function fumble(state: RunState, reason: FumbleReason, events: SimEvent[]): void
     return;
   }
   state.screen.ball = { at: 'big' };
-  state.screen.bigHold = tuning.pocket.bigHold;
+  state.screen.bigHold = tuning.big.hold;
 }
 
 function checkTouchdown(state: RunState, events: SimEvent[]): void {

@@ -163,25 +163,13 @@ export class Game {
     this.markers.setReticle(phase === 'play' ? this.reticle : null);
   }
 
-  /** Number badges: the Blocker's hold and the Big's counter, once a Blitzer is on them. */
+  /** The Big's counter, shown once a Blitzer is attacking it and it still holds the ball. */
   private badges(): Badge[] {
     const { screen } = this.state;
-    const badges: Badge[] = [];
-    for (const s of screen.smalls) {
-      const engaged = screen.defenders.some(
-        (d) => d.alive && d.engaged?.target === 'small' && d.engaged.id === s.id,
-      );
-      const p = this.units.positionOf(s.id);
-      if (engaged && s.alive && p) {
-        badges.push({ ...this.view.toScreen(p.clone().setY(0.9)), text: String(s.hold) });
-      }
-    }
-    const onBig = screen.defenders.some((d) => d.alive && d.engaged?.target === 'big');
-    if (onBig && screen.ball.at === 'big') {
-      const p = this.view.toScreen(tileToWorld(BIG_POS, 1.9));
-      badges.push({ ...p, text: String(screen.bigHold), danger: true });
-    }
-    return badges;
+    const onBig = screen.defenders.some((d) => d.alive && d.engagedSince !== null);
+    if (!onBig || screen.ball.at !== 'big') return [];
+    const p = this.view.toScreen(tileToWorld(BIG_POS, 1.9));
+    return [{ ...p, text: String(screen.bigHold), danger: true }];
   }
 
   // ── Input ───────────────────────────────────────────────────────────────

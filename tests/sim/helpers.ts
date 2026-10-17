@@ -1,9 +1,7 @@
 import { smallKind, WALK_ON } from '../../src/content/smalls';
 import { updateIntents } from '../../src/sim/ai';
-import { isPocket } from '../../src/sim/grid';
 import { createRun } from '../../src/sim/run';
 import { createDefenders } from '../../src/sim/screen';
-import { blockerHold } from '../../src/sim/stats';
 import { step } from '../../src/sim/step';
 import type { DefenderKind, RunState, SimEvent, SmallUnit, Vec } from '../../src/sim/types';
 
@@ -24,7 +22,6 @@ export function playState(
   state.slots = smalls.map((s) => ({ kindId: s.kindId ?? WALK_ON.id }));
   const units: SmallUnit[] = smalls.map((spec, i) => {
     const kind = smallKind(spec.kindId ?? WALK_ON.id);
-    const blocker = isPocket(spec.pos);
     return {
       id: 100 + i,
       side: 'small',
@@ -32,9 +29,7 @@ export function playState(
       kindId: kind.id,
       stats: kind.stats,
       pos: spec.pos,
-      role: blocker ? 'blocker' : 'runner',
       fendOff: 0,
-      hold: blocker ? blockerHold(kind.stats) : 0,
       alive: true,
       downBeats: 0,
       hitsTaken: 0,

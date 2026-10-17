@@ -56,10 +56,6 @@ header a {
   background: #ffd23f;
 }
 
-.cell.pocket {
-  box-shadow: inset 0 0 0 2px #e8344e;
-}
-
 .cell.out-of-range {
   filter: saturate(0.4) brightness(0.85);
 }
@@ -71,10 +67,6 @@ header a {
 
 .cell .small {
   color: #a259ff;
-}
-
-.cell .small.blocker {
-  color: #2b6cff;
 }
 
 .cell .defender {

@@ -31,14 +31,9 @@ export function dist(a: Vec, b: Vec): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
-/**
- * The pocket: the single tile directly in front of the Big. It's the only
- * place a Blocker can stand, and the only way a Blitzer can reach the Big.
- */
-export const POCKET: Vec = vec(BIG_POS.x, BIG_POS.y + 1);
-
-export function isPocket(v: Vec): boolean {
-  return eq(v, POCKET);
+/** Whether a tile touches the Big (up, left or right). A Blitzer standing there attacks it. */
+export function nextToBig(v: Vec): boolean {
+  return dist(v, BIG_POS) === 1;
 }
 
 /**

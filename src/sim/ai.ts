@@ -2,7 +2,7 @@
  * Per-beat decisions (GAMEPLAY.md, What's in the Way). Every unit's intent is
  * decided one beat ahead, so it always faces where it's about to hop.
  */
-import { BIG_POS, END_ROW, POCKET, dist, eq, stepToward, vec } from './grid';
+import { BIG_POS, END_ROW, dist, eq, stepToward, vec } from './grid';
 import type { Defender, ScreenState, SmallUnit, Vec } from './types';
 
 const isActive = (u: { alive: boolean; downBeats: number }): boolean =>
@@ -16,9 +16,9 @@ export function updateIntents(screen: ScreenState): void {
   }
 }
 
-/** Walk-ons are dumb: runners hop straight up their column, even into danger. Blockers stay put. */
+/** Walk-ons are dumb: they hop straight up their column, even into danger. */
 function smallIntent(s: SmallUnit): Vec | null {
-  if (s.role === 'blocker' || s.pos.y >= END_ROW) return null;
+  if (s.pos.y >= END_ROW) return null;
   return vec(s.pos.x, s.pos.y + 1);
 }
 
@@ -29,8 +29,8 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
       return target ? stepToward(d.pos, target) : null;
     }
     case 'blitzer': {
-      if (d.engaged) return null;
-      return stepToward(d.pos, blitzTarget());
+      // Blitzers go straight for the Big. Once they're next to it, they stay and attack.
+      return d.engagedSince === null ? stepToward(d.pos, BIG_POS) : null;
     }
     case 'waller': {
       const target = wallTarget(d, screen);
@@ -49,15 +49,7 @@ function chaseTarget(d: Defender, screen: ScreenState): Vec | null {
     if (carrier?.alive) return carrier.pos;
   }
   if (ball.at === 'flight') return ball.target;
-  return nearest(
-    d.pos,
-    screen.smalls.filter((s) => isActive(s) && s.role === 'runner'),
-  );
-}
-
-/** Blitzers always head for the pocket, so they have to go through the Blocker standing in it. */
-function blitzTarget(): Vec {
-  return POCKET;
+  return nearest(d.pos, screen.smalls.filter(isActive));
 }
 
 /** Wall-ers hold their row and slide into the column of the nearest Small coming their way. */

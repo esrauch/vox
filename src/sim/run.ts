@@ -5,12 +5,11 @@
 import { smallKind, WALK_ON } from '../content/smalls';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
-import { eq, inSetupZone, isPocket, vec } from './grid';
+import { eq, inSetupZone, vec } from './grid';
 import { createDefenders, generateSpawns } from './screen';
-import { blockerHold } from './stats';
 import type { Action, RunState, SimEvent, SmallUnit, Vec } from './types';
 
-/** Where each slot starts if the player hasn't placed it: four runners and one Blocker. */
+/** Where each slot starts if the player hasn't placed it. */
 export const DEFAULT_FORMATION: readonly Vec[] = [
   vec(1, 2),
   vec(3, 2),
@@ -51,9 +50,7 @@ export function setUpScreen(state: RunState, index: number): void {
       kindId: kind.id,
       stats: kind.stats,
       pos,
-      role: 'runner',
       fendOff: 0,
-      hold: 0,
       alive: true,
       downBeats: 0,
       hitsTaken: 0,
@@ -67,7 +64,7 @@ export function setUpScreen(state: RunState, index: number): void {
     smalls,
     defenders,
     ball: { at: 'big' },
-    bigHold: tuning.pocket.bigHold,
+    bigHold: tuning.big.hold,
   };
   state.phase = 'setup';
   state.beat = 0;
@@ -106,11 +103,6 @@ function place(state: RunState, slot: number, tile: Vec): SimEvent[] {
 
 function hike(state: RunState): SimEvent[] {
   if (state.phase !== 'setup') return [];
-  for (const s of state.screen.smalls) {
-    // The Small in the pocket (the tile in front of the Big) stays home as the Blocker.
-    s.role = isPocket(s.pos) ? 'blocker' : 'runner';
-    s.hold = s.role === 'blocker' ? blockerHold(s.stats) : 0;
-  }
   state.phase = 'play';
   state.beat = 0;
   updateIntents(state.screen);

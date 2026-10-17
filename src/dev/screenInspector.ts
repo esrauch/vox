@@ -3,7 +3,7 @@
  * Smalls in setup, and queue throws by tapping tiles. Open /dev/screen.html?seed=N.
  */
 import { tuning } from '../content/tuning';
-import { BIG_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, isPocket, vec } from '../sim/grid';
+import { BIG_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, vec } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
 import type { RunState, SimEvent, Unit, Vec } from '../sim/types';
@@ -122,7 +122,6 @@ function render(): void {
       if ((x + y) % 2 === 1) classes.push('dark');
       if (y < SETUP_ROWS) classes.push('setup');
       if (y === END_ROW) classes.push('end');
-      if (isPocket(tile)) classes.push('pocket');
       if (y > tuning.throw.maxRow) classes.push('out-of-range');
       if (ball.at === 'flight' && eq(ball.target, tile)) classes.push('target');
       if (eq(queuedThrow, tile)) classes.push('queued');
@@ -134,7 +133,7 @@ function render(): void {
         classes.push('big');
         html = '★';
         if (ball.at === 'big') html += '<span class="ball">●</span>';
-        const engaged = screen.defenders.some((d) => d.alive && d.engaged?.target === 'big');
+        const engaged = screen.defenders.some((d) => d.alive && d.engagedSince !== null);
         if (engaged) html += `<span class="badge">${screen.bigHold}</span>`;
       }
       const unit = [...screen.smalls, ...screen.defenders]
@@ -158,7 +157,7 @@ function render(): void {
   buttons.next.disabled = state.phase !== 'cleared';
   help.textContent =
     state.phase === 'setup'
-      ? 'Setup: tap a Small, then a tile in the bottom 3 rows. The red pocket tile makes a Blocker.'
+      ? 'Setup: tap a Small, then a tile in the bottom 3 rows.'
       : state.phase === 'play'
         ? 'Tap a tile to queue a throw for the next beat (lands 2 beats later). Step or Auto to advance.'
         : state.phase === 'cleared'
@@ -170,27 +169,17 @@ function unitHtml(u: Unit): string {
   const arrow = u.intent ? arrowFor(u.pos, u.intent) : '';
   const state = !u.alive ? 'dead' : u.downBeats > 0 ? 'down' : '';
   if (u.side === 'small') {
-    const glyph = !u.alive ? '✝' : u.role === 'blocker' ? 'B' : u.kindId === 'walkOn' ? 'w' : 'R';
+    const glyph = !u.alive ? '✝' : u.kindId === 'walkOn' ? 'w' : 'R';
     const carrying = state === '' && isCarrier(u.id) ? '<span class="ball">●</span>' : '';
-    const hold =
-      u.alive && u.role === 'blocker' && isEngaged(u.id)
-        ? `<span class="badge">${u.hold}</span>`
-        : '';
     const fend = u.fendOff > 0 ? '⛨' : '';
-    return `<span class="small ${u.role} ${state}">${glyph}${fend}${arrow}</span>${carrying}${hold}`;
+    return `<span class="small ${state}">${glyph}${fend}${arrow}</span>${carrying}`;
   }
   const glyph = u.alive ? DEFENDER_GLYPH[u.kind] : '✝';
-  return `<span class="defender ${state}">${glyph}${u.engaged ? '!' : arrow}</span>`;
+  return `<span class="defender ${state}">${glyph}${u.engagedSince !== null ? '!' : arrow}</span>`;
 }
 
 function isCarrier(id: number): boolean {
   return state.screen.ball.at === 'carried' && state.screen.ball.by === id;
-}
-
-function isEngaged(id: number): boolean {
-  return state.screen.defenders.some(
-    (d) => d.alive && d.engaged?.target === 'small' && d.engaged.id === id,
-  );
 }
 
 function arrowFor(from: Vec, to: Vec): string {

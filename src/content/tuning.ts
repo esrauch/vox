@@ -31,9 +31,9 @@ export const tuning = {
     /** The highest row the Big can throw to; the rows above must be run. */
     maxRow: 12,
   },
-  pocket: {
-    /** The Big's own hold counter, per ball, once a Blitzer reaches it. */
-    bigHold: 3,
+  big: {
+    /** The Big's hold counter, per ball: Blitzer attacks tick it down; at 0 it's a sack. */
+    hold: 3,
   },
   units: {
     /** Beats a knocked-down unit stays down. */

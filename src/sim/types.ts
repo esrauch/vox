@@ -31,34 +31,24 @@ interface UnitBase {
   intent: Vec | null;
 }
 
-export type SmallRole = 'runner' | 'blocker';
-
 export interface SmallUnit extends UnitBase {
   readonly side: 'small';
   /** Which squad slot this Small fills. */
   readonly slot: number;
   readonly kindId: string;
-  role: SmallRole;
   /** Defenders this Small can still fend off (e.g. from a Clean Catch). */
   fendOff: number;
-  /** A Blocker's hold counter: Blitzer attacks tick it down; at 0 the Blocker is beaten. */
-  hold: number;
 }
 
 export type DefenderKind = 'chaser' | 'blitzer' | 'waller' | 'picker';
-
-/** What a Blitzer is locked onto, and the beat it engaged (attacks start on its next hop beat). */
-export type Engagement =
-  | { readonly target: 'big'; readonly since: number }
-  | { readonly target: 'small'; readonly id: number; readonly since: number };
 
 export interface Defender extends UnitBase {
   readonly side: 'defender';
   readonly kind: DefenderKind;
   /** Where a Picker returns to, and a Wall-er's row. */
   readonly home: Vec;
-  /** A Blitzer locked onto a Blocker or the Big. */
-  engaged: Engagement | null;
+  /** The beat a Blitzer reached the Big and started attacking it (null = not on the Big). */
+  engagedSince: number | null;
 }
 
 export type Unit = SmallUnit | Defender;
@@ -112,7 +102,8 @@ export type Action =
   | { readonly type: 'nextScreen' };
 
 export type FumbleReason = 'sack' | 'miss' | 'interception' | 'tackle';
-export type DeathCause = 'defender' | 'blitzer';
+/** What killed a unit: a defender, a Blitzer, or (for defenders) a Walk-on trading itself. */
+export type DeathCause = 'defender' | 'blitzer' | 'walkOn';
 export type HitResult = 'down' | 'dead';
 
 /** Everything that happened during a step, for the renderer, audio and tests. */
@@ -123,14 +114,8 @@ export type SimEvent =
   | { readonly type: 'throwRejected'; readonly target: Vec; readonly reason: string }
   | { readonly type: 'caught'; readonly id: number; readonly clean: boolean }
   | { readonly type: 'fumble'; readonly reason: FumbleReason; readonly ballsLeft: number }
-  | { readonly type: 'engaged'; readonly id: number; readonly target: Engagement }
-  | {
-      readonly type: 'attack';
-      readonly id: number;
-      readonly target: Engagement;
-      readonly holdLeft: number;
-    }
-  | { readonly type: 'blockerBeaten'; readonly id: number; readonly by: number }
+  | { readonly type: 'engaged'; readonly id: number }
+  | { readonly type: 'attack'; readonly id: number; readonly holdLeft: number }
   | { readonly type: 'fendedOff'; readonly id: number; readonly defender: number }
   | { readonly type: 'knockedDown'; readonly id: number }
   | { readonly type: 'died'; readonly id: number; readonly cause: DeathCause }

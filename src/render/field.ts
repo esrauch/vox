@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import { bigs, common, hexToNumber } from '../content/palettes';
 import { tuning } from '../content/tuning';
-import { BIG_POS, COLS, END_ROW, POCKET, ROWS, SETUP_ROWS, vec } from '../sim/grid';
+import { BIG_POS, COLS, END_ROW, ROWS, SETUP_ROWS, vec } from '../sim/grid';
 import { tileToWorld } from './view';
 
 /**
  * The static field: a checkerboard of tiles with the setup zone, end zone,
- * out-of-range rows and the pocket marked, plus the Big. One merged mesh for
+ * out-of-range rows marked, plus the Big. One merged mesh for
  * the tiles keeps the draw-call count low (TECHNICAL.md §5).
  */
 export function createField(): THREE.Group {
@@ -41,15 +41,12 @@ export function createField(): THREE.Group {
   }
   group.add(tiles);
 
-  // The pocket: an outline on the one tile in front of the Big.
-  group.add(tileOutline(POCKET, hexToNumber(bigs.slagfather.secondary), 0.9));
-
   // The Big: a tall placeholder block that never moves.
   const big = new THREE.Mesh(
     new THREE.BoxGeometry(1.3, 1.2, 1.0),
     new THREE.MeshLambertMaterial({ color: 0x8a5a2b }),
   );
-  // Kept low and set back a little so the Blocker standing in the pocket stays visible.
+  // Kept low and set back a little so the Small in front of it stays visible.
   big.position.copy(tileToWorld(BIG_POS, 0.6)).add(new THREE.Vector3(0, 0, 0.2));
   big.castShadow = true;
   group.add(big);

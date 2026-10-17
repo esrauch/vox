@@ -117,7 +117,7 @@ Each screen is one field-length climb, in two phases.
 | **Where the ball will land** | The reticle locks in, with **2 countdown pips** (one per beat), plus the ball's shadow growing as it falls. |
 | **Is someone going to be there?** | **Always on.** The target ring lights up in your team's color if one of your Smalls will be able to catch it (on the tile, or one tile short and facing it), brighter for a Clean Catch, and red if a defender will intercept. |
 | **Hazards** | Every hazard warns **one beat ahead**: a lane flashes before something enters it, and a trap shows countdown pips before it snaps. |
-| **Blitz counters** | Every Blocker shows its **hold counter** as a number badge, and it ticks down with a crunch on each Blitzer attack. Attacking Blitzers flash on the beat they strike. The pocket tile is outlined. **The Big's counter appears only once a Blitzer arrives**, pulsing red as it drops. When it hits 0, you've been sacked. |
+| **The Big's counter** | **It appears over the Big only once a Blitzer arrives**, pulsing red and ticking down with a crunch on each attack. Attacking Blitzers flash on the beat they strike. When it hits 0, you've been sacked. |
 | **On-Beat taps** | An "ON BEAT!" pop, a sparkle trail and a beat-synced *thwump*. The Hype meter visibly jumps. |
 
 **Readability rules:**
@@ -130,7 +130,7 @@ Each screen is one field-length climb, in two phases.
 - The new screen is revealed, and **you can see everything** before you commit: every defender in its starting tile and every hazard lane.
 - **Setup is a little puzzle.** You read the board and place Smalls to beat it. A defender's *kind* tells you what it'll do: a Chaser will come at your carrier, a Wall-er holds its row, a Picker guards a passing lane. **Hazards keep cycling during setup**, so you can see the rhythm of a lane before you send someone into it.
 - **Drag your surviving Smalls into tiles of the setup zone.**
-- **Where a Small starts decides what it does.** Each Small runs up its own **column**, doing the job its kind does. The one Small placed in the **pocket** (the tile directly in front of the Big) **stays home as the Blocker**, buying time against Blitzers. Everyone else runs.
+- **Where a Small starts decides what it does.** Each Small runs up its own **column**, doing the job its kind does. Walk-ons all run. Placement is how you aim them: at open lanes, or straight at a defender you want taken out.
 - So the central trade-off is: **send more Smalls up the field, or keep more back to protect the Big?**
 - **Snappy defaults:** last screen's formation is pre-filled, so a quick look and a tap on **HIKE!** is enough.
 
@@ -151,7 +151,7 @@ Two kinds of trouble fill each screen. **Neither of them ever has the ball.** Al
 | Kind | Each beat, it… | Threat |
 |---|---|---|
 | **Chaser** | Hops one tile toward your carrier. With no carrier, it hops toward the ball's landing tile while the ball is in flight, and otherwise toward the nearest Small. | Tackling your carrier is a fumble. |
-| **Blitzer** | Hops toward the Big. When it runs into a Blocker, it stops and **attacks on a rhythm**, ticking the Blocker's counter down. | When it reaches the Big, it ticks down the Big's counter. At 0, it's a **sack**, which is a fumble. |
+| **Blitzer** | Hops toward the Big. Once it's next to the Big, it stays and **attacks on a rhythm**. | Each attack ticks down the Big's counter. At 0, while the Big still holds the ball, it's a **sack**, which is a fumble. |
 | **Wall-er** | Stays in its row and slides one tile sideways to stay in the column of the nearest Small heading its way. | It blocks runners, and acts as a moving wall. |
 | **Picker** | Stays near its home tile. Once a ball is thrown, it hops toward the landing tile, as fast as its Hustle allows. | It intercepts. |
 
@@ -190,19 +190,16 @@ Hazards are themed by biome:
 - **When the last ball is gone, the run is over.**
 - **More balls are a draft reward**, and a rare, valuable one. Because lives carry over, every extra ball is a real lifeline.
 
-### The Pocket
+### Blitzers and the Big's Counter
 
-Blitzers rush the Big. What stands in their way is a series of **counters**.
+Blitzers rush the Big, and the Big holds them off with a **counter**.
 
-- **The pocket is a single tile: the one directly in front of the Big.** It's the only spot for a Blocker, so there's **at most one Blocker**, and it's the only way to reach the Big. **Blitzers always head for the pocket, so they always have to go through the Blocker.**
-- The Blocker carries a **hold counter**, a number shown on a little badge over its head.
-- **When a Blitzer hops into a Blocker, it stops and starts attacking.** A Blitzer attacks on a fixed rhythm (for example, **every 2 beats**), and **each attack ticks the Blocker's counter down by 1**.
-- **At 0, the Blocker is beaten.** It loses the collision (a Walk-on Blocker, at Heft 0, dies), and the Blitzer carries on toward the Big. **Blockers only buy time.**
-- **Ganging up speeds it up.** Every Blitzer next to the pocket attacks the Blocker, so two Blitzers drain it twice as fast.
-- **The Big has a counter too.** It's hidden until a Blitzer steps into the pocket. Then it appears over the Big, starting at **3**, and that Blitzer's attacks tick it down. Only one Blitzer fits in the pocket, so the others queue up behind it. **If the Big still has the ball when it hits 0, that's a sack, which is a fumble.** For example, one Blitzer attacking every 2 beats against the Big's 3 gives you **6 beats** to throw.
-- **Once the ball is thrown, Blitzers stop mattering.** They only threaten a Big that's still holding the ball, and the Big's counter resets for the next ball.
-- **Tuning values:** each Blitzer's attack rhythm (▲ *perhaps its Hustle: Hustle 0 attacks every 2 beats, like it hops*), each Blocker's starting counter (▲ *perhaps Heft + 1, so a Walk-on holds for exactly one attack*), and the Big's starting counter (3, and a perk could raise it).
-- The puzzle: **a Blocker is a runner you don't have**, and every beat it buys is a beat for your receiver to get open. Leaving the pocket empty means the first Blitzer walks straight in.
+- **Blitzers head straight for the Big.** Once one reaches a tile next to it, it stays there and **attacks on a fixed rhythm** (for example, **every 2 beats**).
+- **The Big's counter** is hidden until a Blitzer arrives. Then it appears over the Big, starting at **3**, and **each attack ticks it down by 1**. **If the Big still has the ball when it hits 0, that's a sack, which is a fumble.** For example, one Blitzer attacking every 2 beats gives you **6 beats** to throw.
+- **Ganging up speeds it up.** Every Blitzer next to the Big attacks it, so two Blitzers drain the counter twice as fast.
+- **Once the ball is thrown, Blitzers are irrelevant.** They only threaten a Big that's still holding the ball, and the counter resets for the next ball.
+- **Nothing stands between the Big and a Blitzer except Smalls in its path.** A Walk-on that runs into a Blitzer trades itself for it (see *Collisions*), so a Walk-on in the right column can take one out before it arrives.
+- **Tuning values:** each Blitzer's attack rhythm (▲ *perhaps its Hustle: Hustle 0 attacks every 2 beats, like it hops*), and the Big's starting counter (3, and a perk could raise it).
 
 So every possession is a few seconds of "throw it, THROW IT," against a receiver who isn't quite open yet.
 
@@ -216,7 +213,7 @@ So every possession is a few seconds of "throw it, THROW IT," against a receiver
 
 ### Walk-ons
 
-- **Every run starts with the same squad of Walk-ons.** They're vanilla, identical Smalls with **Hustle 0, Hands 0, Heft 0**, and one simple job: run up their column. The one placed in the pocket acts as the Blocker instead.
+- **Every run starts with the same squad of Walk-ons.** They're vanilla, identical Smalls with **Hustle 0, Hands 0, Heft 0**, and one simple job: run up their column.
 - **They're dressed in your Big's theme** (see THEME.md), but that's cosmetic. A Walk-on is a Walk-on.
 - **Walk-ons always come back.** A Walk-on that dies is out for the rest of that screen, but it's back for the next one. **You never drop to zero.**
 - **Walk-on upgrades** are draft cards that improve **every** Walk-on for the rest of the run: +Hustle, +Hands, +Heft, or a new trick for all of them.
@@ -232,6 +229,7 @@ So every possession is a few seconds of "throw it, THROW IT," against a receiver
 - **Smalls run themselves**, starting from the tile you put them in. Each kind has a single, obvious job you can read from its silhouette.
 - **Walk-ons are dumb.** A Walk-on runner hops straight up its column on every beat, **even into a defender or a hazard**. Keeping it alive is *your* job: place it in a clear column, or throw it the ball before it gets there. Smarter footwork (sidestepping, waiting) is something recruits and Walk-on upgrades can add.
 - **Collisions:** when a Small and a defender run into each other, **the defender wins**. A tackled carrier drops the ball, which is a fumble.
+  - **Walk-ons trade.** A Walk-on **without the ball** that runs into a defender dies, but **takes the defender down with it**. That opens up a strategy: **stack Walk-ons in a column**, so the first clears the way for the ones behind. A Walk-on carrying the ball doesn't trade: it's simply tackled.
   - **The exception is "fends off".** Some Smalls (recruits, upgraded Walk-ons, or any receiver after a Clean Catch) can **fend off N defenders**. Each fend-off knocks the defender down instead and uses up one charge. It's the main property that makes recruits and upgrades feel strong.
 - **Getting hit:** a hit is losing a collision, or being struck by a hazard or an enemy Big. **Heft decides what a hit does.** At Heft 0 (every Walk-on), the first hit kills. What higher Heft buys (knockdowns instead of death, absorbing hits) is still *TBD*.
 - **Knocked down** (for Smalls with enough Heft): the Small bursts into voxel bits, pops back together after a beat or two, and keeps going.
@@ -348,13 +346,30 @@ This is a pillar-level priority, not polish to add at the end.
 **First playable** (the smallest version that proves the fun):
 - One Big (**the Elder Bough**: the clearest passing game), with Walk-ons and two kinds of recruit.
 - One biome, with generic defenders and two hazard types (one lane, one timed trap).
-- The setup grid, one looping track with everything on the beat, the reticle and the pulsing ball button (throws quantized to the beat), Blitzers and the pocket, a pile of balls as lives, permadeath.
+- The setup grid, one looping track with everything on the beat, the reticle and the pulsing ball button (throws quantized to the beat), Blitzers and the Big's counter, Walk-on trades, a pile of balls as lives, permadeath.
 - A draft with **recruit** and **Walk-on upgrade** cards only.
 - Endless screens with a simple difficulty ramp, and a score.
 
 **Then:** Hijinks and Hype, perks, a second and third Big, biomes, boss screens.
 
 **Later:** more unlockable Bigs (the Halflings' ogre), daily runs with a shared seed.
+
+---
+
+## Future Ideas
+
+Designs we tried or considered and set aside. They aren't in the game, but they're worth remembering.
+
+### The Pocket and Blockers
+
+*Removed during M1.3. A possible future mechanic, perhaps as a recruit, perk or Big ability.*
+
+- **The pocket:** a single tile directly in front of the Big, the only route to it.
+- **The Blocker:** the one Small placed in the pocket stays home instead of running. It carries a **hold counter**, shown as a badge.
+- **Engaging:** Blitzers head for the pocket. When one runs into the Blocker, it stops and attacks on its rhythm, ticking the hold counter down. Several Blitzers drain it faster.
+- **At 0, the Blocker is beaten** (a Walk-on dies), and the Blitzer steps into the pocket and starts on the Big's counter. Blockers only buy time.
+- **The puzzle it created:** a Blocker is a runner you don't have.
+- **Why it was set aside:** it added a role and a counter to learn, and it played less directly than Walk-ons trading themselves to take Blitzers out.
 
 ---
 

@@ -44,15 +44,11 @@ describe('setup', () => {
     expect(state.formation[0]).toEqual(vec(0, 0));
   });
 
-  it('makes only the Small in the pocket a Blocker on hike', () => {
+  it('starts play on hike, with every Small heading straight up', () => {
     const state = createRun(1);
-    dispatch(state, { type: 'place', slot: 0, tile: vec(0, 0) });
-    dispatch(state, { type: 'hike' });
-    const roles = state.screen.smalls.map((s) => [key(s.pos), s.role]);
-    expect(roles).toContainEqual(['0,0', 'runner']); // the back row runs too
-    expect(roles).toContainEqual(['4,1', 'blocker']); // the pocket (default formation)
-    expect(roles).toContainEqual(['3,2', 'runner']);
+    expect(dispatch(state, { type: 'hike' })).toEqual([{ type: 'hiked' }]);
     expect(state.phase).toBe('play');
+    expect(state.screen.smalls.every((s) => eq(s.intent, vec(s.pos.x, s.pos.y + 1)))).toBe(true);
   });
 });
 
@@ -115,14 +111,29 @@ describe('throwing and catching', () => {
 });
 
 describe('collisions', () => {
-  it('a defender beats a Walk-on, which dies (Heft 0)', () => {
+  it('a Walk-on without the ball trades itself: it and the defender both die', () => {
     const state = playState(
-      [{ pos: vec(2, 2) }, { pos: vec(4, 1) }],
+      [{ pos: vec(2, 2) }, { pos: vec(0, 2) }],
       [{ kind: 'chaser', pos: vec(2, 4) }],
     );
     const r = run(state, 2);
-    expect(ofType(r.events, 'died')).toEqual([{ type: 'died', id: 100, cause: 'defender' }]);
+    expect(ofType(r.events, 'died')).toEqual([
+      { type: 'died', id: 100, cause: 'defender' },
+      { type: 'died', id: 200, cause: 'walkOn' },
+    ]);
     expect(small(r.state, 100).alive).toBe(false);
+    expect(r.state.screen.defenders[0]?.alive).toBe(false);
+  });
+
+  it('stacked Walk-ons: the first clears the way for the one behind', () => {
+    const state = playState(
+      [{ pos: vec(2, 2) }, { pos: vec(2, 1) }],
+      [{ kind: 'chaser', pos: vec(2, 4) }],
+    );
+    const r = run(state, 4);
+    expect(small(r.state, 100).alive).toBe(false);
+    expect(small(r.state, 101).alive).toBe(true);
+    expect(small(r.state, 101).pos).toEqual(vec(2, 3));
   });
 
   it('tackling the carrier is a fumble', () => {
@@ -134,6 +145,8 @@ describe('collisions', () => {
     const r = run(state, 2);
     expect(ofType(r.events, 'fumble')[0]?.reason).toBe('tackle');
     expect(r.state.balls).toBe(2);
+    // The carrier doesn't trade: the defender survives.
+    expect(r.state.screen.defenders[0]?.alive).toBe(true);
   });
 
   it('a Small that can fend off knocks the defender down instead', () => {
@@ -152,62 +165,43 @@ describe('collisions', () => {
   });
 });
 
-describe('Blitzers and the pocket', () => {
-  // A Walk-on Blocker in the pocket above the Big, a runner off to the side,
-  // and a Blitzer coming straight down.
-  const blitzSetup = () =>
-    playState([{ pos: vec(4, 1) }, { pos: vec(0, 2) }], [{ kind: 'blitzer', pos: vec(4, 4) }]);
+describe('Blitzers', () => {
+  // A runner off to the side, and a Blitzer coming straight down at the Big.
+  const blitzSetup = () => playState([{ pos: vec(0, 2) }], [{ kind: 'blitzer', pos: vec(4, 4) }]);
 
-  it('engages a Blocker, beats it after its hold runs out, then sacks the Big', () => {
-    const r = run(blitzSetup(), 16);
-    const engaged = ofType(r.events, 'engaged');
-    expect(engaged.map((e) => e.target.target)).toEqual(['small', 'big']);
-    expect(ofType(r.events, 'blockerBeaten')).toHaveLength(1);
-    expect(small(r.state, 100).alive).toBe(false);
-    // The Big holds for 3 attacks, one every 2 beats.
-    const bigAttacks = ofType(r.events, 'attack').filter((e) => e.target.target === 'big');
-    expect(bigAttacks.map((e) => e.holdLeft)).toEqual([2, 1, 0]);
+  it('reaches the Big, then sacks it after 3 attacks, one every 2 beats', () => {
+    const r = run(blitzSetup(), 12);
+    expect(ofType(r.events, 'engaged')).toEqual([{ type: 'engaged', id: 200 }]);
+    expect(ofType(r.events, 'attack').map((e) => e.holdLeft)).toEqual([2, 1, 0]);
     expect(ofType(r.events, 'fumble')).toEqual([{ type: 'fumble', reason: 'sack', ballsLeft: 2 }]);
     expect(r.state.screen.bigHold).toBe(3);
   });
 
-  it('always goes through the Blocker, even coming from the side', () => {
-    const state = playState(
-      [{ pos: vec(4, 1) }, { pos: vec(0, 2) }],
-      [{ kind: 'blitzer', pos: vec(1, 1) }],
-    );
-    const r = run(state, 8);
-    const engaged = ofType(r.events, 'engaged');
-    expect(engaged[0]?.target).toEqual({ target: 'small', id: 100, since: 6 });
-    expect(engaged.some((e) => e.target.target === 'big')).toBe(false);
-  });
-
   it('does not sack one beat early', () => {
-    expect(ofType(run(blitzSetup(), 15).events, 'fumble')).toHaveLength(0);
+    expect(ofType(run(blitzSetup(), 11).events, 'fumble')).toHaveLength(0);
   });
 
-  it('only threatens the Big while it holds the ball', () => {
-    let state = run(blitzSetup(), 10).state; // Blitzer engages the Big on beat 10
-    state = step(state, vec(0, 8)).state; // throw on beat 11 to where the runner will be
+  it('is irrelevant once the ball is thrown', () => {
+    let state = run(blitzSetup(), 6).state; // the Blitzer reaches the Big on beat 6
+    state = step(state, vec(0, 6)).state; // throw on beat 7 to where the runner will be
     const r = run(state, 4);
     expect(ofType(r.events, 'caught')).toHaveLength(1);
+    expect(ofType(r.events, 'attack')).toHaveLength(0);
     expect(ofType(r.events, 'fumble')).toHaveLength(0);
     expect(r.state.screen.bigHold).toBe(3);
   });
 
-  it('several Blitzers on one Blocker drain its hold together', () => {
+  it('several Blitzers on the Big drain its counter together', () => {
     const state = playState(
-      [{ pos: vec(4, 1), kindId: TEST_RECRUIT.id }, { pos: vec(0, 2) }],
+      [{ pos: vec(0, 2) }],
       [
-        { kind: 'blitzer', pos: vec(4, 2) },
-        { kind: 'blitzer', pos: vec(5, 2) },
+        { kind: 'blitzer', pos: vec(3, 0) },
+        { kind: 'blitzer', pos: vec(5, 0) },
       ],
     );
-    expect(small(state, 100).hold).toBe(2); // Heft 1 → holds for 2 attacks
-    for (const d of state.screen.defenders) d.engaged = { target: 'small', id: 100, since: 0 };
-    const r = run(state, 2);
-    expect(ofType(r.events, 'attack').map((e) => e.holdLeft)).toEqual([1, 0]);
-    expect(ofType(r.events, 'blockerBeaten')).toHaveLength(1);
+    const r = run(state, 4);
+    expect(ofType(r.events, 'attack').map((e) => e.holdLeft)).toEqual([2, 1, 0]);
+    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('sack');
   });
 });
 

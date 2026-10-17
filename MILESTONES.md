@@ -23,7 +23,8 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 - [x] **Catching:** a Small catches on its own tile, or lunges one tile ahead. An exact-tile **Clean Catch** lets the receiver fend off 1 defender. Defenders only intercept on the exact tile.
 - [x] **Catch glow:** always on.
 - [x] **Hazards hit defenders too.**
-- [x] **The pocket:** a **single tile** directly in front of the Big. It's the only Blocker spot (so there's at most one Blocker), and Blitzers always have to go through it. The Blocker has a hold counter that each Blitzer attack (e.g. every 2 beats) ticks down, and several adjacent Blitzers drain it faster. Once a Blitzer is in the pocket, the Big's counter (3) appears, and if it hits 0 while the Big holds the ball, it's a sack (a fumble).
+- [x] **Blitzers and the Big's counter:** Blitzers head for the Big and attack it from a tile next to it (e.g. every 2 beats). Each attack ticks the Big's counter (3) down, and at 0, while the Big holds the ball, it's a sack (a fumble). Several Blitzers drain it faster. They're irrelevant once the ball is thrown. *(The pocket and Blockers were removed; see GAMEPLAY.md, Future Ideas.)*
+- [x] **Walk-ons trade:** a Walk-on without the ball that runs into a defender dies and takes the defender with it, so stacked Walk-ons clear a path. A carrier is just tackled.
 - [x] **Collisions:** the defender always wins against Walk-ons. Some units **fend off N defenders**.
 - [x] **Bigs have no stats.** Choosing a Big only sets the theme and the draft pool. The Big improves only through perks.
 - [x] **The stat scale:** every Small and defender has Hustle, Hands and Heft as whole numbers from 0. Walk-ons are 0/0/0. Hustle 0 hops every 2 beats, Hands 0 catches on its own tile or 1 ahead, and Heft 0 dies on the first hit.
@@ -86,14 +87,14 @@ The base systems everything else is built on. **Each one is built and verified o
 **Lesson:** the browser's reported latency can't be trusted, so **every player needs calibrating**. Onboarding (M0, M8) must include a short tap-along calibration on first launch, ideally disguised as a warm-up.
 
 ### M1.2 Simulation core
-- [x] The grid (9 × 16), the setup zone (bottom 3 rows), the pocket (one tile in front of the Big) and the end row (`src/sim/grid.ts`). *Typed strips are deferred to M2, along with hazards.*
+- [x] The grid (9 × 16), the setup zone (bottom 3 rows), and the end row (`src/sim/grid.ts`). *Typed strips are deferred to M2, along with hazards.*
 - [x] Units with Hustle, Hands and Heft. They hop on the beat and face their next hop (`src/sim/stats.ts`, `src/sim/ai.ts`). The 0 values follow the decisions; the 1+ values are placeholders.
 - [x] Setup actions (place, with swapping and a remembered formation), hike, and next screen. Throws resolve on the beat they're passed to `step()`.
 - [x] Throws: a fixed 2-beat flight, a maximum range row, and rejected throws.
 - [x] The ball landing: Clean Catch (+1 fend-off), the one-tile lunge, interceptions and misses, with interceptions and misses counting as fumbles.
 - [x] Fumbles and the pile of balls, and the run ending when the last ball is gone.
 - [x] Collisions (the defender wins unless the Small can fend it off), Heft-based knockdowns and deaths, Walk-on and recruit slot rules, wipeouts.
-- [x] Blitzers and Blockers: engaging, hold counters, ganging up, the Big's counter, sacks only while the Big holds the ball.
+- [x] Blitzers: engaging the Big, ganging up, the Big's counter, sacks only while the Big holds the ball. Walk-on trades.
 - [x] The four defender kinds, following the draft spec (Chaser, Blitzer, Wall-er, Picker).
 - [x] A seeded, deterministic placeholder screen generator, and `replay(seed, inputs)`.
 - [x] 26 simulation tests, including replay determinism and a randomized invariant check.
@@ -101,14 +102,14 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Done when:** a whole screen can be played headlessly in tests, from setup through touchdown or fumble, and replays come out the same every time. ✅
 
-**Changed after testing:** the pocket is now a **single tile** in front of the Big. It's the only Blocker spot, and Blitzers always have to go through it. Before this, a lone Blocker was easy to walk around.
+**Changed after testing:** the pocket and Blockers were removed altogether (kept as a Future Idea). Blitzers go straight for the Big, and Walk-ons trade themselves with defenders.
 
 ### M1.3 Minimal render
-- [x] A three.js scene, lighting, and a checkerboard field with the setup zone, end zone, out-of-range rows and pocket marked (`src/render/`).
+- [x] A three.js scene, lighting, and a checkerboard field with the setup zone, end zone and out-of-range rows marked (`src/render/`).
 - [x] Both cameras: a narrow perspective (default) and orthographic (`?camera=ortho`, or the dev "cam" button). Each is fitted so the whole field sits between the HUD bars.
 - [x] Placeholder cubes for units. They hop in an arc at the start of each beat, squash on landing, tip over when knocked down and shrink away when they die.
 - [x] Field indicators: the reticle, the landing ring with one pip per beat left, facing arrows, the ball's arc. The throw range shows as darker rows.
-- [x] The DOM HUD: the ball button (pulsing on the beat), the beat bar, the ball pile, yards, HIKE/NEXT/AGAIN, "ON BEAT!" pops, and hold-counter badges for the Blocker and the Big.
+- [x] The DOM HUD: the ball button (pulsing on the beat), the beat bar, the ball pile, yards, HIKE/NEXT/AGAIN, "ON BEAT!" pops, and the Big's counter badge.
 - [x] Touch input: tap a tile to aim, tap the ball button to throw on the beat, drag Smalls in setup.
 - [x] The sim steps exactly when each beat is *heard*. If frames stall for more than 2 beats, or the page is hidden, the game **pauses** (RESUME realigns the clock) rather than fast-forwarding.
 - [ ] Choose a camera after trying both on a phone.
@@ -162,7 +163,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [ ] The full juice list from GAMEPLAY.md: squash and stretch, everything bouncing on the beat, haptics, the "ON BEAT!" pop, sparkle trails, Small noises.
 - [ ] Every indicator from *Reading the Beat*, polished, with hazards telegraphing one beat ahead.
 - [ ] The tombstone and waving ghost when a recruit dies.
-- [ ] Tuning: hop rates, throw range, Blitzer attack rhythm and the Blocker and Big counters, the On-Beat window.
+- [ ] Tuning: hop rates, throw range, Blitzer attack rhythm and the Big's counter, the On-Beat window.
 - [ ] A screen-generation solvability check, so no unfair screens get through.
 
 **Done when:** the game is satisfying to watch with the sound off, satisfying to play with the sound on, and playtesters can say *why* they fumbled.
@@ -280,6 +281,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Removed the pocket and Blockers (now a Future Idea). Blitzers go straight for the Big. Walk-ons trade themselves with defenders when they don't have the ball.
 - **2026-10-17:** M1.3 minimal render: the game is playable in grey boxes, with both cameras, the HUD, aiming and throwing on the beat, setup dragging, and pause on stall.
 - **2026-10-17:** Changed the pocket to a single Blocker spot that Blitzers must go through.
 - **2026-10-17:** M1.2 simulation core built and tested (47 tests), plus the screen inspector dev page.

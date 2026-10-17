@@ -6,7 +6,6 @@ import { tileToWorld } from './view';
 
 const SMALL_COLORS = {
   runner: hexToNumber(common.candyPurple),
-  blocker: 0x2b6cff,
   recruit: hexToNumber(bigs.elderBough.accent),
 };
 const DEFENDER_COLORS: Record<DefenderKind, number> = {
@@ -128,10 +127,6 @@ export class UnitViews {
     }
     view.root.visible = true;
 
-    if (u.side === 'small' && u.role === 'blocker') {
-      view.body.material = this.material(SMALL_COLORS.blocker);
-    }
-
     // Hop: an arc from the old tile to the new one over the first part of the beat.
     const t = Math.min(1, phase / HOP_SHARE);
     const ease = t * t * (3 - 2 * t);
@@ -151,7 +146,7 @@ export class UnitViews {
     if (u.downBeats > 0) view.body.position.y = half * 0.8;
 
     // Face where it will hop next.
-    const engaged = u.side === 'defender' && u.engaged !== null;
+    const engaged = u.side === 'defender' && u.engagedSince !== null;
     view.arrow.visible = !!u.intent && u.downBeats === 0 && !engaged && !dragged;
     if (u.intent) {
       const dx = u.intent.x - u.pos.x;

@@ -34,11 +34,6 @@ export function hitsSurvived(stats: Stats): number {
   return Math.max(0, stats.heft);
 }
 
-/** A Blocker's starting hold counter. ▲ Proposed: Heft + 1, so a Walk-on holds for one attack. */
-export function blockerHold(stats: Stats): number {
-  return stats.heft + 1;
-}
-
 /** The direction a unit faces: toward its intent, or up if it has none. */
 export function facingOf(pos: Vec, intent: Vec | null): Vec {
   if (!intent || eq(intent, pos)) return UP;
