@@ -102,7 +102,7 @@ Each screen is one field-length climb, in two phases.
   - **Nobody close enough:** it's a miss, and that's also a **fumble**. There are no loose balls and no scrambles. A throw either connects or it costs you a ball.
   - The distances are tuning values (`tuning.catch`), and the game pops "PERFECT!", "GOOD!" or "OK".
 - **Throws and Hijinks always happen on a beat.** Release or tap whenever you like, and the action fires on the **next beat** (a thrown ball starts flying at once, but lands on a beat). Nothing ever happens off the beat.
-- **Setup is the break.** During the huddle the music drops to a quiet loop. **HIKE!** brings the beat crashing back in.
+- **The music never stops.** One song plays continuously, through setup, play, touchdowns and new runs, with no break or restart. Setup is a breather in the *game*, not the music: patrols keep hopping on the beat while you place your squad, and **HIKE!** puts your players on the song's very next beat.
 - **The tempo is the difficulty dial.** Each place has its own track and tempo, and the beat picks up as you climb. Boss screens get their own song.
 
 **The soundtrack:** cheerful Halloween music with a strong, clear pulse: spooky surf rock, a swinging organ, monster-mash bop.
@@ -174,7 +174,7 @@ Defenders avoid telegraphed hazards, but not perfectly, and **hazards hit them t
 
 **Hazard rules:**
 - **Pure beat patterns.** What a hazard does is set by the beat number alone, so the same screen always plays the same way.
-- **Learn it before HIKE.** During setup, hazards loop through their cycle on the huddle music. At **HIKE!** the pattern starts from its first beat, so what you saw is what you get.
+- **Learn it before HIKE.** During setup, hazards and patrols loop through their cycle on the music's beat. At **HIKE!** they carry on exactly where they were, so what you saw is what you get.
 - **One beat of warning, always.** Nothing moves without telegraphing it first, so losing a player feels fair and funny, not cheap.
 - **They hit everyone.** A hit is a normal hit (a Heft 0 Walk-on goes down), for your players and for defenders. A carrier that gets hit drops the ball, which is a fumble.
 - **Upfield only.** Hazards never appear in the setup rows or the end zone, and never reach the QB.

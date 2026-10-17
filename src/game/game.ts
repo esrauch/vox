@@ -2,9 +2,10 @@
  * The game controller: ties the beat clock, the music, the simulation, the
  * three.js view and the DOM HUD together.
  *
- * The simulation steps exactly when the *heard* beat ticks over: each frame,
- * any beats that have been heard since the last frame are stepped. A throw
- * tapped on the ball button resolves on the beat the clock judges it for.
+ * One song loops continuously from the first tap, and its beat clock never
+ * stops: setup, play and touchdowns all ride the same beats. In play, the
+ * simulation steps exactly when the *heard* beat ticks over: each frame, any
+ * beats heard since the last frame are stepped.
  */
 import { installVisibilityPause, unlockAudio } from '../audio/context';
 import { getMixer } from '../audio/mixer';
@@ -45,12 +46,21 @@ export class Game {
   private queuedThrow: { beat: number; target: Vec } | null = null;
   private drag: { id: number; slot: number; tile: Vec } | null = null;
   private seed: number;
-  /** Sim beat = clock beat + offset (the clock restarts from 0 on hike and on resume). */
+  /**
+   * Sim beat = clock beat + offset. The song and its clock run continuously
+   * from the first tap; each hike (and each resume) re-anchors the offset so
+   * the sim's next beat is the song's next beat.
+   */
   private beatOffset = 0;
   private paused = false;
-  /** The setup-phase clock that keeps patrols circling before HIKE (null outside setup). */
-  private idle: { start: number } | null = null;
+  /**
+   * Setup beats that keep patrols circling before HIKE (null outside setup).
+   * Once the song is playing they follow its beats (idle beat = clock beat +
+   * offset); before the first tap, a timer at the song's tempo stands in.
+   */
+  private idle: { offset: number } | { start: number } | null = null;
   private music: MusicPlayer | null = null;
+  private musicStarting: Promise<void> | null = null;
   private sfx: SfxPlayer | null = null;
 
   constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement, options: GameOptions) {
@@ -70,6 +80,8 @@ export class Game {
     window.addEventListener('resize', refit);
     refit();
 
+    // Audio can only start inside a gesture: the song starts on the first tap anywhere.
+    window.addEventListener('pointerdown', () => void this.startMusic());
     canvas.addEventListener('pointerdown', (e) => this.onPointerDown(e));
     canvas.addEventListener('pointermove', (e) => this.onPointerMove(e));
     canvas.addEventListener('pointerup', (e) => this.onPointerUp(e));
@@ -100,7 +112,6 @@ export class Game {
     while (pos && !this.paused && this.state.phase === 'play' && this.state.beat < pos.index) {
       this.stepBeat();
     }
-    if (this.state.phase !== 'play' && this.clock?.running) this.clock.stop();
 
     const playing = this.state.phase === 'play' && !this.paused && pos !== null;
     const idle = this.state.phase === 'setup' ? this.idleTick(now) : null;
@@ -117,9 +128,19 @@ export class Game {
    * current setup beat and how far through it we are, for animation.
    */
   private idleTick(now: number): { beat: number; phase: number } {
-    const beatMs = 60_000 / spookySurf.bpm;
-    this.idle ??= { start: now - this.state.screen.idleBeat * beatMs };
-    const elapsed = (now - this.idle.start) / beatMs;
+    const idleBeat = this.state.screen.idleBeat;
+    const clockPos = this.clock?.running ? this.clock.position(now) : null;
+    let elapsed: number;
+    if (clockPos) {
+      if (!this.idle || !('offset' in this.idle)) {
+        this.idle = { offset: idleBeat - clockPos.index };
+      }
+      elapsed = clockPos.index + this.idle.offset + Math.max(0, clockPos.phase);
+    } else {
+      const beatMs = 60_000 / spookySurf.bpm;
+      if (!this.idle || !('start' in this.idle)) this.idle = { start: now - idleBeat * beatMs };
+      elapsed = (now - this.idle.start) / beatMs;
+    }
     while (this.state.screen.idleBeat < Math.floor(elapsed) && !this.drag) {
       const prev = this.state;
       this.state = idleStep(prev).state;
@@ -195,19 +216,7 @@ export class Game {
     this.sfx?.play(id);
   }
 
-  /** Music follows the game: full song in play, the setup layer otherwise, silence when paused or over. */
-  private syncMusic(): void {
-    const music = this.music;
-    if (!music?.playing) return;
-    const { phase } = this.state;
-    if (phase === 'over') music.stop(1.5);
-    else if (this.paused) music.stop(0.2);
-    else if (phase !== 'play' && music.currentLayer === 'play')
-      music.setLayer('setup', music.now());
-  }
-
   private syncHud(): void {
-    this.syncMusic();
     const { phase, screen } = this.state;
     this.hud.setBalls(this.state.balls);
     this.hud.setYards(yards(this.state), screen.index);
@@ -227,7 +236,6 @@ export class Game {
   private pause(): void {
     if (this.state.phase !== 'play' || this.paused) return;
     this.paused = true;
-    this.clock?.stop();
     this.queuedThrow = null;
     this.markers.launch(null);
     this.syncHud();
@@ -245,31 +253,36 @@ export class Game {
   }
 
   /**
-   * Start the beat. The music is the clock: the clock's beat 0 lands on the
-   * next beat of the song (bringing in the full arrangement), and on the sim's
-   * current beat.
+   * Start the song and its beat clock, once. They then run continuously and
+   * seamlessly through setup, play, touchdowns and new runs: the music is the
+   * clock, and the game lines itself up to it.
    */
-  private async startBeat(): Promise<void> {
-    const { ctx, music } = await this.ensureAudio();
-    this.clock ??= new BeatClock(ctx);
-    let origin: number;
-    if (music.playing) {
-      origin = music.nextBeatTime(ctx.currentTime + 0.15);
-      music.setLayer('play', origin);
-    } else {
-      origin = ctx.currentTime + 0.4;
+  private startMusic(): Promise<void> {
+    this.musicStarting ??= (async () => {
+      const { ctx, music } = await this.ensureAudio();
+      this.clock ??= new BeatClock(ctx);
+      const origin = ctx.currentTime + 0.1;
       music.start(origin, 'play');
-    }
-    this.beatOffset = this.state.beat;
-    this.queuedThrow = null;
-    this.markers.launch(null);
-    this.clock.startAt(music.song.bpm, origin);
+      this.clock.startAt(music.song.bpm, origin);
+    })();
+    return this.musicStarting;
   }
 
-  /** Between plays (a new run), get the huddle groove going. */
-  private async startSetupMusic(): Promise<void> {
-    const { ctx, music } = await this.ensureAudio();
-    if (!music.playing) music.start(ctx.currentTime + 0.1, 'setup');
+  /**
+   * Line the sim up with the song (on hike and on resume): the sim's next beat
+   * is the song's next beat, unless that's too close to react to, in which
+   * case it's the one after.
+   */
+  private async startBeat(): Promise<void> {
+    await this.startMusic();
+    const clock = this.clock;
+    const pos = clock?.position();
+    if (!clock?.bpm || !pos) return;
+    const untilNext = ((1 - Math.max(0, pos.phase)) * 60) / clock.bpm;
+    const firstBeat = pos.index + (untilNext < 0.15 ? 2 : 1);
+    this.beatOffset = this.state.beat + 1 - firstBeat;
+    this.queuedThrow = null;
+    this.markers.launch(null);
   }
 
   private async onAction(): Promise<void> {
@@ -289,7 +302,6 @@ export class Game {
       this.state = createRun(this.seed);
       this.aim = null;
       this.resetUnits();
-      await this.startSetupMusic();
     }
     this.syncHud();
   }
