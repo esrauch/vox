@@ -192,9 +192,9 @@ All game content is **typed data**, kept separate from the engine code. That kee
 ```
 src/content/
   team.ts         // the team: helmet/jersey colors, ball, slot count
-  smalls.ts       // the Walk-on plus every recruit kind: Hustle/Hands/Heft, role, look
+  players.ts      // the Walk-on plus every recruit kind: Hustle/Hands/Heft, role, look
   places.ts       // each haunted place: defenders, hazards, recruit/card/Hijink pools, palette, song
-  defenders.ts    // defender kinds and behaviors
+  defenders.ts    // every defender kind: name, creature, model, stats, movement rule, ignoresSnap
   hazards.ts      // hazard types and their beat patterns
   biomes.ts       // strip sets, hazard pools, song, palette
   cards.ts        // draft cards: Treats, Tricks, perks
@@ -429,18 +429,18 @@ Everything a future session (human or Claude) needs to carry on without the orig
 ### Code map (`src/`)
 
 - **`sim/`**: the pure, deterministic rules. No three.js, no DOM, no `Math.random`.
-  - `types.ts`: `RunState`, units, ball states (`at: 'qb' | 'flight' | 'carried' | 'none'`), events.
+  - `types.ts`: `RunState`, units (`PlayerUnit`, `Defender`), ball states (`at: 'qb' | 'flight' | 'carried' | 'none'`), `BeatInput`, `ThrowProblem` codes, `SimResult`, events.
   - `grid.ts`: 9×16 grid, `QB_POS` (4,0), `inSetupZone`, `inThrowBand` (rows 4–11), `nextToQb`, `stepToward`.
-  - `run.ts`: `createRun(seed)`, `setUpScreen`, `dispatch(place | hike | nextScreen)`, `DEFAULT_FORMATION`.
-  - `step.ts`: `step(state, throwTarget?)` advances the **global beat** by one, in **every phase**, and returns `{state, events}`. `state.beat` never resets (not on HIKE, not on a new screen). Outside play only patrolling defenders (Bats) hop; in play, everything does, each on its own Hustle beats. The order is in its header comment. Throw targets are **free points** in tile units, and landing picks the closest receiver within the `tuning.catch` radii (perfect/good/ok, widened by Hands). Also `throwProblem`, fumbles (lose a ball → **reset the screen to setup**), collisions (the defender wins; Walk-ons without the ball **trade**, taking the defender down too; fend-offs), sacks (any defender up and next to the QB while it holds the ball), landing (Clean Catch, interception, lunge, miss), touchdown, wipeout.
-  - `ai.ts`: per-beat intents (the hop-arrow telegraph): Walk-ons go straight up; Chaser, Blitzer, Wall-er and Picker rules.
+  - `run.ts`: `createRun(seed)`, `setUpScreen`, `dispatch(state, place | hike | nextScreen)` (**pure**, like `step`: returns `{state, events}`), `DEFAULT_FORMATION`.
+  - `step.ts`: `step(state, input: BeatInput)` advances the **global beat** by one, in **every phase**, and returns `{state, events}`. `state.beat` never resets (not on HIKE, not on a new screen). Outside play only defenders with `ignoresSnap` (Bats) hop, without contact; in play, everything does, each on its own Hustle beats. Fumbles and wipeouts share `loseBall`. The order is in its header comment. Throw targets are **free points** in tile units, and landing picks the closest receiver within the `tuning.catch` radii (perfect/good/ok, widened by Hands). Also `throwProblem`, fumbles (lose a ball → **reset the screen to setup**), collisions (the defender wins; Walk-ons without the ball **trade**, taking the defender down too; fend-offs), sacks (any defender up and next to the QB while it holds the ball), landing (Clean Catch, interception, lunge, miss), touchdown, wipeout.
+  - `ai.ts`: per-beat intents (the hop-arrow telegraph): players go straight up; defenders follow their kind's `movement` rule (`chase`, `blitz`, `wall`, `patrol`). **A new defender kind** is an entry in `content/defenders.ts` plus, only if it moves in a new way, a case here.
   - `stats.ts`: what Hustle, Hands and Heft mean (only the 0 values are decided; 1+ are placeholders). `screen.ts`: a placeholder seeded defender scatter. `replay.ts`: replay from seed and inputs. `rng.ts`: mulberry32 plus `deriveSeed`.
 - **`beat/`**: `clock.ts` (`BeatClock`: audio-clock grid, lookahead scheduling, `position()` in *heard* time via `getOutputTimestamp`, `startAt(bpm, origin)`), `beatMath.ts` (pure maths; `judge()` deliberately never awards On-Beat), `calibration.ts`.
 - **`audio/`**: `mixer.ts` (buses → compressor), `music.ts` (`prepareSong`, `MusicPlayer`, the full mix as one continuous loop), `context.ts` (unlock, `suspendAudio`), `sfx.ts` (`SFX` definitions, `prepareSfx`, `SfxPlayer`), `synth/` (`notes.ts` notation, `instruments.ts` voices, `render.ts` offline stem rendering with tail folding), `songs/spookySurf.ts`, `wav.ts`
-- **`render/`**: `view.ts` (renderer, lights `hemi`/`sun`, the fitted perspective camera, fog range, `tileAt`, `toScreen`), `field.ts` (tiles, throwing-band dimming and chalk lines, the QB model, `QB_MODEL`), `units.ts` (unit meshes, hop animation, facing; Wall-ers never rotate), `markers.ts` (ball, the free reticle with perfect/ok rings and a marching dashed arc while aiming, landing ring and pips, the QB's raised-hand ball position), `scenery.ts` (forest floor texture, fog, moonlight, instanced props).
-- **`game/game.ts`**: the controller. The music is the global tick: PLAY (`enter()`) starts the song and its `BeatClock`; each frame the sim steps every beat *heard* since the last, in every phase (sim beat = song beat − `runStart`). Pause = suspend the audio (the beat freezes with it); SFX hooks; input (press anywhere and pull back to aim, release to throw; drag in setup).
-- **`ui/`**: `hud.ts` and `hud.css` (DOM HUD), `base.css`, `paletteVars.ts`.
-- **`content/`**: `palettes.ts` (**the only place colors are defined**: `common`, `team`, `voxel` for model colors, `biomes.forest`), `tuning.ts` (every magic number), `smalls.ts` (the Walk-on and recruit kinds; `returns`, `trades`), `defenders.ts`.
+- **`render/`**: `view.ts` (renderer, lights `hemi`/`sun`, the fitted perspective camera, fog range, `tileAt`, `toScreen`), `field.ts` (tiles, throwing-band dimming and chalk lines), `units.ts` (player and defender meshes, hop animation, hop arrows; models never turn), `qb.ts` (`QbView`: arm up with the ball, down after; `qbHand()`), `ball.ts` (`BallView`: held, flying from the moment of release with landing ring and pips, carried overhead with a ground ring), `aim.ts` (`AimView`: the free reticle with perfect/ok rings and the marching dashed arc), `throwArc.ts` (the shared arc shape), `scenery.ts` (forest floor texture, fog, moonlight, instanced props).
+- **`game/`**: `game.ts` (the controller: each frame the sim steps every beat *heard* since the last, in every phase, sim beat = song beat − `runStart`; phases and the HUD prompt; input routing: press anywhere and pull back to aim, release to throw; drag in setup), `conductor.ts` (`Conductor`: the music and its `BeatClock` are the global tick, started by PLAY; pause = suspend the audio, freezing the beat; SFX), `feedback.ts` (sim events → sounds and HUD pops, and every pop's words), `slingshot.ts` (`aimTarget`, `throwTiming`: pure maths).
+- **`ui/`**: `hud.ts` and `hud.css` (DOM HUD: ball pile, yards, the context button, `pop()`), `base.css`, `paletteVars.ts`.
+- **`content/`**: `palettes.ts` (**the only place colors are defined**: `common`, `team`, `voxel` for model colors, `biomes.forest`), `tuning.ts` (every magic number), `players.ts` (the Walk-on and recruit kinds; `returns`, `trades`), `defenders.ts` (`DEFENDERS`: one entry per kind).
 - **`voxel/`**: `voxt.ts` (parser), `mesh.ts` (greedy mesher), `models.ts` (loads every `.voxt` through `import.meta.glob`, caches geometry, `voxelMaterial`, `modelHeight`), `vox.ts` (MagicaVoxel import).
 - **`dev/`** plus `/dev/*.html`: the beat-clock page, the screen inspector (`screen.html?seed=N`), the model viewer, the sound board. In dev builds the game is exposed as `window.game` for console debugging.
 
@@ -463,7 +463,7 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 | Kind | Typical size | Example |
 |---|---|---|
 | Players (Walk-on) | 9×14×5 at 0.08 → ~0.7 wide, 1.1 tall | `team/walkOn` |
-| QB | 9×14×5 at 0.1 → 0.9 wide, 1.4 tall | `team/qb` (arm raised, holding the ball); `team/qbThrown` (arm lowered after the throw; drawn by `markers.ts`) |
+| QB | 9×14×5 at 0.1 → 0.9 wide, 1.4 tall | `team/qb` (arm raised, holding the ball); `team/qbThrown` (arm lowered after the throw; drawn by `render/qb.ts`) |
 | Defenders | 0.6–0.9 wide, 0.6–1.1 tall | `forest/*` |
 | Ball | 9×5×5 at 0.045 | `team/ball` |
 | Field hazards | about a tile wide | `forestHazards/pumpkin` (9×8×9 at 0.1) |
@@ -488,7 +488,7 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 
 ### Testing and verifying changes
 
-- **Rule changes:** add or adjust a sim test first (`playState(...)` + `run(state, n)` + `ofType(events, 'type')`). Remember the timing: Hustle 0 hops on **even beats**, a throw sent with `step(state, target)` leaves on that beat and lands 2 beats later, and **throw targets must be in rows 4–11** (free points from 3.5 to 11.5). Catch quality depends on the distance from the landing point to the receiver's tile.
+- **Rule changes:** add or adjust a sim test first (`playState(...)` + `run(state, n)` + `ofType(events, 'type')`). Remember the timing: Hustle 0 hops on **even beats**, a throw sent with `step(state, { throwAt })` leaves on that beat and lands 2 beats later, and **throw targets must be in rows 4–11** (free points from 3.5 to 11.5). Catch quality depends on the distance from the landing point to the receiver's tile.
 - **Visual changes:** `npm run screenshot` (and `-- <seed> play`), then look at the PNG. The Browser pane works too, but **when the pane is hidden its page runs in the background and the game pauses itself** (correctly). For live checks, show the pane (`show_pane: preview`) and drive it through `window.game` in JavaScript, e.g. pressing the mouse anywhere on the field and dragging down to aim (see the Playwright script pattern: `page.mouse.down()`, `move`, `up`).
 - **The browser console keeps old errors** across hot reloads; check timestamps before chasing them.
 
