@@ -1,4 +1,4 @@
-# Fee Fi Fo Fumble: Milestones
+# Fourth & Ghoul: Milestones
 
 This is a **living plan**. We work through it top to bottom and update it as we go: check items off, add what we discover, and move things around when priorities change. The design lives in [THEME.md](THEME.md), [GAMEPLAY.md](GAMEPLAY.md) and [TECHNICAL.md](TECHNICAL.md). This file tracks *what's next* and *what "done" means*.
 
@@ -290,6 +290,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Theme reworked: a football team in a haunted forest, with no Bigs or Smalls. The game is now called **Fourth & Ghoul**. GAMEPLAY.md and TECHNICAL.md still need updating for the new theme.
 - **2026-10-17:** Defenders are biome locals in candy purple. The Forest set (gnome Chaser, rhino-beetle Blitzer, scarecrow Wall-er, bat Picker) is modelled and in the game.
 - **2026-10-17:** Playtest changes: a fumble now resets the whole screen to setup, and Smalls no longer block each other.
 - **2026-10-17:** M1.5 synth and audio: mixer, synth voices, song notation, offline stem rendering, music locked to the beat, SFX, render tooling, and the first song, "Spooky Surf".

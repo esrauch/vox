@@ -1,6 +1,6 @@
-# Theme
+# Fourth & Ghoul: Theme
 
-*Working title: **Fee Fi Fo Fumble** (being revisited; see* Title *below).*
+*A football team, a haunted forest, and the longest fourth down of their lives.*
 
 This document is about who, where and what it feels like. It does not cover rules or numbers; those live in [GAMEPLAY.md](GAMEPLAY.md).
 
@@ -115,28 +115,12 @@ Every player and every defender is described by **three attributes**, the **Thre
 
 ## Title
 
-**Fee Fi Fo Fumble** is still a candidate, but it comes from the giant-quarterback idea, which is gone. Candidates that pun on Halloween/haunted *and* football:
+**Fourth & Ghoul**: fourth and goal, the last-chance down, with a ghoul in it. It's chosen.
 
-| Title | The pun |
-|---|---|
-| ★ **Field of Screams** | *Field of Dreams*, haunted. |
-| ★ **Fourth & Ghoul** | Fourth and goal. |
-| ★ **Hike & Shriek** | Hide and seek, plus the snap. |
-| ★ **Trick Play** | A football trick play, plus trick-or-treat. |
-| **Ghoul Line** | The goal line. |
-| **Boo-tball** | Football, booed. |
-| **Gourd Line** | The goal line, made of pumpkins. |
-| **Haunted Huddle** | Self-explanatory, and alliterative. |
-| **The Boo Zone** | The end zone. |
-| **Fright Formation** | A formation, frightened. |
-| **Hail Mary Shelley** | The Hail Mary pass, plus *Frankenstein*'s author. |
-| **Gridiron Graveyard** | Alliterative, very on the nose. |
-| **Pumpkin Punt** | Alliterative. |
-| **Night of the Living Ball** | *Night of the Living Dead*. |
+Runners-up, kept for reuse inside the game (screens, achievements, Trick Plays): *Field of Screams*, *Hike & Shriek*, *Trick Play*, *Ghoul Line*, *Boo-tball*, *The Boo Zone*, *Haunted Huddle*, *Hail Mary Shelley*, *Fright Night Football*, *Touchdown Town*. The old title, *Fee Fi Fo Fumble*, lives on as the crowd's chant when you fumble.
 
 ## Open Questions
 
-- **The title** (see above).
 - **"Walk-ons" or "Rookies"** for the vanilla players?
 - **"Hijinks" or "Trick Plays"** for the team powers?
 - **Who is the quarterback?** A rookie in the backfield, or a special player that's always there? It's the one player who never moves.

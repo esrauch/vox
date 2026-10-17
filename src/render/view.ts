@@ -36,21 +36,22 @@ export class View {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.scene.background = new THREE.Color(hexToNumber(common.sky));
 
-    this.hemi = new THREE.HemisphereLight(0xffffff, hexToNumber(common.grassDark), 1.3);
+    this.hemi = new THREE.HemisphereLight(0xfff1d6, hexToNumber(common.grassDark), 0.75);
     this.scene.add(this.hemi);
-    const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+    const sun = new THREE.DirectionalLight(0xffb36b, 2.1);
     this.sun = sun;
-    sun.position.set(-6, 14, 4);
+    sun.position.set(-9, 20, 6);
     sun.target.position.set(0, 0, -ROWS / 2);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(1024, 1024);
+    sun.shadow.mapSize.set(1536, 1536);
+    sun.shadow.bias = -0.0001;
     Object.assign(sun.shadow.camera, {
-      left: -8,
-      right: 8,
-      top: 12,
-      bottom: -12,
+      left: -14,
+      right: 14,
+      top: 18,
+      bottom: -18,
       near: 1,
-      far: 40,
+      far: 54,
     });
     this.scene.add(sun, sun.target);
 

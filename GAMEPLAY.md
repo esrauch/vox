@@ -1,4 +1,4 @@
-# Fee Fi Fo Fumble: Gameplay
+# Fourth & Ghoul: Gameplay
 
 This doc covers what the player *does*: the design pillars, the controls, the run structure, and how a single screen plays out. It builds on [THEME.md](THEME.md). Exact numbers and tuning belong in a later systems doc.
 

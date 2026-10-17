@@ -1,4 +1,4 @@
-# Fee Fi Fo Fumble: Technical
+# Fourth & Ghoul: Technical
 
 This doc covers how we build it: the stack, the architecture, the beat clock, rendering, UI, audio, and how assets get made and sourced. It builds on [THEME.md](THEME.md) and [GAMEPLAY.md](GAMEPLAY.md).
 
