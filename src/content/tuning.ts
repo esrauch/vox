@@ -42,12 +42,10 @@ export const tuning = {
     ticks: 12,
     /** Every player a play leaves at home to block buys this many more ticks. */
     perBlocker: 3,
-    /** Every Blitzer beyond the first takes this many away. */
-    perExtraBlitzer: 3,
+    /** Every pass rusher beyond the first takes this many away. */
+    perExtraRusher: 3,
     /** The pocket never holds for less than this. */
     minTicks: 6,
-    /** On a run, the line ties the rush up for this many ticks before letting it go. */
-    runHold: 6,
   },
   cards: {
     /** Play cards drawn before each down. */

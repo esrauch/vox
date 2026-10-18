@@ -6,21 +6,25 @@ import { getGeometry, voxelMaterial } from '../voxel/models';
 import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
-/** Your offensive line: three plain players across the middle, in front of the QB. */
+/** Your offensive line: three plain players across the middle, in front of the QB… */
 const LINEMEN = 3;
 const LINEMAN_MODEL = 'team/walkOn';
+/** …and the pass rush pressed against them: three rhino beetles. */
+const RUSHER_MODEL = 'forest/blitzer';
 /** The most countdown pips shown (one per beat left). */
 const MAX_PIPS = 8;
 
 /**
- * The pocket (GAMEPLAY.md, A Down), Retro Bowl-style: your line in front of
- * the QB, with the pass rush pressed against it. As the pocket clock runs
- * down, the rush pushes the line back toward the QB, and pips over the line
- * count the beats left before the sack (white, then red for the last one). The linemen
- * are scenery: the pocket clock (sim/step.ts) decides the sack.
+ * The pocket (GAMEPLAY.md, The Pocket), Retro Bowl-style: three linemen in
+ * front of the QB, with three rushers pressed against them. As the pocket
+ * clock runs down, the rush pushes the line back toward the QB, and pips over
+ * the line count the beats left before the sack (white, then red for the last
+ * one). It's only a countdown: none of them are units, and they don't block,
+ * bat, chase or tackle. The clock (sim/step.ts) decides the sack.
  */
 export class PocketView {
   private readonly linemen: THREE.Group[] = [];
+  private readonly rushers: THREE.Group[] = [];
   private readonly pips: THREE.Mesh[] = [];
   private readonly pipMat = new THREE.MeshBasicMaterial({ color: hexToNumber(common.white) });
   private readonly urgentMat = new THREE.MeshBasicMaterial({ color: hexToNumber(common.danger) });
@@ -28,14 +32,18 @@ export class PocketView {
   private lineRow = 0;
 
   constructor(scene: THREE.Scene) {
-    for (let i = 0; i < LINEMEN; i++) {
+    const figure = (model: string): THREE.Group => {
       const root = new THREE.Group();
-      const body = new THREE.Mesh(getGeometry(LINEMAN_MODEL), voxelMaterial);
+      const body = new THREE.Mesh(getGeometry(model), voxelMaterial);
       body.rotation.x = tilt;
       body.castShadow = true;
       root.add(body);
-      this.linemen.push(root);
       scene.add(root);
+      return root;
+    };
+    for (let i = 0; i < LINEMEN; i++) {
+      this.linemen.push(figure(LINEMAN_MODEL));
+      this.rushers.push(figure(RUSHER_MODEL));
     }
     const pipGeo = new THREE.BoxGeometry(0.26, 0.26, 0.26);
     for (let i = 0; i < MAX_PIPS; i++) {
@@ -61,6 +69,11 @@ export class PocketView {
     }
     this.linemen.forEach((root, i) => {
       const at = tileToWorld({ x: MID_COL - 1 + i, y: this.lineRow });
+      root.position.set(at.x, 0, at.z);
+    });
+    this.rushers.forEach((root, i) => {
+      // A little more than a row up, so the low beetles show above your linemen.
+      const at = tileToWorld({ x: MID_COL - 1 + i, y: this.lineRow + 1.5 });
       root.position.set(at.x, 0, at.z);
     });
 

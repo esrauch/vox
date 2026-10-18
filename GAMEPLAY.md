@@ -82,15 +82,10 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### The Pocket *(Retro Bowl-style)*
 
-- **Your line stands in front of the QB**, three plain linemen across the middle, with the pass rush (the Blitzers) pressed against them.
-- **The pocket clock** starts at the snap: **6 beats** to throw on an ordinary play. As it runs down, **the rush pushes your line back toward the QB**, and **pips over the line count the beats left** (white, then red for the last one). At zero, with the ball still in the QB's hand, it's a **sack**.
-- **Blockers buy time:** every player a play leaves at home (a "." route, like the Screen's two blockers) adds 1½ beats. **Every extra Blitzer** takes 1½ away. The pocket never holds for less than 3 beats.
-- **While the line holds them, Blitzers are tied up:** they can't chase or tackle, and a runner can't go through them. On a run play (a Draw), the line ties the rush up for 3 beats, then lets it go.
-- **Once the ball is thrown**, the rush is let go; once it's caught, the Blitzers chase the carrier.
-- The linemen are scenery: the clock decides the sack.
-6. **After a catch, the carrier runs straight upfield** on its own until it's tackled or crosses the first-down line. You don't steer it. *(Future candidate: special players on cards with their own running AI.)*
-
----
+- **It's a countdown you can see, nothing more.** Three linemen stand in front of the QB with **three rushers** (rhino beetles) pressed against them. From the snap, **the pocket clock runs: 6 beats** on an ordinary play. As it runs down, **the rush pushes your line back toward the QB**, and **pips over the line count the beats left** (white, then red for the last one). At zero, with the ball still in the QB's hand, it's a **sack**.
+- **The line and the rushers are only drawn.** They don't block passes, bat the ball, chase or tackle.
+- **Blockers buy time:** every player a play leaves at home (a "." route, like the Screen's two blockers) adds 1½ beats. **A defense that brings extra rushers** (the Boss brings two) takes 1½ beats away per extra rusher. The pocket never holds for less than 3 beats.
+- **Runs have no pocket clock:** a Draw hands the ball off at the snap.
 
 ## Controls
 
@@ -150,8 +145,8 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 | Defender | Forest creature | Job | Ring |
 |---|---|---|---|
 | **Cover** | Garden Gnome | **Man coverage.** At the snap, each picks a receiver (the nearest one not already covered) and shadows it **one beat behind**, so a route's cut opens a beat or two of separation. After a catch, it **chases the carrier**. | **None:** it blocks only by being right beside a low pass |
+| *The pass rush* | Rhino Beetles | **Drawn, not played:** three rushers against your line, pushed in as the pocket clock runs (see *The Pocket*). A defense's rush count only changes the clock. | — |
 | **Zone** | Scarecrow | **Doesn't move.** Planted on its tile, it guards a wide area. | **Wide** (1½ yards): a low pass inside it is knocked away |
-| **Blitzer** | Rhino Beetle | **The pass rush.** It lines up against your line and pushes it back on the pocket clock (see *The Pocket*); every extra Blitzer shortens the clock. **Once the ball is caught, it chases the carrier** like a Cover. | **None** |
 | **Safety** | **Owl**: perched deep, it sees everything | **The deep guard, always between the ball and the first-down line.** It hangs back near the line and slides across its row to stay level with your deepest receiver; while a pass is in the air, it slides toward where it will land. **After a catch it gets into the carrier's column first, then comes down to meet it** (a carrier already past it is just chased). So **a deep pass coming down near it is batted away**, and a carrier rarely gets by it. Beating the Safety (a decoy, a flood to one side, a trick play) is how you gain 10 in one play. | **None** |
 | **Bat** | Bat | **Patrols** a fixed box circuit (3 yards square), one tile per hop, whatever the play is doing. It's already circling before the snap, so you can time a throw past it. A pass coming down near it bounces off. | Small (half a yard), moving with it |
 

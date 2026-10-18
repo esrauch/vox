@@ -11,8 +11,6 @@ export type Job =
   | 'cover'
   /** Planted: never moves, guards a wide area. */
   | 'zone'
-  /** The pass rush: pushes the pocket back on the pocket clock; chases the carrier after a catch. */
-  | 'rush'
   /** The deep guard: holds its row level with your deepest receiver (or the landing spot); after a catch, into the carrier's column, then down. */
   | 'safety'
   /** Loops a fixed 4×4 box circuit, whatever the play is doing. */
@@ -61,16 +59,6 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     stats: BASE,
     job: 'zone',
     coverage: 3,
-    ignoresSnap: false,
-  },
-  blitzer: {
-    name: 'Blitzer',
-    creature: 'Rhino Beetle',
-    model: 'forest/blitzer',
-    glyph: 'B',
-    stats: BASE,
-    job: 'rush',
-    coverage: 0,
     ignoresSnap: false,
   },
   safety: {

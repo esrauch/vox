@@ -65,27 +65,12 @@ describe('a run', () => {
     expect(hiked.pocket).toEqual({ total: tuning.pocket.ticks, left: tuning.pocket.ticks });
   });
 
-  it('a Draw hands the ball off at the snap, and the line ties the rush up for a while', () => {
+  it('a Draw hands the ball off at the snap: no pocket clock, so no sack', () => {
     let state = createRun(1);
     state = { ...state, deck: { ...state.deck, hand: ['draw', 'go', 'slant'] } };
     state = dispatch(dispatch(state, { type: 'call', hand: 0 }).state, { type: 'hike' }).state;
     expect(state.screen.ball).toEqual({ at: 'carried', by: state.screen.players[0]!.id });
-    const hold = tuning.pocket.runHold;
-    expect(state.pocket).toEqual({ total: hold, left: hold, run: true });
-  });
-
-  it('a tied-up Blitzer can\u2019t tackle the runner going past it; once let go, it chases', () => {
-    const state = carry(
-      playState([{ pos: vec(5, 2) }], [{ kind: 'blitzer', pos: vec(4, 4) }]),
-      100,
-    );
-    state.pocket = { total: 4, left: 4, run: true };
-    const past = run(state, 3); // the runner goes right by it: (5, 3), (5, 4), (5, 5)
-    expect(ofType(past.events, 'tackled')).toHaveLength(0);
-    expect(defender(past.state, 200).pos).toEqual(vec(4, 4));
-    const later = run(past.state, 3);
-    expect(later.state.pocket).toBeNull();
-    expect(defender(later.state, 200).pos).not.toEqual(vec(4, 4));
+    expect(state.pocket).toBeNull();
   });
 
   it('the tick runs before the snap, and carries on through HIKE', () => {
@@ -133,23 +118,21 @@ describe('the pocket', () => {
     const p = tuning.pocket;
     expect(pocketTicks(0, 1)).toBe(p.ticks);
     expect(pocketTicks(2, 1)).toBe(p.ticks + 2 * p.perBlocker);
-    expect(pocketTicks(0, 3)).toBe(Math.max(p.minTicks, p.ticks - 2 * p.perExtraBlitzer));
+    expect(pocketTicks(0, 3)).toBe(Math.max(p.minTicks, p.ticks - 2 * p.perExtraRusher));
     let state = createRun(1);
     state = { ...state, deck: { ...state.deck, hand: ['screen', 'go', 'slant'] } };
     state = dispatch(dispatch(state, { type: 'call', hand: 0 }).state, { type: 'hike' }).state;
     expect(state.pocket?.total).toBe(pocketTicks(2, 1)); // the Screen keeps two blockers home
   });
 
-  it('the rush pushes the line back as the clock runs, and at zero it is a sack: 2 yards lost', () => {
-    const state = playState([], [{ kind: 'blitzer', pos: vec(5, 10) }]);
+  it('when the pocket clock runs out with the ball still in hand, it is a sack: 2 yards lost', () => {
+    const state = playState([]);
     state.drive.los = 9;
-    Object.assign(state.screen, { qb: qbTile(9) }); // the QB on (5, 6)
+    Object.assign(state.screen, { qb: qbTile(9) });
     state.pocket = { total: 4, left: 4 };
-    const halfway = run(state, 2);
-    expect(defender(halfway.state, 200).pos.y).toBeLessThan(10);
-    expect(ofType(halfway.events, 'sacked')).toHaveLength(0);
-    const r = run(halfway.state, 2);
-    expect(ofType(r.events, 'sacked')).toEqual([{ type: 'sacked', by: 200 }]);
+    expect(ofType(run(state, 3).events, 'sacked')).toHaveLength(0);
+    const r = run(state, 4);
+    expect(ofType(r.events, 'sacked')).toEqual([{ type: 'sacked', by: null }]);
     expect(ofType(r.events, 'downEnded')[0]).toEqual({
       type: 'downEnded',
       result: 'sacked',
@@ -158,15 +141,10 @@ describe('the pocket', () => {
     expect(r.state.drive.los).toBe(5);
   });
 
-  it('a player standing in the rush lane holds the Blitzer, but the clock still runs out', () => {
-    const state = playState(
-      [{ pos: vec(5, 2), route: '.' }],
-      [{ kind: 'blitzer', pos: vec(5, 4) }],
-    );
-    state.pocket = { total: 4, left: 4 };
-    const r = run(state, 4);
-    expect(defender(r.state, 200).pos.y).toBeGreaterThan(2);
-    expect(ofType(r.events, 'sacked')).toHaveLength(1);
+  it('the clock stops once the ball is thrown', () => {
+    const state = playState([{ pos: vec(1, 8), route: '.' }]);
+    state.pocket = { total: 12, left: 12 };
+    expect(step(state, { throwAt: vec(1, 8) }).state.pocket).toBeNull();
   });
 
   it("can't push you back behind the drive's starting line", () => {
@@ -175,22 +153,6 @@ describe('the pocket', () => {
     const r = run(state, 2);
     expect(r.state.drive.los).toBe(3);
     expect(ofType(r.events, 'downEnded')[0]?.gained).toBe(0);
-  });
-
-  it('the rush waits once the ball is thrown, and chases once it is caught', () => {
-    const state = playState(
-      [{ pos: vec(1, 8), route: '.' }],
-      [{ kind: 'blitzer', pos: vec(5, 4) }],
-    );
-    state.pocket = { total: 12, left: 12 };
-    let r = run(step(state, { throwAt: vec(1, 8) }).state, 1);
-    expect(r.state.pocket).toBeNull();
-    const at = defender(r.state, 200).pos;
-    r = run(r.state, 1); // the ball lands: a catch
-    expect(r.state.screen.ball).toEqual({ at: 'carried', by: 100 });
-    expect(defender(r.state, 200).pos).toEqual(at);
-    r = run(r.state, 1);
-    expect(defender(r.state, 200).pos).not.toEqual(at);
   });
 });
 
@@ -233,17 +195,14 @@ describe('tackles', () => {
   });
 
   it('a chaser that hops up beside the carrier tackles it', () => {
-    // The Blitzer on (4, 11) comes down to (4, 10) as the carrier hops up to (5, 10): side by side.
-    const state = carry(
-      playState([{ pos: vec(5, 9) }], [{ kind: 'blitzer', pos: vec(4, 11) }]),
-      100,
-    );
+    // The Cover on (4, 11) comes down to (4, 10) as the carrier hops up to (5, 10): side by side.
+    const state = carry(playState([{ pos: vec(5, 9) }], [{ kind: 'cover', pos: vec(4, 11) }]), 100);
     expect(ofType(step(state).events, 'tackled')[0]?.by).toBe(200);
   });
 });
 
 describe('coverage rings', () => {
-  const screenWith = (kind: 'cover' | 'zone' | 'blitzer' | 'safety' | 'bat') =>
+  const screenWith = (kind: 'cover' | 'zone' | 'safety' | 'bat') =>
     playState([], [{ kind, pos: vec(5, 10) }]).screen;
 
   it('a Cover covers the tiles around it, and the next tile out is tight', () => {
@@ -260,7 +219,7 @@ describe('coverage rings', () => {
   });
 
   it('any defender right beside a tile covers it (it can bat a low ball there), unless it\u2019s down', () => {
-    expect(openness(screenWith('blitzer'), vec(5, 11))).toBe('covered');
+    expect(openness(screenWith('cover'), vec(5, 11))).toBe('covered');
     const s = screenWith('cover');
     s.defenders[0]!.downTicks = 2;
     expect(openness(s, vec(5, 11))).toBe('open');
@@ -369,12 +328,12 @@ describe('the defense', () => {
     expect(openness(state.screen, player(state, 100).pos)).toBe('tight');
   });
 
-  it('Blitzers chase the carrier after a catch, and the Safety gets into its column first', () => {
+  it('defenders chase the carrier after a catch, and the Safety gets into its column first', () => {
     const state = carry(
       playState(
         [{ pos: vec(1, 10) }],
         [
-          { kind: 'blitzer', pos: vec(5, 4) },
+          { kind: 'cover', pos: vec(5, 4) },
           { kind: 'safety', pos: vec(5, 20) },
         ],
       ),

@@ -43,7 +43,7 @@ export interface PlayerUnit extends UnitBase {
   fendOff: number;
 }
 
-export type DefenderKind = 'cover' | 'zone' | 'blitzer' | 'safety' | 'bat';
+export type DefenderKind = 'cover' | 'zone' | 'safety' | 'bat';
 
 export interface Defender extends UnitBase {
   readonly side: 'defender';
@@ -156,11 +156,11 @@ export interface RunState {
   /** Ticks since the snap (in play). */
   downTick: number;
   /**
-   * Your line holding the pass rush: on a pass, the pocket clock while the QB
-   * holds the ball (at zero, a sack); on a run (`run`), how long the line ties
-   * the rush up before letting it go. Null once the rush is free.
+   * The pocket clock while the QB holds the ball on a pass play: ticks it
+   * holds for, and ticks left. At zero it's a sack. Null otherwise. The
+   * linemen and rushers are drawn from it (render/pocket.ts); they aren't units.
    */
-  pocket: { readonly total: number; left: number; readonly run?: boolean } | null;
+  pocket: { readonly total: number; left: number } | null;
   /** Ticks left before the next down (in downOver). */
   pause: number;
   /** How the last down ended, and the yards it gained. */

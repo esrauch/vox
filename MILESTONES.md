@@ -298,6 +298,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-18:** The pocket is only a countdown: three linemen and three rushers drawn in front of the QB, pushed back as the clock runs, a sack at zero. Blitzers are no longer units (a defense's `rushers` count shortens the clock), so nothing at the line blocks passes or tackles; runs have no clock.
 - **2026-10-18:** The catch window: a pass can be caught (or batted down) anywhere it's low, not only at the reticle, and the aiming line shows that stretch in gold. Only Scarecrows (and Bats, smaller) keep rings that knock passes away; Covers and the Safety block only by being right beside a low pass.
 - **2026-10-18:** One sliding throw arc: higher and longer the farther you throw; passes can only be batted down where they're low, so long throws clear defenders underneath. The arc's height is hard to see from the steep camera (a follow-up).
 - **2026-10-18:** Toward a Retro Bowl demake: **half-yard tiles** (an 11 × 26 field), the sim **ticks on eighth notes** with everyone hopping every tick (plays of about 4–7 seconds), **catches contested at the ball** (a landing point inside a coverage ring is blocked, so leading the receiver matters), **quick passes land in one beat** and long ones in two, and a **Retro Bowl-style pocket**: your line in front of the QB pushed back as the pocket clock runs, countdown pips, blockers adding time, extra Blitzers taking it away, and the line tying the rush up on runs.

@@ -4,7 +4,6 @@
  * in step.ts. See GAMEPLAY.md, The Run, A Drive and A Down.
  */
 import { DRAFT_POOL, STARTER_DECK, playCard } from '../content/cards';
-import { DEFENDERS } from '../content/defenders';
 import { tuning } from '../content/tuning';
 import { assignMarks, updateIntents } from './ai';
 import {
@@ -174,13 +173,11 @@ function hike(state: RunState): SimEvent[] {
   const runner = card.handoff !== undefined ? state.screen.players[card.handoff] : undefined;
   if (runner) {
     state.screen.ball = { at: 'carried', by: runner.id };
-    // The line ties the rush up for a while, so the runner can get going.
-    state.pocket = { total: tuning.pocket.runHold, left: tuning.pocket.runHold, run: true };
   } else {
     // A pass play: the pocket clock starts. Players left home to block buy time.
     const blockers = state.screen.players.filter((p) => /^[.]*$/.test(p.route)).length;
-    const blitzers = state.screen.defenders.filter((d) => DEFENDERS[d.kind].job === 'rush').length;
-    const total = pocketTicks(blockers, blitzers);
+    const { rushers } = defenseFor(state.seed, state.drive.area, state.drive.index);
+    const total = pocketTicks(blockers, rushers);
     state.pocket = { total, left: total };
   }
   updateIntents(state.screen);

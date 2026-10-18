@@ -82,7 +82,7 @@ Candidates (each wearing the team helmet, with a role you can read from its shap
 | Defender job | Forest local | Look |
 |---|---|---|
 | **Cover** (man coverage) | **Garden Gnome** | A tall pointy hat, a beard, arms out. |
-| **Blitzer** (the pass rush) | **Rhino Beetle** | Low, wide and horned, a little battering ram. |
+| *The pass rush* (drawn against your line) | **Rhino Beetle** | Low, wide and horned, a little battering ram. |
 | **Zone** (planted, guards a wide area) | **Scarecrow** | Arms spread wide along its crossbar, a literal wall. |
 | **Safety** (the deep guard) | ▲ **Owl** | Perched deep, wide-eyed, seeing everything. *(Not modelled yet.)* |
 | **Bat** (patrols a box of sky) | **Bat** | Hovering with its wings spread, to knock passes out of the air. |

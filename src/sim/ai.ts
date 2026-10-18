@@ -59,10 +59,6 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
       const mark = screen.players.find((p) => p.id === d.marking);
       return mark ? stepToward(d.pos, mark.pos) : null;
     }
-    case 'rush':
-      // While the QB holds the ball, the pocket clock pushes the rush back (sim/step.ts);
-      // once it's thrown, the rush waits for a carrier to chase.
-      return null;
 
     default:
       return null;

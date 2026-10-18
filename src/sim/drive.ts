@@ -151,11 +151,11 @@ export function formation(
   });
 }
 
-/** How long the pocket holds for a play: longer with blockers at home, shorter with more Blitzers. */
-export function pocketTicks(blockers: number, blitzers: number): number {
+/** How long the pocket holds for a play: longer with blockers at home, shorter against more rushers. */
+export function pocketTicks(blockers: number, rushers: number): number {
   const p = tuning.pocket;
   return Math.max(
     p.minTicks,
-    p.ticks + p.perBlocker * blockers - p.perExtraBlitzer * Math.max(0, blitzers - 1),
+    p.ticks + p.perBlocker * blockers - p.perExtraRusher * Math.max(0, rushers - 1),
   );
 }

@@ -16,8 +16,8 @@
  *      that meets the carrier, or ends the tick right next to it (in front,
  *      behind or beside), tackles it, unless it fends off.
  *   4. The carrier crossing the first-down line wins the drive.
- *   5. The pocket clock runs down, the pass rush pushes the line back, and
- *      at zero, with the ball still in the QB's hand, it's a sack.
+ *   5. The pocket clock runs down; at zero, with the ball still in the QB's
+ *      hand, it's a sack. (The line and the rush are only drawn: render/pocket.ts.)
  *   6. A Witch crossing the pass blocks it.
  *   7. The pass in the air: once it's low enough to touch, a defender near
  *      it bats it down, a Scarecrow's ring knocks it away, or a player near
@@ -139,7 +139,6 @@ function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
   for (const u of units) {
     if (!isUp(u) || !u.intent || !inBounds(u.intent)) continue;
     if (!actsOn(u.stats, tick) || !movesNow(state, u)) continue;
-    if (u.side === 'defender' && engaged(state, u)) continue; // tied up by your line
     moving.set(u.id, u.intent);
   }
   const finalOf = (u: Unit): Vec => moving.get(u.id) ?? u.pos;
@@ -156,8 +155,8 @@ function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
     changed = cancelDefenderConflicts(defenders, moving);
     for (const p of players) {
       for (const d of defenders) {
-        // The carrier meeting a defender is a tackle, unless your line has it tied up.
-        if (p === carrier && !engaged(state, d)) continue;
+        // The carrier meeting a defender is a tackle (below).
+        if (p === carrier) continue;
         if (!meets(p, d)) continue;
         // The defender always waits; the player waits too if it would still land on it.
         if (moving.delete(d.id)) changed = true;
@@ -169,7 +168,7 @@ function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
   let tackled: PlayerUnit | null = null;
   if (carrier && state.phase === 'play') {
     for (const d of defenders) {
-      if (!isUp(d) || engaged(state, d) || !meets(carrier, d)) continue;
+      if (!isUp(d) || !meets(carrier, d)) continue;
       if (carrier.fendOff > 0) {
         carrier.fendOff--;
         d.downTicks = tuning.units.knockdownTicks;
@@ -206,7 +205,7 @@ function checkContact(state: RunState, events: SimEvent[]): PlayerUnit | null {
   const carrier = carrierOf(state);
   if (!carrier) return null;
   const near = state.screen.defenders
-    .filter((d) => isUp(d) && !engaged(state, d) && dist(d.pos, carrier.pos) <= 1)
+    .filter((d) => isUp(d) && dist(d.pos, carrier.pos) <= 1)
     .sort(byId);
   for (const d of near) {
     if (carrier.fendOff > 0) {
@@ -273,57 +272,18 @@ function checkFirstDown(state: RunState, events: SimEvent[]): boolean {
 function runPocket(state: RunState, events: SimEvent[]): boolean {
   const { screen, pocket } = state;
   if (!pocket) return false;
-  if (pocket.run) {
-    // A run: the line holds the rush for a while, then lets it go.
-    pocket.left = Math.max(0, pocket.left - 1);
-    if (pocket.left === 0) state.pocket = null;
-    return false;
-  }
   if (screen.ball.at !== 'qb') {
-    // The ball is away: the line held long enough, and the rush is let go.
+    // The ball is away in time: the clock stops.
     state.pocket = null;
     return false;
   }
   pocket.left = Math.max(0, pocket.left - 1);
-  pushRush(state, events);
   if (pocket.left > 0) return false;
-  const by = screen.defenders.find((d) => DEFENDERS[d.kind].job === 'rush');
-  events.push({ type: 'sacked', by: by?.id ?? null });
+  events.push({ type: 'sacked', by: null });
   screen.ball = { at: 'dead', pos: screen.qb, bounced: false };
   state.pocket = null;
   endDown(state, 'sacked', state.drive.los - tuning.drive.sackLoss, events);
   return true;
-}
-
-/**
- * The pass rush pushes your line back as the pocket clock runs: each Blitzer
- * moves down its column from where it lined up toward the row in front of
- * the QB, reaching it as the clock hits zero. A player standing in the way
- * holds it there.
- */
-function pushRush(state: RunState, events: SimEvent[]): void {
-  const { screen, pocket } = state;
-  if (!pocket) return;
-  const progress = 1 - pocket.left / pocket.total;
-  const front = screen.qb.y + 1;
-  for (const d of screen.defenders) {
-    if (DEFENDERS[d.kind].job !== 'rush' || !isUp(d)) continue;
-    const row = Math.round(d.home.y - (d.home.y - front) * progress);
-    // One row at a time, so a player in the lane holds the rush there.
-    const from = d.pos;
-    while (d.pos.y > row) {
-      const to = vec(d.pos.x, d.pos.y - 1);
-      if (screen.players.some((p) => eq(p.pos, to))) break;
-      if (screen.defenders.some((o) => o !== d && eq(o.pos, to))) break;
-      d.pos = to;
-    }
-    if (!eq(from, d.pos)) events.push({ type: 'hop', id: d.id, from, to: d.pos });
-  }
-}
-
-/** A Blitzer is tied up by your line while the pocket (or a run's hold) lasts: it can't chase or tackle. */
-function engaged(state: RunState, d: Defender): boolean {
-  return state.pocket !== null && DEFENDERS[d.kind].job === 'rush';
 }
 
 /** A pass crossing a Witch's row near her bounces off her. */
@@ -360,9 +320,7 @@ function resolveFlight(state: RunState, events: SimEvent[]): boolean {
     if (!catchable(ball.from, ball.target, t)) continue;
     const at = ballGround(ball.from, ball.target, t);
     const batter = screen.defenders
-      .filter(
-        (d) => isUp(d) && !engaged(state, d) && distance(d.pos, at) <= tuning.throw.blockRadius,
-      )
+      .filter((d) => isUp(d) && distance(d.pos, at) <= tuning.throw.blockRadius)
       .sort((a, b) => distance(a.pos, at) - distance(b.pos, at) || a.id - b.id)[0];
     const by = batter ?? coveringDefender(screen, at);
     if (by) {
