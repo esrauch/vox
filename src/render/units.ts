@@ -95,12 +95,11 @@ export class UnitViews {
 
   /** Animate to `phase` (0..1) of the current beat. */
   update(screen: ScreenState, phase: number): void {
-    const carrier = screen.ball.at === 'carried' ? screen.ball.by : null;
     for (const u of [...screen.players, ...screen.defenders]) {
       const view = this.views.get(u.id);
       if (!view) continue;
       this.updateOne(u, view, phase);
-      this.updateRing(screen, u, view, u.id === carrier);
+      this.updateRing(screen, u, view);
     }
   }
 
@@ -183,7 +182,7 @@ export class UnitViews {
     }
   }
 
-  private updateRing(screen: ScreenState, u: Unit, view: UnitView, carrying: boolean): void {
+  private updateRing(screen: ScreenState, u: Unit, view: UnitView): void {
     view.ring.position.set(view.current.x, 0.02, view.current.z);
     if (u.side === 'defender') {
       // Coverage only matters while a pass can still be thrown or caught.
@@ -192,8 +191,8 @@ export class UnitViews {
       view.ring.scale.setScalar(Math.max(r, 0.01));
       return;
     }
-    // Open or covered only means something before the throw: after it, the rings go.
-    view.ring.visible = !carrying && screen.ball.at === 'qb';
+    // Open or covered matters until someone catches it (it can change while the ball's in the air).
+    view.ring.visible = screen.ball.at === 'qb' || screen.ball.at === 'flight';
     view.ring.material = this.basic(OPENNESS_COLOR[openness(screen, u.pos)]);
   }
 }
