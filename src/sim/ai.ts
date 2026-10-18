@@ -29,9 +29,13 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
       const target = chaseTarget(d, screen);
       return target ? stepToward(d.pos, target) : null;
     }
-    case 'blitz':
-      // Straight for the QB. Reaching it (while it holds the ball) is a sack.
-      return stepToward(d.pos, QB_POS);
+    case 'blitz': {
+      // Straight for the QB (reaching it while it holds the ball is a sack).
+      // Once someone has caught the ball, it gives up the rush and chases them.
+      const { ball } = screen;
+      const carrier = ball.at === 'carried' && screen.players.find((s) => s.id === ball.by);
+      return stepToward(d.pos, carrier && carrier.alive ? carrier.pos : QB_POS);
+    }
     case 'wall': {
       const target = wallTarget(d, screen);
       return target ? stepToward(d.pos, target) : null;

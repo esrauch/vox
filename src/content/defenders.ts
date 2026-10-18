@@ -9,7 +9,7 @@ import type { DefenderKind, Stats } from '../sim/types';
 export type Movement =
   /** Toward the carrier, else the ball's landing tile, else the nearest player. */
   | 'chase'
-  /** Straight at the QB. */
+  /** Straight at the QB; once the ball is caught, after the carrier. */
   | 'blitz'
   /** Holds its starting row, sliding into the column of the nearest player coming its way. */
   | 'wall'

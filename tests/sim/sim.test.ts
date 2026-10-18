@@ -314,6 +314,14 @@ describe('sacks', () => {
     expect(ofType(step(state).events, 'fumble')).toHaveLength(0);
   });
 
+  it('chases the carrier once the ball is caught, instead of hanging around the QB', () => {
+    const state = playState([{ pos: vec(1, 6) }], [{ kind: 'blitzer', pos: vec(4, 2) }]);
+    state.screen.ball = { at: 'carried', by: 100 };
+    const r = run(state, 2);
+    // From (4, 2) toward the carrier on (1, 6/7): up first (the larger gap), not down to the QB.
+    expect(r.state.screen.defenders[0]!.pos).toEqual(vec(4, 3));
+  });
+
   it('is irrelevant once the ball is thrown', () => {
     let state = run(blitzSetup(), 4).state;
     state = step(state, { throwAt: vec(0, 5) }).state; // throw on beat 5, landing on beat 7 where the runner will be
