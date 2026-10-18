@@ -4,7 +4,7 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** playtest **steering the carrier** on a phone (compare with `?steer=0`): does the run phase add real decisions and break "stack everyone in one column"? Then settle the progression proposals from 2026-10-17: what Twist screens do (e.g. Bowling Night, Short Arm, Butterfingers), Candy for risky play (rerolls first), Walk-on trades knocking the defender down instead of removing it, one bonus objective per screen, and a win after 12 screens with endless Overtime. The three new song loops are waiting for a listen.
+**Current focus:** redesigning the core loop around **play cards and downs** (2026-10-18): four downs to gain 10 yards per level, and progression as a deck of play cards only. Rules spec awaiting approval. The three new song loops are waiting for a listen.
 
 **Earlier focus:** listen to M1.5 (`/dev/audio.html` and the game) and check it on a phone, then M2 (first playable). Still open: the M1.1 iPhone test, and switching Pages to GitHub Actions.
 
@@ -296,7 +296,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
-- **2026-10-17:** Experiment: **steer the carrier.** Once someone catches the ball, swipe left or right to sidestep its next hop, or down to wait; a gold outline marks its next tile. On by default, `?steer=0` turns it off for comparison. Also decided: **a run is three places of four screens (Intro, Challenge, Twist, Boss).**
+- **2026-10-18:** Steering the carrier tried and **discarded**: it didn't make the game. The core loop moves to play cards and four downs to gain 10 yards (being specified).
 - **2026-10-17:** Three new song loops: *Graveyard Shuffle* (swung, on a 12-step triplet grid), *Midnight Chase* (driving) and *Skeleton Stomp* (boss). Every song shares `SONG_GRID` (120 BPM, 8 bars, A minor) so any two can crossfade at any moment; the dev audio board crossfades when you switch songs. The game still plays Spooky Surf only.
 - **2026-10-17:** The Witch on a Broom is in: one per screen, flying across a throw-band row one tile per beat, wrapping off one side and back in from the other, before HIKE too. A pass crossing her row near her is **SNATCHED!** (a fumble); runners pass under her.
 - **2026-10-17:** Code cleanup for extension: dead code removed; Smalls renamed to players; one definition per defender kind (`content/defenders.ts`) with an explicit `ignoresSnap` flag; `step(state, BeatInput)` and a pure `dispatch`; throw problems as codes; `game.ts` split into conductor, feedback and slingshot; `Markers` split into QB, ball and aim views.

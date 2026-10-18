@@ -4,8 +4,7 @@ import { hexToNumber, team } from '../content/palettes';
 import { eq } from '../sim/grid';
 import { getGeometry, voxelMaterial } from '../voxel/models';
 import type { ScreenState, Unit, Vec } from '../sim/types';
-import { tilt } from '../experiments';
-import { tileOutline } from './field';
+import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
 const RECRUIT_COLOR = hexToNumber(team.accent);
@@ -42,22 +41,9 @@ export class UnitViews {
   private readonly recruitBox = new THREE.BoxGeometry(0.55, 0.55, 0.55);
   private readonly arrowGeo = new THREE.ConeGeometry(0.13, 0.28, 4).rotateX(-Math.PI / 2);
   private readonly arrowMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  /** The carrier's arrow is bigger and gold: it's the one you steer. */
-  private readonly carrierArrowMat = new THREE.MeshBasicMaterial({
-    color: hexToNumber(team.accent),
-  });
   private dragging: { id: number; tile: Vec } | null = null;
-  /**
-   * The tile the carrier will be on after its next hop (its own tile while it
-   * waits): the steering feedback, outlined in gold on the turf so it never
-   * hides behind a player the way an up-field arrow does.
-   */
-  private readonly nextTile = tileOutline({ x: 0, y: 0 }, hexToNumber(team.accent), 0.9);
 
-  constructor(private readonly scene: THREE.Scene) {
-    this.nextTile.visible = false;
-    scene.add(this.nextTile);
-  }
+  constructor(private readonly scene: THREE.Scene) {}
 
   /** Rebuild every view from scratch (a new screen or a restart). */
   reset(screen: ScreenState): void {
@@ -83,18 +69,10 @@ export class UnitViews {
 
   /** Animate to `phase` (0..1) of the current beat. */
   update(screen: ScreenState, beat: number, phase: number): void {
-    const carrier = screen.ball.at === 'carried' ? screen.ball.by : null;
-    const carrierUnit = screen.players.find(
-      (s) => s.id === carrier && s.alive && s.downBeats === 0,
-    );
-    this.nextTile.visible = !!carrierUnit;
-    if (carrierUnit) {
-      this.nextTile.position.copy(tileToWorld(carrierUnit.intent ?? carrierUnit.pos, 0.02));
-    }
     for (const u of [...screen.players, ...screen.defenders]) {
       const view = this.views.get(u.id);
       if (!view) continue;
-      this.updateOne(u, view, beat, phase, u.id === carrier);
+      this.updateOne(u, view, beat, phase);
     }
   }
 
@@ -138,7 +116,7 @@ export class UnitViews {
     return m;
   }
 
-  private updateOne(u: Unit, view: UnitView, beat: number, phase: number, carrier: boolean): void {
+  private updateOne(u: Unit, view: UnitView, beat: number, phase: number): void {
     if (!u.alive) {
       const dying = view.diedOn === beat;
       view.root.visible = dying;
@@ -169,13 +147,10 @@ export class UnitViews {
 
     // Face where it will hop next.
     view.arrow.visible = !!u.intent && u.downBeats === 0 && !dragged;
-    view.arrow.material = carrier ? this.carrierArrowMat : this.arrowMat;
-    view.arrow.scale.setScalar(carrier ? 1.6 : 1);
     if (u.intent) {
       const dx = u.intent.x - u.pos.x;
       const dy = u.intent.y - u.pos.y;
-      const reach = carrier ? 0.55 : 0.42;
-      view.arrow.position.set(dx * reach, 0.06, -dy * reach);
+      view.arrow.position.set(dx * 0.42, 0.06, -dy * 0.42);
       view.arrow.rotation.y = Math.atan2(-dx, dy);
     }
     // Models never turn: they always face the camera, and the arrow shows where they'll hop.

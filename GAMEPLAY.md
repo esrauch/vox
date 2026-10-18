@@ -61,25 +61,13 @@ This gives the game one thing to master: **where and when you throw**.
 | **Setup** | **Tap HIKE!** | Start the play. |
 | **Play** | **Press anywhere and pull back** | **Aim.** Wherever your finger first touches is the anchor. Pulling down aims up the field, and pulling left aims right. A **reticle** appears where the ball would land, with an animated dashed arc from the QB's hand to it. |
 | **Play** | **Release** | **Throw** to the reticle: the ball leaves at once and lands on a beat. Releasing where you can't throw (outside the middle-half band) cancels. |
-| **Carrying** *(experiment)* | **Swipe left or right** | **Steer the carrier:** it sidesteps a column on its next hop instead of going up. |
-| **Carrying** *(experiment)* | **Swipe down** | **Wait:** the carrier stays put for its next hop (let a pumpkin roll by, let a Chaser overshoot). Swipe up to cancel. |
 | **After the throw** | **Tap a Hijink icon** | Fire it, either at the reticle or across the whole field (see *Hype and Hijinks*). |
 
-**One thumb, never two meanings:** while the QB has the ball, a drag aims; once someone is carrying it, a swipe steers.
-
-### Steer the Carrier *(experiment, 2026-10-17)*
-
-Every screen should have three kinds of decision: **plan** (place the squad), **pass** (aim and lead a receiver) and **run** (dodge home with the ball). Without steering, the run is just watching, which makes "stack everyone in one column" the default answer. So once someone catches the ball, **you steer the carrier**, a *Crossy Road* dodge on the beat:
-
-- **The carrier still hops up on its own beats.** A swipe changes only its **next** hop: sidestep left or right, or wait. One swipe, one hop; then it's back to straight up.
-- **A gold outline on the turf marks the tile it will hop to** (its own tile while it waits), and its arrow turns gold. Steering shows at once, before the hop.
-- **Everyone else still runs themselves**, so placement still matters: they're decoys, blockers and backup receivers.
-- **A sidestep off the field just goes up.** Collisions, fend-offs and hazards work as usual.
-- **It's behind a flag** so it can be compared on a phone: `?steer=0` turns it off. Upgrades it could open up later: double sidesteps, a juke through a defender, a lateral pitch to a teammate.
+**That's it.** There's nothing to move or steer.
 
 - **The reticle is a free point, not a tile.** It shows two rings, a small one for a **perfect** catch and a larger one for an **ok** catch, and turns red where a throw isn't allowed. **Leading your receiver** is the skill: put the rings where it will be in two beats.
 - **There's no perfect-timing throw bonus.** A throw resolves on the beat, but the rhythm is a shared timing layer, not a separate score mechanic.
-- **Only the QB throws. There are no laterals** (yet: a lateral pitch is a candidate draft card). Once a player catches the ball, you steer it home. You can't aim again until the QB has a ball.
+- **Only the QB throws. There are no laterals.** Once a player catches the ball, it's on its own and has to run it home. You can't aim again until the QB has a ball.
 - **The flight time is the drama.** While the ball is in the air, everyone hops for the landing point, and you hold your breath.
 - **The pull sensitivity** is a tuning value (`tuning.aim`).
 
@@ -300,8 +288,6 @@ Card names and art should be jokes. The draft is part of the comedy, not a sprea
 ---
 
 ## Difficulty and Pacing
-
-**A run is three places, four screens each** (decided 2026-10-17): **Intro**, **Challenge**, **Twist** and **Boss**. Twelve screens is about the "good run in ~10 minutes" target. *(What a Twist screen does, how a win and Overtime work, and a reward currency are proposals still being decided: see MILESTONES.md, Current focus.)*
 
 - **Defenders get tougher as you climb:** more of them, smarter, faster and heavier.
 - **Hazards get busier:** more lanes, faster patterns, and traps combined with lanes.

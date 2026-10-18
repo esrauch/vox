@@ -38,11 +38,6 @@ export interface PlayerUnit extends UnitBase {
   readonly kindId: string;
   /** Defenders this player can still fend off (e.g. from a Clean Catch). */
   fendOff: number;
-  /**
-   * The carrier's steering for its next hop (GAMEPLAY.md, Steer the Carrier):
-   * sidestep a column, or wait in place. Used up on its next hop beat.
-   */
-  steer: Steer | null;
 }
 
 export type DefenderKind = 'chaser' | 'blitzer' | 'waller' | 'picker';
@@ -59,9 +54,6 @@ export interface Defender extends UnitBase {
 }
 
 export type Unit = PlayerUnit | Defender;
-
-/** How the player steers the ball carrier's next hop: sidestep left or right, or wait. */
-export type Steer = 'left' | 'right' | 'wait';
 
 export type HazardKind = 'witch';
 
@@ -122,7 +114,6 @@ export interface RunState {
 export type Action =
   | { readonly type: 'place'; readonly slot: number; readonly tile: Vec }
   | { readonly type: 'hike' }
-  | { readonly type: 'steer'; readonly steer: Steer | null }
   | { readonly type: 'nextScreen' };
 
 /** How close the receiver was to where the ball came down. A perfect catch is a Clean Catch. */

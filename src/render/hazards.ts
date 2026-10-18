@@ -5,7 +5,7 @@ import { COLS } from '../sim/grid';
 import { witchTravel } from '../sim/hazards';
 import type { Hazard, ScreenState } from '../sim/types';
 import { getGeometry, voxelMaterial } from '../voxel/models';
-import { tilt } from '../experiments';
+import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
 /** How high the Witch flies above her row. */

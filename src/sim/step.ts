@@ -55,7 +55,6 @@ export function step(prev: RunState, input: BeatInput = {}): SimResult {
 
   if (input.throwAt) tryThrow(state, input.throwAt, events);
   resolveMoves(state, events);
-  if (state.phase === 'play') useUpSteering(state);
   if (state.phase === 'play') checkSack(state, events);
   updateIntents(state.screen);
   if (state.phase === 'play') checkSnatch(state, events);
@@ -163,13 +162,6 @@ function resolveMoves(state: RunState, events: SimEvent[]): void {
     events.push({ type: 'hop', id: u.id, from: u.pos, to });
     u.pos = to;
     if (u.side === 'defender') advancePatrol(u);
-  }
-}
-
-/** Steering lasts for one hop: on a player's hop beat it's used up, whether it hopped or waited. */
-function useUpSteering(state: RunState): void {
-  for (const s of state.screen.players) {
-    if (s.steer && isUp(s) && actsOn(s.stats, state.beat)) s.steer = null;
   }
 }
 

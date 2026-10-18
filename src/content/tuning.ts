@@ -39,10 +39,6 @@ export const tuning = {
     /** Slingshot aiming: how far the target moves per pixel of pull. */
     tilesPerPixel: 0.055,
   },
-  steer: {
-    /** How far (CSS px) a swipe must travel before it steers the carrier. */
-    swipePixels: 28,
-  },
   catch: {
     /**
      * Throws land anywhere (not grid-locked); a receiver catches if it's close

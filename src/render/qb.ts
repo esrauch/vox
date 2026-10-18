@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { QB_POS } from '../sim/grid';
 import { getGeometry, modelHeight, voxelMaterial } from '../voxel/models';
-import { tilt } from '../experiments';
+import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
 /** The QB, throwing arm raised (it holds the ball). */

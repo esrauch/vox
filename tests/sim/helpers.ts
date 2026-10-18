@@ -30,7 +30,6 @@ export function playState(
       stats: kind.stats,
       pos: spec.pos,
       fendOff: 0,
-      steer: null,
       alive: true,
       downBeats: 0,
       hitsTaken: 0,
