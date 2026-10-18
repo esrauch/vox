@@ -1,3 +1,5 @@
+@import './fonts.css';
+
 /* Base layout: a full-screen canvas with the DOM overlay layered on top (TECHNICAL.md §6). */
 
 *,
@@ -13,7 +15,8 @@ body {
   overflow: hidden;
   background: var(--sky, #8fd3ff);
   color: var(--ink, #2b2140);
-  font-family: system-ui, sans-serif;
+  font-family: 'Creepster', system-ui, sans-serif;
+  letter-spacing: 0.03em;
   /* No zoom, scroll, pull-to-refresh, selection or long-press menus on the game surface. */
   touch-action: none;
   overscroll-behavior: none;

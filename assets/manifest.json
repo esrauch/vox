@@ -120,6 +120,12 @@
       "source": "Original voxel model (Forest hazard: Drifting Ghost), written by Claude",
       "author": "Claude",
       "license": "original"
+    },
+    {
+      "path": "assets/fonts/creepster.woff2",
+      "source": "Creepster by Sideshow, from Google Fonts (https://fonts.google.com/specimen/Creepster), WOFF2 as served by fonts.gstatic.com (v13)",
+      "author": "Sideshow",
+      "license": "OFL-1.1"
     }
   ]
 }

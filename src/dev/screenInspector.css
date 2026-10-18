@@ -1,10 +1,12 @@
+@import '../ui/fonts.css';
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  font-family: 'Creepster', system-ui, sans-serif;
   background: #2b2140;
   color: #f7f1e3;
   user-select: none;
