@@ -98,6 +98,11 @@ export class DriveLines {
     scene.add(this.endZone);
   }
 
+  /** The painted lines (for the hand-over between drives, render/crossfade.ts). */
+  objects(): THREE.Object3D[] {
+    return [this.scrimmage, this.firstDown, this.endZone];
+  }
+
   update(drive: DriveState): void {
     // A row's front edge (nearer the camera) is half a tile below its centre.
     this.scrimmage.position.set(0, 0.006, -(drive.los - 0.5));

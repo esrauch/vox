@@ -103,6 +103,11 @@ export class UnitViews {
     }
   }
 
+  /** Everything drawn for the units (for the hand-over between drives, render/crossfade.ts). */
+  objects(): THREE.Object3D[] {
+    return [...this.views.values()].flatMap((v) => [v.root, v.ring]);
+  }
+
   /** The animated world position of a unit (for the carried ball). */
   positionOf(id: number): THREE.Vector3 | null {
     return this.views.get(id)?.current ?? null;

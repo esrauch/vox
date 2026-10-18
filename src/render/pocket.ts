@@ -53,6 +53,11 @@ export class PocketView {
     }
   }
 
+  /** The linemen and rushers (for the hand-over between drives, render/crossfade.ts). */
+  objects(): THREE.Object3D[] {
+    return [...this.linemen, ...this.rushers];
+  }
+
   /** `tickPos` is the current tick plus its fraction, for a smooth push. */
   update(state: RunState, tickPos: number): void {
     const { pocket, screen, drive, phase } = state;

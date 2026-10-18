@@ -38,6 +38,11 @@ export class QbView {
     scene.add(this.mesh);
   }
 
+  /** What's drawn (for the hand-over between drives, render/crossfade.ts). */
+  objects(): THREE.Object3D[] {
+    return [this.mesh];
+  }
+
   update(qb: Vec, holdingBall: boolean): void {
     this.mesh.position.copy(tileToWorld(qb)).add(QB_OFFSET);
     this.mesh.geometry = getGeometry(holdingBall ? QB_MODEL : QB_THROWN_MODEL);

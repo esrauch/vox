@@ -77,6 +77,11 @@ export class BallView {
     scene.add(this.ball, this.landing, this.carrierRing);
   }
 
+  /** The ball and the carrier's ring (for the hand-over between drives, render/crossfade.ts). */
+  objects(): THREE.Object3D[] {
+    return [this.ball, this.carrierRing];
+  }
+
   /** The ball just left the QB's hand (before the sim takes the throw); null forgets it. */
   launch(flight: Flight | null): void {
     this.launched = flight;

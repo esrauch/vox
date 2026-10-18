@@ -8,7 +8,7 @@ import { tileToWorld } from './view';
 import { getGeometry, voxelMaterial } from '../voxel/models';
 
 /** How see-through the next defense stands while it waits. */
-const WAITING_OPACITY = 0.4;
+export const WAITING_OPACITY = 0.4;
 
 /**
  * The next drive's defense, already standing up the field past the

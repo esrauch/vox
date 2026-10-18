@@ -9,13 +9,15 @@
  * play cards (Flip mirrors it); pull back to snap the ball and aim, release to throw; the
  * down ends; after a won drive, draft a card; a failed 4th down ends the run.
  */
+import type * as THREE from 'three';
 import { playCard } from '../content/cards';
 import { tuning } from '../content/tuning';
 import { AimView } from '../render/aim';
 import { BallView } from '../render/ball';
 import { DriveLines, Turf } from '../render/field';
 import { HazardViews } from '../render/hazards';
-import { NextDefenseView } from '../render/nextDefense';
+import { Crossfade } from '../render/crossfade';
+import { NextDefenseView, WAITING_OPACITY } from '../render/nextDefense';
 import { PocketView } from '../render/pocket';
 import { QbView } from '../render/qb';
 import { RoutePreview } from '../render/routes';
@@ -65,6 +67,7 @@ export class Game {
   private readonly turf: Turf;
   private readonly scenery: ForestScenery;
   private readonly nextDefense: NextDefenseView;
+  private readonly crossfade: Crossfade;
   private readonly units: UnitViews;
   private readonly hazards: HazardViews;
   private readonly lines: DriveLines;
@@ -95,6 +98,7 @@ export class Game {
     this.scenery = new ForestScenery(scene, this.view);
     scene.add(this.turf.group, this.scenery.group);
     this.nextDefense = new NextDefenseView(scene);
+    this.crossfade = new Crossfade(scene);
     this.lines = new DriveLines(scene);
     this.routes = new RoutePreview(scene);
     this.pocket = new PocketView(scene);
@@ -189,13 +193,22 @@ export class Game {
   private afterChange(events: readonly SimEvent[], prev: RunState): void {
     if (events.some((e) => e.type === 'downStarted' || e.type === 'driveStarted')) {
       // A won drive marching on into the next: glide forward to it.
-      if (events.some((e) => e.type === 'driveStarted') && this.state.phase === 'draft') {
-        this.glide = {
-          rows: prev.drive.firstDown - this.state.drive.start,
-          since: performance.now(),
-        };
+      const marching =
+        events.some((e) => e.type === 'driveStarted') && this.state.phase === 'draft';
+      const rows = prev.drive.firstDown - this.state.drive.start;
+      // Nothing pops at the hand-over: the old drive stays put and fades as the camera leaves it…
+      if (marching) {
+        this.crossfade.end();
+        this.crossfade.leave(this.fieldObjects(), rows);
+        this.glide = { rows, since: performance.now() };
       }
       this.resetViews();
+      // …and the next drive fades in: the defense from its waiting ghosts, everything else from nothing.
+      if (marching) {
+        this.crossfade.arrive(this.units.objects(), WAITING_OPACITY);
+        this.crossfade.arrive([...this.qb.objects(), ...this.pocket.objects()], 0);
+        this.crossfade.arrive([...this.ball.objects(), ...this.lines.objects()], 0);
+      }
     } else {
       this.units.sync(this.state.screen);
       this.units.beginBeat(prev.screen, this.state.screen);
@@ -216,9 +229,22 @@ export class Game {
     const t = Math.min(1, (now - glide.since) / GLIDE_MS);
     const ease = t * t * (3 - 2 * t);
     this.view.scroll(glide.rows * (1 - ease));
+    this.crossfade.update(t);
     if (t < 1) return;
     this.glide = null;
+    this.crossfade.end();
     this.syncHud(); // the draft can show now
+  }
+
+  /** Everything drawn on the field that changes from drive to drive. */
+  private fieldObjects(): THREE.Object3D[] {
+    return [
+      ...this.units.objects(),
+      ...this.qb.objects(),
+      ...this.pocket.objects(),
+      ...this.ball.objects(),
+      ...this.lines.objects(),
+    ];
   }
 
   /** Rebuild the views of everything on the field (a new down or drive). */
