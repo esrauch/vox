@@ -66,6 +66,12 @@ export const tuning = {
     releaseHeight: 1,
     /** A defender can get a hand on a ball lower than this… */
     reach: 1.2,
+    /**
+     * The aiming line shows the ball as catchable (gold) only below this
+     * height: a little short of the real `reach`, so the real window is always
+     * a bit more forgiving than it looks. Purely visual.
+     */
+    shownReach: 0.9,
     /** …if it passes within this many tiles of it (a defender right beside the ball's path). */
     blockRadius: 1,
     /** Throws land from this many rows behind the line of scrimmage (negative)… */

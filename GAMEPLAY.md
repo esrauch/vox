@@ -106,7 +106,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **Only the QB throws. There are no laterals**, except on trick-play cards.
 - **Throw range** is measured from the line of scrimmage: from **a yard behind it** (for a Screen) to **11 yards past it**.
 - **One sliding arc, no throw modes:** the farther you throw, **the higher the ball flies** (the peak grows with the distance squared) **and the longer it's in the air** (about a beat per 2½ yards). The dashed aiming line shows the arc.
-- **A pass can only be touched where it's low**, by anyone: caught by your players or batted down by defenders. A short pass stays low the whole way; a long one climbs out of reach right from the release and comes back within reach only as it drops toward the reticle. **The dashed aiming line shows it: gold (and bigger) where the ball will be low enough to touch, white where it's out of reach.**
+- **A pass can only be touched where it's low**, by anyone: caught by your players or batted down by defenders. A short pass stays low the whole way; a long one climbs out of reach right from the release and comes back within reach only as it drops toward the reticle. **The dashed aiming line shows it: gold (and bigger) where the ball will be low enough to touch, white where it's out of reach.** The gold stretch is drawn a little short of the real window, so catches are a bit more forgiving than they look.
 - **The pull sensitivity** is a tuning value (`tuning.aim`).
 
 ---

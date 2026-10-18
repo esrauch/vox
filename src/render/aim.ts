@@ -3,7 +3,7 @@ import { common, hexToNumber, team } from '../content/palettes';
 import { tuning } from '../content/tuning';
 import type { Vec } from '../sim/types';
 import { qbHand } from './qb';
-import { catchable, flightDistance } from '../sim/flight';
+import { ballHeight, flightDistance } from '../sim/flight';
 import { arcPoint } from './throwArc';
 import { tileToWorld } from './view';
 
@@ -88,7 +88,8 @@ export class AimView {
       const t = i / DASHES + march;
       arcPoint(dash.position, from, to, t, distance);
       dash.visible = t <= 1;
-      const low = catchable(this.from, target, Math.min(1, t));
+      // Gold a little short of the real window (tuning.throw.shownReach), so it plays more forgiving than it looks.
+      const low = ballHeight(distance, Math.min(1, t)) < tuning.throw.shownReach;
       dash.material = !this.valid ? this.badMat : low ? this.lowMat : this.highMat;
       dash.scale.setScalar(low ? 1.8 : 1);
     });
