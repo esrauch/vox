@@ -432,9 +432,9 @@ describe('the Witch on a Broom', () => {
   });
 
   it('blocks a pass crossing her row near her', () => {
-    // From the QB on (5, 0) to (5, 16): a long pass thrown on tick 1, over row 8 on tick 3.
+    // From the QB on (5, 0) to (5, 16): a pass thrown on tick 1, over row 8 on tick 2.
     const state = playState([{ pos: vec(5, 16), route: '.' }]);
-    Object.assign(state.screen, { hazards: [witch(8, 2, 1)] });
+    Object.assign(state.screen, { hazards: [witch(8, 3, 1)] });
     const r = run(step(state, { throwAt: vec(5, 16) }).state, 4);
     expect(ofType(r.events, 'blocked')).toEqual([{ type: 'blocked', by: 900, at: vec(5, 8) }]);
   });
