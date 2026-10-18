@@ -192,8 +192,8 @@ export class UnitViews {
       view.ring.scale.setScalar(Math.max(r, 0.01));
       return;
     }
-    // The carrier has its gold ring (render/ball.ts); everyone else shows if they're open.
-    view.ring.visible = !carrying;
+    // Open or covered only means something before the throw: after it, the rings go.
+    view.ring.visible = !carrying && screen.ball.at === 'qb';
     view.ring.material = this.basic(OPENNESS_COLOR[openness(screen, u.pos)]);
   }
 }

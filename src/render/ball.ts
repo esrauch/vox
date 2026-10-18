@@ -13,6 +13,8 @@ import { tileToWorld } from './view';
 const BALL_MODEL = 'team/ball';
 /** Where a carrier holds the ball, relative to its feet: overhead, leaning with the tilt. */
 const CARRIED = new THREE.Vector3(0, 1.3, 0.1).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
+/** How long (beats) a caught ball takes to glide into the receiver's hands. */
+const CATCH_BLEND_BEATS = 0.35;
 /** The ball is shown bigger while carried, so the carrier is unmistakable. */
 const CARRIED_SCALE = 1.6;
 
@@ -42,6 +44,9 @@ export class BallView {
   private launched: Flight | null = null;
   /** When the ball went dead (beat position), for the bounce. */
   private deadSince: number | null = null;
+  /** A catch: the ball glides from where it was drawn into the receiver's hands, instead of snapping. */
+  private catchBlend: { from: THREE.Vector3; since: number } | null = null;
+  private wasCarried = false;
 
   constructor(scene: THREE.Scene) {
     this.ball.castShadow = true;
@@ -87,6 +92,11 @@ export class BallView {
     this.ball.visible = true;
     this.ball.rotation.y = time * 1.5;
     if (ball.at !== 'dead') this.deadSince = null;
+    const carried = ball.at === 'carried';
+    if (carried && !this.wasCarried)
+      this.catchBlend = { from: this.ball.position.clone(), since: beatPos };
+    if (!carried) this.catchBlend = null;
+    this.wasCarried = carried;
     this.ball.scale.setScalar(ball.at === 'carried' ? CARRIED_SCALE : 1);
     this.landing.visible = flight !== null;
     this.carrierRing.visible = ball.at === 'carried';
@@ -125,6 +135,13 @@ export class BallView {
       const p = units.positionOf(ball.by);
       if (p) {
         this.ball.position.set(p.x + CARRIED.x, CARRIED.y, p.z + CARRIED.z);
+        const blend = this.catchBlend;
+        if (blend) {
+          const t = Math.min(1, (beatPos - blend.since) / CATCH_BLEND_BEATS);
+          const ease = t * t * (3 - 2 * t);
+          this.ball.position.lerpVectors(blend.from, this.ball.position, ease);
+          if (t >= 1) this.catchBlend = null;
+        }
         this.carrierRing.position.set(p.x, 0.03, p.z);
         this.carrierRing.scale.setScalar(1 + Math.abs(Math.sin(time * Math.PI * 2)) * 0.12);
       }
