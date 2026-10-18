@@ -13,12 +13,13 @@ import { playCard } from '../content/cards';
 import { tuning } from '../content/tuning';
 import { AimView } from '../render/aim';
 import { BallView } from '../render/ball';
-import { DriveLines, createField } from '../render/field';
+import { DriveLines, Turf } from '../render/field';
 import { HazardViews } from '../render/hazards';
+import { NextDefenseView } from '../render/nextDefense';
 import { PocketView } from '../render/pocket';
 import { QbView } from '../render/qb';
 import { RoutePreview } from '../render/routes';
-import { createForestScenery } from '../render/scenery';
+import { ForestScenery } from '../render/scenery';
 import { UnitViews } from '../render/units';
 import { View } from '../render/view';
 import { createRun, dispatch, downAndDistance, yardsText } from '../sim/run';
@@ -61,6 +62,9 @@ export class Game {
   private paused = false;
 
   private readonly view: View;
+  private readonly turf: Turf;
+  private readonly scenery: ForestScenery;
+  private readonly nextDefense: NextDefenseView;
   private readonly units: UnitViews;
   private readonly hazards: HazardViews;
   private readonly lines: DriveLines;
@@ -87,7 +91,10 @@ export class Game {
     this.state = createRun(this.seed);
     this.view = new View(canvas);
     const { scene } = this.view;
-    scene.add(createField(), createForestScenery(scene, this.view));
+    this.turf = new Turf();
+    this.scenery = new ForestScenery(scene, this.view);
+    scene.add(this.turf.group, this.scenery.group);
+    this.nextDefense = new NextDefenseView(scene);
     this.lines = new DriveLines(scene);
     this.routes = new RoutePreview(scene);
     this.pocket = new PocketView(scene);
@@ -136,6 +143,11 @@ export class Game {
     this.units.update(screen, pos - tick);
     this.hazards.update(pos, now / 1000);
     this.lines.update(drive);
+    // One long field: it runs on past the first-down line, with the next
+    // defense waiting up there, until the Boss drive ends it at the end zone.
+    this.turf.setEnd(drive.kind === 'boss');
+    this.scenery.setEnd(drive.kind === 'boss');
+    this.nextDefense.update(this.state);
     this.routes.update(this.state);
     this.pocket.update(this.state, pos);
     const holding = this.ball.update(screen, pos, this.units, now / 1000);

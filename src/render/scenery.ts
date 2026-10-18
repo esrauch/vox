@@ -9,11 +9,20 @@ import { biomes, hexToNumber, type Hex } from '../content/palettes';
 import { createRng } from '../sim/rng';
 import { getGeometry, voxelMaterial } from '../voxel/models';
 import { COLS, ROWS } from '../sim/grid';
+import { TURF_AHEAD, TURF_BEHIND } from './field';
 
-const FIELD_HALF_W = COLS / 2; // the field spans x ∈ [-4.5, 4.5]
+const FIELD_HALF_W = COLS / 2; // the field spans x ∈ [-5.5, 5.5]
 const FIELD_FAR_Z = -(ROWS - 0.5); // the far edge of the end zone
+/** The long field (render/field.ts) runs from here… */
+const NEAR_Z = TURF_BEHIND + 0.5;
+/** …to here. */
+const FAR_Z = -(ROWS + TURF_AHEAD - 0.5);
+
+/** Which part of the scenery a prop belongs to (see ForestScenery). */
+type Part = 'always' | 'beyond' | 'treeLine';
 
 interface Placement {
+  readonly part: Part;
   readonly model: string;
   readonly x: number;
   readonly z: number;
@@ -26,8 +35,34 @@ export interface Mood {
   readonly sun: THREE.DirectionalLight;
 }
 
+/**
+ * The Forest around the long field. The sidelines run the whole way; past the
+ * top of the field, the fences go on while there's another drive to come,
+ * and on the Boss drive a tree line closes the field off behind the end zone.
+ */
+export class ForestScenery {
+  readonly group: THREE.Group;
+  private readonly beyond = new THREE.Group();
+  private readonly treeLine = new THREE.Group();
+
+  constructor(scene: THREE.Scene, mood: Mood) {
+    this.group = createForestScenery(scene, mood, { beyond: this.beyond, treeLine: this.treeLine });
+    this.setEnd(false);
+  }
+
+  /** On the Boss drive the field ends at the woods; otherwise it runs on. */
+  setEnd(ends: boolean): void {
+    this.beyond.visible = !ends;
+    this.treeLine.visible = ends;
+  }
+}
+
 /** Build the Forest around the field and set the haunted-dusk mood. */
-export function createForestScenery(scene: THREE.Scene, mood: Mood): THREE.Group {
+function createForestScenery(
+  scene: THREE.Scene,
+  mood: Mood,
+  parts: { beyond: THREE.Group; treeLine: THREE.Group },
+): THREE.Group {
   const palette = biomes.forest;
   scene.background = new THREE.Color(hexToNumber(palette.fog));
   scene.fog = new THREE.Fog(hexToNumber(palette.fog), 30, 60); // View.fit() sets the real range
@@ -38,9 +73,13 @@ export function createForestScenery(scene: THREE.Scene, mood: Mood): THREE.Group
   mood.sun.intensity = 1.7;
 
   const group = new THREE.Group();
-  group.add(forestFloor(palette.floor));
-  for (const [model, placements] of groupBy(forestPlacements())) {
-    group.add(instanced(model, placements));
+  group.add(forestFloor(palette.floor), parts.beyond, parts.treeLine);
+  const into: Readonly<Record<Part, THREE.Group>> = { always: group, ...parts };
+  const all = forestPlacements();
+  for (const part of ['always', 'beyond', 'treeLine'] as const) {
+    for (const [model, placements] of groupBy(all.filter((p) => p.part === part))) {
+      into[part].add(instanced(model, placements));
+    }
   }
   return group;
 }
@@ -72,13 +111,14 @@ function forestFloor(base: Hex): THREE.Mesh {
   texture.magFilter = THREE.NearestFilter;
   texture.minFilter = THREE.NearestFilter;
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(12, 12);
+  const length = NEAR_Z - FAR_Z + 40;
+  texture.repeat.set(12, (12 * length) / 96);
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(96, 96),
+    new THREE.PlaneGeometry(96, length),
     new THREE.MeshLambertMaterial({ map: texture }),
   );
   floor.rotation.x = -Math.PI / 2;
-  floor.position.set(0, -0.3, FIELD_FAR_Z / 2);
+  floor.position.set(0, -0.3, (NEAR_Z + FAR_Z) / 2);
   floor.receiveShadow = true;
   return floor;
 }
@@ -88,10 +128,11 @@ function forestPlacements(): Placement[] {
   const rng = createRng(2026);
   const out: Placement[] = [];
   const taken: { x: number; z: number; r: number }[] = [];
+  let part: Part = 'always';
   const place = (model: string, x: number, z: number, radius: number, scale = 1): boolean => {
     if (taken.some((t) => Math.hypot(t.x - x, t.z - z) < t.r + radius)) return false;
     taken.push({ x, z, r: radius });
-    out.push({ model, x, z, rotation: rng.int(0, 3) * (Math.PI / 2), scale });
+    out.push({ part, model, x, z, rotation: rng.int(0, 3) * (Math.PI / 2), scale });
     return true;
   };
   const scatter = (
@@ -108,13 +149,17 @@ function forestPlacements(): Placement[] {
   };
   const side = (min: number, max: number) => () => ({
     x: (rng.next() < 0.5 ? -1 : 1) * (FIELD_HALF_W + min + rng.next() * (max - min)),
-    z: 3 - rng.next() * (3 - FIELD_FAR_Z),
+    z: NEAR_Z - rng.next() * (NEAR_Z - FAR_Z),
   });
+  /** How many times longer the sidelines are than the field the sim plays on. */
+  const long = (NEAR_Z - FAR_Z) / (3 - FIELD_FAR_Z);
 
   // Crooked fences along both sidelines, with a glowing lantern every few rows.
+  // Past the top of the field they're the 'beyond' part: gone on the Boss drive.
   for (const sign of [-1, 1]) {
-    for (let z = 0.4; z > FIELD_FAR_Z; z -= 1.15) {
+    for (let z = NEAR_Z; z > FAR_Z; z -= 1.15) {
       out.push({
+        part: z > FIELD_FAR_Z ? 'always' : 'beyond',
         model: 'forestProps/fence',
         x: sign * (FIELD_HALF_W + 0.35),
         z,
@@ -122,11 +167,13 @@ function forestPlacements(): Placement[] {
         scale: 1,
       });
     }
-    for (let row = 1; row < ROWS; row += 3) {
+    for (let row = 1 - 3 * Math.floor(TURF_BEHIND / 3); row < ROWS + TURF_AHEAD; row += 3) {
+      part = row < ROWS ? 'always' : 'beyond';
       place('forestProps/lantern', sign * (FIELD_HALF_W + 1.1), -row, 0.6);
     }
   }
-  // The tree line behind the end zone.
+  // The tree line behind the end zone, on the Boss drive.
+  part = 'treeLine';
   scatter(
     'forestProps/pine',
     26,
@@ -141,20 +188,14 @@ function forestPlacements(): Placement[] {
     () => ({ x: -10 + rng.next() * 20, z: FIELD_FAR_Z - 1 - rng.next() * 4 }),
     () => 1 + rng.next() * 0.4,
   );
-  // The pumpkin patch and the woods along the sides and in front.
-  scatter('forestProps/pumpkin', 14, 0.55, side(1.6, 3.5));
-  scatter('forestProps/toadstools', 10, 0.4, side(1.4, 4));
-  scatter('forestProps/stump', 6, 0.5, side(2, 4.5));
-  scatter('forestProps/deadTree', 8, 0.9, side(3, 6));
-  scatter('forestProps/pine', 14, 1.1, side(4.5, 9), () => 0.9 + rng.next() * 0.4);
-  scatter('forestProps/pumpkin', 5, 0.55, () => ({
-    x: -4 + rng.next() * 8,
-    z: 1.6 + rng.next() * 2,
-  }));
-  scatter('forestProps/lantern', 3, 0.6, () => ({
-    x: -4 + rng.next() * 8,
-    z: 1.8 + rng.next() * 2,
-  }));
+  // Pumpkin patches and the woods along the sides, the whole length of the long field.
+  part = 'always';
+  const n = (count: number): number => Math.round(count * long);
+  scatter('forestProps/pumpkin', n(14), 0.55, side(1.6, 3.5));
+  scatter('forestProps/toadstools', n(10), 0.4, side(1.4, 4));
+  scatter('forestProps/stump', n(6), 0.5, side(2, 4.5));
+  scatter('forestProps/deadTree', n(8), 0.9, side(3, 6));
+  scatter('forestProps/pine', n(14), 1.1, side(4.5, 9), () => 0.9 + rng.next() * 0.4);
   return out;
 }
 
