@@ -92,7 +92,7 @@ This is the riskiest system in the project, so it gets built and tested first.
 ## 5. 3D Rendering
 
 - **Camera:** a fixed, angled ¾ view as in *Crossy Road*. **Decided (M1.3):** perspective with a narrow field of view. Orthographic was prototyped and dropped.
-- **The look (2026-10-17):** the camera is pitched **58°** above the horizon, and **every character leans back 35°**: a diorama cheat so faces and jerseys read from above. Both live in `tuning.camera`, and the URL can override them for comparisons (`?pitch=` and `?tilt=`; see `src/render/experiments.ts`). Anything a character holds must lean with it (the ball's held and carried positions do). *Possibly to be tweaked in the M3 feel pass.*
+- **The look (2026-10-17):** the camera is pitched **58°** above the horizon, and **every character leans back 35°**: a diorama cheat so faces and jerseys read from above. Both live in `tuning.camera`, and the URL can override them for comparisons (`?pitch=` and `?tilt=`; see `src/experiments.ts`, which also holds the `?steer=0` flag). Anything a character holds must lean with it (the ball's held and carried positions do). *Possibly to be tweaked in the M3 feel pass.*
 - **Lighting:** one directional "sun" plus a hemisphere fill. Shadows come from **one shadow-casting light with a small shadow map**, or from fake blob shadows under units if phones struggle.
 - **Materials:** flat-shaded with **vertex colors**. No textures on voxel models.
   - **Exception:** the **ball cubes** (and similar props) carry one tiny texture each, for the face: skull, jack-o'-lantern, ember cracks.

@@ -294,6 +294,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** Experiment: **steer the carrier.** Once someone catches the ball, swipe left or right to sidestep its next hop, or down to wait; a gold outline marks its next tile. On by default, `?steer=0` turns it off for comparison. Also decided: **a run is three places of four screens (Intro, Challenge, Twist, Boss).**
 - **2026-10-17:** Three new song loops: *Graveyard Shuffle* (swung, on a 12-step triplet grid), *Midnight Chase* (driving) and *Skeleton Stomp* (boss). Every song shares `SONG_GRID` (120 BPM, 8 bars, A minor) so any two can crossfade at any moment; the dev audio board crossfades when you switch songs. The game still plays Spooky Surf only.
 - **2026-10-17:** The Witch on a Broom is in: one per screen, flying across a throw-band row one tile per beat, wrapping off one side and back in from the other, before HIKE too. A pass crossing her row near her is **SNATCHED!** (a fumble); runners pass under her.
 - **2026-10-17:** Code cleanup for extension: dead code removed; Smalls renamed to players; one definition per defender kind (`content/defenders.ts`) with an explicit `ignoresSnap` flag; `step(state, BeatInput)` and a pure `dispatch`; throw problems as codes; `game.ts` split into conductor, feedback and slingshot; `Markers` split into QB, ball and aim views.

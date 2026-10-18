@@ -5,6 +5,8 @@
  * Each frame, the sim steps every beat that has been *heard* since the last
  * one, in every phase; the phase only decides who moves (see sim/step.ts).
  */
+import { tuning } from '../content/tuning';
+import { experiment } from '../experiments';
 import { AimView } from '../render/aim';
 import { BallView } from '../render/ball';
 import { createField } from '../render/field';
@@ -16,7 +18,7 @@ import { View } from '../render/view';
 import { eq, inSetupZone } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
-import type { Action, RunState, Vec } from '../sim/types';
+import type { Action, RunState, Steer, Vec } from '../sim/types';
 import { Hud } from '../ui/hud';
 import { Conductor } from './conductor';
 import { THROW_PROBLEM_TEXT, react } from './feedback';
@@ -46,6 +48,8 @@ export class Game {
   private aim: { start: { x: number; y: number }; target: Vec } | null = null;
   /** A released throw, waiting for the beat the sim takes it on. */
   private queuedThrow: { beat: number; target: Vec } | null = null;
+  /** A swipe steering the carrier: where it started (screen px), until it steers. */
+  private swipe: { x: number; y: number } | null = null;
   /** Dragging a player in setup. */
   private drag: { id: number; slot: number; tile: Vec } | null = null;
 
@@ -161,6 +165,7 @@ export class Game {
     if (!this.conductor.started || this.paused) return;
     this.paused = true;
     this.setAim(null);
+    this.swipe = null;
     this.conductor.pause();
     this.syncHud();
   }
@@ -190,8 +195,14 @@ export class Game {
   private onPointerDown(e: PointerEvent): void {
     if (!this.conductor.started || this.paused) return;
     const { phase, screen } = this.state;
-    // In play, a drag that starts anywhere on the screen aims a throw.
+    // In play, a drag that starts anywhere aims a throw while the QB has the
+    // ball, and a swipe steers the carrier once someone has caught it.
     if (phase === 'play') {
+      if (screen.ball.at === 'carried' && experiment.steer) {
+        this.view.canvas.setPointerCapture(e.pointerId);
+        this.swipe = { x: e.clientX, y: e.clientY };
+        return;
+      }
       if (screen.ball.at !== 'qb') return;
       this.view.canvas.setPointerCapture(e.pointerId);
       const start = { x: e.clientX, y: e.clientY };
@@ -207,6 +218,10 @@ export class Game {
   }
 
   private onPointerMove(e: PointerEvent): void {
+    if (this.swipe) {
+      this.steerBySwipe(e);
+      return;
+    }
     if (this.aim) {
       const target = aimTarget(this.aim.start, { x: e.clientX, y: e.clientY });
       this.setAim({ ...this.aim, target });
@@ -221,6 +236,10 @@ export class Game {
   }
 
   private onPointerUp(e: PointerEvent): void {
+    if (this.swipe) {
+      this.swipe = null;
+      return;
+    }
     if (this.aim) {
       this.release(this.aim.target, e.timeStamp);
       return;
@@ -230,6 +249,22 @@ export class Game {
     this.drag = null;
     this.units.setDragging(null);
     this.resetViews();
+  }
+
+  /**
+   * Steer the carrier once a swipe has gone far enough: left or right
+   * sidesteps a column on its next hop, down waits a hop, up cancels (straight
+   * up again). One swipe, one steer.
+   */
+  private steerBySwipe(e: PointerEvent): void {
+    if (!this.swipe) return;
+    const dx = e.clientX - this.swipe.x;
+    const dy = e.clientY - this.swipe.y;
+    if (Math.hypot(dx, dy) < tuning.steer.swipePixels) return;
+    this.swipe = null;
+    const steer: Steer | null =
+      Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : dy > 0 ? 'wait' : null;
+    this.act({ type: 'steer', steer });
   }
 
   /** Releasing throws if the aim is allowed (the sim takes it on the next beat); otherwise it cancels. */

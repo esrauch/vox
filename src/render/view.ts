@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { common, hexToNumber } from '../content/palettes';
 import { COLS, ROWS, vec } from '../sim/grid';
-import { experiment } from './experiments';
+import { experiment } from '../experiments';
 import type { Vec } from '../sim/types';
 
 /** Screen space kept free for the HUD, in CSS pixels. */

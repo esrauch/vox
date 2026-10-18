@@ -3,7 +3,7 @@
  * decided one beat ahead, so it always faces where it's about to hop.
  */
 import { DEFENDERS } from '../content/defenders';
-import { QB_POS, END_ROW, dist, eq, stepToward, vec } from './grid';
+import { QB_POS, END_ROW, dist, eq, inBounds, stepToward, vec } from './grid';
 import type { Defender, ScreenState, PlayerUnit, Vec } from './types';
 
 const isActive = (u: { alive: boolean; downBeats: number }): boolean =>
@@ -17,9 +17,17 @@ export function updateIntents(screen: ScreenState): void {
   }
 }
 
-/** Walk-ons are dumb: they hop straight up their column, even into danger. */
+/**
+ * Players are dumb: they hop straight up their column, even into danger. The
+ * one exception is the carrier, which you steer: a sidestep moves it a column
+ * instead (straight up if that's off the field), and a wait keeps it put.
+ */
 function playerIntent(s: PlayerUnit): Vec | null {
-  if (s.pos.y >= END_ROW) return null;
+  if (s.pos.y >= END_ROW || s.steer === 'wait') return null;
+  if (s.steer === 'left' || s.steer === 'right') {
+    const side = vec(s.pos.x + (s.steer === 'left' ? -1 : 1), s.pos.y);
+    if (inBounds(side)) return side;
+  }
   return vec(s.pos.x, s.pos.y + 1);
 }
 

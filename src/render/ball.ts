@@ -3,7 +3,7 @@ import { hexToNumber, team } from '../content/palettes';
 import { tuning } from '../content/tuning';
 import type { ScreenState, Vec } from '../sim/types';
 import { getGeometry, voxelMaterial } from '../voxel/models';
-import { tilt } from './experiments';
+import { tilt } from '../experiments';
 import { qbHand } from './qb';
 import { arcPoint } from './throwArc';
 import type { UnitViews } from './units';

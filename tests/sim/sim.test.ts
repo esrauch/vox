@@ -6,7 +6,7 @@ import { createRun, dispatch } from '../../src/sim/run';
 import { boxCircuit, createDefenders, generateSpawns } from '../../src/sim/screen';
 import { step } from '../../src/sim/step';
 import { witchColumn } from '../../src/sim/hazards';
-import type { Hazard } from '../../src/sim/types';
+import type { Hazard, Steer } from '../../src/sim/types';
 import { ofType, playState, run, player, standStill } from './helpers';
 
 describe('creating a run', () => {
@@ -455,5 +455,58 @@ describe('the Witch on a Broom', () => {
     const r = run(state, 8);
     expect(ofType(r.events, 'died')).toHaveLength(0);
     expect(r.state.screen.players[0]!.pos.y).toBeGreaterThan(4);
+  });
+});
+
+describe('steering the carrier', () => {
+  // A carrier on (4, 6), the ball in its hands; Hustle 0 hops on even beats.
+  const carrying = () => {
+    const state = playState([{ pos: vec(4, 6) }, { pos: vec(1, 2) }]);
+    state.screen.ball = { at: 'carried', by: 100 };
+    return state;
+  };
+  const steer = (state: ReturnType<typeof carrying>, s: Steer | null) =>
+    dispatch(state, { type: 'steer', steer: s }).state;
+
+  it('a sidestep moves it a column on its next hop, then it carries on up', () => {
+    let state = steer(carrying(), 'right');
+    expect(player(state, 100).intent).toEqual(vec(5, 6)); // the arrow updates at once
+    state = run(state, 2).state; // its hop beat
+    expect(player(state, 100).pos).toEqual(vec(5, 6));
+    expect(player(state, 100).steer).toBeNull();
+    expect(player(state, 100).intent).toEqual(vec(5, 7));
+  });
+
+  it('lasts until its hop beat, even when steered on an off beat', () => {
+    let state = run(carrying(), 1).state; // beat 1: an off beat
+    state = steer(state, 'left');
+    state = run(state, 1).state; // beat 2: the hop
+    expect(player(state, 100).pos).toEqual(vec(3, 6));
+  });
+
+  it('a wait keeps it in place for one hop beat', () => {
+    let state = steer(carrying(), 'wait');
+    expect(player(state, 100).intent).toBeNull();
+    state = run(state, 2).state;
+    expect(player(state, 100).pos).toEqual(vec(4, 6));
+    state = run(state, 2).state;
+    expect(player(state, 100).pos).toEqual(vec(4, 7));
+  });
+
+  it('a sidestep off the field goes straight up instead', () => {
+    const state = playState([{ pos: vec(0, 6) }]);
+    state.screen.ball = { at: 'carried', by: 100 };
+    expect(player(steer(state, 'left'), 100).intent).toEqual(vec(0, 7));
+  });
+
+  it('only steers a carrier: nothing happens while the QB holds the ball', () => {
+    const state = steer(playState([{ pos: vec(4, 6) }]), 'right');
+    expect(player(state, 100).steer).toBeNull();
+    expect(player(state, 100).intent).toEqual(vec(4, 7));
+  });
+
+  it('the other players keep running straight up', () => {
+    const state = run(steer(carrying(), 'right'), 2).state;
+    expect(player(state, 101).pos).toEqual(vec(1, 3));
   });
 });

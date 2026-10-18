@@ -7,7 +7,7 @@ import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
 import { eq, inSetupZone, vec } from './grid';
 import { createDefenders, generateHazards, generateSpawns } from './screen';
-import type { Action, RunState, SimEvent, SimResult, PlayerUnit, Vec } from './types';
+import type { Action, RunState, SimEvent, SimResult, PlayerUnit, Steer, Vec } from './types';
 
 /** Where each slot starts if the player hasn't placed it. */
 export const DEFAULT_FORMATION: readonly Vec[] = [
@@ -51,6 +51,7 @@ export function setUpScreen(state: RunState, index: number): void {
       stats: kind.stats,
       pos,
       fendOff: 0,
+      steer: null,
       alive: true,
       downBeats: 0,
       hitsTaken: 0,
@@ -90,6 +91,8 @@ function apply(state: RunState, action: Action): SimEvent[] {
       return place(state, action.slot, action.tile);
     case 'hike':
       return hike(state);
+    case 'steer':
+      return steer(state, action.steer);
     case 'nextScreen':
       return nextScreen(state);
   }
@@ -115,6 +118,21 @@ function hike(state: RunState): SimEvent[] {
   state.phase = 'play';
   updateIntents(state.screen);
   return [{ type: 'hiked' }];
+}
+
+/**
+ * Steer the ball carrier's next hop (null goes back to straight up). Only in
+ * play, and only while one of your players is carrying the ball. Its hop arrow
+ * updates at once, so you see the new route before it hops.
+ */
+function steer(state: RunState, steer: Steer | null): SimEvent[] {
+  const { ball } = state.screen;
+  if (state.phase !== 'play' || ball.at !== 'carried') return [];
+  const carrier = state.screen.players.find((s) => s.id === ball.by);
+  if (!carrier?.alive) return [];
+  carrier.steer = steer;
+  updateIntents(state.screen);
+  return [];
 }
 
 function nextScreen(state: RunState): SimEvent[] {
