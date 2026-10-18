@@ -58,13 +58,13 @@ The game is **discrete**: a tile grid that advances once per beat. That makes a 
          └──────────────┘
 ```
 
-- **The simulation** (`src/sim/`) is pure TypeScript. It holds the grid, the units, the ball, the Hype and the fumble rules. It advances with `step(state, queuedActions) → nextState + events`, **once per beat**. It has no rendering, no timers and no randomness except a seeded RNG.
-- **The renderer** (`src/render/`, `src/ui/`) never changes the game state. It reads the state and its events (`Hopped`, `Caught`, `Fumbled`, `Died` and so on) and animates the transitions *between* beats: hop arcs, squash/stretch, cube bursts.
+- **The simulation** (`src/sim/`) is pure TypeScript. It holds the grid, the units, the ball, the downs and the deck. It advances with `step(state, input) → nextState + events`, **once per beat**, and actions between beats (calling a play, HIKE) go through `dispatch(state, action)`, which is pure too. It has no rendering, no timers and no randomness except a seeded RNG.
+- **The renderer** (`src/render/`, `src/ui/`) never changes the game state. It reads the state and its events (`hop`, `caught`, `blocked`, `tackled` and so on) and animates the transitions *between* beats: hop arcs, squash/stretch, cube bursts.
 - **Benefits:** the rules are unit-testable, runs are deterministic and replayable from a seed (useful for debugging, and later for daily runs), and the art can be redone without touching the rules.
 
 ### Game flow
 
-A small state machine covers the screens: `Boot → Title → [Setup → Play → Draft]* → GameOver`. Each state owns its DOM overlay and its input handling.
+A small state machine covers the screens: `Boot → Title → [Drive: (Call a play → Down) × up to 4 → Draft]* → GameOver`, with areas of four drives (GAMEPLAY.md, *The Run*). Each state owns its DOM overlay and its input handling.
 
 ### No ECS framework
 
@@ -84,7 +84,7 @@ This is the riskiest system in the project, so it gets built and tested first.
   - `outputLatency` and `baseLatency` are taken into account where the browser reports them.
   - Device-specific offset checks remain possible for the clock, but they are for sync quality, not a perfect-timing system.
 - **Audio unlock:** mobile browsers only start audio after a user gesture. For now the title is just the **PLAY** prompt: that tap creates and resumes the `AudioContext`, starts the song, and starts the global tick.
-- **Pausing:** when the tab is hidden, the game pauses and suspends the audio context. Resuming starts with a short count-in before play continues.
+- **Pausing:** when the tab is hidden, the game pauses by suspending the audio context, which freezes the beat with the music. RESUME picks both up exactly where they were.
 - **Debug overlay (dev only):** shows the current beat, the measured latency and the frame time.
 
 ---
@@ -99,15 +99,15 @@ This is the riskiest system in the project, so it gets built and tested first.
 - **Voxel meshes:**
   - **Greedy meshing** merges matching faces into a few big quads.
   - **Only visible faces** are kept.
-  - Repeated units (all the Rattlebones) share their geometry through **InstancedMesh**.
-  - The field tiles of a screen are merged into one mesh per strip.
+  - Repeated models share their geometry (`getGeometry` caches it), and many copies of a static prop go through **InstancedMesh**.
+  - The field tiles are one instanced mesh.
 - **Effects:**
   - **Cube bursts:** one shared `InstancedMesh` pool of small cubes with simple physics, recycled.
   - **Hit-pause:** the renderer holds the animation time. The *beat* never pauses; hit-pause only stretches the animation inside the current beat.
   - **Screen shake** is an offset on the camera.
   - **Squash and stretch** are scale animations on the unit's root node.
-- **Field indicators** (the reticle, landing rings, facing arrows, hazard warnings, the throw-range ring) are three.js meshes lying flat on the tiles. They live in 3D space, so they belong there rather than in the DOM.
-- **Screen transitions:** the camera scrolls up one screen while the next screen's strips are built in the background.
+- **Field indicators** (the reticle, landing rings, hop arrows, coverage rings, the open/covered rings under your players, route previews, the first-down line, hazard warnings) are three.js meshes lying flat on the tiles. They live in 3D space, so they belong there rather than in the DOM.
+- **Between downs and drives:** ▲ the camera follows the line of scrimmage during a drive, and a new drive brings a new field and defense.
 - **Mobile performance:**
   - The pixel ratio is capped at around 2, with a dynamic resolution fallback.
   - Keep draw calls low (target under ~100) and don't allocate memory in the frame loop.
@@ -122,14 +122,14 @@ This is the riskiest system in the project, so it gets built and tested first.
 - **Layering:** the canvas fills the screen, and a DOM root sits over it. The overlay doesn't block taps by default (`pointer-events: none`), and only real controls accept them.
 - **What lives in the DOM:**
   - The title screen and menus.
-  - The draft cards and the game-over roll call.
-  - The HUD: the ball pile, the yards, the **Hijink icons** and the Hype meter. (Aiming happens on the canvas, so the HUD has no throw button.)
+  - The play cards (the hand of three before each down, and the draft after a won drive), and the game-over screen.
+  - The HUD: down and distance ("3rd & 4"), Flip and HIKE, and message pops. (Aiming happens on the canvas, so the HUD has no throw button.)
   - Settings and credits.
 - **Polish toolkit:**
   - CSS transitions and keyframes, animating only `transform` and `opacity`, which stay smooth on phones.
   - CSS custom properties for team palettes, set from the same palette data as the voxels.
   - SVG for icons and card art.
-- **Syncing UI to the beat:** UI animations that should be on the beat (e.g. pulses on Hijink icons) are driven from the beat clock in JavaScript. CSS's own timing would drift.
+- **Syncing UI to the beat:** UI animations that should be on the beat (e.g. the cards bobbing in the hand) are driven from the beat clock in JavaScript. CSS's own timing would drift.
 - **Phone layout:**
   - Safe-area insets (`env(safe-area-inset-*)`) for notches.
   - The `100dvh` viewport unit for the full screen height.
@@ -147,8 +147,8 @@ This is the riskiest system in the project, so it gets built and tested first.
   - The long-press menu is suppressed.
 - **Tap routing:**
   - **Aiming:** during play, a press anywhere on the canvas starts a slingshot pull, using pointer capture. The pull vector maps to a free target point (`tuning.aim.tilesPerPixel`), and the release's `timeStamp` decides which beat the throw resolves on.
-  - **Button taps** (Hijinks, HIKE) are handled by DOM elements.
-  - **Setup drags** move players between tiles.
+  - **Button taps** (play cards, Flip, HIKE) are handled by DOM elements.
+  - *(The current prototype still has setup drags to place players; play cards replace them in M2.)*
 - **Haptics:** `navigator.vibrate` for throws, catches, fumbles and the beat tick.
   - **Known limitation:** iOS Safari doesn't support vibration. On iOS, the beat has to be readable from visuals and sound alone (it already is by design).
 
@@ -165,12 +165,12 @@ Everything goes through **one `AudioContext`**, with a small mixer: `master → 
 - **▲ Decision: render the songs at load time, not live.** Each song's stems are rendered to `AudioBuffer`s with an `OfflineAudioContext` while the game loads (and cached), then played as perfectly looping buffers.
   - **Why:** it's still all synthesized (no music files, tiny downloads), but it plays back at near-zero CPU cost and with sample-accurate loops.
   - **Live synthesis** stays an option for reactive layers later.
-- **The music is the global tick.** Tapping **PLAY** enters the game: the song's full mix starts looping and its beat clock starts with it. Neither ever stops or restarts, through setup, play, touchdowns and new runs. Game ticks are the song's beats: **sim beat = song beat − the run's start beat** (fixed when a run is created). There's nothing else: no timer, no re-anchoring.
-  - **What a tick does depends on the phase**, not whether it happens: before HIKE only the Bats move; after it, everyone does (see §22's `step.ts` note). **HIKE!** doesn't touch the beat.
+- **The music is the global tick.** Tapping **PLAY** enters the game: the song's full mix starts looping and its beat clock starts with it. Neither ever stops or restarts, through calling plays, downs, drives and new runs. Game ticks are the song's beats: **sim beat = song beat − the run's start beat** (fixed when a run is created). There's nothing else: no timer, no re-anchoring.
+  - **What a tick does depends on the phase**, not whether it happens: before the snap only the Bats (and hazards) move; after it, everyone does (see §22's `step.ts` note). **HIKE!** doesn't touch the beat.
   - **Pausing suspends the `AudioContext`.** `BeatClock.heardTime` never runs past `ctx.currentTime`, so the beat freezes with the music and both pick up exactly where they were on **RESUME**. Leaving the page pauses.
   - **No catch-up limit:** if frames stall while the music plays, the sim steps every beat it missed, so it never drifts from the song.
 - **Notation:** each stem is one string per bar: notes like `A3`, chords like `A3+C4+E4`, `-` to hold, `.` to rest, and `x`/`X` for drum hits (`src/audio/synth/notes.ts`).
-- **Tempo per biome:** each biome's song has its own BPM. Changing tempo means switching songs, which happens on a screen transition, never mid-play.
+- **One tempo for every song:** all songs share `SONG_GRID` (120 BPM, 8-bar loops, A minor), so the game can **crossfade** between them at any moment without the beat moving (§22, *How to make audio*). ▲ *When it switches is a design question (GAMEPLAY.md, Open Questions).*
 - **The chant** ("FEE! FI! FO! FUMBLE!") is a stinger that lands on the beat, made either from synthesized vocal-ish sounds or from a recorded public-domain or CC0 sample.
 
 ### Sound effects
@@ -191,28 +191,28 @@ All game content is **typed data**, kept separate from the engine code. That kee
 
 ```
 src/content/
-  team.ts         // the team: helmet/jersey colors, ball, slot count
-  players.ts      // the Walk-on plus every recruit kind: Hustle/Hands/Heft, role, look
-  places.ts       // each haunted place: defenders, hazards, recruit/card/Hijink pools, palette, song
-  defenders.ts    // every defender kind: name, creature, model, stats, movement rule, ignoresSnap
+  cards.ts        // play cards: formation, every route, Flip, special players and tricks; the starter deck
+  players.ts      // the Walk-on plus every special player a card can bring: Hustle/Hands/Heft, look
+  defenders.ts    // every defender kind: name, creature, model, stats, job (movement rule), coverage ring
   hazards.ts      // every hazard kind: model, speed, reach (the beat patterns are in sim/hazards.ts)
-  biomes.ts       // strip sets, hazard pools, song, palette
-  cards.ts        // draft cards: Treats, Tricks, perks
-  hijinks.ts      // Hijinks: targeted/global, Hype cost, effect, rhythm bonus
+  areas.ts        // each themed area: its four drives' defenses, Gimmicks, Boss, card pool, palette, song
+  palettes.ts     // every color
   tuning.ts       // every magic number in one place
 ```
+
+*(`cards.ts` and `areas.ts` don't exist yet: they arrive with M2.)*
 
 - Content is checked with TypeScript types, plus a small validation test (every reference resolves, and no stat is out of range).
 - **Palettes have a single source of truth** (`src/content/palettes.ts`). It feeds the voxel colors, the CSS custom properties and the SVG fills, so 3D and 2D always match.
 
 ---
 
-## 10. Screen Generation and AI
+## 10. Drive Generation and AI
 
-- **Strip-based generation:** a screen is about 15–16 rows of stacked **strips** (turf, defender zone, hazard lane), chosen from the biome's pool by a seeded RNG along a difficulty curve.
-- **Solvability check:** setup is a puzzle, so a generated screen must be beatable. A cheap simulated check (can *some* formation and throw timing get a player to the top?) rejects unfair screens. It runs at generation time, and in bulk tests during development.
+- **Each drive's defense** comes from the area's data for its slot (Intro, Challenge, Gimmick, Boss), placed by a seeded RNG: which defenders, where, and with what jobs, plus the hazards.
+- **Fairness check:** a generated defense must be beatable. A cheap simulated check (can *some* card in the starter deck, with some throw, gain yards?) rejects unfair drives. It runs at generation time, and in bulk tests during development.
 - **AI** is simple, readable rules, decided once per beat:
-  - Each player and defender kind has a small decision function that chooses a target tile.
+  - Each defender has a job (cover, zone, rush, deep safety, patrol) with a small decision function that chooses a target tile; your players follow their card's routes, and a carrier runs straight up.
   - **Its intent (next tile) is set one beat ahead**, which gives the hop-arrow telegraph for free. Models never turn to face it.
 - **Collisions** are resolved within the simulation step, in a fixed order, so they're deterministic.
 
@@ -268,7 +268,7 @@ layer 0
 ## 12. Asset Pipeline: 2D Sprites and UI Art
 
 - **Created by Claude: SVG.**
-  - Icons, Hijink icons, draft-card frames and art, buttons, badges.
+  - Icons, play-card frames and art (including route diagrams), buttons, badges.
   - It scales perfectly, is tiny, can be written as text, and is themed through palette CSS variables.
   - Its style follows the voxel look: chunky, flat colors, bold outlines.
 - **Public-domain or CC0 sources:**
@@ -311,8 +311,8 @@ layer 0
 ## 15. Saving and Settings
 
 - **localStorage**, holding small JSON with a version number for migrations:
-  - best score (yards), unlocks (recruits, cards, team looks, places), and seen tutorials;
-  - settings: music and SFX volume, **audio latency offset**, reduced motion, haptics on or off.
+  - best score, unlocks (cards in the draft pools, team looks, areas), and seen tutorials;
+  - settings: music and SFX volume, reduced motion, haptics on or off.
 - **No accounts and no backend.**
 - **▲ Decision:** whether to save a run in progress so you can resume it. Recommendation: yes. A phone call shouldn't end a good run. The simulation state is small and serializable, which makes this cheap.
 
@@ -334,19 +334,19 @@ layer 0
 
 - **TypeScript strict mode,** plus ESLint and Prettier (development only).
 - **Unit tests (Vitest)** cover:
-  - the simulation rules (catches, interceptions, fumbles, deaths, Hype);
-  - the beat maths (tap judging, scheduling, latency offset);
-  - screen generation (seeded output, solvability);
+  - the simulation rules (catches, blocks, tackles, sacks, downs, the deck);
+  - the beat maths (scheduling, heard time);
+  - drive generation (seeded output, fairness);
   - content validation.
 - **Replay tests:** a seed plus a recorded sequence of inputs must give the same outcome. This guards against accidental rule changes.
-- **Dev pages and tools** (deployed alongside the game while we build foundations, so they can be tested on phones; `npm run build:release` leaves them out): a debug overlay (fps, draw calls, beat offsets), cheats (skip screen, give cards, set tempo), `/dev/models`, `/dev/audio`, and `/dev/screen?seed=…` to inspect any generated screen.
+- **Dev pages and tools** (deployed alongside the game while we build foundations, so they can be tested on phones; `npm run build:release` leaves them out): a debug overlay (fps, draw calls, beat offsets), cheats (skip a drive, give cards), `/dev/models`, `/dev/audio`, and `/dev/screen?seed=…` to inspect any generated screen.
 - **Device testing:** a regular check on a real mid-range Android phone and a real iPhone, which covers beat feel, frame rate and touch. Desktop emulation isn't enough for timing.
 
 ---
 
 ## 18. Accessibility
 
-- **Audio latency calibration** (see the beat clock).
+- **Output latency compensation** (see the beat clock), so what you see matches what you hear.
 - **Playing on mute:** the beat is always visible (everything bounces on the beat) and, where supported, felt (haptics).
 - **Teams differ by shape *and* color,** and the palettes are checked for color-blind safety.
 - **Reduced motion:** less screen shake, gentler bursts, no camera jolts. It follows the system's `prefers-reduced-motion` setting by default.
@@ -362,9 +362,10 @@ layer 0
 ├─ src/
 │  ├─ main.ts            // boot, state machine
 │  ├─ sim/               // pure rules: grid, units, ball, step(), RNG
-│  ├─ beat/              // beat clock, scheduler, input judging
+│  ├─ beat/              // beat clock and scheduler
 │  ├─ render/            // three.js scene, voxel meshing, effects, field indicators
-│  ├─ ui/                // DOM overlay: HUD, menus, draft, styles
+│  ├─ game/              // the controller, the conductor (music = tick), feedback, aiming maths
+│  ├─ ui/                // DOM overlay: HUD, play cards, draft, menus, styles
 │  ├─ audio/             // mixer, synth, song player, SFX
 │  ├─ content/           // typed game data, palettes, tuning
 │  └─ dev/               // debug overlay, cheats, dev pages (excluded from prod)
@@ -386,7 +387,7 @@ layer 0
 3. **Minimal render.** Cubes standing in for units, the camera, the reticle, the HUD.
 4. **The voxel pipeline.** `.voxt` → mesh → preview PNGs. First models: a Walk-on, the QB, the Jack-o'-Lantern ball.
 5. **Synth and the first song.** One Halloween track with stems, plus the core SFX.
-6. **First playable** (as scoped in GAMEPLAY.md). Then iterate on feel.
+6. **First playable** (as scoped in GAMEPLAY.md): since 2026-10-18 that's the drive-and-play-card loop (MILESTONES.md, M2). Then iterate on feel.
 
 ---
 
@@ -400,10 +401,11 @@ Multiplayer, accounts and backends, analytics, localization (we keep text minima
 
 Everything a future session (human or Claude) needs to carry on without the original conversation. The design lives in THEME.md and GAMEPLAY.md, and progress lives in MILESTONES.md. This section covers **how the code works and how assets get made**.
 
-### State of play (2026-10-17)
+### State of play (2026-10-18)
 
-- **Done:** M1.0–M1.5 (scaffold, beat clock, simulation, render, voxel pipeline, synth and music), plus the new theme's models: the team, the Forest defenders, props, scenery and hazard models.
-- **Next:** wire the hazards into play (M2): Rolling Pumpkin lanes and Witch on a Broom (rules in GAMEPLAY.md, *Haunted Forest hazards*). Then the draft, two recruits, strip-based screen generation, and recruit death effects.
+- **Done:** M1.0–M1.5 (scaffold, beat clock, simulation, render, voxel pipeline, synth and music), the theme's models, the Witch on a Broom, the global tick (the music), four song loops on one grid, and a cleanup for extension.
+- **The design moved on (2026-10-18):** the core loop is now **drives, downs and play cards** (GAMEPLAY.md, *The Run* through *The Deck*). **The code still implements the earlier loop**: free placement in setup, screens to the end zone, a pile of balls as lives, fumbles and interceptions, Walk-on trades. The code map below describes that code.
+- **Next:** the M2 first playable slice (MILESTONES.md): downs and the first-down line, play cards with routes and Flip, defensive jobs with coverage rings, blocks instead of interceptions, the Safety.
 - **Open loose ends:** `main` is **not pushed** (this shell has no GitHub credentials; the user pushes with `git -C /home/esr/Code/vox push origin main`). GitHub Pages must be switched to **Settings → Pages → Source: GitHub Actions** (it currently serves the raw branch, which doesn't work). The iPhone beat test and a human listen of the audio are still pending.
 
 ### Environment
@@ -432,20 +434,20 @@ Everything a future session (human or Claude) needs to carry on without the orig
   - `types.ts`: `RunState`, units (`PlayerUnit`, `Defender`), ball states (`at: 'qb' | 'flight' | 'carried' | 'none'`), `BeatInput`, `ThrowProblem` codes, `SimResult`, events.
   - `grid.ts`: 9×16 grid, `QB_POS` (4,0), `inSetupZone`, `inThrowBand` (rows 4–11), `nextToQb`, `stepToward`.
   - `run.ts`: `createRun(seed)`, `setUpScreen`, `dispatch(state, place | hike | nextScreen)` (**pure**, like `step`: returns `{state, events}`), `DEFAULT_FORMATION`.
-  - `step.ts`: `step(state, input: BeatInput)` advances the **global beat** by one, in **every phase**, and returns `{state, events}`. `state.beat` never resets (not on HIKE, not on a new screen). Outside play only defenders with `ignoresSnap` (Bats) hop, without contact; in play, everything does, each on its own Hustle beats. Fumbles and wipeouts share `loseBall`. The order is in its header comment. Throw targets are **free points** in tile units, and landing picks the closest receiver within the `tuning.catch` radii (perfect/good/ok, widened by Hands). Also `throwProblem`, fumbles (lose a ball → **reset the screen to setup**), collisions (the defender wins; Walk-ons without the ball **trade**, taking the defender down too; fend-offs), sacks (any defender up and next to the QB while it holds the ball), landing (Clean Catch, interception, lunge, miss), touchdown, wipeout.
-  - `ai.ts`: per-beat intents (the hop-arrow telegraph): players go straight up; defenders follow their kind's `movement` rule (`chase`, `blitz`, `wall`, `patrol`). **A new defender kind** is an entry in `content/defenders.ts` plus, only if it moves in a new way, a case here.
+  - `step.ts` *(the pre-M2 rules)*: `step(state, input: BeatInput)` advances the **global beat** by one, in **every phase**, and returns `{state, events}`. `state.beat` never resets (not on HIKE, not on a new screen). Outside play only defenders with `ignoresSnap` (Bats) hop, without contact; in play, everything does, each on its own Hustle beats. Fumbles and wipeouts share `loseBall`. The order is in its header comment. Throw targets are **free points** in tile units, and landing picks the closest receiver within the `tuning.catch` radii (perfect/good/ok, widened by Hands). Also `throwProblem`, fumbles (lose a ball → **reset the screen to setup**), collisions (the defender wins; Walk-ons without the ball **trade**, taking the defender down too; fend-offs), sacks (any defender up and next to the QB while it holds the ball), landing (Clean Catch, interception, lunge, miss), touchdown, wipeout.
+  - `ai.ts`: per-beat intents (the hop-arrow telegraph): players go straight up; defenders follow their kind's `movement` rule (`chase`, `blitz`, `wall`, `patrol`). Blitzers chase the carrier once the ball is caught. **A new defender kind** is an entry in `content/defenders.ts` plus, only if it moves in a new way, a case here.
   - `hazards.ts`: hazards are **pure beat patterns** with no changing state (`ScreenState.hazards`): the Witch's column is `witchColumn(h, beat)`, wrapping around the field; `witchTravel` is the unwrapped, continuous version for drawing; `passCrossing` and `snatches` decide whether a pass crossing her row is caught by her. Hazards are a separate list, not defender kinds: they don't collide, tackle, sack or hold tiles.
   - `stats.ts`: what Hustle, Hands and Heft mean (only the 0 values are decided; 1+ are placeholders). `screen.ts`: a placeholder seeded defender scatter. `replay.ts`: replay from seed and inputs. `rng.ts`: mulberry32 plus `deriveSeed`.
-- **`beat/`**: `clock.ts` (`BeatClock`: audio-clock grid, lookahead scheduling, `position()` in *heard* time via `getOutputTimestamp`, `startAt(bpm, origin)`), `beatMath.ts` (pure maths; `judge()` deliberately never awards On-Beat), `calibration.ts`.
+- **`beat/`**: `clock.ts` (`BeatClock`: audio-clock grid, lookahead scheduling, `position()` in *heard* time via `getOutputTimestamp`, `startAt(bpm, origin)`), `beatMath.ts` (pure maths), plus `calibration.ts` and tap judging (`judgeTap`, `judge()`) left over from the rhythm-game days and used only by the dev beat page.
 - **`audio/`**: `mixer.ts` (buses → compressor), `music.ts` (`prepareSong`, `MusicPlayer`, the full mix as one continuous loop), `context.ts` (unlock, `suspendAudio`), `sfx.ts` (`SFX` definitions, `prepareSfx`, `SfxPlayer`), `synth/` (`notes.ts` notation, `instruments.ts` voices, `render.ts` offline stem rendering with tail folding), `songs/` (`index.ts` lists `SONGS`; `grid.ts` is `SONG_GRID`; one file per song: `graveyardShuffle`, `spookySurf`, `midnightChase`, `skeletonStomp`), `wav.ts`
 - **`render/`**: `view.ts` (renderer, lights `hemi`/`sun`, the fitted perspective camera, fog range, `tileAt`, `toScreen`), `field.ts` (tiles, throwing-band dimming and chalk lines), `units.ts` (player and defender meshes, hop animation, hop arrows; models never turn), `qb.ts` (`QbView`: arm up with the ball, down after; `qbHand()`), `ball.ts` (`BallView`: held, flying from the moment of release with landing ring and pips, carried overhead with a ground ring), `aim.ts` (`AimView`: the free reticle with perfect/ok rings and the marching dashed arc), `throwArc.ts` (the shared arc shape), `hazards.ts` (`HazardViews`: the Witch glides along her row facing her way, with a shadow; a second copy flies in from off the field while she wraps), `scenery.ts` (forest floor texture, fog, moonlight, instanced props).
 - **`game/`**: `game.ts` (the controller: each frame the sim steps every beat *heard* since the last, in every phase, sim beat = song beat − `runStart`; phases and the HUD prompt; input routing: press anywhere and pull back to aim, release to throw; drag in setup), `conductor.ts` (`Conductor`: the music and its `BeatClock` are the global tick, started by PLAY; pause = suspend the audio, freezing the beat; SFX), `feedback.ts` (sim events → sounds and HUD pops, and every pop's words), `slingshot.ts` (`aimTarget`, `throwTiming`: pure maths).
 - **`ui/`**: `hud.ts` and `hud.css` (DOM HUD: ball pile, yards, the context button, `pop()`), `base.css`, `paletteVars.ts`.
-- **`content/`**: `palettes.ts` (**the only place colors are defined**: `common`, `team`, `voxel` for model colors, `biomes.forest`), `tuning.ts` (every magic number), `players.ts` (the Walk-on and recruit kinds; `returns`, `trades`), `defenders.ts` (`DEFENDERS`: one entry per kind), `hazards.ts` (`HAZARDS`: model, `beatsPerTile`, `reach`).
+- **`content/`**: `palettes.ts` (**the only place colors are defined**: `common`, `team`, `voxel` for model colors, `biomes.forest`), `tuning.ts` (every magic number), `players.ts` (the Walk-on and a test recruit; `returns`, `trades`), `defenders.ts` (`DEFENDERS`: one entry per kind), `hazards.ts` (`HAZARDS`: model, `beatsPerTile`, `reach`).
 - **`voxel/`**: `voxt.ts` (parser), `mesh.ts` (greedy mesher), `models.ts` (loads every `.voxt` through `import.meta.glob`, caches geometry, `voxelMaterial`, `modelHeight`), `vox.ts` (MagicaVoxel import).
 - **`dev/`** plus `/dev/*.html`: the beat-clock page, the screen inspector (`screen.html?seed=N`), the model viewer, the sound board. In dev builds the game is exposed as `window.game` for console debugging.
 
-Tests live in `tests/` and mirror these folders (73 at last count). Simulation tests build exact situations with `tests/sim/helpers.ts` (`playState`, `run`, `small`, `ofType`).
+Tests live in `tests/` and mirror these folders (87 at last count). Simulation tests build exact situations with `tests/sim/helpers.ts` (`playState`, `run`, `player`, `standStill`, `ofType`).
 
 ### How to make a voxel model (the recipe that works)
 
@@ -479,7 +481,7 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 - **Models always face the camera** (a design rule since 2026-10-17): turning made a sideways-moving Wall-er read as a stick and hid every player's face mask. Design every model for the front view plus the view from above. The Witch is the one model that turns (left or right).
 - **Faces:** simple and spaced out, with a voxel of skin between features. Dark eyes next to a dark mask merge (the mask went grey). Busy carved faces read as brackets, so prefer a few bold blocks (two eyes and a wide grin).
 - **Color rules:** **our team is gold and orange in helmets**; **every opponent is candy purple and never helmeted**; hazards are their own shapes (orange pumpkins with glowing grins, grey stone, the witch). Never reuse the field's greens on anything that moves.
-- **Keep scenery off the field and clear of the HUD:** the pumpkins in front of the field sit behind the HUD's bottom area (HIKE and the Hijink icons).
+- **Keep scenery off the field and clear of the HUD:** the pumpkins in front of the field sit behind the HUD's bottom area (HIKE, and the play cards to come).
 
 ### How to make audio
 
@@ -502,4 +504,4 @@ Tests live in `tests/` and mirror these folders (73 at last count). Simulation t
 - **Dev pages ship in the normal build** (for phone testing over Pages). Links between them must be **relative**, because Pages serves the site under `/vox/`.
 - **Audio** can't start before a user gesture. Songs and SFX are pre-rendered at load at 48 kHz (`RENDER_RATE`) without a context; the `AudioContext` is created on the PLAY tap.
 - **Event SFX** play when the beat is *heard*, so they're one output-latency late (an M3 task).
-- **Calibration:** Android measured about −115 ms uncalibrated, and the offset saved by `/dev/beat.html` is used by the game.
+- **Calibration:** Android measured about −115 ms uncalibrated on `/dev/beat.html`. The game no longer uses a saved offset (there's no tap judging); it relies on the heard-time mapping.

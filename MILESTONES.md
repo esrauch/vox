@@ -4,9 +4,9 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** redesigning the core loop around **play cards and downs** (2026-10-18): four downs to gain 10 yards per level, and progression as a deck of play cards only. Rules spec awaiting approval. The three new song loops are waiting for a listen.
+**Current focus:** build the **M2 first playable slice** of the new core loop (decided 2026-10-18, GAMEPLAY.md): drives and downs, play cards with routes and Flip, defensive jobs with coverage rings, blocks instead of interceptions, and the Safety. The four song loops are waiting for a listen.
 
-**Earlier focus:** listen to M1.5 (`/dev/audio.html` and the game) and check it on a phone, then M2 (first playable). Still open: the M1.1 iPhone test, and switching Pages to GitHub Actions.
+**Still open from earlier:** the M1.1 iPhone test, and switching Pages to GitHub Actions.
 
 ---
 
@@ -16,50 +16,47 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 
 ### Needed before the first playable (M2)
 
-- [x] **Name for the default Smalls:** Walk-ons.
-- [x] **Starting slots:** 5, with "+1 slot" as a rare card.
-- [x] **Starting balls:** 3.
-- [x] **Wipeout:** lose a ball and restart the screen from setup. Walk-ons return, and dead recruits stay dead.
-- [x] **Draft mix:** always one recruit, one Walk-on upgrade and one other card.
-- [x] **Throw range:** the middle half of the field only (rows 4–11). The bottom and top quarters can't be targeted, shown by slightly dimmed rows and faint chalk lines.
-- [x] **Catching:** *(revised 2026-10-17)* throws land on free points, not tiles. The closest receiver within about a tile catches it, rated perfect, good or ok by distance (perfect is a Clean Catch, and Hands widens the rings). A defender right under the ball and closer than the receiver intercepts.
-- [x] **Throwing controls:** *(2026-10-17)* press anywhere, pull back to aim (a slingshot, with a free reticle and an animated dashed arc), release to throw on the next beat. This replaces tapping a tile and then the ball button.
-- [x] **Catch glow:** always on.
-- [x] **Hazards hit defenders too.**
-- [x] **Blitzers and the Big's counter:** Blitzers head for the Big and attack it from a tile next to it (e.g. every 2 beats). Each attack ticks the Big's counter (3) down, and at 0, while the Big holds the ball, it's a sack (a fumble). Several Blitzers drain it faster. They're irrelevant once the ball is thrown. *(The pocket and Blockers were removed; see GAMEPLAY.md, Future Ideas.)*
-- [x] **A fumble resets the screen:** you lose a ball and go back to setup, with Walk-ons and defenders back at their starting tiles (after playtesting: continuing mid-screen left Walk-ons out of reach).
-- [x] **Smalls never block each other:** they can share tiles and pass one another.
-- [x] **Walk-ons trade:** a Walk-on without the ball that runs into a defender dies and takes the defender with it, so stacked Walk-ons clear a path. A carrier is just tackled.
-- [x] **Collisions:** the defender always wins against Walk-ons. Some units **fend off N defenders**.
-- [x] **Bigs have no stats.** Choosing a Big only sets the theme and the draft pool. The Big improves only through perks.
-- [x] **The stat scale:** every Small and defender has Hustle, Hands and Heft as whole numbers from 0. Walk-ons are 0/0/0. Hustle 0 hops every 2 beats, Hands 0 catches on its own tile or 1 ahead, and Heft 0 dies on the first hit.
-- [ ] **What 1+ means** for each stat, and the stat values for defenders. *(Decide during M1.2 and M2 tuning.)*
-- [~] **Defender kinds and per-beat rules:** a draft spec is in GAMEPLAY.md (Chaser, Blitzer, Wall-er, Picker). Confirm it during M2 playtesting.
-- [x] **Hands is catch reach:** the own tile plus one ahead, and high Hands adds diagonal lunges.
-- [x] **Walk-ons are dumb:** they hop straight up their column, even into danger. Recruits and upgrades can add smarter footwork.
+**Decided 2026-10-18 (the core loop, GAMEPLAY.md):**
+
+- [x] **Areas of four drives,** *Balatro*-style: Intro, Challenge, Gimmick, Boss. Then the next themed area.
+- [x] **A drive is four downs to gain 10 yards.** A tackle ends the down where it happened; an incompletion or a block uses the down; a sack uses it and loses 2 yards.
+- [x] **No lives: losing a drive (a failed 4th down) is game over.** There are no interceptions or turnovers.
+- [x] **Play cards:** draw 3, call 1, discard the rest. A card sets the formation and every route; Flip mirrors it. No free placement.
+- [x] **The deck is the only progression:** after each won drive, draft one of three cards or remove one. Special players and trick plays live on cards; nothing else carries over.
+- [x] **Coverage rings:** purple rings on covering defenders; green, yellow or red rings on your players. No aim warning.
+- [x] **Blocks, not interceptions:** a pass to a covered receiver bounces off the defender. Bats and the Witch block passes the same way.
+- [x] **Defensive jobs:** Covers (man, one beat behind, chase after a catch), Zones (scarecrows, planted, wide rings), Blitzers (the pass rush, no ring, chase after a catch), Bats (patrol), and a deep **Safety** that makes a 10-yard play rare.
+- [x] **Carriers always run straight up.** No steering (tried and discarded). Special players with their own running AI are a future card idea.
+- [x] **Keep the grid and the beat** for the prototype.
+- [x] **Throwing:** the slingshot (press anywhere, pull back, release), free landing points, perfect/good/ok catches by distance (a perfect catch fends off one tackle).
+- [x] **Names:** Walk-ons for the plain players; Trick Plays are cards.
+- [ ] **Throw range** measured from the line of scrimmage (the old fixed band of rows 4–11 doesn't fit short plays).
+- [ ] **The camera during a drive:** follow the line of scrimmage, or show all 10 yards.
+- [ ] **The starter deck:** the six plays' exact formations and routes, and how many players a play uses.
+- [ ] **What 1+ means** for Hustle, Hands and Heft, and the defenders' values. *(Decide during M2 tuning.)*
+- [ ] **The Safety's look** (an Owl?).
+
+**Superseded by the new loop:** the earlier decisions about starting slots, balls as lives, wipeouts, the draft mix, interceptions, fumble resets, Walk-on trades, the Big's counter and placement-based setup. The history is in GAMEPLAY.md, *History*.
 
 ### Missing from the design so far (needed before M5–M8)
 
-- [ ] **Onboarding:** how a first-time player learns setup, the reticle and the ball button, using the beat as a shared rhythm cue rather than a perfect-timing gate. *(Idea: the first few screens of the first run are built to teach one thing each.)*
-- [ ] **The UX flow and wireframes:** title, setup, play HUD, draft, game over (with the roll call of fallen recruits), pause, settings and calibration.
-- [ ] **Unlock conditions:** how new recruits, cards, team looks and places are earned (distance milestones? achievements?).
-- [ ] **Content scope for v1:** how many recruits, Walk-on upgrades, perks and Hijinks the Haunted Forest has, and how many places there are.
-- [ ] **Biomes:** their order, how many screens each lasts, and whether the sequence loops or changes as you climb.
-- [ ] **Boss screens:** how often they come, what a giant forest boss does on the beat, and how you beat one.
-- [ ] **The Hype economy:** meter size, what fills it and by how much, and how much each Hijink costs.
-- [ ] **Treats vs Tricks:** keep Tricks for v1, or postpone?
+- [ ] **Onboarding:** how a first-time player learns calling a play, reading the rings and the slingshot. *(Idea: the first drives of the first run each teach one thing.)*
+- [ ] **The UX flow and wireframes:** title, the hand of play cards, the down-and-distance HUD, the draft, game over, pause and settings.
+- [ ] **Unlock conditions:** how new cards, team looks and areas are earned (progress milestones? achievements?).
+- [ ] **Content scope for v1:** how many play cards (basic, special-player and trick) the Haunted Forest has, and how many areas there are.
+- [ ] **Areas:** their order, and what happens after the last one (a win? endless?). *(Each is four drives: decided.)*
+- [ ] **Gimmicks and Bosses:** the forest's Gimmick list, and the Treant boss drive's rules.
 - [ ] **The announcer:** text pop-ups only, or synthesized or sampled voice?
-- [ ] **The audio list:** the songs (per biome, boss, menus) and the core list of sound effects.
-- [ ] **Who the quarterback is:** a Walk-on, or a special player that's always there.
-- [ ] **What makes runs different** now that there's no Big to choose (a starting recruit, a coach, the team's look?).
-- [ ] **Names:** "Walk-ons" or "Rookies"; "Hijinks" or "Trick Plays"; the team's name.
-- [ ] **The Bat as both defender and recruit:** keep it (told apart by the helmet), or make the Picker an Owl or Crow.
-- [x] **Who the defenders are:** each biome's locals, always in candy purple. The Forest set is built (gnome, rhino beetle, scarecrow, bat); the Graveyard and Mountain sets are still to design.
-- [ ] **The theme of the climb:** where it's going, and whether there's a joke at the top.
+- [ ] **The audio list:** the songs (per area, boss, menus), when the music switches, and the core list of sound effects.
+- [ ] **What makes runs different** beyond the draft (different starting decks? the team's look?).
+- [ ] **Names:** the team's name.
+- [ ] **The Bat as both defender and special player:** keep it (told apart by the helmet), or change one.
+- [x] **Who the defenders are:** each area's locals, always in candy purple. The Forest set is built (gnome, rhino beetle, scarecrow, bat), with a Safety still to model; later areas' sets are still to design.
+- [ ] **What the run is toward:** where it's going, and whether there's a joke at the end.
 
 ### Can be settled by prototyping
 
-- [ ] **Camera:** narrow perspective or orthographic *(decide in M1.3)*.
+- [x] **Camera:** narrow perspective *(decided in M1.3)*.
 - [ ] **Beat-alignment tuning** *(decide in M1.1, keeping the action timing readable without a perfect-timing challenge)*.
 - [ ] **Saving a run in progress** *(rec: yes, decide in M5)*.
 
@@ -166,7 +163,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [ ] **Defensive jobs and coverage rings:** Covers (gnomes) shadow a receiver one beat behind and pursue after a catch; Zones (scarecrows) stand still with a wide ring; Blitzers rush the QB (no ring); a new **Safety** hangs deep and keeps you from gaining 10 in one play; Bats patrol. Purple coverage rings on defenders, and green/yellow/red rings on your players.
 - [ ] **Blocks, not interceptions:** a pass to a covered (red) receiver bounces off the defender; an uncaught pass is incomplete. Both just use the down. A model for the Safety (an Owl?).
 - [ ] **The pre-snap UI:** three cards to pick from, the chosen play's routes previewed on the field, Flip and HIKE.
-- [~] The Haunted Forest's hazards: **Rolling Pumpkin** (ground lane) and **Witch on a Broom** (air lane that snatches passes), plus **Tombstones** (static obstacles) if time allows. Each needs a model, a beat pattern, a one-beat telegraph and a setup-phase preview. *The Witch is in (one per screen on a throw-band row, flying one tile per beat and wrapping, visible before HIKE); her edge flash telegraph isn't built yet. The pumpkin and tombstones are still to do.*
+- [~] The Haunted Forest's hazards: **Rolling Pumpkin** (ground lane) and **Witch on a Broom** (an air lane: a pass crossing near her bounces off), plus **Tombstones** (static obstacles) if time allows. Each needs a model, a beat pattern, a one-beat telegraph and a setup-phase preview. *The Witch is in (one per screen on a throw-band row, flying one tile per beat and wrapping, visible before HIKE). In the current code her snatch is still a fumble; under the new rules it's a block. Her edge flash telegraph isn't built yet. The pumpkin and tombstones are still to do.*
 - [ ] **One area of four drives:** Intro, Challenge, Gimmick and Boss (placeholder Gimmick and Boss), then a "next area" stub.
 - [ ] **The draft after a won drive:** one of three play cards, or remove one, in a plain UI.
 - [ ] Game over and a score (drives won, yards gained).
@@ -183,13 +180,12 @@ The base systems everything else is built on. **Each one is built and verified o
 **Goal:** make every second feel great.
 
 - [ ] The full juice list from GAMEPLAY.md: squash and stretch, everything bouncing on the beat, haptics, rhythm cues, sparkle trails, player noises.
-- [ ] Every indicator from *Reading the Beat*, polished, with hazards telegraphing one beat ahead.
-- [ ] The tombstone and waving ghost when a recruit dies.
+- [ ] Every indicator from *Reading the Field*, polished, with hazards telegraphing one beat ahead.
 - [ ] **Revisit the look:** the camera pitch (58°) and the characters' backward lean (35°) were chosen from screenshots (2026-10-17). Re-check them on phones, perhaps with a playtester, and tweak `tuning.camera` (try different values with `?pitch=` and `?tilt=`).
 - [ ] Tuning: hop rates, throw range, and beat alignment.
-- [ ] A screen-generation solvability check, so no unfair screens get through.
+- [ ] A drive fairness check, so no unbeatable defenses get through.
 
-**Done when:** the game is satisfying to watch with the sound off, satisfying to play with the sound on, and playtesters can say *why* they fumbled.
+**Done when:** the game is satisfying to watch with the sound off, satisfying to play with the sound on, and playtesters can say *why* a pass was blocked.
 
 ---
 
@@ -203,7 +199,7 @@ The base systems everything else is built on. **Each one is built and verified o
 - [ ] Card rarity, and card upgrades (e.g. a veteran version of a play).
 - [ ] The draft UI: three cards, chosen in one tap, plus "remove a card".
 
-**Done when:** two runs can grow into noticeably different teams and playstyles.
+**Done when:** two runs can grow into noticeably different decks and playstyles.
 
 ---
 
@@ -211,8 +207,8 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** it looks and feels like a finished game from the first tap.
 
-- [ ] The UX flow from M0: title, setup HUD, play HUD, draft, game over and the roll call.
-- [ ] Pause, settings (volume, haptics, reduced motion), the calibration screen, credits (generated from the manifest).
+- [ ] The UX flow from M0: title, the hand of play cards, the down-and-distance HUD, the draft, game over.
+- [ ] Pause, settings (volume, haptics, reduced motion), credits (generated from the manifest).
 - [ ] The "rotate your phone" card, safe areas and thumb-reach layout.
 - [ ] SVG art for icons and cards. Public-domain UI assets, recolored to the palette.
 - [ ] Saving and resuming a run in progress (if M0 approved it).
@@ -226,24 +222,25 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** the first place, complete.
 
-- [ ] The full recruit roster for the forest, each with a model in the team helmet: Bat, Skeleton, Pumpkin-head, Werewolf, Mummy, Ghost, Black Cat, Witch, Frankenstein's Monster, Owl (THEME.md).
-- [ ] Their perks and Hijinks.
-- [ ] Every recruit's job reads from its silhouette and plays differently.
+- [ ] The forest's card pool: special-player cards for the forest's creatures, each with a model in the team helmet (Bat, Skeleton, Pumpkin-head, Werewolf, Mummy, Ghost, Black Cat, Witch, Frankenstein's Monster, Owl: THEME.md), and forest trick plays.
+- [ ] The forest's Gimmicks and the **Treant** boss drive.
+- [ ] The Rolling Pumpkin and Tombstones.
+- [ ] Every special player's job reads from its silhouette and plays differently.
 
-**Done when:** each recruit feels clearly different to play, and none of them is obviously the best.
+**Done when:** each card feels clearly different to call, and none of them is obviously the best.
 
 ---
 
-## M7: Biomes, Bosses and the Climb
+## M7: Areas, Bosses and the Run
 
 **Goal:** a run that changes as you go.
 
-- [ ] A second haunted place (the graveyard), with its own strips, hazards, defenders, palette and song (with its own tempo), after the Haunted Forest.
-- [ ] Biome transitions and their order (from M0).
-- [ ] Boss screens with giant forest bosses, plus a boss song.
+- [ ] A second area (the graveyard), with its own defenders, hazards, card pool, palette and song (on the shared tempo), after the Haunted Forest.
+- [ ] Area transitions and their order (from M0).
+- [ ] A boss drive for each area, plus the boss song.
 - [ ] A difficulty curve that hits the target run lengths: about 2 minutes early, about 10 for a good run, 20+ for a legendary one.
 
-**Done when:** a good run passes through every biome and a boss, and the climb feels like a journey.
+**Done when:** a good run passes through every area and its boss, and the run feels like a journey.
 
 ---
 
@@ -251,9 +248,9 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** the first run teaches the game, and every later run gives you a reason to come back.
 
-- [ ] Onboarding from M0: the first screens of the first run each teach one thing.
-- [ ] Unlocks (from M0): new recruits, cards, team looks and places.
-- [ ] Best distance on the title screen, and a collection screen.
+- [ ] Onboarding from M0: the first drives of the first run each teach one thing.
+- [ ] Unlocks (from M0): new cards, team looks and areas.
+- [ ] Best progress on the title screen, and a card collection screen.
 - [ ] More content toward the v1 scope from M0.
 
 **Done when:** a brand-new player gets through their first run without any explanation, and veterans have things to chase.
@@ -264,8 +261,8 @@ The base systems everything else is built on. **Each one is built and verified o
 
 **Goal:** everything planned for v1 is in.
 
-- [ ] All recruits, cards, perks and Hijinks from the v1 content scope.
-- [ ] The full soundtrack: menus, three biomes, the boss, the stingers.
+- [ ] All the play cards from the v1 content scope.
+- [ ] The full soundtrack: menus, the areas, the boss, the stingers.
 - [ ] The full SFX list, the crowd, the chant and the announcer (as decided in M0).
 - [ ] Final names in place everywhere.
 - [ ] The asset manifest is complete and the credits are correct.
@@ -280,7 +277,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 - [ ] Performance on low and mid-range phones: frame rate, load time, battery.
 - [ ] An accessibility pass: reduced motion, color-blind checks, playing on mute, text sizes.
-- [ ] A balance pass across the recruits and cards.
+- [ ] A balance pass across the cards and defenses.
 - [ ] A bug bash on iOS Safari and Android Chrome, in the browser and installed.
 - [ ] The final domain/URL, a share image and a short landing blurb.
 
@@ -290,17 +287,18 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Backlog (after v1)
 
-- [ ] **More haunted places:** the graveyard, a witch's swamp, a haunted manor, each with its own defenders, hazards and recruits.
+- [ ] **More areas:** the graveyard, a witch's swamp, a haunted manor, each with its own defenders, hazards and cards.
 - [ ] **Team looks:** helmet and jersey colors, team names.
 - [ ] Daily runs with a shared seed.
-- [ ] More biomes (swamp, sky, clockwork, sea).
-- [ ] Balls with rules (e.g. a biting Skull perk).
+- [ ] More areas further out (sky, clockwork, sea).
+- [ ] Ball variants as cards (e.g. a biting Skull ball).
 - [ ] A native wrapper and app stores.
 
 ---
 
 ## Changelog
 
+- **2026-10-18:** Blitzers chase the carrier once the ball is caught. The design docs were reworked to match the new core loop: GAMEPLAY.md rewritten around areas, drives, downs, play cards and coverage (the old design moved to *History*), THEME.md's pitch, team and defenders updated, TECHNICAL.md's architecture, content and state of play updated, and M0 and M3–M10 re-scoped.
 - **2026-10-18:** Coverage designed: purple coverage rings on defenders; green, yellow or red rings on your players; no interceptions (covered passes bounce off and use the down); Covers, Zones (scarecrows), Blitzers, Bats and a new deep **Safety** that makes a 10-yard gain in one play rare. Carriers always run straight up.
 - **2026-10-18:** Steering the carrier tried and **discarded**: it didn't make the game. The core loop moves to play cards and four downs to gain 10 yards (being specified).
 - **2026-10-17:** Three new song loops: *Graveyard Shuffle* (swung, on a 12-step triplet grid), *Midnight Chase* (driving) and *Skeleton Stomp* (boss). Every song shares `SONG_GRID` (120 BPM, 8 bars, A minor) so any two can crossfade at any moment; the dev audio board crossfades when you switch songs. The game still plays Spooky Surf only.
