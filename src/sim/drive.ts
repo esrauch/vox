@@ -47,8 +47,16 @@ export function lineUpDefense(
   firstId: number,
 ): Defender[] {
   const taken: Vec[] = [];
+  // Near the first-down line there's less field left: the defense keeps its
+  // shape but squeezes evenly into the room up to the top, rather than piling
+  // up against the edge.
+  const deepest = Math.max(1, ...spec.defenders.map((d) => d.y));
+  const squeeze = Math.min(1, (END_ROW - 1 - los) / deepest);
   return spec.defenders.map((spot, i) => {
-    const row = spot.kind === 'safety' ? Math.max(los + 8, firstDown) : los + Math.max(1, spot.y);
+    const row =
+      spot.kind === 'safety'
+        ? Math.max(los + 8, firstDown + 2)
+        : los + Math.max(1, Math.round(spot.y * squeeze));
     const pos = freeTile(vec(spot.x, Math.min(END_ROW, row)), taken);
     taken.push(pos);
     const patrol = DEFENDERS[spot.kind].job === 'patrol' ? boxCircuit(pos, los + 2) : null;

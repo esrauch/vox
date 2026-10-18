@@ -104,7 +104,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **The reticle is a free point, not a tile.** It shows a small ring for a **perfect** catch and a larger one for an **ok** catch, and turns red only where a throw isn't allowed at all. **It never warns about coverage:** you read the rings.
 - **Leading your receiver is the skill:** put the reticle where it will be when the ball lands.
 - **Only the QB throws. There are no laterals**, except on trick-play cards.
-- **Throw range** is measured from the line of scrimmage: from **a yard behind it** (for a Screen) to **11 yards past it**.
+- **Throw range** is measured from the line of scrimmage: from **a yard behind it** (for a Screen) to **13 yards past it**.
 - **One sliding arc, no throw modes:** the farther you throw, **the higher the ball flies** (the peak grows with the distance squared) **and the longer it's in the air** (about a beat per 3¾ yards). The dashed aiming line shows the arc.
 - **A pass can only be touched where it's low**, by anyone: caught by your players or batted down by defenders. A short pass stays low the whole way; a long one climbs out of reach right from the release and comes back within reach only as it drops toward the reticle. **The dashed aiming line shows it: gold (and bigger) where the ball will be low enough to touch, white where it's out of reach.** The gold stretch is drawn a little short of the real window, so catches are a bit more forgiving than they look.
 - **The pull sensitivity** is a tuning value (`tuning.aim`).
@@ -192,7 +192,7 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 
 ### The Grid
 
-- **The field is a grid of half-yard tiles:** **11 wide and 26 tall** (5½ by 13 yards) in portrait, so a 10-yard first down is 20 rows and the whole drive fits on one screen. Everything lives on it.
+- **The field is a grid of half-yard tiles:** **11 wide and 30 tall** (5½ by 15 yards) in portrait: a 10-yard first down is 20 rows, with **3 yards of field past the first-down line**, and the whole drive fits on one screen. Near the line, a defense keeps its shape but squeezes into the room that's left, instead of piling onto your receivers. Everything lives on it.
 - **Players and defenders hop tile to tile**, the way the chicken does in *Crossy Road*, and they **hop on the beat**.
 - **Routes are tile paths**, so a play's preview is easy to read. ▲ *The grid can be loosened later if it plays stiff.*
 

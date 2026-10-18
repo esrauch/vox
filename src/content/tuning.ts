@@ -18,11 +18,12 @@ export const tuning = {
   },
   grid: {
     /**
-     * Half-yard tiles (GAMEPLAY.md, The Grid): 11 wide (5½ yards) by 26 tall
-     * (13 yards), so a 10-yard first down is 20 rows and fits on one screen.
+     * Half-yard tiles (GAMEPLAY.md, The Grid): 11 wide (5½ yards) by 30 tall
+     * (15 yards): a 10-yard first down is 20 rows, with 3 yards of field past
+     * the first-down line so a defense near it still has room.
      */
     cols: 11,
-    rows: 26,
+    rows: 30,
   },
   drive: {
     /** The row the line of scrimmage starts on for every drive. */
@@ -77,7 +78,7 @@ export const tuning = {
     /** Throws land from this many rows behind the line of scrimmage (negative)… */
     minAhead: -2,
     /** …to this many rows past it. */
-    maxAhead: 22,
+    maxAhead: 26,
   },
   aim: {
     /** Slingshot aiming: how far the target moves per pixel of pull. */
