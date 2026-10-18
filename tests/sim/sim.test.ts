@@ -129,11 +129,32 @@ describe('tackles', () => {
     expect(downAndDistance(next)).toBe('2nd & 5');
   });
 
-  it('a fend-off (from a Clean Catch) knocks the tackler down instead', () => {
-    const r = run(meeting(1), 4);
+  it('a fend-off (from a Clean Catch) knocks the tackler down, and the carrier gets clear', () => {
+    const r = run(meeting(1), 10);
     expect(ofType(r.events, 'fendedOff')).toHaveLength(1);
     expect(ofType(r.events, 'downEnded')).toHaveLength(0);
-    expect(player(r.state, 100).pos).toEqual(vec(4, 8));
+    expect(player(r.state, 100).pos.y).toBe(11);
+  });
+
+  it('a defender right behind the carrier tackles it (no trailing it up the field)', () => {
+    const state = carry(playState([{ pos: vec(4, 6) }], [{ kind: 'cover', pos: vec(4, 5) }]), 100);
+    const r = step(state);
+    expect(ofType(r.events, 'tackled')).toEqual([{ type: 'tackled', id: 100, by: 200 }]);
+    expect(ofType(r.events, 'downEnded')[0]).toEqual({
+      type: 'downEnded',
+      result: 'tackled',
+      gained: 4,
+    });
+  });
+
+  it('a chaser that hops up beside the carrier tackles it', () => {
+    // The Blitzer on (3, 7) comes down to (3, 6) as the carrier hops up to (4, 6): side by side.
+    const state = carry(
+      playState([{ pos: vec(4, 5) }], [{ kind: 'blitzer', pos: vec(3, 7) }]),
+      100,
+    );
+    const r = run(state, 2);
+    expect(ofType(r.events, 'tackled')[0]?.by).toBe(200);
   });
 });
 
@@ -270,17 +291,19 @@ describe('the defense', () => {
   });
 
   it('the Safety gets into the carrier\u2019s column first, then comes down to meet it', () => {
-    let state = carry(playState([{ pos: vec(1, 6) }], [{ kind: 'safety', pos: vec(4, 12) }]), 100);
-    const path: string[] = [];
-    for (let i = 0; i < 4 && state.phase === 'play'; i++) {
-      state = run(state, 2).state;
-      path.push(key(defender(state, 200).pos));
-    }
-    // Across (3, 2, 1 on row 12) before coming down the carrier's column.
+    const state = carry(
+      playState([{ pos: vec(1, 6) }], [{ kind: 'safety', pos: vec(4, 12) }]),
+      100,
+    );
+    const r = run(state, 12);
+    const path = ofType(r.events, 'hop')
+      .filter((e) => e.id === 200)
+      .map((e) => key(e.to));
+    // Across row 12 to the carrier's column before coming down it…
     expect(path.slice(0, 3)).toEqual(['3,12', '2,12', '1,12']);
-    // Then it meets the carrier coming up: a tackle, short of the first-down line.
-    const r = run(state, 4);
+    // …then it meets the carrier coming up: a tackle, short of the first-down line.
     expect(ofType(r.events, 'tackled')[0]?.by).toBe(200);
+    expect(ofType(r.events, 'downEnded')[0]?.result).toBe('tackled');
   });
 
   it('the Safety slides toward where a pass will land', () => {

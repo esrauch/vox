@@ -125,8 +125,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### Tackling
 
-- **A tackle is contact:** the carrier is down when it and a defender meet on a tile, or swap tiles. Any defender can tackle.
-- **A fend-off** (from a Clean Catch or a card) knocks that defender down for 3 beats instead, and the carrier keeps running.
+- **A tackle is contact:** the carrier is down when a defender reaches it: they meet on a tile or swap tiles, or the defender ends a beat **right next to it** (in front, behind or beside, not diagonally). So a chaser one step behind catches the carrier rather than trailing it up the field. Any defender can tackle.
+- **A fend-off** (from a Clean Catch or a card) knocks that defender down instead, for 8 beats (long enough for the carrier to get clear), and the carrier keeps running.
 - **Blocking is just standing in the way:** your players and defenders **never share a tile**. Whoever would step into the other waits, so a player on a "." route is a blocker, and a Blitzer has to go around it. Only the carrier can be stepped into, and that's a tackle.
 - **Your players never block each other.** They can share a tile and hop past one another.
 

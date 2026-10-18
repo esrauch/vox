@@ -12,7 +12,8 @@
  *   1. Knocked-down units recover a little.
  *   2. A throw released for this beat leaves the QB's hand.
  *   3. Units hop (on their hop beats). Your players and defenders can't share
- *      a tile; a defender meeting the carrier tackles it (unless it fends off).
+ *      a tile. A defender that meets the carrier, or ends the beat right next
+ *      to it (in front, behind or beside), tackles it, unless it fends off.
  *   4. The carrier crossing the first-down line wins the drive.
  *   5. A defender next to the QB while it holds the ball sacks it (or the play clock runs out).
  *   6. A Witch crossing the pass blocks it.
@@ -23,7 +24,7 @@ import { DEFENDERS } from '../content/defenders';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
 import { coveringDefender, openness } from './coverage';
-import { COLS, END_ROW, ROWS, eq, inBounds, key, touches, vec } from './grid';
+import { COLS, END_ROW, ROWS, dist, eq, inBounds, key, touches, vec } from './grid';
 import { snatches, witchColumn } from './hazards';
 import { endDown, nextDown } from './run';
 import { actsOn } from './stats';
@@ -59,7 +60,7 @@ export function step(prev: RunState, input: BeatInput = {}): SimResult {
   state.downBeat++;
   for (const u of allUnits(state)) if (u.downBeats > 0) u.downBeats--;
   if (input.throwAt) tryThrow(state, input.throwAt, events);
-  const tackled = resolveMoves(state, events);
+  const tackled = resolveMoves(state, events) ?? checkContact(state, events);
   if (checkFirstDown(state, events)) return { state, events };
   if (tackled) {
     endDown(state, 'tackled', tackled.pos.y, events);
@@ -187,6 +188,31 @@ function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
     if (u.side === 'defender') advancePatrol(u);
   }
   return tackled;
+}
+
+/**
+ * After everyone hops: a defender that's up and right next to the carrier (or
+ * on its tile) tackles it, so a chaser one step behind catches it rather than
+ * trailing it up the field. A fend-off knocks that defender down instead.
+ */
+function checkContact(state: RunState, events: SimEvent[]): PlayerUnit | null {
+  const carrier = carrierOf(state);
+  if (!carrier) return null;
+  const near = state.screen.defenders
+    .filter((d) => isUp(d) && dist(d.pos, carrier.pos) <= 1)
+    .sort(byId);
+  for (const d of near) {
+    if (carrier.fendOff > 0) {
+      carrier.fendOff--;
+      d.downBeats = tuning.units.knockdownBeats;
+      events.push({ type: 'fendedOff', id: carrier.id, defender: d.id });
+      events.push({ type: 'knockedDown', id: d.id });
+      continue;
+    }
+    events.push({ type: 'tackled', id: carrier.id, by: d.id });
+    return carrier;
+  }
+  return null;
 }
 
 /** After a hop, a patrolling defender moves on to the next tile of its circuit. */

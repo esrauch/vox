@@ -83,7 +83,11 @@ export const tuning = {
     ui: 0.5,
   },
   units: {
-    /** Beats a knocked-down unit stays down: longer than a hop, so a carrier that fends one off gets past. */
-    knockdownBeats: 3,
+    /**
+     * Beats a knocked-down unit stays down: four hops, long enough for a
+     * carrier that fends it off to get clear, so it can't get up right behind
+     * the carrier and tackle it anyway.
+     */
+    knockdownBeats: 8,
   },
 } as const;
