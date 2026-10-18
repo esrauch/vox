@@ -50,6 +50,7 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
   if (job === 'zone') return null;
   if (job === 'patrol') return patrolNext(d);
   const carrier = carrierOf(screen);
+  if (job === 'safety') return safetyIntent(d, screen, carrier);
   if (carrier) return stepToward(d.pos, carrier.pos);
   switch (job) {
     case 'cover': {
@@ -63,14 +64,30 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
       const ahead = stepToward(d.pos, screen.qb);
       return occupiedByPlayer(screen, ahead) ? stepAround(d.pos, screen.qb) : ahead;
     }
-    case 'safety': {
-      // Holds its row, sliding level with your deepest receiver.
-      const deepest = [...screen.players].sort((a, b) => b.pos.y - a.pos.y || a.id - b.id)[0];
-      return deepest && deepest.pos.x !== d.pos.x
-        ? vec(d.pos.x + Math.sign(deepest.pos.x - d.pos.x), d.pos.y)
-        : null;
-    }
+    default:
+      return null;
   }
+}
+
+/**
+ * The Safety is the last line between the ball and the first-down line, so it
+ * always gets into the right column first and only then comes down:
+ * - with a carrier still in front of it: across to the carrier's column, then
+ *   down to meet it (a carrier that's already past it is just chased);
+ * - with the ball in the air: across to the column it will land in, holding its row;
+ * - otherwise: holding its row, level with your deepest receiver.
+ */
+function safetyIntent(d: Defender, screen: ScreenState, carrier: PlayerUnit | null): Vec | null {
+  const across = (x: number): Vec | null =>
+    x === d.pos.x ? null : vec(d.pos.x + Math.sign(x - d.pos.x), d.pos.y);
+  if (carrier) {
+    if (carrier.pos.y > d.pos.y) return stepToward(d.pos, carrier.pos);
+    return across(carrier.pos.x) ?? stepToward(d.pos, carrier.pos);
+  }
+  const { ball } = screen;
+  if (ball.at === 'flight') return across(Math.round(ball.target.x));
+  const deepest = [...screen.players].sort((a, b) => b.pos.y - a.pos.y || a.id - b.id)[0];
+  return deepest ? across(deepest.pos.x) : null;
 }
 
 function carrierOf(screen: ScreenState): PlayerUnit | null {

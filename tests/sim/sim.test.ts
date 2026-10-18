@@ -266,7 +266,30 @@ describe('the defense', () => {
     );
     const r = run(state, 2).state;
     expect(defender(r, 200).pos).toEqual(vec(4, 3)); // up toward the carrier, not down to the QB
-    expect(defender(r, 201).pos).toEqual(vec(4, 11));
+    expect(defender(r, 201).pos).toEqual(vec(3, 12)); // the Safety: into the carrier's column first
+  });
+
+  it('the Safety gets into the carrier\u2019s column first, then comes down to meet it', () => {
+    let state = carry(playState([{ pos: vec(1, 6) }], [{ kind: 'safety', pos: vec(4, 12) }]), 100);
+    const path: string[] = [];
+    for (let i = 0; i < 4 && state.phase === 'play'; i++) {
+      state = run(state, 2).state;
+      path.push(key(defender(state, 200).pos));
+    }
+    // Across (3, 2, 1 on row 12) before coming down the carrier's column.
+    expect(path.slice(0, 3)).toEqual(['3,12', '2,12', '1,12']);
+    // Then it meets the carrier coming up: a tackle, short of the first-down line.
+    const r = run(state, 4);
+    expect(ofType(r.events, 'tackled')[0]?.by).toBe(200);
+  });
+
+  it('the Safety slides toward where a pass will land', () => {
+    const state = playState(
+      [{ pos: vec(7, 6), route: '.' }],
+      [{ kind: 'safety', pos: vec(4, 12) }],
+    );
+    const r = run(step(state, { throwAt: vec(7, 9) }).state, 1).state;
+    expect(defender(r, 200).pos).toEqual(vec(5, 12));
   });
 
   it('the Safety holds its row, sliding level with your deepest receiver', () => {

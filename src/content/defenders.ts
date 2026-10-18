@@ -13,7 +13,7 @@ export type Job =
   | 'zone'
   /** The pass rush: straight for the QB; chases the carrier after a catch. */
   | 'rush'
-  /** The deep guard: holds its row, sliding level with your deepest receiver; chases after a catch. */
+  /** The deep guard: holds its row level with your deepest receiver (or the landing spot); after a catch, into the carrier's column, then down. */
   | 'safety'
   /** Loops a fixed 4×4 box circuit, whatever the play is doing. */
   | 'patrol';
