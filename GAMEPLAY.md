@@ -82,7 +82,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### The Pocket *(Retro Bowl-style)*
 
-- **It's a countdown you can see, nothing more.** Three linemen stand in front of the QB with **three rushers** (rhino beetles) pressed against them. From the snap, **the pocket clock runs: 6 beats** on an ordinary play. As it runs down, **the rush pushes your line back toward the QB**, and **pips over the line count the beats left** (white, then red for the last one). At zero, with the ball still in the QB's hand, it's a **sack**.
+- **It's a countdown you can see, nothing more.** Two linemen stand in front of the QB, either side of the middle, with **two rushers** (rhino beetles) pressed against them, leaving a lane up the middle for runs. From the snap, **the pocket clock runs: 6 beats** on an ordinary play. As it runs down, **the rush pushes your line back toward the QB**, and **pips over the line count the beats left** (white, then red for the last one). At zero, with the ball still in the QB's hand, it's a **sack**.
 - **The line and the rushers are only drawn.** They don't block passes, bat the ball, chase or tackle.
 - **Blockers buy time:** every player a play leaves at home (a "." route, like the Screen's two blockers) adds 1½ beats. **A defense that brings extra rushers** (the Boss brings two) takes 1½ beats away per extra rusher. The pocket never holds for less than 3 beats.
 - **Runs have no pocket clock:** a Draw hands the ball off at the snap.

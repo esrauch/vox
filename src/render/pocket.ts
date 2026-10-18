@@ -6,17 +6,17 @@ import { getGeometry, voxelMaterial } from '../voxel/models';
 import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
-/** Your offensive line: three plain players across the middle, in front of the QB… */
-const LINEMEN = 3;
+/** Your offensive line: two plain players either side of the middle, in front of the QB… */
+const LINE_COLUMNS = [-1, 1];
 const LINEMAN_MODEL = 'team/walkOn';
-/** …and the pass rush pressed against them: three rhino beetles. */
+/** …and the pass rush pressed against them: two rhino beetles. The middle stays open for a run. */
 const RUSHER_MODEL = 'forest/blitzer';
 /** The most countdown pips shown (one per beat left). */
 const MAX_PIPS = 8;
 
 /**
- * The pocket (GAMEPLAY.md, The Pocket), Retro Bowl-style: three linemen in
- * front of the QB, with three rushers pressed against them. As the pocket
+ * The pocket (GAMEPLAY.md, The Pocket), Retro Bowl-style: two linemen in
+ * front of the QB, with two rushers pressed against them, and a lane up the middle. As the pocket
  * clock runs down, the rush pushes the line back toward the QB, and pips over
  * the line count the beats left before the sack (white, then red for the last
  * one). It's only a countdown: none of them are units, and they don't block,
@@ -41,7 +41,7 @@ export class PocketView {
       scene.add(root);
       return root;
     };
-    for (let i = 0; i < LINEMEN; i++) {
+    for (let i = 0; i < LINE_COLUMNS.length; i++) {
       this.linemen.push(figure(LINEMAN_MODEL));
       this.rushers.push(figure(RUSHER_MODEL));
     }
@@ -68,12 +68,12 @@ export class PocketView {
       this.lineRow = los;
     }
     this.linemen.forEach((root, i) => {
-      const at = tileToWorld({ x: MID_COL - 1 + i, y: this.lineRow });
+      const at = tileToWorld({ x: MID_COL + (LINE_COLUMNS[i] ?? 0), y: this.lineRow });
       root.position.set(at.x, 0, at.z);
     });
     this.rushers.forEach((root, i) => {
       // A little more than a row up, so the low beetles show above your linemen.
-      const at = tileToWorld({ x: MID_COL - 1 + i, y: this.lineRow + 1.5 });
+      const at = tileToWorld({ x: MID_COL + (LINE_COLUMNS[i] ?? 0), y: this.lineRow + 1.5 });
       root.position.set(at.x, 0, at.z);
     });
 
