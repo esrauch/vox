@@ -186,7 +186,8 @@ export class UnitViews {
   private updateRing(screen: ScreenState, u: Unit, view: UnitView, carrying: boolean): void {
     view.ring.position.set(view.current.x, 0.02, view.current.z);
     if (u.side === 'defender') {
-      const r = coverageRadius(u);
+      // Coverage only matters while a pass can still be thrown or caught.
+      const r = screen.ball.at === 'carried' ? 0 : coverageRadius(u);
       view.ring.visible = r > 0;
       view.ring.scale.setScalar(Math.max(r, 0.01));
       return;

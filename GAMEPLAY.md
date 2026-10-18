@@ -107,7 +107,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Coverage: Who's Open, at a Glance
 
-- **Every defender that covers shows a purple ring** on the turf around it: **its coverage**.
+- **Every defender that covers shows a purple ring** on the turf around it: **its coverage**. The rings go away once the ball is caught, since there's no pass left to block.
 - **Every one of your players shows a ring that says whether it could catch right now:**
   - **Green:** clear. No coverage nearby; a ball arriving now is a safe catch.
   - **Yellow:** a ball arriving now would still be caught, but coverage is close (*within one tile of a purple ring*). By the time the ball lands, it may not be.
