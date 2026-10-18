@@ -133,7 +133,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 - **A tackle is contact:** the carrier is down when a defender reaches it: they meet on a tile or swap tiles, or the defender ends a beat **right next to it** (in front, behind or beside, not diagonally). So a chaser one step behind catches the carrier rather than trailing it up the field. Any defender can tackle.
 - **A fend-off** (from a Clean Catch or a card) knocks that defender down instead, long enough for the carrier to get clear, and the carrier keeps running.
-- **Blocking is just standing in the way:** your players and defenders **never share a tile**. Whoever would step into the other waits, so a player on a "." route is a blocker, and a Blitzer has to go around it. Only the carrier can be stepped into, and that's a tackle.
+- **Blocking is just standing in the way:** your players and defenders **never share a tile**. Whoever would step into the other waits, so a player on a "." route is a blocker that defenders have to go around. Only the carrier can be stepped into, and that's a tackle.
 - **Your players never block each other.** They can share a tile and hop past one another.
 
 ---
@@ -150,7 +150,7 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 | **Safety** | **Owl**: perched deep, it sees everything | **The deep guard, always between the ball and the first-down line.** It hangs back near the line and slides across its row to stay level with your deepest receiver; while a pass is in the air, it slides toward where it will land. **After a catch it gets into the carrier's column first, then comes down to meet it** (a carrier already past it is just chased). So **a deep pass coming down near it is batted away**, and a carrier rarely gets by it. Beating the Safety (a decoy, a flood to one side, a trick play) is how you gain 10 in one play. | **None** |
 | **Bat** | Bat | **Patrols** a fixed box circuit (3 yards square), one tile per hop, whatever the play is doing. It's already circling before the snap, so you can time a throw past it. A pass coming down near it bounces off. | Small (half a yard), moving with it |
 
-- **Later drives and areas** add more Covers and Blitzers, plant more Scarecrows, and lengthen the distance ("4th and 15").
+- **Later drives and areas** add more Covers and rushers, plant more Scarecrows, and lengthen the distance ("4th and 15").
 - **Before the snap, only the Bats move.** Everyone else waits for HIKE.
 
 ### Hazards
@@ -170,7 +170,7 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 - **Pure beat patterns.** What a hazard does is set by the beat number alone, so the same field always plays the same way.
 - **Learn it before the snap.** Hazards and patrols keep moving while you pick a play, and carry on exactly where they were after HIKE.
 - **One beat of warning, always.** Nothing moves without telegraphing it first.
-- **They hit defenders too.** ▲ *Covers and Blitzers are reckless and charge through; Bats and Scarecrows don't go near them.*
+- **They hit defenders too.** ▲ *Covers are reckless and charge through; Bats and Scarecrows don't go near them.*
 - **Upfield only.** Hazards never sit behind the line of scrimmage or reach the QB.
 
 ---
@@ -279,7 +279,7 @@ The smallest version that proves the fun:
 - **One area, the Haunted Forest, of four drives** (placeholder Gimmick and Boss).
 - **Drives and downs** with a first-down line and a down-and-distance readout.
 - **Play cards:** six starter plays with formations, routes and Flip; draw 3, call 1.
-- **The defense:** Covers, Zones, Blitzers, a Safety and Bats, with coverage rings and green, yellow and red player rings. Blocks instead of interceptions.
+- **The defense:** Covers, Zones, a Safety and Bats, the drawn pass rush, Scarecrow rings and green, yellow and red player rings. Blocks instead of interceptions.
 - **The Witch** as the first hazard.
 - **The draft** after a won drive: one of three cards, or remove one.
 - One looping song, the core sound effects, and basic juice.
@@ -297,7 +297,7 @@ Designs we built or considered. They aren't in the game, but they're worth remem
 - **Screens to the end zone, balls as lives** *(until 2026-10-18):* you placed your squad freely, threw once, and ran it to the top of the screen. A pile of balls was your lives, and every fumble or interception cost one. Walk-ons traded themselves for defenders; recruits joined from a draft and were gone for good if they went down; Hijinks spent a Hype meter. **Why it was replaced:** placement barely mattered, waiting was free, and the run after the catch was free too, so there was no real game. Drives, downs and play cards replaced it.
 - **Steering the carrier** *(tried 2026-10-17, discarded 2026-10-18):* swipe to sidestep or wait after the catch. It didn't make the game.
 - **The pocket and Blockers** *(removed in M1.3):* a single tile in front of the QB held by a Blocker with a hold counter that Blitzers wore down. It added a role and a counter to learn.
-- **A hold counter for sacks** *(replaced 2026-10-17):* Blitzers attacked a 3-point counter. Now a rusher reaching the QB is a sack.
+- **A hold counter for sacks** *(replaced 2026-10-17):* Blitzers attacked a 3-point counter. Now the pocket clock decides the sack.
 - **The Giant Quarterback** *(the original premise):* you were the **Big**, a hulking monster QB, and your team was tiny creatures (the **Smalls**). The comedy of scale might return as a boss.
 
 ---
