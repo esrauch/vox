@@ -55,6 +55,20 @@ export interface Defender extends UnitBase {
 
 export type Unit = PlayerUnit | Defender;
 
+export type HazardKind = 'witch';
+
+/** A hazard: a pure beat pattern (sim/hazards.ts). It has no state that changes. */
+export interface Hazard {
+  readonly id: number;
+  readonly kind: HazardKind;
+  /** The row it flies along. */
+  readonly row: number;
+  /** Its column on beat 0. */
+  readonly startX: number;
+  /** Which way it flies: +1 is right, -1 is left. */
+  readonly dir: 1 | -1;
+}
+
 export type BallState =
   | { readonly at: 'qb' }
   | {
@@ -78,6 +92,7 @@ export interface ScreenState {
   readonly index: number;
   readonly players: PlayerUnit[];
   readonly defenders: Defender[];
+  readonly hazards: readonly Hazard[];
   ball: BallState;
 }
 
@@ -104,7 +119,7 @@ export type Action =
 /** How close the receiver was to where the ball came down. A perfect catch is a Clean Catch. */
 export type CatchQuality = 'perfect' | 'good' | 'ok';
 
-export type FumbleReason = 'sack' | 'miss' | 'interception' | 'tackle';
+export type FumbleReason = 'sack' | 'miss' | 'interception' | 'tackle' | 'snatched';
 /** What killed a unit: a defender, or (for defenders) a Walk-on trading itself. */
 export type DeathCause = 'defender' | 'walkOn';
 export type HitResult = 'down' | 'dead';

@@ -5,6 +5,8 @@ import { replay, type Input } from '../../src/sim/replay';
 import { createRun, dispatch } from '../../src/sim/run';
 import { boxCircuit, createDefenders, generateSpawns } from '../../src/sim/screen';
 import { step } from '../../src/sim/step';
+import { witchColumn } from '../../src/sim/hazards';
+import type { Hazard } from '../../src/sim/types';
 import { ofType, playState, run, player, standStill } from './helpers';
 
 describe('creating a run', () => {
@@ -401,5 +403,57 @@ describe('determinism', () => {
         expect(state.balls).toBeGreaterThanOrEqual(0);
       }
     }
+  });
+});
+
+describe('the Witch on a Broom', () => {
+  const witch = (row: number, startX: number, dir: 1 | -1): Hazard => ({
+    id: 900,
+    kind: 'witch',
+    row,
+    startX,
+    dir,
+  });
+
+  it('flies one tile per beat across her row and wraps to the other side', () => {
+    const right = witch(6, 7, 1);
+    expect([0, 1, 2, 3].map((b) => witchColumn(right, b))).toEqual([7, 8, 0, 1]);
+    const left = witch(6, 1, -1);
+    expect([0, 1, 2, 3].map((b) => witchColumn(left, b))).toEqual([1, 0, 8, 7]);
+  });
+
+  it('flies on the global beat, before HIKE too', () => {
+    const state = createRun(1);
+    const h = state.screen.hazards[0]!;
+    const later = run(state, 3).state;
+    expect(later.phase).toBe('setup');
+    expect(witchColumn(h, later.beat)).not.toBe(witchColumn(h, state.beat));
+  });
+
+  // A pass from the QB (4, 0) to (4, 8), thrown on beat 1, crosses row 4 halfway: on beat 2.
+  const passOverRow4 = (startX: number) => {
+    const state = playState([{ pos: vec(4, 6) }]);
+    Object.assign(state.screen, { hazards: [witch(4, startX, 1)] });
+    return run(step(state, { throwAt: vec(4, 8) }).state, 2);
+  };
+
+  it('snatches a pass that crosses her row near her: a fumble', () => {
+    // She's on column 2 at beat 0, so column 4 on beat 2, as the ball crosses.
+    const r = passOverRow4(2);
+    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('snatched');
+  });
+
+  it('lets a pass through when she is elsewhere in her row', () => {
+    const r = passOverRow4(7);
+    expect(ofType(r.events, 'fumble')).toHaveLength(0);
+    expect(ofType(r.events, 'caught')).toHaveLength(1);
+  });
+
+  it('never touches runners: players pass under her', () => {
+    const state = playState([{ pos: vec(2, 3) }]);
+    Object.assign(state.screen, { hazards: [witch(4, 0, 1)] }); // over column 2 on beat 2
+    const r = run(state, 8);
+    expect(ofType(r.events, 'died')).toHaveLength(0);
+    expect(r.state.screen.players[0]!.pos.y).toBeGreaterThan(4);
   });
 });

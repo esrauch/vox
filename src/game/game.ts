@@ -8,6 +8,7 @@
 import { AimView } from '../render/aim';
 import { BallView } from '../render/ball';
 import { createField } from '../render/field';
+import { HazardViews } from '../render/hazards';
 import { QbView } from '../render/qb';
 import { createForestScenery } from '../render/scenery';
 import { UnitViews } from '../render/units';
@@ -35,6 +36,7 @@ export class Game {
 
   private readonly view: View;
   private readonly units: UnitViews;
+  private readonly hazards: HazardViews;
   private readonly qb: QbView;
   private readonly ball: BallView;
   private readonly aimView: AimView;
@@ -54,12 +56,13 @@ export class Game {
     const { scene } = this.view;
     scene.add(createField(), createForestScenery(scene, this.view));
     this.units = new UnitViews(scene);
+    this.hazards = new HazardViews(scene);
     this.qb = new QbView(scene);
     this.ball = new BallView(scene);
     this.aimView = new AimView(scene);
     this.hud = new Hud(uiRoot, { onAction: () => void this.onAction() });
 
-    this.units.reset(this.state.screen);
+    this.resetViews();
     this.syncHud();
     const refit = (): void => this.view.setInsets(this.hud.insets());
     window.addEventListener('resize', refit);
@@ -87,6 +90,7 @@ export class Game {
     while (this.state.beat < beat) this.stepBeat();
 
     this.units.update(this.state.screen, beat, pos - beat);
+    this.hazards.update(pos, now / 1000);
     const holding = this.ball.update(this.state.screen, pos, this.units, now / 1000);
     this.qb.update(holding);
     this.aimView.update(now / 1000);
@@ -108,10 +112,16 @@ export class Game {
     const prev = this.state;
     const { state, events } = step(prev, input);
     this.state = state;
-    if (events.some((e) => e.type === 'screenStarted')) this.units.reset(state.screen);
+    if (events.some((e) => e.type === 'screenStarted')) this.resetViews();
     else this.units.beginBeat(prev.screen, state.screen, state.beat);
     react(events, state.screen, this.hud, (id) => this.conductor.play(id));
     this.syncHud();
+  }
+
+  /** Rebuild the views of everything on the field (a new or restarted screen). */
+  private resetViews(): void {
+    this.units.reset(this.state.screen);
+    this.hazards.reset(this.state.screen);
   }
 
   // ── Phases and the HUD ──────────────────────────────────────────────────
@@ -135,13 +145,13 @@ export class Game {
       this.act({ type: 'hike' });
     } else if (phase === 'cleared') {
       this.act({ type: 'nextScreen' });
-      this.units.reset(this.state.screen);
+      this.resetViews();
     } else if (phase === 'over') {
       this.seed++;
       this.state = createRun(this.seed);
       this.runStart = Math.floor(this.conductor.beatAt() ?? 0) - this.state.beat;
       this.queuedThrow = null;
-      this.units.reset(this.state.screen);
+      this.resetViews();
     }
     this.syncHud();
   }
@@ -219,7 +229,7 @@ export class Game {
     this.act({ type: 'place', slot: this.drag.slot, tile: this.drag.tile });
     this.drag = null;
     this.units.setDragging(null);
-    this.units.reset(this.state.screen);
+    this.resetViews();
   }
 
   /** Releasing throws if the aim is allowed (the sim takes it on the next beat); otherwise it cancels. */

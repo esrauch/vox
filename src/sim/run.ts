@@ -6,7 +6,7 @@ import { playerKind, WALK_ON } from '../content/players';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
 import { eq, inSetupZone, vec } from './grid';
-import { createDefenders, generateSpawns } from './screen';
+import { createDefenders, generateHazards, generateSpawns } from './screen';
 import type { Action, RunState, SimEvent, SimResult, PlayerUnit, Vec } from './types';
 
 /** Where each slot starts if the player hasn't placed it. */
@@ -31,7 +31,7 @@ export function createRun(seed: number): RunState {
     screensCleared: 0,
     slots: Array.from({ length: tuning.run.startingSlots }, () => ({ kindId: WALK_ON.id })),
     formation: [],
-    screen: { index: 0, players: [], defenders: [], ball: { at: 'qb' } },
+    screen: { index: 0, players: [], defenders: [], hazards: [], ball: { at: 'qb' } },
     nextId: 1,
   };
   setUpScreen(state, 0);
@@ -59,10 +59,13 @@ export function setUpScreen(state: RunState, index: number): void {
   });
   const defenders = createDefenders(generateSpawns(state.seed, index), state.nextId);
   state.nextId += defenders.length;
+  const hazards = generateHazards(state.seed, index, state.nextId);
+  state.nextId += hazards.length;
   state.screen = {
     index,
     players,
     defenders,
+    hazards,
     ball: { at: 'qb' },
   };
   state.phase = 'setup';

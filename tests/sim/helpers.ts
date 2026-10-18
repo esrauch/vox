@@ -40,6 +40,7 @@ export function playState(
     index: 0,
     players: units,
     defenders: createDefenders(defenders, 200),
+    hazards: [],
     ball: { at: 'qb' },
   };
   state.phase = 'play';

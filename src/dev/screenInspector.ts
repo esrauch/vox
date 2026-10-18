@@ -3,6 +3,7 @@
  * Players in setup, and queue throws by tapping tiles. Open /dev/screen.html?seed=N.
  */
 import { DEFENDERS } from '../content/defenders';
+import { witchColumn } from '../sim/hazards';
 import { tuning } from '../content/tuning';
 import { QB_POS, COLS, END_ROW, ROWS, SETUP_ROWS, eq, inThrowBand, vec } from '../sim/grid';
 import { createRun, dispatch, yards } from '../sim/run';
@@ -142,6 +143,9 @@ function render(): void {
         .filter((u) => eq(u.pos, tile))
         .sort((a, b) => Number(b.alive) - Number(a.alive))[0];
       if (unit) html += unitHtml(unit);
+      if (screen.hazards.some((h) => h.row === y && witchColumn(h, state.beat) === x)) {
+        html += '<span class="hazard">⋔</span>';
+      }
       if (ball.at === 'flight' && eq(ball.target, tile)) {
         html += `<span class="badge">${ball.landsOn - state.beat}</span>`;
       }

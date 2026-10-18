@@ -13,14 +13,16 @@
  *   2. A throw tapped for this beat leaves the QB's hand.
  *   3. Units hop (on their hop beats) and collisions resolve.
  *   4. A defender next to the QB sacks it (only while it holds the ball).
- *   5. A ball due this beat lands: catch, interception or miss.
- *   6. Touchdown and wipeout checks.
- *   7. Everyone decides next beat's hop (the telegraph).
+ *   5. A Witch snatches a pass crossing her row near her.
+ *   6. A ball due this beat lands: catch, interception or miss.
+ *   7. Touchdown and wipeout checks.
+ *   8. Everyone decides next beat's hop (the telegraph).
  */
 import { DEFENDERS } from '../content/defenders';
 import { playerKind } from '../content/players';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
+import { snatches } from './hazards';
 import { COLS, END_ROW, eq, inBounds, key, nextToQb } from './grid';
 import { setUpScreen, yards } from './run';
 import { actsOn, hitsSurvived } from './stats';
@@ -55,6 +57,7 @@ export function step(prev: RunState, input: BeatInput = {}): SimResult {
   resolveMoves(state, events);
   if (state.phase === 'play') checkSack(state, events);
   updateIntents(state.screen);
+  if (state.phase === 'play') checkSnatch(state, events);
   if (state.phase === 'play') resolveLanding(state, events);
   if (state.phase === 'play') checkTouchdown(state, events);
   if (state.phase === 'play') checkWipeout(state, events);
@@ -258,6 +261,14 @@ function checkSack(state: RunState, events: SimEvent[]): void {
   const { screen } = state;
   if (screen.ball.at !== 'qb') return;
   if (screen.defenders.some((d) => isUp(d) && nextToQb(d.pos))) fumble(state, 'sack', events);
+}
+
+// ── Hazards ─────────────────────────────────────────────────────────────────
+
+/** A pass crossing a Witch's row near her is snatched out of the air: a fumble. */
+function checkSnatch(state: RunState, events: SimEvent[]): void {
+  const { screen, beat } = state;
+  if (screen.hazards.some((h) => snatches(h, screen.ball, beat))) fumble(state, 'snatched', events);
 }
 
 // ── The ball landing ───────────────────────────────────────────────────────

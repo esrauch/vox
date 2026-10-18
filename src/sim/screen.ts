@@ -4,9 +4,10 @@
  * solvability check replaces it in M2/M3 (TECHNICAL.md §10).
  */
 import { DEFENDERS, DEFENDER_KINDS } from '../content/defenders';
+import { tuning } from '../content/tuning';
 import { COLS, END_ROW, SETUP_ROWS, eq, vec } from './grid';
 import { createRng, deriveSeed } from './rng';
-import type { Defender, DefenderKind, Vec } from './types';
+import type { Defender, DefenderKind, Hazard, Vec } from './types';
 
 export interface DefenderSpawn {
   readonly kind: DefenderKind;
@@ -80,4 +81,22 @@ export function boxCircuit(near: Vec): Vec[] {
   for (let y = y0 + BOX - 1; y > y0; y--) out.push(vec(x0 + BOX - 1, y)); // down the right side
   for (let x = x0 + BOX - 1; x > x0; x--) out.push(vec(x, y0)); // back along the bottom
   return out;
+}
+
+/**
+ * A screen's hazards. Deterministic per (seed, index), from their own seed so
+ * adding hazards doesn't move the defenders. For now: one Witch on a random
+ * row of the throwing band, flying a random way.
+ */
+export function generateHazards(seed: number, index: number, firstId: number): Hazard[] {
+  const rng = createRng(deriveSeed(seed, 'hazards', index));
+  return [
+    {
+      id: firstId,
+      kind: 'witch',
+      row: rng.int(tuning.throw.minRow, tuning.throw.maxRow),
+      startX: rng.int(0, COLS - 1),
+      dir: rng.int(0, 1) === 0 ? 1 : -1,
+    },
+  ];
 }

@@ -3,7 +3,7 @@
  * sound effects and HUD pops. The words for every pop live here.
  */
 import type { SfxId } from '../audio/sfx';
-import type { CatchQuality, ScreenState, SimEvent, ThrowProblem } from '../sim/types';
+import type { CatchQuality, FumbleReason, ScreenState, SimEvent, ThrowProblem } from '../sim/types';
 import type { Hud } from '../ui/hud';
 
 export const THROW_PROBLEM_TEXT: Readonly<Record<ThrowProblem, string>> = {
@@ -12,6 +12,12 @@ export const THROW_PROBLEM_TEXT: Readonly<Record<ThrowProblem, string>> = {
   offField: 'off the field',
   tooFar: 'out of range',
   tooClose: 'too close',
+};
+
+/** Fumbles with their own pop; the rest get the crowd's chant. */
+const FUMBLE_TEXT: Partial<Record<FumbleReason, string>> = {
+  sack: 'SACKED!',
+  snatched: 'SNATCHED!',
 };
 
 const CATCH_TEXT: Readonly<Record<CatchQuality, string>> = {
@@ -45,7 +51,7 @@ export function react(
         if (e.reason === 'sack') play('sack');
         play('fumble');
         play('chant');
-        hud.pop(e.reason === 'sack' ? 'SACKED!' : 'FEE FI FO FUMBLE!', 'bad');
+        hud.pop(FUMBLE_TEXT[e.reason] ?? 'FEE FI FO FUMBLE!', 'bad');
         break;
       case 'touchdown':
         play('touchdown');

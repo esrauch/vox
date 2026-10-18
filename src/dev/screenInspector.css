@@ -153,3 +153,8 @@ input {
   padding-left: 2.5rem;
   opacity: 0.85;
 }
+
+.cell .hazard {
+  color: #a259ff;
+  font-weight: 900;
+}
