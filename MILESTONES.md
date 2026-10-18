@@ -163,7 +163,8 @@ The base systems everything else is built on. **Each one is built and verified o
 - [-] ~~The Haunted Forest, Walk-ons, and two recruit kinds.~~ Special players now come from play cards.
 - [ ] **Drives and downs:** a line of scrimmage, a first-down line 10 rows upfield, four downs. A tackle ends the down (the next starts there), an incompletion uses the down, a sack uses it and loses 2 yards, and an interception or a failed 4th down is **game over**. A down-and-distance HUD ("2nd & 6") and the first-down line on the field.
 - [ ] **Play cards:** each sets the formation and every route, with **Flip** to mirror it. A deck with draw 3, play 1, discard, reshuffle. Six starter plays: Go, Slant, Out, Curl, Screen, Draw. Players follow their routes; after a catch the carrier runs straight up.
-- [ ] **Defensive jobs:** Chasers mark a receiver and pursue after a catch; Blitzers are the pass rush (about 4–6 beats to throw); Wall-ers guard a zone; Bats and the Witch keep their patterns.
+- [ ] **Defensive jobs and coverage rings:** Covers (gnomes) shadow a receiver one beat behind and pursue after a catch; Zones (scarecrows) stand still with a wide ring; Blitzers rush the QB (no ring); a new **Safety** hangs deep and keeps you from gaining 10 in one play; Bats patrol. Purple coverage rings on defenders, and green/yellow/red rings on your players.
+- [ ] **Blocks, not interceptions:** a pass to a covered (red) receiver bounces off the defender; an uncaught pass is incomplete. Both just use the down. A model for the Safety (an Owl?).
 - [ ] **The pre-snap UI:** three cards to pick from, the chosen play's routes previewed on the field, Flip and HIKE.
 - [~] The Haunted Forest's hazards: **Rolling Pumpkin** (ground lane) and **Witch on a Broom** (air lane that snatches passes), plus **Tombstones** (static obstacles) if time allows. Each needs a model, a beat pattern, a one-beat telegraph and a setup-phase preview. *The Witch is in (one per screen on a throw-band row, flying one tile per beat and wrapping, visible before HIKE); her edge flash telegraph isn't built yet. The pumpkin and tombstones are still to do.*
 - [ ] **One area of four drives:** Intro, Challenge, Gimmick and Boss (placeholder Gimmick and Boss), then a "next area" stub.
@@ -300,6 +301,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-18:** Coverage designed: purple coverage rings on defenders; green, yellow or red rings on your players; no interceptions (covered passes bounce off and use the down); Covers, Zones (scarecrows), Blitzers, Bats and a new deep **Safety** that makes a 10-yard gain in one play rare. Carriers always run straight up.
 - **2026-10-18:** Steering the carrier tried and **discarded**: it didn't make the game. The core loop moves to play cards and four downs to gain 10 yards (being specified).
 - **2026-10-17:** Three new song loops: *Graveyard Shuffle* (swung, on a 12-step triplet grid), *Midnight Chase* (driving) and *Skeleton Stomp* (boss). Every song shares `SONG_GRID` (120 BPM, 8 bars, A minor) so any two can crossfade at any moment; the dev audio board crossfades when you switch songs. The game still plays Spooky Surf only.
 - **2026-10-17:** The Witch on a Broom is in: one per screen, flying across a throw-band row one tile per beat, wrapping off one side and back in from the other, before HIKE too. A pass crossing her row near her is **SNATCHED!** (a fumble); runners pass under her.

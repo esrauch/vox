@@ -34,7 +34,7 @@ This section is the source of truth for how a run plays. Where older sections be
   3. **Gimmick:** one rule-bending twist on the defense or the field, shown before you pick a play (e.g. "the Witch flies two rows", "Bats everywhere", "4th and 15").
   4. **Boss:** the area's set-piece defense (the forest's is a Treant).
 - **Then the run moves on to the next themed area**, with its own defenders, hazards, card pool and song.
-- **There are no lives. Losing a drive is game over.** You get four downs, and that's it. Every down counts.
+- **There are no lives. Losing a drive is game over.** You get four downs, and that's it. Every down counts. **The only way to lose is running out of downs**: there are no interceptions.
 
 ### A drive: four downs to gain 10 yards
 
@@ -45,11 +45,15 @@ This section is the source of truth for how a run plays. Where older sections be
   | What happens | Result |
   |---|---|
   | **Tackled** | The down is over. The next down starts from where the carrier went down. |
-  | **Incomplete** (nobody catches the pass) | The down is used, with no gain. |
+  | **Incomplete** (nobody is there to catch it) | The down is used, with no gain. |
+  | **Blocked** (the receiver was covered: the ball **bounces off the covering defender**) | The down is used, with no gain. |
   | **Sacked** (the pass rush reaches the QB before the throw) | The down is used, and you lose 2 yards. |
-  | **Intercepted**, or **4th down fails** | **The drive is lost: game over.** |
+  | **4th down fails** | **The drive is lost: game over.** |
 
-- **After a catch, the carrier runs on its own**, straight upfield, until it's tackled or crosses the line. You don't steer it.
+  ▲ *Every failed pass is a "fumble" in the comedy sense (the ball bounces loose, the crowd chants FEE FI FO FUMBLE), but it only costs the down.*
+
+- **After a catch, the carrier always runs straight upfield**, until it's tackled or crosses the line. You don't steer it. *(Future candidate: special players on cards with their own running AI.)*
+- **A tackle is contact:** the carrier is down when it and a defender meet on a tile (or swap tiles). ▲ *Blitzers tackle too.*
 - **Every down starts fresh:** your players line up again behind the new line of scrimmage.
 
 ### Each down: pick a play, then throw
@@ -67,13 +71,35 @@ This section is the source of truth for how a run plays. Where older sections be
 - **Trick plays are cards too.** For example: **Flea Flicker** (a pitch back, then a deep throw), **Hook and Ladder** (a lateral after the catch), **Hail Mary** (huge range, tiny catch window), **Statue of Liberty**.
 - **Nothing else carries over between drives.** Recruits, Walk-on upgrades, Hijinks, Hype and perks are all replaced by cards: if it matters, it's on a card.
 
+### Coverage rings: who's open, at a glance
+
+- **Every defender that covers shows a purple ring** on the turf around it: **its coverage**. A ball arriving at a player inside a purple ring is blocked.
+- **Every one of your players shows a ring that says whether it could catch right now:**
+  - **Green:** clear. No defender's coverage is near; a ball arriving now is a safe catch.
+  - **Yellow:** a ball arriving now would still be caught, but coverage is close (▲ *within one tile of a purple ring*): by the time the ball lands, it may not be.
+  - **Red:** covered (inside a purple ring). A ball arriving now would be blocked.
+- **The rings update every beat.** Reading them, and how they'll change during the ball's two beats of flight, *is* the throw.
+- **There's no aim warning:** the reticle doesn't change color for coverage. You read the rings.
+
+### Catching
+
+- **The ball lands at a free point**, as before, and the **closest player within catch reach** is the receiver (perfect, good or ok by distance).
+- **If that receiver is red when the ball lands, the pass is blocked:** it bounces off the covering defender, and the down is used.
+- **If nobody is within reach, it's incomplete.**
+- **There are no interceptions.** A Bat under the ball, or the Witch crossing it, also **blocks** it: it bounces off.
+
 ### The defense has jobs
 
-- **Chasers mark a receiver** (man coverage), and **pursue the carrier** after a catch.
-- **Blitzers are the pass rush:** they decide how long you have to throw.
-- **Wall-ers guard a zone:** a row they won't let you cross for free.
-- **Bats and the Witch** keep their patterns over the field: a Bat intercepts passes under it, and the Witch snatches passes crossing her row.
-- **Later drives and areas** tighten the coverage, add rushers and lengthen the distance.
+| Defender | Creature | Job | Coverage ring |
+|---|---|---|---|
+| **Cover** (was the Chaser) | Garden Gnome | **Man coverage.** At the snap, each one picks a receiver (▲ *the nearest one not already covered*) and shadows it, **one beat behind**, so a route's cut opens a beat or two of separation. After a catch, it **pursues the carrier**. | Small (▲ *about 1 tile*), moving with it |
+| **Zone** (was the Wall-er) | Scarecrow | **Doesn't move.** Planted on its tile, it guards a wide area. | **Wide** (▲ *about 2 tiles*) |
+| **Blitzer** | Rhino Beetle | **The pass rush.** It goes straight for the QB: how close the rushers are is your throw clock. A sack uses the down and loses 2 yards. | **None** |
+| **Safety** *(new)* | ▲ *An Owl: it perches deep and sees everything* | **The deep guard.** It hangs back near the first-down line and slides across to stay level with your deepest receiver, so **a deep pass is almost always blocked**, and a carrier running up the middle runs into it. This is what keeps you from gaining 10 yards in one play: beating the Safety (a decoy, a flood to one side, a trick play) is the way to do it in one. | **Wide** (▲ *about 2 tiles*), moving with it |
+| **Bat** (was the Picker) | Bat | **Patrols** its 4×4 box circuit, whatever the play is doing. A pass under it bounces off. | Small, moving with it |
+
+- **The Witch** is a hazard, not a defender: a pass crossing her row near her bounces off her.
+- **Later drives and areas** add more Covers and Blitzers, plant more Scarecrows, and lengthen the distance.
 
 ### Kept for the prototype
 
@@ -160,8 +186,7 @@ Each screen is one field-length climb, in two phases.
     - **Good** (within about ¾ of a tile).
     - **Ok** (within about 1.15 tiles).
   - **Hands widens all three rings,** so good catchers are easier to hit.
-  - **A defender right under the ball** (within about 0.6 of a tile) **and closer than your receiver intercepts it**, which is a **fumble**.
-  - **Nobody close enough:** it's a miss, and that's also a **fumble**. There are no loose balls and no scrambles. A throw either connects or it costs you a ball.
+  - ~~A defender right under the ball intercepts it, a fumble. Nobody close enough is a miss, also a fumble.~~ **Superseded (2026-10-18):** a covered receiver's pass is **blocked** and an uncaught pass is **incomplete**; both just use the down (see *The Core Loop: Catching*).
   - The distances are tuning values (`tuning.catch`), and the game pops "PERFECT!", "GOOD!" or "OK".
 - **Throws and Hijinks always happen on a beat.** Release or tap whenever you like, and the action fires on the **next beat** (a thrown ball starts flying at once, but lands on a beat). Nothing ever happens off the beat.
 - **The beat never stops either.** There's one beat for the whole game, running in setup, in play and between screens. It starts when you tap **PLAY**, with the music (the beat *is* the music), and stops only when the music does: pausing freezes both. **HIKE!** doesn't start it; it just releases everyone. Before the snap, your players and most defenders stand still on the beat, while the **Bats ignore the snap entirely** and keep circling. After it, each unit moves on its own beats (Hustle 0 hops every other beat), so the first hop can come one beat or two after HIKE.
@@ -212,6 +237,8 @@ A screen should take **roughly 15–40 seconds** of play, plus a few seconds of 
 
 ### What's in the Way
 
+> **Superseded in part (2026-10-18):** defenders' jobs and coverage rings are in *The Core Loop: The defense has jobs*. The hazard rules below still stand, except that a hazard hitting a pass **blocks** it rather than causing a fumble.
+
 Two kinds of trouble fill each screen. **Neither of them ever has the ball.** All they want is to stop you.
 
 **Defenders** are the forest's locals, who don't want a football team tramping through their woods. They **always wear candy purple and never wear helmets**, so they can't be mistaken for your team (see THEME.md, *The Opposition*). Each kind follows one simple rule, decided once per beat, and always shows its next hop with an arrow. *(▲ Draft spec, to confirm in play.)*
@@ -259,7 +286,7 @@ Defenders avoid telegraphed hazards, but not perfectly, and **hazards hit them t
 
 ### Balls Are Lives
 
-> **Superseded (2026-10-18):** there are no lives. Losing a drive (an interception or a failed 4th down) ends the run. A tackle just ends the down.
+> **Superseded (2026-10-18):** there are no lives. Losing a drive (a failed 4th down) ends the run. A tackle just ends the down.
 
 
 **The QB starts the run with a pile of N jack-o'-lantern footballs**, stacked right beside it at the bottom of the screen. **The pile is your life counter.** There's no separate display; you can just *see* how many you have left.
