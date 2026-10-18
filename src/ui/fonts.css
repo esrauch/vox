@@ -1,6 +1,10 @@
-/* Creepster (OFL-1.1, self-hosted: assets/fonts): the game's one typeface, used everywhere. */
+/*
+ * Creepster (OFL-1.1, self-hosted: assets/fonts): the game's one typeface, used everywhere.
+ * `block`: text waits for it rather than flashing a fallback (main.ts also
+ * waits for it before building the game).
+ */
 @font-face {
   font-family: 'Creepster';
   src: url('../../assets/fonts/creepster.woff2') format('woff2');
-  font-display: swap;
+  font-display: block;
 }
