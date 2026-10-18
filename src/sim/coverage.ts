@@ -19,13 +19,17 @@ export function coverageRadius(d: Defender): number {
   return d.downTicks > 0 ? 0 : DEFENDERS[d.kind].coverage;
 }
 
-/** How open a tile is. */
+/**
+ * How open a tile is for a ball thrown right at it: covered if a defender is
+ * close enough to bat a low ball there, or it's inside a Scarecrow's (or
+ * Bat's) ring; tight if one is nearly that close.
+ */
 export function openness(screen: ScreenState, at: Vec): Openness {
   let worst: Openness = 'open';
   for (const d of screen.defenders) {
-    const r = coverageRadius(d);
-    if (r <= 0) continue;
-    const gap = distance(d.pos, at) - r;
+    if (d.downTicks > 0) continue;
+    const reach = Math.max(coverageRadius(d), tuning.throw.blockRadius);
+    const gap = distance(d.pos, at) - reach;
     if (gap <= 0) return 'covered';
     if (gap <= tuning.coverage.nearBand) worst = 'tight';
   }

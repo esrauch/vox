@@ -111,14 +111,14 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **Only the QB throws. There are no laterals**, except on trick-play cards.
 - **Throw range** is measured from the line of scrimmage: from **a yard behind it** (for a Screen) to **11 yards past it**.
 - **One sliding arc, no throw modes:** the farther you throw, **the higher the ball flies** (the peak grows with the distance squared) **and the longer it's in the air** (about a beat per 2½ yards). The dashed aiming line shows the arc.
-- **A defender can only bat a pass down where it's low** (below its reach, and passing close to it). A short pass stays low the whole way, so anyone under its path can knock it down; a long pass climbs out of reach right from the release and only comes back within reach as it drops toward the landing, where the coverage rings decide it.
+- **A pass can only be touched where it's low**, by anyone: caught by your players or batted down by defenders. A short pass stays low the whole way; a long one climbs out of reach right from the release and comes back within reach only as it drops toward the reticle. **The dashed aiming line shows it: gold (and bigger) where the ball will be low enough to touch, white where it's out of reach.**
 - **The pull sensitivity** is a tuning value (`tuning.aim`).
 
 ---
 
 ## Coverage: Who's Open, at a Glance
 
-- **Every defender that covers shows a purple ring** on the turf around it: **its coverage**. The rings go away once the ball is caught, since there's no pass left to block.
+- **Scarecrows (and Bats) show a purple ring** on the turf: a low pass inside it is knocked away. Covers and the Safety have **no ring**: they can only bat down a low pass that comes right past them. The rings go away once the ball is caught.
 - **Every one of your players shows a ring that says whether it could catch right now:**
   - **Green:** clear. No coverage nearby; a ball arriving now is a safe catch.
   - **Yellow:** coverage is close (*within half a yard of a purple ring*). A ball thrown right at it now would still be caught, but by the time it lands, it may not be.
@@ -129,7 +129,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 - **The ball lands at a free point**, and the **closest player within catch reach** is the receiver. How close decides the catch: **perfect** (within about ⅓ of a tile), **good** (about ¾) or **ok** (about 1.15). Hands widens all three.
 - **A perfect catch is a Clean Catch:** the carrier **fends off one tackle** (shown by a glowing outline).
-- **The catch is contested where the ball comes down, not where the receiver stands** (Retro Bowl-style): if the ball lands **inside a defender's purple ring**, it bounces off that defender, and the down is used. So **leading the receiver away from its defender is the skill**: a receiver with a Cover right behind it can still catch a ball put on its far side.
+- **The catch window is the gold stretch:** along the ball's path, the first thing within reach of it while it's low decides the pass. **A defender right beside the ball bats it down**; **inside a Scarecrow's (or Bat's) ring it's knocked away**; **one of your players near it catches it**, even short of the reticle. So **leading the receiver away from its defender is the skill**: a receiver with a Cover right behind it can still catch a ball put on its far side.
 - **If nobody is within reach, it's incomplete.**
 - **There are no interceptions.** The Witch crossing the pass also **blocks** it: it bounces off.
 - The game pops "PERFECT!", "GOOD!" or "OK", and "BLOCKED!" when one bounces.
@@ -147,13 +147,13 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 Defenders are the forest's locals, who don't want a football team tramping through their woods. They **always wear candy purple and never wear helmets**, so they can't be mistaken for your team (THEME.md, *The Opposition*). Each kind has **one job** and shows its next hop with an arrow.
 
-| Defender | Forest creature | Job | Coverage ring |
+| Defender | Forest creature | Job | Ring |
 |---|---|---|---|
-| **Cover** | Garden Gnome | **Man coverage.** At the snap, each picks a receiver (the nearest one not already covered) and shadows it **one beat behind**, so a route's cut opens a beat or two of separation. After a catch, it **chases the carrier**. | Small (about 1 tile), moving with it |
-| **Zone** | Scarecrow | **Doesn't move.** Planted on its tile, it guards a wide area. | **Wide** (about 2 tiles) |
+| **Cover** | Garden Gnome | **Man coverage.** At the snap, each picks a receiver (the nearest one not already covered) and shadows it **one beat behind**, so a route's cut opens a beat or two of separation. After a catch, it **chases the carrier**. | **None:** it blocks only by being right beside a low pass |
+| **Zone** | Scarecrow | **Doesn't move.** Planted on its tile, it guards a wide area. | **Wide** (1½ yards): a low pass inside it is knocked away |
 | **Blitzer** | Rhino Beetle | **The pass rush.** It lines up against your line and pushes it back on the pocket clock (see *The Pocket*); every extra Blitzer shortens the clock. **Once the ball is caught, it chases the carrier** like a Cover. | **None** |
-| **Safety** | **Owl**: perched deep, it sees everything | **The deep guard, always between the ball and the first-down line.** It hangs back near the line and slides across its row to stay level with your deepest receiver; while a pass is in the air, it slides toward where it will land. **After a catch it gets into the carrier's column first, then comes down to meet it** (a carrier already past it is just chased). So **a deep pass is almost always blocked**, and a carrier rarely gets by it. Beating the Safety (a decoy, a flood to one side, a trick play) is how you gain 10 in one play. | **Wide** (about 2 tiles), moving with it |
-| **Bat** | Bat | **Patrols** a fixed box circuit (3 yards square), one tile per hop, whatever the play is doing. It's already circling before the snap, so you can time a throw past it. A pass coming down near it bounces off. | Small (¾ of a yard), moving with it |
+| **Safety** | **Owl**: perched deep, it sees everything | **The deep guard, always between the ball and the first-down line.** It hangs back near the line and slides across its row to stay level with your deepest receiver; while a pass is in the air, it slides toward where it will land. **After a catch it gets into the carrier's column first, then comes down to meet it** (a carrier already past it is just chased). So **a deep pass coming down near it is batted away**, and a carrier rarely gets by it. Beating the Safety (a decoy, a flood to one side, a trick play) is how you gain 10 in one play. | **None** |
+| **Bat** | Bat | **Patrols** a fixed box circuit (3 yards square), one tile per hop, whatever the play is doing. It's already circling before the snap, so you can time a throw past it. A pass coming down near it bounces off. | Small (half a yard), moving with it |
 
 - **Later drives and areas** add more Covers and Blitzers, plant more Scarecrows, and lengthen the distance ("4th and 15").
 - **Before the snap, only the Bats move.** Everyone else waits for HIKE.

@@ -18,19 +18,18 @@
  *   4. The carrier crossing the first-down line wins the drive.
  *   5. The pocket clock runs down, the pass rush pushes the line back, and
  *      at zero, with the ball still in the QB's hand, it's a sack.
- *   6. A Witch crossing the pass blocks it; so does a defender it passes
- *      low enough to reach (sim/flight.ts: the longer the pass, the higher).
- *   7. A ball due this tick lands: blocked if it comes down inside a
- *      defender's coverage ring, otherwise caught by the closest player in
- *      reach, or incomplete.
+ *   6. A Witch crossing the pass blocks it.
+ *   7. The pass in the air: once it's low enough to touch, a defender near
+ *      it bats it down, a Scarecrow's ring knocks it away, or a player near
+ *      it catches it; at the turf with nobody there, it's incomplete.
  *   8. Everyone decides next tick's hop (the telegraph).
  */
 import { DEFENDERS } from '../content/defenders';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
 import { coveringDefender } from './coverage';
-import { COLS, END_ROW, ROWS, dist, eq, inBounds, key, vec } from './grid';
-import { flightTicks, reachable } from './flight';
+import { COLS, END_ROW, ROWS, dist, eq, inBounds, key, vec, distance } from './grid';
+import { ballGround, catchable, flightTicks } from './flight';
 import { snatches, witchColumn } from './hazards';
 import { endDown, nextDown } from './run';
 import { actsOn } from './stats';
@@ -74,8 +73,7 @@ export function step(prev: RunState, input: BeatInput = {}): SimResult {
   }
   if (runPocket(state, events)) return { state, events };
   if (checkSnatch(state, events)) return { state, events };
-  if (checkBatted(state, events)) return { state, events };
-  if (resolveLanding(state, events)) return { state, events };
+  if (resolveFlight(state, events)) return { state, events };
   updateIntents(state.screen);
   return { state, events };
 }
@@ -323,33 +321,6 @@ function pushRush(state: RunState, events: SimEvent[]): void {
   }
 }
 
-/**
- * A defender batting the pass down in the air: wherever the ball passed this
- * tick (checked in a few steps), if it was low enough to reach and close to
- * an up defender, it bounces off. The landing itself is checked in
- * resolveLanding.
- */
-function checkBatted(state: RunState, events: SimEvent[]): boolean {
-  const { screen, tick } = state;
-  const ball = screen.ball;
-  if (ball.at !== 'flight' || tick >= ball.landsOn) return false;
-  const span = ball.landsOn - ball.releasedOn;
-  const STEPS = 4;
-  for (let i = 1; i <= STEPS; i++) {
-    const t = (tick - 1 - ball.releasedOn + i / STEPS) / span;
-    if (t <= 0 || t >= 1) continue;
-    const by = screen.defenders
-      .filter((d) => isUp(d) && !engaged(state, d) && reachable(ball.from, ball.target, t, d.pos))
-      .sort(byId)[0];
-    if (!by) continue;
-    events.push({ type: 'blocked', by: by.id, at: by.pos });
-    screen.ball = { at: 'dead', pos: by.pos, bounced: true };
-    endDown(state, 'blocked', state.drive.los, events);
-    return true;
-  }
-  return false;
-}
-
 /** A Blitzer is tied up by your line while the pocket (or a run's hold) lasts: it can't chase or tackle. */
 function engaged(state: RunState, d: Defender): boolean {
   return state.pocket !== null && DEFENDERS[d.kind].job === 'rush';
@@ -368,37 +339,55 @@ function checkSnatch(state: RunState, events: SimEvent[]): boolean {
 }
 
 /**
- * The ball comes down: the closest of your players within reach is the
- * receiver. If it's covered (inside a purple ring), the pass bounces off the
- * covering defender; otherwise it's a catch. Nobody in reach is incomplete.
+ * The pass in the air (sim/flight.ts): it can only be touched while it's low,
+ * so for a long throw that's the stretch as it comes down toward the
+ * reticle, and for a short one most of the way. This tick's stretch of the
+ * path is checked in order, and the first thing within reach of the low ball
+ * decides it:
+ *   - a defender close to it bats it down;
+ *   - inside a Scarecrow's (or Bat's) ring, it's knocked away;
+ *   - one of your players close to it catches it (how close sets perfect, good or ok);
+ *   - if it reaches the turf with nobody there, it's incomplete.
  */
-function resolveLanding(state: RunState, events: SimEvent[]): boolean {
+function resolveFlight(state: RunState, events: SimEvent[]): boolean {
   const { screen, tick } = state;
   const ball = screen.ball;
-  if (ball.at !== 'flight' || ball.landsOn !== tick) return false;
-  const target = ball.target;
-  const away = (p: Vec): number => Math.hypot(p.x - target.x, p.y - target.y);
-  const receiver = screen.players
-    .filter((p) => isUp(p) && away(p.pos) <= catchRadius(p, 'ok'))
-    .sort((a, b) => away(a.pos) - away(b.pos) || a.id - b.id)[0];
+  if (ball.at !== 'flight' || tick <= ball.releasedOn) return false;
+  const span = ball.landsOn - ball.releasedOn;
+  const STEPS = 4;
+  for (let i = 1; i <= STEPS; i++) {
+    const t = Math.min(1, (tick - 1 - ball.releasedOn + i / STEPS) / span);
+    if (!catchable(ball.from, ball.target, t)) continue;
+    const at = ballGround(ball.from, ball.target, t);
+    const batter = screen.defenders
+      .filter(
+        (d) => isUp(d) && !engaged(state, d) && distance(d.pos, at) <= tuning.throw.blockRadius,
+      )
+      .sort((a, b) => distance(a.pos, at) - distance(b.pos, at) || a.id - b.id)[0];
+    const by = batter ?? coveringDefender(screen, at);
+    if (by) {
+      events.push({ type: 'blocked', by: by.id, at: by.pos });
+      screen.ball = { at: 'dead', pos: by.pos, bounced: true };
+      endDown(state, 'blocked', state.drive.los, events);
+      return true;
+    }
+    const receiver = screen.players
+      .filter((p) => isUp(p) && distance(p.pos, at) <= catchRadius(p, 'ok'))
+      .sort((a, b) => distance(a.pos, at) - distance(b.pos, at) || a.id - b.id)[0];
+    if (receiver) return catchBall(state, receiver, distance(receiver.pos, at), events);
+    if (t >= 1) {
+      events.push({ type: 'incomplete', at: ball.target });
+      screen.ball = { at: 'dead', pos: ball.target, bounced: false };
+      endDown(state, 'incomplete', state.drive.los, events);
+      return true;
+    }
+  }
+  return false;
+}
 
-  // The catch is contested where the ball comes down, not where the receiver
-  // stands: put it inside a defender's ring and it bounces off, so leading the
-  // receiver away from its defender is the skill.
-  const by = coveringDefender(screen, target);
-  if (by) {
-    events.push({ type: 'blocked', by: by.id, at: by.pos });
-    screen.ball = { at: 'dead', pos: by.pos, bounced: true };
-    endDown(state, 'blocked', state.drive.los, events);
-    return true;
-  }
-  if (!receiver) {
-    events.push({ type: 'incomplete', at: target });
-    screen.ball = { at: 'dead', pos: target, bounced: false };
-    endDown(state, 'incomplete', state.drive.los, events);
-    return true;
-  }
-  const d = away(receiver.pos);
+/** A catch: how close the ball came to the receiver sets its quality; a perfect one is a Clean Catch. */
+function catchBall(state: RunState, receiver: PlayerUnit, d: number, events: SimEvent[]): boolean {
+  const { screen } = state;
   const quality: CatchQuality =
     d <= catchRadius(receiver, 'perfect')
       ? 'perfect'

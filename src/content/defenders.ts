@@ -30,8 +30,9 @@ export interface DefenderDef {
   readonly stats: Stats;
   readonly job: Job;
   /**
-   * The radius (tiles, half-yards) of its purple coverage ring: a pass that
-   * comes down inside it is blocked. 0 means it doesn't cover (the pass rush).
+   * The radius (tiles, half-yards) of its purple ring: a pass coming down
+   * low inside it is knocked away. 0 means no ring: it can still bat down a
+   * low pass that comes close (sim/step.ts), like every defender.
    */
   readonly coverage: number;
   /** Whether it moves before the snap and between downs too, not only in play. */
@@ -49,7 +50,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     glyph: 'C',
     stats: BASE,
     job: 'cover',
-    coverage: 1,
+    coverage: 0,
     ignoresSnap: false,
   },
   zone: {
@@ -79,7 +80,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     glyph: 'S',
     stats: BASE,
     job: 'safety',
-    coverage: 3,
+    coverage: 0,
     ignoresSnap: false,
   },
   bat: {
@@ -89,7 +90,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     glyph: 'V',
     stats: BASE,
     job: 'patrol',
-    coverage: 1.5,
+    coverage: 1,
     ignoresSnap: true,
   },
 };

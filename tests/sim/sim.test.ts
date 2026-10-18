@@ -254,13 +254,13 @@ describe('coverage rings', () => {
     expect(openness(s, vec(5, 13))).toBe('open');
   });
 
-  it('a Scarecrow (Zone) and the Safety cover a wide area', () => {
+  it('a Scarecrow\u2019s ring covers a wide area; the Safety has no ring', () => {
     expect(openness(screenWith('zone'), vec(5, 13))).toBe('covered');
-    expect(openness(screenWith('safety'), vec(8, 10))).toBe('covered');
+    expect(openness(screenWith('safety'), vec(8, 10))).toBe('open');
   });
 
-  it('a Blitzer has no ring, and a knocked-down defender covers nothing', () => {
-    expect(openness(screenWith('blitzer'), vec(5, 11))).toBe('open');
+  it('any defender right beside a tile covers it (it can bat a low ball there), unless it\u2019s down', () => {
+    expect(openness(screenWith('blitzer'), vec(5, 11))).toBe('covered');
     const s = screenWith('cover');
     s.defenders[0]!.downTicks = 2;
     expect(openness(s, vec(5, 11))).toBe('open');
@@ -310,6 +310,14 @@ describe('passes', () => {
       result: 'incomplete',
       gained: 0,
     });
+  });
+
+  it('a pass is catchable on its way down, short of the reticle', () => {
+    // A long pass to (5, 20): it comes back down within reach from about row 17.
+    const state = playState([{ pos: vec(5, 18), route: '.' }]);
+    const r = run(step(state, { throwAt: vec(5, 20) }).state, 4);
+    expect(ofType(r.events, 'caught')).toHaveLength(1);
+    expect(r.state.screen.ball).toEqual({ at: 'carried', by: 100 });
   });
 
   it('the farther the pass, the higher it flies and the longer it takes', () => {

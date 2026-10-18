@@ -35,8 +35,7 @@ export function ballGround(from: Vec, to: Vec, t: number): Vec {
   return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t };
 }
 
-/** Whether a defender standing on `at` can reach the pass `t` of the way along it. */
-export function reachable(from: Vec, to: Vec, t: number, at: Vec): boolean {
-  if (ballHeight(flightDistance(from, to), t) >= T.reach) return false;
-  return flightDistance(ballGround(from, to, t), at) <= T.blockRadius;
+/** Whether the pass is low enough to touch `t` of the way along it: to catch, or to bat down. */
+export function catchable(from: Vec, to: Vec, t: number): boolean {
+  return ballHeight(flightDistance(from, to), t) < T.reach;
 }

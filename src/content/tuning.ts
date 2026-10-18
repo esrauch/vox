@@ -68,8 +68,8 @@ export const tuning = {
     releaseHeight: 1,
     /** A defender can get a hand on a ball lower than this… */
     reach: 1.2,
-    /** …if it passes within this many tiles of it. */
-    blockRadius: 0.8,
+    /** …if it passes within this many tiles of it (a defender right beside the ball's path). */
+    blockRadius: 1,
     /** Throws land from this many rows behind the line of scrimmage (negative)… */
     minAhead: -2,
     /** …to this many rows past it. */
