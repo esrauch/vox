@@ -157,14 +157,19 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## M2: First Playable
 
-**Goal:** prove the fun. It's rough, but it's a whole run.
+**Goal:** prove the fun. It's rough, but it's a whole run. *(Re-scoped 2026-10-18 to the drive-and-play-card loop: GAMEPLAY.md, The Core Loop.)*
 
 - [x] **Swap in the new theme's models:** football-player Walk-ons (`team/walkOn`), a bigger QB in reversed colors with its throwing arm up (`team/qb`), and a jack-o'-lantern football (`team/ball`). The old Elder Bough models are removed, and the code now says QB instead of Big.
-- [ ] The Haunted Forest, Walk-ons, and **two recruit kinds** (e.g. the Bat and the Pumpkin-head, in team helmets).
+- [-] ~~The Haunted Forest, Walk-ons, and two recruit kinds.~~ Special players now come from play cards.
+- [ ] **Drives and downs:** a line of scrimmage, a first-down line 10 rows upfield, four downs. A tackle ends the down (the next starts there), an incompletion uses the down, a sack uses it and loses 2 yards, and an interception or a failed 4th down is **game over**. A down-and-distance HUD ("2nd & 6") and the first-down line on the field.
+- [ ] **Play cards:** each sets the formation and every route, with **Flip** to mirror it. A deck with draw 3, play 1, discard, reshuffle. Six starter plays: Go, Slant, Out, Curl, Screen, Draw. Players follow their routes; after a catch the carrier runs straight up.
+- [ ] **Defensive jobs:** Chasers mark a receiver and pursue after a catch; Blitzers are the pass rush (about 4–6 beats to throw); Wall-ers guard a zone; Bats and the Witch keep their patterns.
+- [ ] **The pre-snap UI:** three cards to pick from, the chosen play's routes previewed on the field, Flip and HIKE.
 - [~] The Haunted Forest's hazards: **Rolling Pumpkin** (ground lane) and **Witch on a Broom** (air lane that snatches passes), plus **Tombstones** (static obstacles) if time allows. Each needs a model, a beat pattern, a one-beat telegraph and a setup-phase preview. *The Witch is in (one per screen on a throw-band row, flying one tile per beat and wrapping, visible before HIKE); her edge flash telegraph isn't built yet. The pumpkin and tombstones are still to do.*
-- [ ] Endless screens from strip-based generation, with a simple difficulty ramp.
-- [ ] A draft with **recruit** and **Walk-on upgrade** cards only, in a plain UI.
-- [ ] The pile of balls, wipeouts, game over, and a score in yards.
+- [ ] **One area of four drives:** Intro, Challenge, Gimmick and Boss (placeholder Gimmick and Boss), then a "next area" stub.
+- [ ] **The draft after a won drive:** one of three play cards, or remove one, in a plain UI.
+- [ ] Game over and a score (drives won, yards gained).
+- [-] ~~Endless screens from strip-based generation; the pile of balls and wipeouts.~~ Replaced by drives and game over on a lost drive.
 - [ ] One song and the core SFX.
 - [ ] Basic juice: cube bursts, hit-pause, screen shake, the fumble chant (a placeholder is fine).
 
@@ -187,16 +192,15 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ---
 
-## M4: Hijinks and the Draft
+## M4: Trick Plays and the Deck
 
-**Goal:** the roguelite layer.
+**Goal:** the roguelite layer: the deck is the only progression *(re-scoped 2026-10-18)*.
 
-- [ ] The Hype meter, filled by strong plays and drained by fumbles.
-- [ ] Hijinks only after the throw, using the reticle, in targeted and global kinds, without a separate perfect-timing bonus.
-- [ ] Three Hijinks, several of them brought by recruits.
-- [ ] The full card types: recruit upgrades, arm perks (Long Arm), +1 slot, extra balls, Fast Throw, Butterfingers Insurance, Second String.
-- [ ] Treats and Tricks (if M0 kept Tricks).
-- [ ] The draft UI: three cards, chosen in one tap.
+- [-] ~~The Hype meter and Hijinks.~~ Trick plays are play cards.
+- [ ] **Cards with special players** who exist only for that play: Bat Route, Skeleton Sneak, Pumpkin Decoy.
+- [ ] **Trick-play cards:** Flea Flicker, Hook and Ladder, Hail Mary, Statue of Liberty.
+- [ ] Card rarity, and card upgrades (e.g. a veteran version of a play).
+- [ ] The draft UI: three cards, chosen in one tap, plus "remove a card".
 
 **Done when:** two runs can grow into noticeably different teams and playstyles.
 

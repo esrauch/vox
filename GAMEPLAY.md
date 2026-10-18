@@ -7,6 +7,8 @@ This doc covers what the player *does*: the design pillars, the controls, the ru
 Items marked **▲ Decision** are recommendations that are still open to change.
 
 **Words used here:**
+- **Drive:** one level: four downs to gain 10 yards. **Down:** one play.
+- **Play card:** a play you call. It sets the formation and every route, and can bring special players or tricks.
 - **The quarterback (QB):** the one player who throws. It stands in the backfield and never moves.
 - **Players:** everyone else on your team, the ones who run, catch and score.
 - **Walk-ons:** the vanilla rookies every run starts with. *(THEME.md calls them rookies; the final name isn't settled.)*
@@ -16,7 +18,67 @@ Items marked **▲ Decision** are recommendations that are still open to change.
 
 ## The Game in One Breath
 
-Your quarterback stands at the bottom of the screen with the ball. First you **place your players** in the bottom grid. Then the play starts: **press anywhere and pull back to aim, release to throw**, and use Hijinks after the throw. **Get the ball to the top of the screen** and it's a touchdown. Then the camera scrolls up, there's a new screen and harder defenders, and you **pick a reward**, often a new teammate from the forest. Your plain **Walk-ons** always come back, but the **recruits** you draft stay gone if they go down. The QB starts the run with a pile of **balls**, and those are your lives. Every fumble costs one for good and resets the screen. When the last ball is gone, the run is over. **Go as far as you can.**
+Every drive, you have **four downs to gain 10 yards**. Each down you **draw three play cards and call one**: it lines your players up and sets their routes. The defense is right there for you to read. Snap the ball, **pull back and release** to hit the receiver who's beaten their man before the pass rush gets you, and watch them run until they're tackled. Make the line and you **draft a new play card**. Miss on 4th down, or get picked off, and **the run is over**. Each themed area is four drives (Intro, Challenge, Gimmick, Boss), then on to the next. **Your deck is your team. Go as far as you can.**
+
+---
+
+## The Core Loop: Drives, Downs and Play Cards *(decided 2026-10-18)*
+
+This section is the source of truth for how a run plays. Where older sections below disagree, they're marked **superseded** and this wins.
+
+### The run: areas of four drives
+
+- **A run is a series of themed areas** (the Haunted Forest first, then the graveyard, the swamp and more). **Each area is four drives**, *Balatro*-style:
+  1. **Intro:** a plain defense, and a safe place to try new cards.
+  2. **Challenge:** a tougher defense: tighter coverage, more rushers.
+  3. **Gimmick:** one rule-bending twist on the defense or the field, shown before you pick a play (e.g. "the Witch flies two rows", "Bats everywhere", "4th and 15").
+  4. **Boss:** the area's set-piece defense (the forest's is a Treant).
+- **Then the run moves on to the next themed area**, with its own defenders, hazards, card pool and song.
+- **There are no lives. Losing a drive is game over.** You get four downs, and that's it. Every down counts.
+
+### A drive: four downs to gain 10 yards
+
+- **A drive is one screen and one defense.** The ball starts on your **line of scrimmage** near the bottom, and a **first-down line** is drawn **10 rows (10 yards) upfield**.
+- **You have four downs to get the ball past that line.** Do it and the drive is won: you draft a card and go on to the next drive.
+- **How a down ends:**
+
+  | What happens | Result |
+  |---|---|
+  | **Tackled** | The down is over. The next down starts from where the carrier went down. |
+  | **Incomplete** (nobody catches the pass) | The down is used, with no gain. |
+  | **Sacked** (the pass rush reaches the QB before the throw) | The down is used, and you lose 2 yards. |
+  | **Intercepted**, or **4th down fails** | **The drive is lost: game over.** |
+
+- **After a catch, the carrier runs on its own**, straight upfield, until it's tackled or crosses the line. You don't steer it.
+- **Every down starts fresh:** your players line up again behind the new line of scrimmage.
+
+### Each down: pick a play, then throw
+
+1. **Draw three play cards** from your deck and **play one**. The other two go to the discard pile (*Slay the Spire* style). When the deck runs out, the discard pile is shuffled back in.
+2. **A card is the whole play:** where your players line up and **every player's route**, drawn on the field as a preview before you commit. **Flip** mirrors it left or right. That's the only adjustment: there's no dragging players.
+3. **The defense is visible before you choose** (*Into the Breach* style): who's marking whom, where the pass rush comes from, where the Bats circle and the Witch flies. Picking the card that beats this defense *is* the puzzle.
+4. **Snap, then throw.** Receivers run their routes on the beat, and you pull back and release as before. **The pass rush gives you about 4–6 beats** before you're sacked, so waiting is never free.
+
+### The deck is the only progression
+
+- **A run starts with a small deck** of 6–8 basic plays, e.g. **Go** (deep), **Slant**, **Out**, **Curl**, **Screen** (short, with blockers) and **Draw** (a handoff: no throw at all).
+- **After every won drive, pick one of three new cards** to add to the deck, **or remove one** to thin it.
+- **Cards can bring players who exist only for that play.** For example: **Bat Route** (a Bat receiver flies over defenders), **Skeleton Sneak** (the carrier reassembles after its first tackle), **Pumpkin Decoy** (a rolling pumpkin drags coverage away).
+- **Trick plays are cards too.** For example: **Flea Flicker** (a pitch back, then a deep throw), **Hook and Ladder** (a lateral after the catch), **Hail Mary** (huge range, tiny catch window), **Statue of Liberty**.
+- **Nothing else carries over between drives.** Recruits, Walk-on upgrades, Hijinks, Hype and perks are all replaced by cards: if it matters, it's on a card.
+
+### The defense has jobs
+
+- **Chasers mark a receiver** (man coverage), and **pursue the carrier** after a catch.
+- **Blitzers are the pass rush:** they decide how long you have to throw.
+- **Wall-ers guard a zone:** a row they won't let you cross for free.
+- **Bats and the Witch** keep their patterns over the field: a Bat intercepts passes under it, and the Witch snatches passes crossing her row.
+- **Later drives and areas** tighten the coverage, add rushers and lengthen the distance.
+
+### Kept for the prototype
+
+- **The grid and the beat stay.** Routes on the grid are readable and cheap to build; they can be loosened later if it plays stiff.
+- **The slingshot throw, catch slop and catch quality stay.** A perfect catch still earns a fend-off.
 
 ---
 
@@ -37,7 +99,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## The Core Rule: The QB Throws, Players Score
 
-**The quarterback can never score.** The ball has to cross the top of the screen in the hands (or wings, or jaws) of one of your players. The QB's job is to **get it to a player who can get it there**.
+**The quarterback can never score.** The ball has to cross the first-down line (or, in the old design, the top of the screen) in the hands (or wings, or jaws) of one of your players. The QB's job is to **get it to a player who can get it there**.
 
 That's what makes your players matter. Your **Walk-ons** always return for the next screen, so you never run out for good. But if everyone on the field goes down mid-screen, it costs you a ball (see *Wipeout*).
 
@@ -57,11 +119,11 @@ This gives the game one thing to master: **where and when you throw**.
 
 | Phase | Input | What it does |
 |---|---|---|
-| **Setup** | **Drag a player** onto a tile of the setup zone | Set your formation. |
-| **Setup** | **Tap HIKE!** | Start the play. |
+| **Before the snap** | **Tap a play card** (one of three) | Call the play: it sets your formation and every route, previewed on the field. |
+| **Before the snap** | **Tap Flip** | Mirror the play left or right. |
+| **Before the snap** | **Tap HIKE!** | Start the down. |
 | **Play** | **Press anywhere and pull back** | **Aim.** Wherever your finger first touches is the anchor. Pulling down aims up the field, and pulling left aims right. A **reticle** appears where the ball would land, with an animated dashed arc from the QB's hand to it. |
 | **Play** | **Release** | **Throw** to the reticle: the ball leaves at once and lands on a beat. Releasing where you can't throw (outside the middle-half band) cancels. |
-| **After the throw** | **Tap a Hijink icon** | Fire it, either at the reticle or across the whole field (see *Hype and Hijinks*). |
 
 **That's it.** There's nothing to move or steer.
 
@@ -131,6 +193,9 @@ Each screen is one field-length climb, in two phases.
 
 ### 1. Setup (the huddle)
 
+> **Superseded (2026-10-18):** there's no free placement any more. A play card sets the formation and routes (see *The Core Loop*).
+
+
 - The new screen is revealed, and **you can see everything** before you commit: every defender on its starting tile and every hazard lane.
 - **Setup is a little puzzle.** You read the board and place your players to beat it. A defender's *kind* tells you what it'll do: a Chaser will come at your carrier, a Wall-er holds its row, a Picker circles a box of sky, guarding the passes under it. **Hazards keep cycling during setup**, so you can see the rhythm of a lane before you send someone into it.
 - **Drag your players onto tiles of the setup zone.**
@@ -194,6 +259,9 @@ Defenders avoid telegraphed hazards, but not perfectly, and **hazards hit them t
 
 ### Balls Are Lives
 
+> **Superseded (2026-10-18):** there are no lives. Losing a drive (an interception or a failed 4th down) ends the run. A tackle just ends the down.
+
+
 **The QB starts the run with a pile of N jack-o'-lantern footballs**, stacked right beside it at the bottom of the screen. **The pile is your life counter.** There's no separate display; you can just *see* how many you have left.
 
 - **The count carries over for the whole run.** It never resets between screens.
@@ -205,6 +273,9 @@ Defenders avoid telegraphed hazards, but not perfectly, and **hazards hit them t
 
 ### Sacks
 
+> **Superseded in part (2026-10-18):** a sack now **uses the down and loses 2 yards**; it isn't a fumble. Blitzers are the pass rush, which gives you about 4–6 beats to throw.
+
+
 - **Any defender that reaches the QB sacks it, on the beat it gets there.** "Reaches" means it's up (not knocked down) on a tile touching the QB (left, right or in front) while the QB still holds the ball. **SACKED!** is a fumble. There's no counter and no waiting: the hop arrow pointing at the QB is the whole warning.
 - **Blitzers are the ones that come for it.** They head straight for the QB, so a Blitzer's approach is your clock: a Blitzer 3 tiles away with Hustle 0 gives you 6 beats to throw. Other defenders only sack the QB if their own rule happens to bring them next to it.
 - **Once the ball is thrown, the QB is safe.** Only a QB that's still holding the ball can be sacked.
@@ -215,6 +286,9 @@ So every possession is a few seconds of "throw it, THROW IT," against a receiver
 ---
 
 ## The Team: Walk-ons and Recruits
+
+> **Superseded (2026-10-18):** players come from play cards. Special players (a Bat receiver, a Skeleton) exist only on the card that brings them, and nothing carries over between drives.
+
 
 ### Walk-ons
 
@@ -246,6 +320,9 @@ The team has **5 slots** to start with, with "+1 slot" as a rare draft card. Eve
 
 ## The Draft: Trick or Treat
 
+> **Superseded (2026-10-18):** the draft is now **one of three play cards, or remove a card**, after every won drive. The deck is the only progression.
+
+
 After every touchdown, you go trick-or-treating: choose **one of three cards**. It's one tap and then straight into the next screen.
 
 **The cards come from the place you're playing through.** The haunted forest offers its creatures as recruits, plus Walk-on upgrades, perks and Hijinks. Later places (the graveyard, the swamp) bring their own.
@@ -272,6 +349,9 @@ Card names and art should be jokes. The draft is part of the comedy, not a sprea
 
 ## Hype and Hijinks
 
+> **Superseded (2026-10-18):** trick plays are play cards; there's no Hype meter or Hijink slots.
+
+
 *(Hijinks may be renamed **Trick Plays**: see THEME.md.)*
 
 - **You start a run with no Hijinks** and unlock them through the draft, many of them brought by recruits.
@@ -288,6 +368,9 @@ Card names and art should be jokes. The draft is part of the comedy, not a sprea
 ---
 
 ## Difficulty and Pacing
+
+> **Superseded in part (2026-10-18):** a run is themed areas of four drives (Intro, Challenge, Gimmick, Boss). Difficulty comes from the defenses, the Gimmick and the Boss.
+
 
 - **Defenders get tougher as you climb:** more of them, smarter, faster and heavier.
 - **Hazards get busier:** more lanes, faster patterns, and traps combined with lanes.
