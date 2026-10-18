@@ -283,7 +283,7 @@ describe('passes', () => {
     expect(arcPeak(5)).toBeLessThan(arcPeak(10));
     expect(arcPeak(10)).toBeLessThan(arcPeak(20));
     expect(flightTicks(vec(5, 0), vec(5, 5))).toBe(1);
-    expect(flightTicks(vec(5, 0), vec(5, 20))).toBe(4);
+    expect(flightTicks(vec(5, 0), vec(5, 20))).toBe(3);
   });
 
   it('a short, low pass is batted down by a defender under its path', () => {

@@ -55,7 +55,7 @@ export const tuning = {
   },
   throw: {
     /** Flight time: one tick per this many tiles of distance (at least one tick). */
-    tilesPerTick: 5,
+    tilesPerTick: 7.5,
     /**
      * The arc's peak above the straight line, in tiles: this times the
      * distance squared (capped). Short passes stay low; long ones climb.
