@@ -6,7 +6,7 @@
  * one, in every phase; the phase only decides who moves (see sim/step.ts).
  *
  * The flow (GAMEPLAY.md, The Core Loop): before each down, tap one of three
- * play cards (Flip mirrors it) and HIKE; pull back and release to throw; the
+ * play cards (Flip mirrors it); pull back to snap the ball and aim, release to throw; the
  * down ends; after a won drive, draft a card; a failed 4th down ends the run.
  */
 import { playCard } from '../content/cards';
@@ -237,7 +237,7 @@ export class Game {
 
     if (!this.conductor.started) this.hud.setPrompt('Fourth & Ghoul', 'PLAY');
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
-    else if (phase === 'setup') this.hud.setPrompt(null, called ? 'HIKE!' : null);
+    else if (phase === 'setup') this.hud.setPrompt(called ? 'Pull back to snap' : null, null);
     else if (phase === 'over') this.hud.setPrompt('Turnover on downs!', 'AGAIN');
     else if (phase === 'won') this.hud.setPrompt('The forest is cleared!', 'AGAIN');
     else this.hud.setPrompt(null, null);
@@ -259,6 +259,8 @@ export class Game {
 
   private onPointerDown(e: PointerEvent): void {
     if (!this.conductor.started || this.paused) return;
+    // With a play called, pulling back snaps the ball: the same pull then aims the throw.
+    if (this.state.phase === 'setup' && this.state.called) this.act({ type: 'hike' });
     const { phase, screen } = this.state;
     // In play, a drag that starts anywhere on the screen aims a throw.
     if (phase !== 'play' || screen.ball.at !== 'qb') return;

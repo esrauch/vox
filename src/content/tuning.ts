@@ -13,11 +13,8 @@ export const tuning = {
     measuredTaps: 12,
   },
   clock: {
-    /**
-     * The simulation ticks on eighth notes: two ticks per beat of the music.
-     * Units hop on ticks, so they still move in time with the song.
-     */
-    ticksPerBeat: 2,
+    /** Simulation ticks per beat of the music (one: everyone hops on the beat). */
+    ticksPerBeat: 1,
   },
   grid: {
     /**

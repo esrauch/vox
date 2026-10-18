@@ -4,7 +4,7 @@
  *
  *   npm run screenshot                 → previews/game.png (the title, over the first down, seed 8)
  *   npm run screenshot -- 3 call       → seed 3, the first card called (its routes previewed)
- *   npm run screenshot -- 3 play       → seed 3, a moment after HIKE!
+ *   npm run screenshot -- 3 play       → seed 3, a moment after the snap
  *   npm run screenshot -- 8 play pitch=50 low   → with extra URL params, saved as previews/low.png
  *
  * Uses the system Chrome through playwright-core.
@@ -44,7 +44,10 @@ try {
     await page.waitForTimeout(400);
   }
   if (when === 'play') {
-    await page.click('.hud-action'); // HIKE!
+    // Snap: press and let go without pulling (a pull too short to throw just cancels the aim).
+    await page.mouse.move(190, 400);
+    await page.mouse.down();
+    await page.mouse.up();
     await page.waitForTimeout(2600);
   }
   mkdirSync(join(ROOT, 'previews'), { recursive: true });

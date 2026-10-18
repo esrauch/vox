@@ -100,7 +100,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 |---|---|---|
 | **Before the snap** | **Tap a play card** (one of three) | Call the play: it sets your formation and every route, previewed on the field. |
 | **Before the snap** | **Tap Flip** | Mirror the play left or right. |
-| **Before the snap** | **Tap HIKE!** | Start the down. |
+| **Before the snap** | **Press anywhere and pull back** | **Snap the ball:** the down starts, and the same pull aims the throw. There's no HIKE button. |
 | **After the snap** | **Press anywhere and pull back** | **Aim.** Wherever your finger first touches is the anchor. Pulling down aims up the field, and pulling left aims right. A **reticle** appears where the ball would land, with an animated dashed arc from the QB's hand to it. |
 | **After the snap** | **Release** | **Throw** to the reticle: the ball leaves at once and lands on a beat. Releasing where you can't throw cancels. |
 
@@ -205,7 +205,7 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 **The whole game runs on the music**, like *Crypt of the NecroDancer*.
 
 - **The music is the clock.** It starts when you tap **PLAY** and never stops: through picking plays, downs, drives and new runs. Pausing freezes the music and the beat together.
-- **There's one clock for the whole game: the music.** The game ticks on **eighth notes** (two ticks a beat), and **everyone hops every tick**: half a yard per tick, 2 yards a second, so a play lasts about 4–7 seconds, like Retro Bowl. HIKE doesn't start the clock; it just releases everyone. Before the snap only the Bats and hazards move.
+- **There's one clock for the whole game: the music.** The game ticks **on the beat**, and **everyone hops every tick**: half a yard per beat, 1 yard a second at 120 BPM, so a play lasts about 8–14 seconds. HIKE doesn't start the clock; it just releases everyone. Before the snap only the Bats and hazards move.
 - **Every throw lands on a tick:** one beat after the release for a quick pass, two for a long one. The ball **leaves the QB's hand the instant you let go** and flies a little faster or slower so it lands in time.
 - **Hazards are beat patterns**, so you learn them like a riff.
 
