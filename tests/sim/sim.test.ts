@@ -247,7 +247,7 @@ describe('passes', () => {
     expect(ofType(r.events, 'downEnded')).toEqual([
       { type: 'downEnded', result: 'blocked', gained: 0 },
     ]);
-    expect(r.state.screen.ball).toEqual({ at: 'dead', pos: vec(5, 11), bounced: true });
+    expect(r.state.screen.ball).toEqual({ at: 'dead', pos: vec(5, 11), how: 'blocked' });
     expect(run(r.state, PAUSE).state.drive).toMatchObject({ down: 2, los: 3 });
   });
 

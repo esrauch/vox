@@ -280,7 +280,7 @@ function runPocket(state: RunState, events: SimEvent[]): boolean {
   pocket.left = Math.max(0, pocket.left - 1);
   if (pocket.left > 0) return false;
   events.push({ type: 'sacked', by: null });
-  screen.ball = { at: 'dead', pos: screen.qb, bounced: false };
+  screen.ball = { at: 'dead', pos: screen.qb, how: 'sacked' };
   state.pocket = null;
   endDown(state, 'sacked', state.drive.los - tuning.drive.sackLoss, events);
   return true;
@@ -293,7 +293,7 @@ function checkSnatch(state: RunState, events: SimEvent[]): boolean {
   if (!witch) return false;
   const at = vec(witchColumn(witch, tick), witch.row);
   events.push({ type: 'blocked', by: witch.id, at });
-  screen.ball = { at: 'dead', pos: at, bounced: true };
+  screen.ball = { at: 'dead', pos: at, how: 'blocked' };
   endDown(state, 'blocked', state.drive.los, events);
   return true;
 }
@@ -325,7 +325,7 @@ function resolveFlight(state: RunState, events: SimEvent[]): boolean {
     const by = batter ?? coveringDefender(screen, at);
     if (by) {
       events.push({ type: 'blocked', by: by.id, at: by.pos });
-      screen.ball = { at: 'dead', pos: by.pos, bounced: true };
+      screen.ball = { at: 'dead', pos: by.pos, how: 'blocked' };
       endDown(state, 'blocked', state.drive.los, events);
       return true;
     }
@@ -335,7 +335,7 @@ function resolveFlight(state: RunState, events: SimEvent[]): boolean {
     if (receiver) return catchBall(state, receiver, distance(receiver.pos, at), events);
     if (t >= 1) {
       events.push({ type: 'incomplete', at: ball.target });
-      screen.ball = { at: 'dead', pos: ball.target, bounced: false };
+      screen.ball = { at: 'dead', pos: ball.target, how: 'incomplete' };
       endDown(state, 'incomplete', state.drive.los, events);
       return true;
     }

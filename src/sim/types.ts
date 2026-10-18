@@ -85,8 +85,11 @@ export type BallState =
       readonly landsOn: number;
     }
   | { readonly at: 'carried'; readonly by: number }
-  /** The down is over: the ball lies (or bounced) here. */
-  | { readonly at: 'dead'; readonly pos: Vec; readonly bounced: boolean };
+  /** The down is over: the ball came down here, and how (the renderer bounces it differently). */
+  | { readonly at: 'dead'; readonly pos: Vec; readonly how: DeadBall };
+
+/** How a ball went dead: batted off a defender (or a hazard), landing with nobody there, or the QB sacked with it. */
+export type DeadBall = 'blocked' | 'incomplete' | 'sacked';
 
 export interface ScreenState {
   readonly players: PlayerUnit[];

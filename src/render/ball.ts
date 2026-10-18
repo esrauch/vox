@@ -26,11 +26,15 @@ export interface Flight {
   readonly landsOn: number;
 }
 
+/** How far (tiles) an incomplete pass skids on after it lands. */
+const INCOMPLETE_SKID = 1.4;
+
 /**
  * The ball, wherever it is: in the QB's raised hand, flying (with a landing
  * ring and one pip per beat left), held overhead by a carrier (who also gets
  * a pulsing ring on the ground), or dead when the down is over: a blocked
- * pass bounces off whatever blocked it, and an incomplete one drops.
+ * pass bounces off whatever blocked it, and an incomplete one skips on along
+ * the turf.
  *
  * A throw is drawn from the moment of release (`launch`), a fraction of a beat
  * before the sim takes it on the next beat, flying a little faster or slower
@@ -130,10 +134,20 @@ export class BallView {
       this.deadSince ??= beatPos;
       const t = Math.min(1, (beatPos - this.deadSince) / 1.5);
       const ground = tileToWorld(ball.pos, 0.15);
-      if (ball.bounced) {
+      if (ball.how === 'blocked') {
         ground.x += t * 0.6;
         ground.y += Math.sin(t * Math.PI) * 1.6 + (1 - t) * 0.9;
         this.ball.rotation.x = t * Math.PI * 3;
+      } else if (ball.how === 'incomplete') {
+        // It hits the turf still going: skips on the way it was thrown, in two shrinking hops.
+        const dx = ball.pos.x - screen.qb.x;
+        const dy = ball.pos.y - screen.qb.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const run = (1 - (1 - t) * (1 - t)) * INCOMPLETE_SKID;
+        ground.x += (dx / len) * run;
+        ground.z -= (dy / len) * run;
+        ground.y += Math.abs(Math.sin(t * Math.PI * 2)) * 0.7 * (1 - t);
+        this.ball.rotation.x = t * Math.PI * 4 * (1 - t / 2);
       }
       this.ball.position.copy(ground);
     } else if (ball.at === 'carried') {
