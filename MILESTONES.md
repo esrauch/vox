@@ -4,7 +4,9 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** listen to M1.5 (`/dev/audio.html` and the game) and check it on a phone, then M2 (first playable). Still open: the M1.1 iPhone test, and switching Pages to GitHub Actions.
+**Current focus:** playtest **steering the carrier** on a phone (compare with `?steer=0`): does the run phase add real decisions and break "stack everyone in one column"? Then settle the progression proposals from 2026-10-17: what Twist screens do (e.g. Bowling Night, Short Arm, Butterfingers), Candy for risky play (rerolls first), Walk-on trades knocking the defender down instead of removing it, one bonus objective per screen, and a win after 12 screens with endless Overtime. The three new song loops are waiting for a listen.
+
+**Earlier focus:** listen to M1.5 (`/dev/audio.html` and the game) and check it on a phone, then M2 (first playable). Still open: the M1.1 iPhone test, and switching Pages to GitHub Actions.
 
 ---
 
