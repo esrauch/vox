@@ -1,6 +1,6 @@
 /**
  * Simulation types. The simulation is pure data: a RunState advanced once per
- * beat by step(), with actions between beats through dispatch() (TECHNICAL.md
+ * tick by step(), with actions between ticks through dispatch() (TECHNICAL.md
  * §3). Nothing here knows about rendering or audio.
  *
  * Coordinates: x is the column (0 = left), y is the row (0 = bottom, nearest
@@ -26,9 +26,9 @@ interface UnitBase {
   readonly id: number;
   pos: Vec;
   readonly stats: Stats;
-  /** Beats left lying knocked down (0 = up). */
-  downBeats: number;
-  /** The tile this unit will hop to on its next hop beat: the hop-arrow telegraph. */
+  /** Ticks left lying knocked down (0 = up). */
+  downTicks: number;
+  /** The tile this unit will hop to on its next hop tick: the hop-arrow telegraph. */
   intent: Vec | null;
 }
 
@@ -62,13 +62,13 @@ export type Unit = PlayerUnit | Defender;
 
 export type HazardKind = 'witch';
 
-/** A hazard: a pure beat pattern (sim/hazards.ts). It has no state that changes. */
+/** A hazard: a pure tick pattern (sim/hazards.ts). It has no state that changes. */
 export interface Hazard {
   readonly id: number;
   readonly kind: HazardKind;
   /** The row it flies along. */
   readonly row: number;
-  /** Its column on beat 0. */
+  /** Its column on tick 0. */
   readonly startX: number;
   /** Which way it flies: +1 is right, -1 is left. */
   readonly dir: 1 | -1;
@@ -132,7 +132,7 @@ export type Phase =
   /** Before the snap: call a play. */
   | 'setup'
   | 'play'
-  /** The down just ended; it stays on screen for a few beats. */
+  /** The down just ended; it stays on screen for a few ticks. */
   | 'downOver'
   /** A drive was won: pick a card. */
   | 'draft'
@@ -143,8 +143,8 @@ export type Phase =
 
 export interface RunState {
   readonly seed: number;
-  /** The global beat (the last beat step() resolved). It ticks in every phase, with the music, and never resets. */
-  beat: number;
+  /** The global tick (the last tick step() resolved). It ticks in every phase, with the music, and never resets. */
+  tick: number;
   phase: Phase;
   drive: DriveState;
   deck: Deck;
@@ -153,9 +153,15 @@ export interface RunState {
   /** Cards offered in the draft. */
   offer: string[];
   screen: ScreenState;
-  /** Beats since the snap (in play). */
-  downBeat: number;
-  /** Beats left before the next down (in downOver). */
+  /** Ticks since the snap (in play). */
+  downTick: number;
+  /**
+   * Your line holding the pass rush: on a pass, the pocket clock while the QB
+   * holds the ball (at zero, a sack); on a run (`run`), how long the line ties
+   * the rush up before letting it go. Null once the rush is free.
+   */
+  pocket: { readonly total: number; left: number; readonly run?: boolean } | null;
+  /** Ticks left before the next down (in downOver). */
   pause: number;
   /** How the last down ended, and the yards it gained. */
   result: { readonly result: DownResult; readonly gained: number } | null;
@@ -165,7 +171,7 @@ export interface RunState {
   nextId: number;
 }
 
-/** Actions outside the beat: calling a play, the snap, the draft. Throws go to step() as BeatInput. */
+/** Actions outside the tick: calling a play, the snap, the draft. Throws go to step() as BeatInput. */
 export type Action =
   | { readonly type: 'call'; readonly hand: number }
   | { readonly type: 'flip' }
@@ -174,7 +180,7 @@ export type Action =
   | { readonly type: 'remove'; readonly owned: number }
   | { readonly type: 'skipDraft' };
 
-/** What the player does on a beat. */
+/** What the player does on a tick. */
 export interface BeatInput {
   /** Throw the ball to this free point (tile units), if the QB has it. */
   readonly throwAt?: Vec;
@@ -183,7 +189,7 @@ export interface BeatInput {
 /** Why a throw isn't allowed. The UI turns these into words. */
 export type ThrowProblem = 'notInPlay' | 'noBall' | 'offField' | 'tooFar' | 'tooClose';
 
-/** The result of a beat step or an action: the new state (the old one is untouched) and what happened. */
+/** The result of a tick step or an action: the new state (the old one is untouched) and what happened. */
 export interface SimResult {
   readonly state: RunState;
   readonly events: SimEvent[];

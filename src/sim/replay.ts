@@ -2,9 +2,9 @@ import { createRun, dispatch } from './run';
 import { step } from './step';
 import type { Action, BeatInput, RunState, SimEvent } from './types';
 
-/** One recorded input: a setup/screen action, or one beat (with an optional throw). */
+/** One recorded input: a setup/screen action, or one tick (with an optional throw). */
 export type Input =
-  { readonly kind: 'action'; readonly action: Action } | ({ readonly kind: 'beat' } & BeatInput);
+  { readonly kind: 'action'; readonly action: Action } | ({ readonly kind: 'tick' } & BeatInput);
 
 /** Rebuild a run from its seed and inputs. The same inputs always give the same run. */
 export function replay(

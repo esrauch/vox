@@ -102,7 +102,7 @@ function take(result: SimResult): void {
 }
 
 function act(events: SimEvent[]): void {
-  for (const e of events) if (e.type !== 'hop') logLine(`beat ${state.beat}: ${describe(e)}`);
+  for (const e of events) if (e.type !== 'hop') logLine(`tick ${state.tick}: ${describe(e)}`);
   render();
 }
 
@@ -135,11 +135,11 @@ function render(): void {
       }
       const unit = [...screen.players, ...screen.defenders].find((u) => eq(u.pos, tile));
       if (unit) html += unitHtml(unit);
-      if (screen.hazards.some((h) => h.row === y && witchColumn(h, state.beat) === x)) {
+      if (screen.hazards.some((h) => h.row === y && witchColumn(h, state.tick) === x)) {
         html += '<span class="hazard">⋔</span>';
       }
       if (ball.at === 'flight' && eq(ball.target, tile)) {
-        html += `<span class="badge">${ball.landsOn - state.beat}</span>`;
+        html += `<span class="badge">${ball.landsOn - state.tick}</span>`;
       }
       cell.className = classes.join(' ');
       cell.innerHTML = html;
@@ -149,7 +149,7 @@ function render(): void {
   const called = state.called && state.deck.hand[state.called.hand];
   status.textContent =
     `drive ${state.drive.index + 1} (${state.drive.kind}) · ${downAndDistance(state)} · ` +
-    `${state.phase} · beat ${state.beat} · ${state.yards} yds` +
+    `${state.phase} · tick ${state.tick} · ${state.yards} yds` +
     (called
       ? ` · called ${playCard(called).name}${state.called?.flipped ? ' (flipped)' : ''}`
       : '');
@@ -169,7 +169,7 @@ function render(): void {
 
 function unitHtml(u: Unit): string {
   const arrow = u.intent ? arrowFor(u.pos, u.intent) : '';
-  const state = u.downBeats > 0 ? 'down' : '';
+  const state = u.downTicks > 0 ? 'down' : '';
   if (u.side === 'player') {
     const glyph = u.kindId === 'walkOn' ? 'w' : 'R';
     const carrying = state === '' && isCarrier(u.id) ? '<span class="ball">●</span>' : '';

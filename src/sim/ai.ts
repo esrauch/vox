@@ -1,6 +1,6 @@
 /**
- * Per-beat decisions (GAMEPLAY.md, The Defense). Every unit's intent is
- * decided one beat ahead, so it always shows where it's about to hop.
+ * Per-tick decisions (GAMEPLAY.md, The Defense). Every unit's intent is
+ * decided one tick ahead, so it always shows where it's about to hop.
  *
  * - Your players run their card's route, one move per hop; the carrier runs
  *   straight up the field.
@@ -10,7 +10,7 @@
  */
 import { DEFENDERS } from '../content/defenders';
 import type { Move } from '../content/cards';
-import { END_ROW, eq, inBounds, stepAround, stepToward, vec } from './grid';
+import { END_ROW, eq, inBounds, stepToward, vec } from './grid';
 import type { Defender, PlayerUnit, ScreenState, Vec } from './types';
 
 export function updateIntents(screen: ScreenState): void {
@@ -54,16 +54,16 @@ function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
   if (carrier) return stepToward(d.pos, carrier.pos);
   switch (job) {
     case 'cover': {
-      // Man coverage, one beat behind: it heads for where its receiver is now,
+      // Man coverage, one tick behind: it heads for where its receiver is now,
       // so by the time it gets there the receiver has moved on.
       const mark = screen.players.find((p) => p.id === d.marking);
       return mark ? stepToward(d.pos, mark.pos) : null;
     }
-    case 'rush': {
-      // Straight for the QB, going around one of your players in the way.
-      const ahead = stepToward(d.pos, screen.qb);
-      return occupiedByPlayer(screen, ahead) ? stepAround(d.pos, screen.qb) : ahead;
-    }
+    case 'rush':
+      // While the QB holds the ball, the pocket clock pushes the rush back (sim/step.ts);
+      // once it's thrown, the rush waits for a carrier to chase.
+      return null;
+
     default:
       return null;
   }
@@ -94,10 +94,6 @@ function carrierOf(screen: ScreenState): PlayerUnit | null {
   const { ball } = screen;
   if (ball.at !== 'carried') return null;
   return screen.players.find((p) => p.id === ball.by) ?? null;
-}
-
-function occupiedByPlayer(screen: ScreenState, at: Vec): boolean {
-  return screen.players.some((p) => eq(p.pos, at));
 }
 
 /** The next tile of a defender's patrol circuit. */

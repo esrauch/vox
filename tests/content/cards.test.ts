@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { AREAS } from '../../src/content/areas';
-import { CARDS, DRAFT_POOL, STARTER_DECK, flipPlayer, playCard } from '../../src/content/cards';
-import { formation } from '../../src/sim/drive';
-import { key } from '../../src/sim/grid';
+import {
+  CARDS,
+  DRAFT_POOL,
+  STARTER_DECK,
+  flipPlayer,
+  playCard,
+  route,
+} from '../../src/content/cards';
+import { formation, qbTile } from '../../src/sim/drive';
+import { COLS, MID_COL, key } from '../../src/sim/grid';
 
 describe('play cards', () => {
   const cards = Object.values(CARDS);
@@ -14,14 +21,17 @@ describe('play cards', () => {
   it('every formation lines up on the field without two players on one tile, flipped or not', () => {
     for (const c of cards) {
       for (const flipped of [false, true]) {
-        const players = formation(c.id, flipped, 2, 1);
+        const players = formation(c.id, flipped, 3, 1);
         for (const p of players) {
           expect(p.pos.x, c.id).toBeGreaterThanOrEqual(0);
-          expect(p.pos.x, c.id).toBeLessThanOrEqual(8);
+          expect(p.pos.x, c.id).toBeLessThan(COLS);
         }
         const tiles = players.map((p) => key(p.pos));
         expect(new Set(tiles).size, c.id).toBe(tiles.length);
-        expect(tiles, `${c.id} puts a player on the QB`).not.toContain('4,0');
+        expect(tiles, `${c.id} puts a player on the QB`).not.toContain(key(qbTile(3)));
+        // The three middle columns on the line belong to the (drawn) offensive line.
+        const onLine = players.filter((p) => p.pos.y === 3 && Math.abs(p.pos.x - MID_COL) <= 1);
+        expect(onLine, `${c.id} puts a player in the line`).toHaveLength(0);
       }
     }
   });
@@ -34,6 +44,10 @@ describe('play cards', () => {
 
   it('the starter deck and the draft pool only use real cards', () => {
     for (const id of [...STARTER_DECK, ...DRAFT_POOL]) expect(() => playCard(id)).not.toThrow();
+  });
+
+  it('route() expands run-length words', () => {
+    expect(route('U3 RU2 .')).toBe('UUURURU.');
   });
 
   it('Flip mirrors the column and swaps L and R', () => {
@@ -51,7 +65,7 @@ describe('areas', () => {
         ).toBe(true);
         for (const d of spec.defenders) {
           expect(d.x).toBeGreaterThanOrEqual(0);
-          expect(d.x).toBeLessThanOrEqual(8);
+          expect(d.x).toBeLessThan(COLS);
         }
       }
     }

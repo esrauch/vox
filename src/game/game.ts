@@ -10,22 +10,27 @@
  * down ends; after a won drive, draft a card; a failed 4th down ends the run.
  */
 import { playCard } from '../content/cards';
+import { tuning } from '../content/tuning';
 import { AimView } from '../render/aim';
 import { BallView } from '../render/ball';
 import { DriveLines, createField } from '../render/field';
 import { HazardViews } from '../render/hazards';
+import { PocketView } from '../render/pocket';
 import { QbView } from '../render/qb';
 import { RoutePreview } from '../render/routes';
 import { createForestScenery } from '../render/scenery';
 import { UnitViews } from '../render/units';
 import { View } from '../render/view';
-import { createRun, dispatch, downAndDistance } from '../sim/run';
-import { step, throwProblem } from '../sim/step';
+import { createRun, dispatch, downAndDistance, yardsText } from '../sim/run';
+import { flightTicks, step, throwProblem } from '../sim/step';
 import type { Action, DriveKind, RunState, SimEvent, Vec } from '../sim/types';
 import { Hud, type CardFace } from '../ui/hud';
 import { Conductor } from './conductor';
 import { THROW_PROBLEM_TEXT, react } from './feedback';
 import { aimTarget, throwTiming } from './slingshot';
+
+/** Sim ticks per beat of the music: eighth notes. */
+const TICKS_PER_BEAT = tuning.clock.ticksPerBeat;
 
 export interface GameOptions {
   seed: number;
@@ -47,7 +52,7 @@ export class Game {
   private state: RunState;
   private seed: number;
   private readonly conductor = new Conductor();
-  /** The song beat this run's beat 0 fell on: sim beat = song beat - runStart. */
+  /** The song beat this run's tick 0 fell on: sim tick = (song beat - runStart) × ticks per beat. */
   private runStart = 0;
   private paused = false;
 
@@ -56,6 +61,7 @@ export class Game {
   private readonly hazards: HazardViews;
   private readonly lines: DriveLines;
   private readonly routes: RoutePreview;
+  private readonly pocket: PocketView;
   private readonly qb: QbView;
   private readonly ball: BallView;
   private readonly aimView: AimView;
@@ -64,7 +70,7 @@ export class Game {
   /** Pulling back to aim: where the pull started (screen px) and where it points. */
   private aim: { start: { x: number; y: number }; target: Vec } | null = null;
   /** A released throw, waiting for the beat the sim takes it on. */
-  private queuedThrow: { beat: number; target: Vec } | null = null;
+  private queuedThrow: { tick: number; target: Vec } | null = null;
 
   constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement, options: GameOptions) {
     this.seed = options.seed;
@@ -74,6 +80,7 @@ export class Game {
     scene.add(createField(), createForestScenery(scene, this.view));
     this.lines = new DriveLines(scene);
     this.routes = new RoutePreview(scene);
+    this.pocket = new PocketView(scene);
     this.units = new UnitViews(scene);
     this.hazards = new HazardViews(scene);
     this.qb = new QbView(scene);
@@ -109,34 +116,35 @@ export class Game {
   // ── The beat ────────────────────────────────────────────────────────────
 
   private frame(now: number): void {
-    const pos = this.simBeatAt(now);
-    const beat = Math.floor(pos);
-    // Step every beat heard since the last frame. The music never waits, so
+    const pos = this.simTickAt(now);
+    const tick = Math.floor(pos);
+    // Step every tick heard since the last frame. The music never waits, so
     // neither does the sim: after a hiccup it catches up rather than drifting.
-    while (this.state.beat < beat) this.stepBeat();
+    while (this.state.tick < tick) this.stepTick();
 
     const { screen, drive } = this.state;
-    this.units.update(screen, pos - beat);
+    this.units.update(screen, pos - tick);
     this.hazards.update(pos, now / 1000);
     this.lines.update(drive);
     this.routes.update(this.state);
+    this.pocket.update(this.state, pos);
     const holding = this.ball.update(screen, pos, this.units, now / 1000);
     this.qb.update(screen.qb, holding);
     this.aimView.update(now / 1000);
     this.view.render();
   }
 
-  /** The sim beat (with its fraction) heard at a performance-clock moment (ms). */
-  private simBeatAt(perfMs?: number): number {
+  /** The sim tick (with its fraction) heard at a performance-clock moment (ms). Ticks are eighth notes. */
+  private simTickAt(perfMs?: number): number {
     const song = this.conductor.beatAt(perfMs);
-    return song === null ? this.state.beat : song - this.runStart;
+    return song === null ? this.state.tick : (song - this.runStart) * TICKS_PER_BEAT;
   }
 
-  private stepBeat(): void {
-    const next = this.state.beat + 1;
+  private stepTick(): void {
+    const next = this.state.tick + 1;
     const queued = this.queuedThrow;
-    if (queued && queued.beat <= next) this.queuedThrow = null;
-    const input = queued?.beat === next ? { throwAt: queued.target } : {};
+    if (queued && queued.tick <= next) this.queuedThrow = null;
+    const input = queued?.tick === next ? { throwAt: queued.target } : {};
 
     const prev = this.state;
     const { state, events } = step(prev, input);
@@ -180,9 +188,9 @@ export class Game {
     this.conductor.play('uiClick');
     const { phase } = this.state;
     if (!this.conductor.started) {
-      // Entering the game: the run's beat 0 is the song's beat 0.
+      // Entering the game: the run's tick 0 is the song's beat 0.
       await this.conductor.start();
-      this.runStart = -this.state.beat;
+      this.runStart = -this.state.tick / TICKS_PER_BEAT;
     } else if (this.paused) {
       this.paused = false;
       await this.conductor.resume();
@@ -192,7 +200,7 @@ export class Game {
     } else if (phase === 'over' || phase === 'won') {
       this.seed++;
       this.state = createRun(this.seed);
-      this.runStart = Math.floor(this.conductor.beatAt() ?? 0) - this.state.beat;
+      this.runStart = Math.floor(this.conductor.beatAt() ?? 0);
       this.resetViews();
     }
     this.syncHud();
@@ -210,7 +218,7 @@ export class Game {
   private syncHud(): void {
     const { phase, drive, deck, called } = this.state;
     const { drivesWon, yards } = this.state;
-    const summary = `${drivesWon} ${drivesWon === 1 ? 'drive' : 'drives'} won · ${yards} yds`;
+    const summary = `${drivesWon} ${drivesWon === 1 ? 'drive' : 'drives'} won · ${yardsText(yards)} yds`;
     const banner =
       phase === 'over' || phase === 'won'
         ? summary
@@ -282,8 +290,9 @@ export class Game {
       if (problem !== 'tooClose') this.hud.pop(THROW_PROBLEM_TEXT[problem], 'bad');
       return;
     }
-    const timing = throwTiming(this.simBeatAt(perfMs), this.state.beat);
-    this.queuedThrow = { beat: timing.beat, target };
+    const flight = flightTicks(this.state.screen.qb, target);
+    const timing = throwTiming(this.simTickAt(perfMs), this.state.tick, flight);
+    this.queuedThrow = { tick: timing.tick, target };
     this.ball.launch({ target, releasedAt: timing.releasedAt, landsOn: timing.landsOn });
   }
 }

@@ -169,12 +169,12 @@ export class UnitViews {
     const land = moving && t >= 1 ? Math.max(0, 1 - (phase - HOP_SHARE) / 0.2) : 0;
     view.body.scale.set(1 + land * 0.15, 1 - land * 0.2, 1 + land * 0.15);
     view.body.position.y = view.base * (1 - land * 0.2);
-    view.body.rotation.z = u.downBeats > 0 ? Math.PI / 2 : 0;
+    view.body.rotation.z = u.downTicks > 0 ? Math.PI / 2 : 0;
     view.body.rotation.x = tilt;
-    if (u.downBeats > 0) view.body.position.y = Math.max(view.base * 0.8, 0.25);
+    if (u.downTicks > 0) view.body.position.y = Math.max(view.base * 0.8, 0.25);
 
     // The arrow points where it will hop next. Models never turn.
-    view.arrow.visible = !!u.intent && u.downBeats === 0;
+    view.arrow.visible = !!u.intent && u.downTicks === 0;
     if (u.intent) {
       const dx = u.intent.x - u.pos.x;
       const dy = u.intent.y - u.pos.y;

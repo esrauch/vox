@@ -7,11 +7,11 @@ import type { DefenderKind, Stats } from '../sim/types';
 
 /** How a defender picks its next hop (sim/ai.ts). */
 export type Job =
-  /** Man coverage: shadows one receiver, one beat behind; chases the carrier after a catch. */
+  /** Man coverage: shadows one receiver, one tick behind; chases the carrier after a catch. */
   | 'cover'
   /** Planted: never moves, guards a wide area. */
   | 'zone'
-  /** The pass rush: straight for the QB; chases the carrier after a catch. */
+  /** The pass rush: pushes the pocket back on the pocket clock; chases the carrier after a catch. */
   | 'rush'
   /** The deep guard: holds its row level with your deepest receiver (or the landing spot); after a catch, into the carrier's column, then down. */
   | 'safety'
@@ -30,8 +30,8 @@ export interface DefenderDef {
   readonly stats: Stats;
   readonly job: Job;
   /**
-   * The radius (tiles) of its purple coverage ring: a pass to a player inside
-   * it is blocked. 0 means it doesn't cover (the pass rush).
+   * The radius (tiles, half-yards) of its purple coverage ring: a pass that
+   * comes down inside it is blocked. 0 means it doesn't cover (the pass rush).
    */
   readonly coverage: number;
   /** Whether it moves before the snap and between downs too, not only in play. */
@@ -59,7 +59,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     glyph: 'Z',
     stats: BASE,
     job: 'zone',
-    coverage: 2,
+    coverage: 3,
     ignoresSnap: false,
   },
   blitzer: {
@@ -79,7 +79,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     glyph: 'S',
     stats: BASE,
     job: 'safety',
-    coverage: 2,
+    coverage: 3,
     ignoresSnap: false,
   },
   bat: {
@@ -89,8 +89,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     glyph: 'V',
     stats: BASE,
     job: 'patrol',
-    // A ring of 1 covers the tiles around it (your players can't share its tile).
-    coverage: 1,
+    coverage: 1.5,
     ignoresSnap: true,
   },
 };

@@ -24,16 +24,17 @@ export function aimTarget(
 }
 
 /**
- * When a throw released at sim beat position `releasedAt` happens: the sim
- * takes it on the next beat (`beat`) and it lands flightBeats after that. The
- * ball is drawn leaving the hand at `releasedAt`, flying a little faster or
- * slower so it still lands on the beat.
+ * When a throw released at sim tick position `releasedAt` happens: the sim
+ * takes it on the next tick (`tick`) and it lands `flight` ticks after that.
+ * The ball is drawn leaving the hand at `releasedAt`, flying a little faster
+ * or slower so it still lands on a tick.
  */
 export function throwTiming(
   releasedAt: number,
-  simBeat: number,
-): { beat: number; releasedAt: number; landsOn: number } {
-  const from = Math.max(releasedAt, simBeat);
-  const beat = Math.floor(from) + 1;
-  return { beat, releasedAt: from, landsOn: beat + tuning.throw.flightBeats };
+  simTick: number,
+  flight: number,
+): { tick: number; releasedAt: number; landsOn: number } {
+  const from = Math.max(releasedAt, simTick);
+  const tick = Math.floor(from) + 1;
+  return { tick, releasedAt: from, landsOn: tick + flight };
 }

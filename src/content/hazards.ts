@@ -10,7 +10,7 @@ export interface HazardDef {
   /** Voxel model id. */
   readonly model: string;
   /** Beats per tile of travel. */
-  readonly beatsPerTile: number;
+  readonly ticksPerTile: number;
   /**
    * How close (in tiles, along her row) a pass must cross to be hit. The
    * Witch snatches a ball crossing her row within this distance of her.
@@ -22,7 +22,7 @@ export const HAZARDS: Readonly<Record<HazardKind, HazardDef>> = {
   witch: {
     name: 'Witch on a Broom',
     model: 'forestHazards/witch',
-    beatsPerTile: 1,
+    ticksPerTile: 1,
     reach: 0.75,
   },
 };

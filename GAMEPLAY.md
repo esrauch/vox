@@ -62,12 +62,12 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   | **Tackled** | The down is over. The next down starts from where the carrier went down. |
   | **Incomplete** (nobody is there to catch it) | The down is used, with no gain. |
   | **Blocked** (the receiver was covered: the ball **bounces off the covering defender**) | The down is used, with no gain. |
-  | **Sacked** (the pass rush reaches the QB before the throw) | The down is used, and you lose 2 yards. |
+  | **Sacked** (the pocket clock runs out before the throw) | The down is used, and you lose 2 yards. |
   | **4th down fails** | **The drive is lost: game over.** |
 
 - **Every failed pass gets the comedy of a fumble:** the ball bounces loose, the crowd chants *"FEE! FI! FO! FUMBLE!"*. But it only costs the down.
 - **Every down starts fresh:** your players line up again behind the new line of scrimmage.
-- **The QB lines up two rows behind the line of scrimmage** each down. *(Prototype: the camera shows the whole 16-row field, every drive starts on row 2, and the first-down line is row 12. Following the line of scrimmage with the camera is still open.)*
+- **The QB lines up 1½ yards behind the line of scrimmage** each down. *(Prototype: the camera shows the whole field, every drive starts 1½ yards up it, and the first-down line is 10 yards on. Following the line of scrimmage with the camera is still open.)*
 - ▲ **Getting 10 yards in one play should be rare** (see *The Safety*). A typical drive is a short gain, a short gain, and a nervy 3rd or 4th down.
 
 ---
@@ -78,7 +78,16 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 2. **A card is the whole play:** where your players line up and **every player's route**, drawn on the field as a preview before you commit. **Flip** mirrors it left or right. That's the only adjustment: you don't place players by hand.
 3. **The defense is visible before you choose** (*Into the Breach* style): every defender, its coverage ring and its job, where the Bats circle and the Witch flies. Picking the card that beats this defense *is* the puzzle.
 4. **HIKE!** Receivers run their routes on the beat. Defenders cover them, and the pass rush comes for the QB.
-5. **Pull back and release** to throw to an open receiver before you're sacked (**about 4–6 beats**), leading it to where it will be. Even with no rush, the QB is sacked if it still holds the ball after 14 beats (the play clock).
+5. **Pull back and release** to throw before **the pocket collapses** (see *The Pocket*), leading your receiver into open space.
+
+### The Pocket *(Retro Bowl-style)*
+
+- **Your line stands in front of the QB**, three plain linemen across the middle, with the pass rush (the Blitzers) pressed against them.
+- **The pocket clock** starts at the snap: **6 beats** to throw on an ordinary play. As it runs down, **the rush pushes your line back toward the QB**, and **pips over the line count the beats left** (white, then red for the last one). At zero, with the ball still in the QB's hand, it's a **sack**.
+- **Blockers buy time:** every player a play leaves at home (a "." route, like the Screen's two blockers) adds 1½ beats. **Every extra Blitzer** takes 1½ away. The pocket never holds for less than 3 beats.
+- **While the line holds them, Blitzers are tied up:** they can't chase or tackle, and a runner can't go through them. On a run play (a Draw), the line ties the rush up for 3 beats, then lets it go.
+- **Once the ball is thrown**, the rush is let go; once it's caught, the Blitzers chase the carrier.
+- The linemen are scenery: the clock decides the sack.
 6. **After a catch, the carrier runs straight upfield** on its own until it's tackled or crosses the first-down line. You don't steer it. *(Future candidate: special players on cards with their own running AI.)*
 
 ---
@@ -100,7 +109,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **The reticle is a free point, not a tile.** It shows a small ring for a **perfect** catch and a larger one for an **ok** catch, and turns red only where a throw isn't allowed at all. **It never warns about coverage:** you read the rings.
 - **Leading your receiver is the skill:** put the reticle where it will be when the ball lands.
 - **Only the QB throws. There are no laterals**, except on trick-play cards.
-- **Throw range** is measured from the line of scrimmage: from **1 row behind it** (for a Screen) to **11 rows past it**.
+- **Throw range** is measured from the line of scrimmage: from **a yard behind it** (for a Screen) to **11 yards past it**.
+- **Quick passes are quick:** a throw up to 5 yards lands **one beat** after the release; anything longer takes **two**, which gives the defense time to close in.
 - **The pull sensitivity** is a tuning value (`tuning.aim`).
 
 ---
@@ -110,23 +120,23 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **Every defender that covers shows a purple ring** on the turf around it: **its coverage**. The rings go away once the ball is caught, since there's no pass left to block.
 - **Every one of your players shows a ring that says whether it could catch right now:**
   - **Green:** clear. No coverage nearby; a ball arriving now is a safe catch.
-  - **Yellow:** a ball arriving now would still be caught, but coverage is close (*within one tile of a purple ring*). By the time the ball lands, it may not be.
-  - **Red:** covered (inside a purple ring). A ball arriving now would be blocked.
+  - **Yellow:** coverage is close (*within half a yard of a purple ring*). A ball thrown right at it now would still be caught, but by the time it lands, it may not be.
+  - **Red:** covered (inside a purple ring). A ball thrown right at it would be blocked; lead it into open space instead.
 - **The rings update every beat.** Reading them, and how they'll change during the ball's flight, *is* the throw.
 
 ### Catching
 
 - **The ball lands at a free point**, and the **closest player within catch reach** is the receiver. How close decides the catch: **perfect** (within about ⅓ of a tile), **good** (about ¾) or **ok** (about 1.15). Hands widens all three.
 - **A perfect catch is a Clean Catch:** the carrier **fends off one tackle** (shown by a glowing outline).
-- **If the receiver is red when the ball lands, the pass is blocked:** it bounces off the covering defender, and the down is used.
+- **The catch is contested where the ball comes down, not where the receiver stands** (Retro Bowl-style): if the ball lands **inside a defender's purple ring**, it bounces off that defender, and the down is used. So **leading the receiver away from its defender is the skill**: a receiver with a Cover right behind it can still catch a ball put on its far side.
 - **If nobody is within reach, it's incomplete.**
-- **There are no interceptions.** A Bat under the ball, or the Witch crossing it, also **blocks** it: it bounces off.
+- **There are no interceptions.** The Witch crossing the pass also **blocks** it: it bounces off.
 - The game pops "PERFECT!", "GOOD!" or "OK", and "BLOCKED!" when one bounces.
 
 ### Tackling
 
 - **A tackle is contact:** the carrier is down when a defender reaches it: they meet on a tile or swap tiles, or the defender ends a beat **right next to it** (in front, behind or beside, not diagonally). So a chaser one step behind catches the carrier rather than trailing it up the field. Any defender can tackle.
-- **A fend-off** (from a Clean Catch or a card) knocks that defender down instead, for 8 beats (long enough for the carrier to get clear), and the carrier keeps running.
+- **A fend-off** (from a Clean Catch or a card) knocks that defender down instead, long enough for the carrier to get clear, and the carrier keeps running.
 - **Blocking is just standing in the way:** your players and defenders **never share a tile**. Whoever would step into the other waits, so a player on a "." route is a blocker, and a Blitzer has to go around it. Only the carrier can be stepped into, and that's a tackle.
 - **Your players never block each other.** They can share a tile and hop past one another.
 
@@ -140,9 +150,9 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 |---|---|---|---|
 | **Cover** | Garden Gnome | **Man coverage.** At the snap, each picks a receiver (the nearest one not already covered) and shadows it **one beat behind**, so a route's cut opens a beat or two of separation. After a catch, it **chases the carrier**. | Small (about 1 tile), moving with it |
 | **Zone** | Scarecrow | **Doesn't move.** Planted on its tile, it guards a wide area. | **Wide** (about 2 tiles) |
-| **Blitzer** | Rhino Beetle | **The pass rush.** It goes straight for the QB: how close the rushers are is your throw clock. Reaching the QB while it holds the ball is a sack. **Once the ball is caught, it chases the carrier** like a Cover. | **None** |
+| **Blitzer** | Rhino Beetle | **The pass rush.** It lines up against your line and pushes it back on the pocket clock (see *The Pocket*); every extra Blitzer shortens the clock. **Once the ball is caught, it chases the carrier** like a Cover. | **None** |
 | **Safety** | **Owl**: perched deep, it sees everything | **The deep guard, always between the ball and the first-down line.** It hangs back near the line and slides across its row to stay level with your deepest receiver; while a pass is in the air, it slides toward where it will land. **After a catch it gets into the carrier's column first, then comes down to meet it** (a carrier already past it is just chased). So **a deep pass is almost always blocked**, and a carrier rarely gets by it. Beating the Safety (a decoy, a flood to one side, a trick play) is how you gain 10 in one play. | **Wide** (about 2 tiles), moving with it |
-| **Bat** | Bat | **Patrols** a fixed 4×4 box circuit, one tile per hop, whatever the play is doing. It's already circling before the snap, so you can time a throw past it. A pass to a player beside it bounces off. | Small (about 1 tile), moving with it |
+| **Bat** | Bat | **Patrols** a fixed box circuit (3 yards square), one tile per hop, whatever the play is doing. It's already circling before the snap, so you can time a throw past it. A pass coming down near it bounces off. | Small (¾ of a yard), moving with it |
 
 - **Later drives and areas** add more Covers and Blitzers, plant more Scarecrows, and lengthen the distance ("4th and 15").
 - **Before the snap, only the Bats move.** Everyone else waits for HIKE.
@@ -186,7 +196,7 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 
 ### The Grid
 
-- **The field is a tile grid about the size of one *Crossy Road* screen:** **9 columns wide and 16 rows tall** in portrait. Everything lives on it.
+- **The field is a grid of half-yard tiles:** **11 wide and 26 tall** (5½ by 13 yards) in portrait, so a 10-yard first down is 20 rows and the whole drive fits on one screen. Everything lives on it.
 - **Players and defenders hop tile to tile**, the way the chicken does in *Crossy Road*, and they **hop on the beat**.
 - **Routes are tile paths**, so a play's preview is easy to read. ▲ *The grid can be loosened later if it plays stiff.*
 
@@ -195,8 +205,8 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 **The whole game runs on the music**, like *Crypt of the NecroDancer*.
 
 - **The music is the clock.** It starts when you tap **PLAY** and never stops: through picking plays, downs, drives and new runs. Pausing freezes the music and the beat together.
-- **There's one beat for the whole game.** HIKE doesn't start it; it just releases everyone. Before the snap only the Bats and hazards move. After it, each unit hops on its own beats (Hustle 0 hops every other beat).
-- **Every throw lands on a beat, 2 beats after the next one.** The ball **leaves the QB's hand the instant you let go** and flies a little faster or slower so it lands on the beat. One fixed rhythm makes leading a receiver countable: "two hops from now, it'll be *there*."
+- **There's one clock for the whole game: the music.** The game ticks on **eighth notes** (two ticks a beat), and **everyone hops every tick**: half a yard per tick, 2 yards a second, so a play lasts about 4–7 seconds, like Retro Bowl. HIKE doesn't start the clock; it just releases everyone. Before the snap only the Bats and hazards move.
+- **Every throw lands on a tick:** one beat after the release for a quick pass, two for a long one. The ball **leaves the QB's hand the instant you let go** and flies a little faster or slower so it lands in time.
 - **Hazards are beat patterns**, so you learn them like a riff.
 
 **The soundtrack:** cheerful Halloween music with a strong, clear pulse. Four loops so far, from friendliest to most intense: *Graveyard Shuffle* (a swung monster-mash bop), *Spooky Surf* (the one the game plays now), *Midnight Chase* (driving) and *Skeleton Stomp* (for bosses). They share one tempo and loop length, so the game can crossfade between them at any moment. ▲ *When it switches songs (by drive type? on 4th down?) is still open.*
@@ -216,7 +226,8 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 | **Who's open** | A **green, yellow or red ring** under each of your players. |
 | **Where a unit will hop next** | A **small arrow toward its next tile**. Models never turn: they always face the camera (except the Witch, who faces the way she's flying). |
 | **The reticle** | While you pull: a free point with a small *perfect* ring and a larger *ok* ring, and a dashed arc marching from the QB's hand to it. |
-| **Where the ball will land** | A landing ring with **countdown pips** (one per beat). |
+| **Where the ball will land** | A landing ring with **countdown pips**. |
+| **The pocket clock** | Your line in front of the QB being pushed back, with **pips over it, one per beat left** before the sack. |
 | **Who has the ball** | The carrier holds a **bigger football up overhead**, with a **pulsing gold ring** on the ground around it. |
 | **Hazards** | Every hazard warns **one beat ahead**. |
 
@@ -235,7 +246,7 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 
 | Attribute | At **0** | At 1+ |
 |---|---|---|
-| **Hustle** | Hops **every 2 beats**. | ▲ *Faster hopping.* |
+| **Hustle** | Hops **every tick** (2 yards a second). | ▲ *Faster: e.g. two hops a tick.* |
 | **Hands** | The normal catch reach. | ▲ *Wider catch reach.* |
 | **Heft** | **Tackled on the first contact.** | ▲ *Breaks tackles.* |
 

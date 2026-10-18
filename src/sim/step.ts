@@ -1,30 +1,34 @@
 /**
- * The beat step: advance a run by exactly one beat (TECHNICAL.md §3). Pure:
+ * The tick step: advance a run by exactly one tick (TECHNICAL.md §3). Pure:
  * the input state is never modified, and the same state plus the same input
  * always gives the same result.
  *
- * The beat is global: it ticks in every phase, in time with the music, and
- * never resets. What changes is who acts on it. Before the snap only
- * defenders that ignore it move (the Bats); everyone else waits. After a down
- * ends, it stays on screen for a few beats, then the next down lines up.
+ * Ticks are eighth notes: two per beat of the music. The tick is global: it
+ * ticks in every phase and never resets. What changes is who acts on it.
+ * Before the snap only defenders that ignore it move (the Bats); everyone
+ * else waits. After a down ends, it stays on screen for a few ticks, then the
+ * next down lines up.
  *
- * Order within a beat in play (GAMEPLAY.md, A Down):
+ * Order within a tick in play (GAMEPLAY.md, A Down):
  *   1. Knocked-down units recover a little.
- *   2. A throw released for this beat leaves the QB's hand.
- *   3. Units hop (on their hop beats). Your players and defenders can't share
- *      a tile. A defender that meets the carrier, or ends the beat right next
- *      to it (in front, behind or beside), tackles it, unless it fends off.
+ *   2. A throw released for this tick leaves the QB's hand.
+ *   3. Units hop. Your players and defenders can't share a tile. A defender
+ *      that meets the carrier, or ends the tick right next to it (in front,
+ *      behind or beside), tackles it, unless it fends off.
  *   4. The carrier crossing the first-down line wins the drive.
- *   5. A defender next to the QB while it holds the ball sacks it (or the play clock runs out).
+ *   5. The pocket clock runs down, the pass rush pushes the line back, and
+ *      at zero, with the ball still in the QB's hand, it's a sack.
  *   6. A Witch crossing the pass blocks it.
- *   7. A ball due this beat lands: a catch, a block (the receiver was covered) or incomplete.
- *   8. Everyone decides next beat's hop (the telegraph).
+ *   7. A ball due this tick lands: blocked if it comes down inside a
+ *      defender's coverage ring, otherwise caught by the closest player in
+ *      reach, or incomplete.
+ *   8. Everyone decides next tick's hop (the telegraph).
  */
 import { DEFENDERS } from '../content/defenders';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
-import { coveringDefender, openness } from './coverage';
-import { COLS, END_ROW, ROWS, dist, eq, inBounds, key, touches, vec } from './grid';
+import { coveringDefender } from './coverage';
+import { COLS, END_ROW, ROWS, dist, eq, inBounds, key, vec } from './grid';
 import { snatches, witchColumn } from './hazards';
 import { endDown, nextDown } from './run';
 import { actsOn } from './stats';
@@ -44,7 +48,7 @@ import type {
 export function step(prev: RunState, input: BeatInput = {}): SimResult {
   const state = structuredClone(prev);
   const events: SimEvent[] = [];
-  state.beat += 1;
+  state.tick += 1;
 
   if (state.phase === 'downOver') {
     if (--state.pause <= 0) nextDown(state, events);
@@ -57,8 +61,8 @@ export function step(prev: RunState, input: BeatInput = {}): SimResult {
     return { state, events };
   }
 
-  state.downBeat++;
-  for (const u of allUnits(state)) if (u.downBeats > 0) u.downBeats--;
+  state.downTick++;
+  for (const u of allUnits(state)) if (u.downTicks > 0) u.downTicks--;
   if (input.throwAt) tryThrow(state, input.throwAt, events);
   const tackled = resolveMoves(state, events) ?? checkContact(state, events);
   if (checkFirstDown(state, events)) return { state, events };
@@ -66,7 +70,7 @@ export function step(prev: RunState, input: BeatInput = {}): SimResult {
     endDown(state, 'tackled', tackled.pos.y, events);
     return { state, events };
   }
-  if (checkSack(state, events)) return { state, events };
+  if (runPocket(state, events)) return { state, events };
   if (checkSnatch(state, events)) return { state, events };
   if (resolveLanding(state, events)) return { state, events };
   updateIntents(state.screen);
@@ -78,7 +82,7 @@ function allUnits(state: RunState): Unit[] {
 }
 
 const byId = (a: { id: number }, b: { id: number }): number => a.id - b.id;
-const isUp = (u: Unit): boolean => u.downBeats === 0;
+const isUp = (u: Unit): boolean => u.downTicks === 0;
 
 function carrierOf(state: RunState): PlayerUnit | null {
   const { ball } = state.screen;
@@ -100,15 +104,21 @@ export function throwProblem(state: RunState, target: Vec): ThrowProblem | null 
   return null;
 }
 
+/** How long a pass is in the air: quick passes land in one beat, longer ones in two. */
+export function flightTicks(from: Vec, target: Vec): number {
+  const far = Math.hypot(target.x - from.x, target.y - from.y) > tuning.throw.quickRange;
+  return far ? tuning.throw.longTicks : tuning.throw.quickTicks;
+}
+
 function tryThrow(state: RunState, target: Vec, events: SimEvent[]): void {
   const problem = throwProblem(state, target);
   if (problem) {
     events.push({ type: 'throwRejected', target, reason: problem });
     return;
   }
-  const landsOn = state.beat + tuning.throw.flightBeats;
   const from = state.screen.qb;
-  state.screen.ball = { at: 'flight', from, target, releasedOn: state.beat, landsOn };
+  const landsOn = state.tick + flightTicks(from, target);
+  state.screen.ball = { at: 'flight', from, target, releasedOn: state.tick, landsOn };
   events.push({ type: 'thrown', target, landsOn });
 }
 
@@ -120,20 +130,21 @@ function movesNow(state: RunState, u: Unit): boolean {
 }
 
 /**
- * Everyone due to hop this beat hops. Your players and defenders never share
+ * Everyone due to hop this tick hops. Your players and defenders never share
  * a tile: whoever would step into the other waits (that's how blockers work).
  * The one exception is the carrier: a defender meeting it tackles it, unless
  * it has a fend-off left, which knocks the defender down instead. Returns the
  * tackled carrier, if any.
  */
 function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
-  const { beat } = state;
+  const { tick } = state;
   const carrier = carrierOf(state);
   const units = allUnits(state).sort(byId);
   const moving = new Map<number, Vec>();
   for (const u of units) {
     if (!isUp(u) || !u.intent || !inBounds(u.intent)) continue;
-    if (!actsOn(u.stats, beat) || !movesNow(state, u)) continue;
+    if (!actsOn(u.stats, tick) || !movesNow(state, u)) continue;
+    if (u.side === 'defender' && engaged(state, u)) continue; // tied up by your line
     moving.set(u.id, u.intent);
   }
   const finalOf = (u: Unit): Vec => moving.get(u.id) ?? u.pos;
@@ -149,8 +160,9 @@ function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
   for (let changed = true; changed;) {
     changed = cancelDefenderConflicts(defenders, moving);
     for (const p of players) {
-      if (p === carrier) continue;
       for (const d of defenders) {
+        // The carrier meeting a defender is a tackle, unless your line has it tied up.
+        if (p === carrier && !engaged(state, d)) continue;
         if (!meets(p, d)) continue;
         // The defender always waits; the player waits too if it would still land on it.
         if (moving.delete(d.id)) changed = true;
@@ -162,10 +174,10 @@ function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
   let tackled: PlayerUnit | null = null;
   if (carrier && state.phase === 'play') {
     for (const d of defenders) {
-      if (!isUp(d) || !meets(carrier, d)) continue;
+      if (!isUp(d) || engaged(state, d) || !meets(carrier, d)) continue;
       if (carrier.fendOff > 0) {
         carrier.fendOff--;
-        d.downBeats = tuning.units.knockdownBeats;
+        d.downTicks = tuning.units.knockdownTicks;
         moving.delete(d.id);
         events.push({ type: 'fendedOff', id: carrier.id, defender: d.id });
         events.push({ type: 'knockedDown', id: d.id });
@@ -178,7 +190,7 @@ function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
   }
 
   for (const u of units) {
-    if (u.side === 'player' && state.phase === 'play' && actsOn(u.stats, beat) && isUp(u)) {
+    if (u.side === 'player' && state.phase === 'play' && actsOn(u.stats, tick) && isUp(u)) {
       u.routeStep++;
     }
     const to = moving.get(u.id);
@@ -199,12 +211,12 @@ function checkContact(state: RunState, events: SimEvent[]): PlayerUnit | null {
   const carrier = carrierOf(state);
   if (!carrier) return null;
   const near = state.screen.defenders
-    .filter((d) => isUp(d) && dist(d.pos, carrier.pos) <= 1)
+    .filter((d) => isUp(d) && !engaged(state, d) && dist(d.pos, carrier.pos) <= 1)
     .sort(byId);
   for (const d of near) {
     if (carrier.fendOff > 0) {
       carrier.fendOff--;
-      d.downBeats = tuning.units.knockdownBeats;
+      d.downTicks = tuning.units.knockdownTicks;
       events.push({ type: 'fendedOff', id: carrier.id, defender: d.id });
       events.push({ type: 'knockedDown', id: d.id });
       continue;
@@ -263,23 +275,68 @@ function checkFirstDown(state: RunState, events: SimEvent[]): boolean {
 }
 
 /** A defender next to the QB while it still holds the ball sacks it; so does running out the play clock. */
-function checkSack(state: RunState, events: SimEvent[]): boolean {
-  const { screen } = state;
-  if (screen.ball.at !== 'qb') return false;
-  const by = screen.defenders.find((d) => isUp(d) && touches(d.pos, screen.qb));
-  if (!by && state.downBeat < tuning.drive.playClockBeats) return false;
+function runPocket(state: RunState, events: SimEvent[]): boolean {
+  const { screen, pocket } = state;
+  if (!pocket) return false;
+  if (pocket.run) {
+    // A run: the line holds the rush for a while, then lets it go.
+    pocket.left = Math.max(0, pocket.left - 1);
+    if (pocket.left === 0) state.pocket = null;
+    return false;
+  }
+  if (screen.ball.at !== 'qb') {
+    // The ball is away: the line held long enough, and the rush is let go.
+    state.pocket = null;
+    return false;
+  }
+  pocket.left = Math.max(0, pocket.left - 1);
+  pushRush(state, events);
+  if (pocket.left > 0) return false;
+  const by = screen.defenders.find((d) => DEFENDERS[d.kind].job === 'rush');
   events.push({ type: 'sacked', by: by?.id ?? null });
   screen.ball = { at: 'dead', pos: screen.qb, bounced: false };
+  state.pocket = null;
   endDown(state, 'sacked', state.drive.los - tuning.drive.sackLoss, events);
   return true;
 }
 
+/**
+ * The pass rush pushes your line back as the pocket clock runs: each Blitzer
+ * moves down its column from where it lined up toward the row in front of
+ * the QB, reaching it as the clock hits zero. A player standing in the way
+ * holds it there.
+ */
+function pushRush(state: RunState, events: SimEvent[]): void {
+  const { screen, pocket } = state;
+  if (!pocket) return;
+  const progress = 1 - pocket.left / pocket.total;
+  const front = screen.qb.y + 1;
+  for (const d of screen.defenders) {
+    if (DEFENDERS[d.kind].job !== 'rush' || !isUp(d)) continue;
+    const row = Math.round(d.home.y - (d.home.y - front) * progress);
+    // One row at a time, so a player in the lane holds the rush there.
+    const from = d.pos;
+    while (d.pos.y > row) {
+      const to = vec(d.pos.x, d.pos.y - 1);
+      if (screen.players.some((p) => eq(p.pos, to))) break;
+      if (screen.defenders.some((o) => o !== d && eq(o.pos, to))) break;
+      d.pos = to;
+    }
+    if (!eq(from, d.pos)) events.push({ type: 'hop', id: d.id, from, to: d.pos });
+  }
+}
+
+/** A Blitzer is tied up by your line while the pocket (or a run's hold) lasts: it can't chase or tackle. */
+function engaged(state: RunState, d: Defender): boolean {
+  return state.pocket !== null && DEFENDERS[d.kind].job === 'rush';
+}
+
 /** A pass crossing a Witch's row near her bounces off her. */
 function checkSnatch(state: RunState, events: SimEvent[]): boolean {
-  const { screen, beat } = state;
-  const witch = screen.hazards.find((h) => snatches(h, screen.ball, beat));
+  const { screen, tick } = state;
+  const witch = screen.hazards.find((h) => snatches(h, screen.ball, tick));
   if (!witch) return false;
-  const at = vec(witchColumn(witch, beat), witch.row);
+  const at = vec(witchColumn(witch, tick), witch.row);
   events.push({ type: 'blocked', by: witch.id, at });
   screen.ball = { at: 'dead', pos: at, bounced: true };
   endDown(state, 'blocked', state.drive.los, events);
@@ -292,27 +349,29 @@ function checkSnatch(state: RunState, events: SimEvent[]): boolean {
  * covering defender; otherwise it's a catch. Nobody in reach is incomplete.
  */
 function resolveLanding(state: RunState, events: SimEvent[]): boolean {
-  const { screen, beat } = state;
+  const { screen, tick } = state;
   const ball = screen.ball;
-  if (ball.at !== 'flight' || ball.landsOn !== beat) return false;
+  if (ball.at !== 'flight' || ball.landsOn !== tick) return false;
   const target = ball.target;
   const away = (p: Vec): number => Math.hypot(p.x - target.x, p.y - target.y);
   const receiver = screen.players
     .filter((p) => isUp(p) && away(p.pos) <= catchRadius(p, 'ok'))
     .sort((a, b) => away(a.pos) - away(b.pos) || a.id - b.id)[0];
 
+  // The catch is contested where the ball comes down, not where the receiver
+  // stands: put it inside a defender's ring and it bounces off, so leading the
+  // receiver away from its defender is the skill.
+  const by = coveringDefender(screen, target);
+  if (by) {
+    events.push({ type: 'blocked', by: by.id, at: by.pos });
+    screen.ball = { at: 'dead', pos: by.pos, bounced: true };
+    endDown(state, 'blocked', state.drive.los, events);
+    return true;
+  }
   if (!receiver) {
     events.push({ type: 'incomplete', at: target });
     screen.ball = { at: 'dead', pos: target, bounced: false };
     endDown(state, 'incomplete', state.drive.los, events);
-    return true;
-  }
-  if (openness(screen, receiver.pos) === 'covered') {
-    const by = coveringDefender(screen, receiver.pos);
-    const at = by?.pos ?? receiver.pos;
-    events.push({ type: 'blocked', by: by?.id ?? receiver.id, at });
-    screen.ball = { at: 'dead', pos: at, bounced: true };
-    endDown(state, 'blocked', state.drive.los, events);
     return true;
   }
   const d = away(receiver.pos);

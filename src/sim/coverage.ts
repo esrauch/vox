@@ -16,7 +16,7 @@ export type Openness = 'open' | 'tight' | 'covered';
 
 /** A defender's coverage ring radius right now: 0 while it's knocked down, or if it doesn't cover. */
 export function coverageRadius(d: Defender): number {
-  return d.downBeats > 0 ? 0 : DEFENDERS[d.kind].coverage;
+  return d.downTicks > 0 ? 0 : DEFENDERS[d.kind].coverage;
 }
 
 /** How open a tile is. */

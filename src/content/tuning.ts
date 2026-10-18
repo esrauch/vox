@@ -12,25 +12,45 @@ export const tuning = {
     /** Taps measured after the warm-up. */
     measuredTaps: 12,
   },
+  clock: {
+    /**
+     * The simulation ticks on eighth notes: two ticks per beat of the music.
+     * Units hop on ticks, so they still move in time with the song.
+     */
+    ticksPerBeat: 2,
+  },
   grid: {
-    /** The field is about one Crossy Road screen: 9 wide, 16 tall (GAMEPLAY.md, The Grid). */
-    cols: 9,
-    rows: 16,
+    /**
+     * Half-yard tiles (GAMEPLAY.md, The Grid): 11 wide (5½ yards) by 26 tall
+     * (13 yards), so a 10-yard first down is 20 rows and fits on one screen.
+     */
+    cols: 11,
+    rows: 26,
   },
   drive: {
     /** The row the line of scrimmage starts on for every drive. */
-    startRow: 2,
-    /** Yards (rows) to gain for a first down. */
-    distance: 10,
+    startRow: 3,
+    /** Rows (half-yards) to gain for a first down: 10 yards. */
+    distance: 20,
     downs: 4,
-    /** How far behind the line of scrimmage the QB lines up. */
-    qbDepth: 2,
-    /** Yards lost on a sack. */
-    sackLoss: 2,
-    /** Beats a finished down stays on screen (so you see what happened) before the next. */
-    pauseBeats: 4,
-    /** If the QB still holds the ball this many beats after the snap, it's a sack anyway. */
-    playClockBeats: 14,
+    /** How many rows behind the line of scrimmage the QB lines up. */
+    qbDepth: 3,
+    /** Rows lost on a sack (2 yards). */
+    sackLoss: 4,
+    /** Ticks a finished down stays on screen (so you see what happened) before the next. */
+    pauseTicks: 6,
+  },
+  pocket: {
+    /** Ticks your line holds the pass rush off before the pocket collapses (a sack). */
+    ticks: 12,
+    /** Every player a play leaves at home to block buys this many more ticks. */
+    perBlocker: 3,
+    /** Every Blitzer beyond the first takes this many away. */
+    perExtraBlitzer: 3,
+    /** The pocket never holds for less than this. */
+    minTicks: 6,
+    /** On a run, the line ties the rush up for this many ticks before letting it go. */
+    runHold: 6,
   },
   cards: {
     /** Play cards drawn before each down. */
@@ -39,12 +59,16 @@ export const tuning = {
     draftOffer: 3,
   },
   throw: {
-    /** Beats from release to landing. */
-    flightBeats: 2,
+    /** Passes up to this far from the QB (tiles: 5 yards) are quick… */
+    quickRange: 10,
+    /** …and land this many ticks after the release (one beat)… */
+    quickTicks: 2,
+    /** …and longer ones take this many (two beats): time for the defense to close in. */
+    longTicks: 4,
     /** Throws land from this many rows behind the line of scrimmage (negative)… */
-    minAhead: -1,
+    minAhead: -2,
     /** …to this many rows past it. */
-    maxAhead: 11,
+    maxAhead: 22,
   },
   aim: {
     /** Slingshot aiming: how far the target moves per pixel of pull. */
@@ -84,10 +108,10 @@ export const tuning = {
   },
   units: {
     /**
-     * Beats a knocked-down unit stays down: four hops, long enough for a
-     * carrier that fends it off to get clear, so it can't get up right behind
-     * the carrier and tackle it anyway.
+     * Ticks a knocked-down unit stays down: long enough for a carrier that
+     * fends it off to get clear, so it can't get up right behind it and
+     * tackle it anyway.
      */
-    knockdownBeats: 8,
+    knockdownTicks: 5,
   },
 } as const;

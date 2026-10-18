@@ -20,10 +20,11 @@ export interface PlayerSpec {
 }
 
 /**
- * A down already in play (beat 0, just snapped) with exactly the given
- * players and defenders: line of scrimmage on row 2, first-down line on row
- * 12, the QB on (4, 0) with the ball, no hazards. Player ids start at 100 and
- * defender ids at 200.
+ * A down already in play (tick 0, just snapped) with exactly the given
+ * players and defenders: line of scrimmage on row 3, first-down line on row
+ * 23 (rows are half-yards), the QB on (5, 0) with the ball, no hazards and no
+ * pocket clock (set `state.pocket` to test one). Player ids start at 100 and
+ * defender ids at 200. Everyone hops every tick.
  */
 export function playState(
   players: PlayerSpec[],
@@ -39,7 +40,7 @@ export function playState(
     route: spec.route ?? 'UUUUUUUUUUUU',
     routeStep: 0,
     fendOff: 0,
-    downBeats: 0,
+    downTicks: 0,
     intent: null,
   }));
   const defs: Defender[] = defenders.map((d, i) => ({
@@ -49,28 +50,28 @@ export function playState(
     pos: d.pos,
     home: d.pos,
     stats: DEFENDERS[d.kind].stats,
-    downBeats: 0,
+    downTicks: 0,
     intent: null,
     patrol: null,
     patrolIndex: 0,
     marking: d.marking ?? null,
   }));
-  state.drive = { ...state.drive, los: 2, start: 2, firstDown: 12, down: 1 };
+  state.drive = { ...state.drive, los: 3, start: 3, firstDown: 23, down: 1 };
   state.screen = {
     players: units,
     defenders: defs,
     hazards: [],
     ball: { at: 'qb' },
-    qb: qbTile(2),
+    qb: qbTile(3),
   };
   state.phase = 'play';
-  state.beat = 0;
-  state.downBeat = 0;
+  state.tick = 0;
+  state.downTick = 0;
   updateIntents(state.screen);
   return state;
 }
 
-/** Step `n` beats with no throws, collecting events. */
+/** Step `n` ticks with no throws, collecting events. */
 export function run(state: RunState, n: number): { state: RunState; events: SimEvent[] } {
   const events: SimEvent[] = [];
   let s = state;

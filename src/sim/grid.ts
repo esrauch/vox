@@ -43,15 +43,3 @@ export function stepToward(from: Vec, to: Vec): Vec {
   if (Math.abs(dy) >= Math.abs(dx)) return vec(from.x, from.y + Math.sign(dy));
   return vec(from.x + Math.sign(dx), from.y);
 }
-
-/** The other useful hop toward `to`: along the smaller gap (or sideways if lined up). */
-export function stepAround(from: Vec, to: Vec): Vec {
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-  if (Math.abs(dy) >= Math.abs(dx)) {
-    if (dx !== 0) return vec(from.x + Math.sign(dx), from.y);
-    return vec(from.x + (from.x < COLS - 1 ? 1 : -1), from.y);
-  }
-  if (dy !== 0) return vec(from.x, from.y + Math.sign(dy));
-  return vec(from.x, from.y + (from.y < ROWS - 1 ? 1 : -1));
-}

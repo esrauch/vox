@@ -38,7 +38,7 @@ export function qbTile(los: number): Vec {
 /**
  * Line the defense up for a down. Spots are relative to the line of
  * scrimmage; the Safety always sits deep, at the first-down line (or a few
- * rows past the line of scrimmage once that's close). Bats get their box.
+ * yards past the line of scrimmage once that's close). Bats get their box.
  */
 export function lineUpDefense(
   spec: DefenseSpec,
@@ -48,10 +48,10 @@ export function lineUpDefense(
 ): Defender[] {
   const taken: Vec[] = [];
   return spec.defenders.map((spot, i) => {
-    const row = spot.kind === 'safety' ? Math.max(los + 4, firstDown) : los + Math.max(1, spot.y);
+    const row = spot.kind === 'safety' ? Math.max(los + 8, firstDown) : los + Math.max(1, spot.y);
     const pos = freeTile(vec(spot.x, Math.min(END_ROW, row)), taken);
     taken.push(pos);
-    const patrol = DEFENDERS[spot.kind].job === 'patrol' ? boxCircuit(pos, los + 1) : null;
+    const patrol = DEFENDERS[spot.kind].job === 'patrol' ? boxCircuit(pos, los + 2) : null;
     const start = patrol?.[0] ?? pos;
     return {
       id: firstId + i,
@@ -60,7 +60,7 @@ export function lineUpDefense(
       pos: start,
       home: start,
       stats: DEFENDERS[spot.kind].stats,
-      downBeats: 0,
+      downTicks: 0,
       intent: null,
       patrol,
       patrolIndex: 0,
@@ -80,11 +80,11 @@ function freeTile(want: Vec, taken: readonly Vec[]): Vec {
   return want;
 }
 
-/** The size of a patrol's square circuit. */
-const BOX = 4;
+/** The size of a patrol's square circuit (tiles: 3 yards). */
+const BOX = 6;
 
 /**
- * A 4×4 box of tiles, walked clockwise around its edge (12 tiles), with its
+ * A 6×6 box of tiles, walked clockwise around its edge (20 tiles), with its
  * bottom-left corner near `near` but kept on the field and at or above `minRow`.
  */
 export function boxCircuit(near: Vec, minRow = 1): Vec[] {
@@ -111,9 +111,9 @@ export function driveHazards(
   const rows: number[] = [];
   const hazards: Hazard[] = [];
   for (let i = 0; i < spec.witches; i++) {
-    let row = rng.int(start + 3, firstDown - 1);
+    let row = rng.int(start + 6, firstDown - 2);
     for (let tries = 0; rows.includes(row) && tries < 10; tries++) {
-      row = rng.int(start + 3, firstDown - 1);
+      row = rng.int(start + 6, firstDown - 2);
     }
     rows.push(row);
     hazards.push({
@@ -145,8 +145,17 @@ export function formation(
       route: p.route,
       routeStep: 0,
       fendOff: 0,
-      downBeats: 0,
+      downTicks: 0,
       intent: null,
     };
   });
+}
+
+/** How long the pocket holds for a play: longer with blockers at home, shorter with more Blitzers. */
+export function pocketTicks(blockers: number, blitzers: number): number {
+  const p = tuning.pocket;
+  return Math.max(
+    p.minTicks,
+    p.ticks + p.perBlocker * blockers - p.perExtraBlitzer * Math.max(0, blitzers - 1),
+  );
 }

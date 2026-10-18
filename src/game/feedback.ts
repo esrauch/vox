@@ -4,6 +4,7 @@
  */
 import type { SfxId } from '../audio/sfx';
 import type { CatchQuality, ScreenState, SimEvent, ThrowProblem } from '../sim/types';
+import { yardsText } from '../sim/run';
 import type { Hud } from '../ui/hud';
 
 export const THROW_PROBLEM_TEXT: Readonly<Record<ThrowProblem, string>> = {
@@ -20,10 +21,10 @@ const CATCH_TEXT: Readonly<Record<CatchQuality, string>> = {
   ok: 'OK',
 };
 
-/** How a tackle's gain reads. */
+/** How a tackle's gain (in rows: half-yards) reads. */
 function gainText(gained: number): string {
-  if (gained > 0) return `+${gained} ${gained === 1 ? 'YARD' : 'YARDS'}`;
-  if (gained < 0) return `LOSS OF ${-gained}`;
+  if (gained > 0) return `+${yardsText(gained)} ${gained <= 2 ? 'YARD' : 'YARDS'}`;
+  if (gained < 0) return `LOSS OF ${yardsText(-gained)}`;
   return 'NO GAIN';
 }
 

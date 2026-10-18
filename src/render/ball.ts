@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { hexToNumber, team } from '../content/palettes';
-import { tuning } from '../content/tuning';
 import type { ScreenState, Vec } from '../sim/types';
 import { getGeometry, voxelMaterial } from '../voxel/models';
 import { tilt } from './experiments';
@@ -137,7 +136,8 @@ export class BallView {
       l !== null &&
       beatPos >= l.releasedAt &&
       beatPos < l.landsOn &&
-      ((ball.at === 'qb' && beatPos < l.landsOn - tuning.throw.flightBeats + 1) ||
+      // Until the sim takes the throw (on the tick after the release).
+      ((ball.at === 'qb' && beatPos < Math.floor(l.releasedAt) + 2) ||
         (ball.at === 'flight' && ball.landsOn === l.landsOn));
     if (launchedStill) return l;
     this.launched = null;
