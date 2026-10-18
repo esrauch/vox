@@ -37,11 +37,14 @@ export function createField(): THREE.Group {
 /**
  * The lines that move with the drive, painted across the field: the line of
  * scrimmage (white, under the front edge of its row) and the first-down line
- * (gold, at the front edge of the row you have to reach).
+ * (gold, at the front edge of the row you have to reach). On the Boss drive
+ * that line is the goal line, with the end zone painted past it.
  */
 export class DriveLines {
   private readonly scrimmage: THREE.Mesh;
   private readonly firstDown: THREE.Mesh;
+  /** On the Boss drive the line is the goal line: the field past it is painted as an end zone. */
+  private readonly endZone: THREE.Mesh;
 
   constructor(scene: THREE.Scene) {
     const line = (color: number, opacity: number, width: number): THREE.Mesh => {
@@ -55,12 +58,29 @@ export class DriveLines {
     };
     this.scrimmage = line(0xffffff, 0.55, 0.08);
     this.firstDown = line(hexToNumber(team.accent), 0.9, 0.12);
+    this.endZone = new THREE.Mesh(
+      new THREE.PlaneGeometry(COLS, 1),
+      new THREE.MeshBasicMaterial({
+        color: hexToNumber(team.jersey),
+        transparent: true,
+        opacity: 0.28,
+      }),
+    );
+    this.endZone.rotation.x = -Math.PI / 2;
+    scene.add(this.endZone);
   }
 
   update(drive: DriveState): void {
     // A row's front edge (nearer the camera) is half a tile below its centre.
     this.scrimmage.position.set(0, 0.006, -(drive.los - 0.5));
     this.firstDown.position.set(0, 0.007, -(drive.firstDown - 0.5));
+    const boss = drive.kind === 'boss';
+    this.endZone.visible = boss;
+    if (boss) {
+      const depth = ROWS - drive.firstDown;
+      this.endZone.scale.set(1, depth, 1);
+      this.endZone.position.set(0, 0.005, -(drive.firstDown - 0.5 + depth / 2));
+    }
   }
 }
 

@@ -33,6 +33,8 @@ export function react(
   screen: ScreenState,
   hud: Hud,
   play: (id: SfxId) => void,
+  /** The Boss drive goes for the end zone: its "first down" is a touchdown. */
+  touchdown = false,
 ): void {
   // One hop sound per beat, and only for your players' hops.
   const playerIds = new Set(screen.players.map((s) => s.id));
@@ -69,7 +71,7 @@ export function react(
       case 'downEnded':
         if (e.result === 'firstDown') {
           play('touchdown');
-          hud.pop('FIRST DOWN!', 'good');
+          hud.pop(touchdown ? 'TOUCHDOWN!' : 'FIRST DOWN!', 'good');
         } else if (e.result === 'tackled') {
           hud.pop(gainText(e.gained), e.gained > 0 ? 'good' : 'bad');
         }

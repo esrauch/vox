@@ -51,7 +51,18 @@ export function createRun(seed: number): RunState {
 }
 
 /** Start a drive: a fresh shuffle of the deck, the line of scrimmage at the start row, 1st & 10. */
-export function setUpDrive(state: RunState, area: number, index: number, events: SimEvent[]): void {
+/**
+ * Start a drive: the line of scrimmage at the start row, 1st & 10, and the
+ * defense lined up. With `deal`, a fresh shuffle and the first hand too;
+ * without, the hand waits (the draft comes first: nextDrive deals it).
+ */
+export function setUpDrive(
+  state: RunState,
+  area: number,
+  index: number,
+  events: SimEvent[],
+  deal = true,
+): void {
   const spec = defenseFor(state.seed, area, index);
   const start = tuning.drive.startRow;
   const firstDown = Math.min(END_ROW, start + tuning.drive.distance);
@@ -65,18 +76,37 @@ export function setUpDrive(state: RunState, area: number, index: number, events:
     down: 1,
     los: start,
   };
-  state.deck.draw = shuffle(state, [...state.deck.owned]);
-  state.deck.discard = [];
   state.deck.hand = [];
   const hazards = driveHazards(state.seed, state.drivesWon, spec, start, firstDown, state.nextId);
   state.nextId += hazards.length;
   state.screen = { ...state.screen, hazards };
   events.push({ type: 'driveStarted', drive: index, name: spec.name });
-  setUpDown(state, events);
+  lineUp(state);
+  if (deal) {
+    dealDrive(state);
+    events.push({ type: 'downStarted', down: 1, toGo: firstDown - start });
+  }
+}
+
+/** A drive's first hand: the whole deck freshly shuffled. */
+function dealDrive(state: RunState): void {
+  state.deck.draw = shuffle(state, [...state.deck.owned]);
+  state.deck.discard = [];
+  state.phase = 'setup';
+  drawHand(state);
 }
 
 /** Line up the next down: the defense against the line of scrimmage, a fresh hand of three cards. */
 export function setUpDown(state: RunState, events: SimEvent[]): void {
+  const { drive } = state;
+  lineUp(state);
+  state.phase = 'setup';
+  drawHand(state);
+  events.push({ type: 'downStarted', down: drive.down, toGo: drive.firstDown - drive.los });
+}
+
+/** The defense against the line of scrimmage and the QB behind it; nobody of yours yet. */
+function lineUp(state: RunState): void {
   const { drive } = state;
   const spec = defenseFor(state.seed, drive.area, drive.index);
   const defenders = lineUpDefense(spec, drive.los, drive.firstDown, state.nextId);
@@ -92,10 +122,7 @@ export function setUpDown(state: RunState, events: SimEvent[]): void {
   state.result = null;
   state.downTick = 0;
   state.pocket = null;
-  state.phase = 'setup';
-  drawHand(state);
   updateIntents(state.screen);
-  events.push({ type: 'downStarted', down: drive.down, toGo: drive.firstDown - drive.los });
 }
 
 function drawHand(state: RunState): void {
@@ -219,8 +246,11 @@ export function nextDown(state: RunState, events: SimEvent[]): void {
       events.push({ type: 'areaCleared', area: drive.area });
       return;
     }
-    state.phase = 'draft';
+    // The march goes on: the next drive's defense lines up straight away (the
+    // camera glides forward to it), and the draft happens in front of it.
     state.offer = draftOffer(state);
+    setUpDrive(state, drive.area, drive.index + 1, events, false);
+    state.phase = 'draft';
     return;
   }
   if (drive.down >= tuning.drive.downs) {
@@ -257,11 +287,11 @@ function removeCard(state: RunState, owned: number): SimEvent[] {
   return nextDrive(state);
 }
 
+/** After the draft: the drive (already lined up) gets its first hand, with the new card in the shuffle. */
 function nextDrive(state: RunState): SimEvent[] {
-  const events: SimEvent[] = [];
   state.offer = [];
-  setUpDrive(state, state.drive.area, state.drive.index + 1, events);
-  return events;
+  dealDrive(state);
+  return [];
 }
 
 /** Rows (half-yards) as yards, e.g. 9 → "4½". */
@@ -272,9 +302,9 @@ export function yardsText(rows: number): string {
   return `${sign}${whole === 0 && r % 2 ? '' : whole}${r % 2 ? '½' : ''}`;
 }
 
-/** Down and distance, e.g. "3rd & 4½". */
+/** Down and distance, e.g. "3rd & 4½", or "3rd & Goal" on the Boss drive (its line is the end zone). */
 export function downAndDistance(state: RunState): string {
-  const { down, firstDown, los } = state.drive;
+  const { down, firstDown, los, kind } = state.drive;
   const ordinal = ['1st', '2nd', '3rd', '4th'][down - 1] ?? `${down}th`;
-  return `${ordinal} & ${yardsText(firstDown - los)}`;
+  return `${ordinal} & ${kind === 'boss' ? 'Goal' : yardsText(firstDown - los)}`;
 }

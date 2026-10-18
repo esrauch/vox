@@ -59,6 +59,19 @@ export class View {
     new ResizeObserver(() => this.fit()).observe(canvas);
   }
 
+  /** Where fit() put the camera; scroll() moves it back from there. */
+  private readonly basePosition = new THREE.Vector3();
+
+  /**
+   * Hold the camera `rows` back down the field from its usual spot (0 = the
+   * usual view). Easing this to 0 glides the camera forward up the field:
+   * the march from one drive into the next.
+   */
+  scroll(rows: number): void {
+    this.camera.position.copy(this.basePosition).add(new THREE.Vector3(0, 0, rows));
+    this.camera.updateMatrixWorld();
+  }
+
   setInsets(insets: Insets): void {
     this.insets = insets;
     this.fit();
@@ -141,6 +154,7 @@ export class View {
       this.scene.fog.far = far + 22;
     }
     cam.lookAt(target);
+    this.basePosition.copy(cam.position);
     cam.setViewOffset(w, availH, 0, -this.insets.top, w, h);
     cam.updateProjectionMatrix();
   }

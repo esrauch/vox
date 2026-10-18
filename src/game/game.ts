@@ -30,7 +30,10 @@ import { Conductor } from './conductor';
 import { THROW_PROBLEM_TEXT, react } from './feedback';
 import { aimTarget, throwTiming } from './slingshot';
 
-/** Sim ticks per beat of the music: eighth notes. */
+/** How long the camera takes to glide forward into the next drive. */
+const GLIDE_MS = 1300;
+
+/** Sim ticks per beat of the music. */
 const TICKS_PER_BEAT = tuning.clock.ticksPerBeat;
 
 export interface GameOptions {
@@ -70,7 +73,13 @@ export class Game {
 
   /** Pulling back to aim: where the pull started (screen px) and where it points. */
   private aim: { start: { x: number; y: number }; target: Vec } | null = null;
-  /** A released throw, waiting for the beat the sim takes it on. */
+  /**
+   * Gliding forward into the next drive: the camera starts `rows` back (so the
+   * new line of scrimmage sits where the old first-down line was) and eases
+   * forward from `since` (performance ms). The draft waits until it arrives.
+   */
+  private glide: { rows: number; since: number } | null = null;
+  /** A released throw, waiting for the tick the sim takes it on. */
   private queuedThrow: { tick: number; target: Vec } | null = null;
 
   constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement, options: GameOptions) {
@@ -132,6 +141,7 @@ export class Game {
     const holding = this.ball.update(screen, pos, this.units, now / 1000);
     this.qb.update(screen.qb, holding);
     this.aimView.update(now / 1000);
+    this.updateGlide(now);
     this.view.render();
   }
 
@@ -166,13 +176,37 @@ export class Game {
   /** After the state changes: rebuild or animate the views, react, and refresh the HUD. */
   private afterChange(events: readonly SimEvent[], prev: RunState): void {
     if (events.some((e) => e.type === 'downStarted' || e.type === 'driveStarted')) {
+      // A won drive marching on into the next: glide forward to it.
+      if (events.some((e) => e.type === 'driveStarted') && this.state.phase === 'draft') {
+        this.glide = {
+          rows: prev.drive.firstDown - this.state.drive.start,
+          since: performance.now(),
+        };
+      }
       this.resetViews();
     } else {
       this.units.sync(this.state.screen);
       this.units.beginBeat(prev.screen, this.state.screen);
     }
-    react(events, this.state.screen, this.hud, (id) => this.conductor.play(id));
+    react(
+      events,
+      this.state.screen,
+      this.hud,
+      (id) => this.conductor.play(id),
+      prev.drive.kind === 'boss',
+    );
     this.syncHud();
+  }
+
+  private updateGlide(now: number): void {
+    const glide = this.glide;
+    if (!glide) return;
+    const t = Math.min(1, (now - glide.since) / GLIDE_MS);
+    const ease = t * t * (3 - 2 * t);
+    this.view.scroll(glide.rows * (1 - ease));
+    if (t < 1) return;
+    this.glide = null;
+    this.syncHud(); // the draft can show now
   }
 
   /** Rebuild the views of everything on the field (a new down or drive). */
@@ -231,7 +265,7 @@ export class Game {
     const ready = this.conductor.started && !this.paused;
     this.hud.setHand(ready && phase === 'setup' ? deck.hand.map(face) : null, called?.hand ?? null);
     this.hud.setDraft(
-      ready && phase === 'draft'
+      ready && phase === 'draft' && !this.glide
         ? { offer: this.state.offer.map(face), deck: deck.owned.map(face) }
         : null,
     );

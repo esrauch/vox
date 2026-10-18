@@ -45,6 +45,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   2. **Challenge:** a tougher defense: tighter coverage, more rushers.
   3. **Gimmick:** one rule-bending twist on the defense or the field, shown before you pick a play (e.g. "the Witch flies two rows", "Bats everywhere", "4th and 15").
   4. **Boss:** the area's set-piece defense (the forest's is a Treant).
+- **The four drives are one continuous march down the field.** The first three go for a first down; **the Boss drive goes for the end zone**: its line is the goal line, with the end zone painted past it, the readout says "& Goal", and making it is a **TOUCHDOWN!**
+- **Between drives the march doesn't stop:** after a first down, the camera glides forward up the field (the new line of scrimmage lands where the old first-down line was) with the next drive's defense already lined up, the draft happens in front of it, and play carries on. Your new card is in the shuffle for that drive's first hand.
 - **Then the run moves on to the next area**, with its own defenders, hazards, card pool and song.
 - **There are no lives. Losing a drive is game over.** You get four downs, and that's it: every down counts. **The only way to lose is running out of downs.** There are no interceptions and no turnovers.
 - **After every won drive, you draft** (see *The Deck*).

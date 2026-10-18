@@ -298,6 +298,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-18:** The four drives are one continuous march: after a first down the camera glides forward with the next defense already lined up, then the draft, then play. The Boss drive goes for the end zone ("& Goal", an end zone painted past the goal line, TOUCHDOWN!).
 - **2026-10-18:** The pocket is only a countdown: three linemen and three rushers drawn in front of the QB, pushed back as the clock runs, a sack at zero. Blitzers are no longer units (a defense's `rushers` count shortens the clock), so nothing at the line blocks passes or tackles; runs have no clock.
 - **2026-10-18:** The catch window: a pass can be caught (or batted down) anywhere it's low, not only at the reticle, and the aiming line shows that stretch in gold. Only Scarecrows (and Bats, smaller) keep rings that knock passes away; Covers and the Safety block only by being right beside a low pass.
 - **2026-10-18:** One sliding throw arc: higher and longer the farther you throw; passes can only be batted down where they're low, so long throws clear defenders underneath. The arc's height is hard to see from the steep camera (a follow-up).

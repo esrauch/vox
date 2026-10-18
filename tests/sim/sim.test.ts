@@ -464,6 +464,22 @@ describe('drives', () => {
     expect(removed.deck.owned).toHaveLength(draft.deck.owned.length - 1);
   });
 
+  it('the next drive lines up before the draft (the march goes on); its hand comes after', () => {
+    const draft = run(wonDrive().state, PAUSE).state;
+    expect(draft.drive).toMatchObject({ index: 1, kind: 'challenge', down: 1, los: 3 });
+    expect(draft.screen.defenders.length).toBeGreaterThan(0);
+    expect(draft.deck.hand).toHaveLength(0);
+    const picked = dispatch(draft, { type: 'draft', offer: 0 }).state;
+    expect(picked.deck.hand).toHaveLength(3);
+    expect([...picked.deck.hand, ...picked.deck.draw]).toContain(draft.offer[0]);
+  });
+
+  it('the Boss drive goes for the end zone: "& Goal"', () => {
+    const s = createRun(7);
+    s.drive = { ...s.drive, kind: 'boss', down: 3 };
+    expect(downAndDistance(s)).toBe('3rd & Goal');
+  });
+
   it('failing on 4th down is game over', () => {
     const sackedOn = (down: number) => {
       const state = playState([]);
