@@ -1,6 +1,6 @@
 /**
- * "Spooky Surf": the first track. Cheerful Halloween surf rock in A minor at
- * 120 BPM, 8 bars: Am Am F E Am Am Dm E.
+ * "Spooky Surf": the first track. Cheerful Halloween surf rock in A minor on
+ * the shared grid (120 BPM, 8 bars): Am Am F E Am Am Dm E.
  *
  * The game plays the full mix (kick, snare, hats, bass, organ stabs and the
  * twangy lead) continuously; the thinner `setup` mix is only auditioned on the
@@ -8,6 +8,7 @@
  */
 import { rep } from '../synth/notes';
 import type { Song } from '../synth/render';
+import { SONG_GRID } from './grid';
 
 const AM = 'A3+C4+E4';
 const F = 'F3+A3+C4';
@@ -26,9 +27,7 @@ const BASS = {
 export const spookySurf: Song = {
   id: 'spookySurf',
   name: 'Spooky Surf',
-  bpm: 120,
-  beatsPerBar: 4,
-  bars: 8,
+  ...SONG_GRID,
   stems: [
     {
       id: 'kick',
@@ -88,5 +87,3 @@ export const spookySurf: Song = {
     play: ['kick', 'snare', 'hat', 'bass', 'organ', 'lead'],
   },
 };
-
-export const SONGS: readonly Song[] = [spookySurf];

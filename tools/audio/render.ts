@@ -14,7 +14,7 @@ import { join } from 'node:path';
 import { chromium } from 'playwright-core';
 import { createServer } from 'vite';
 import { SFX } from '../../src/audio/sfx';
-import { SONGS } from '../../src/audio/songs/spookySurf';
+import { SONGS } from '../../src/audio/songs';
 
 const ROOT = join(import.meta.dirname, '..', '..');
 const OUT = join(ROOT, 'previews', 'audio');

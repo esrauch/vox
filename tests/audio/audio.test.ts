@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { noteToFreq, parseDrumBar, parseMelodicBar, rep } from '../../src/audio/synth/notes';
-import { SONGS, spookySurf } from '../../src/audio/songs/spookySurf';
+import { SONGS, SONG_GRID, spookySurf } from '../../src/audio/songs';
 import { validateSong } from '../../src/audio/synth/render';
 import { encodeWav, levels } from '../../src/audio/wav';
 
@@ -69,6 +69,15 @@ describe('wav', () => {
 describe('songs', () => {
   it('every song is well-formed: bar counts, step counts, notes and layers', () => {
     for (const song of SONGS) expect(() => validateSong(song)).not.toThrow();
+  });
+
+  it('every song shares one beat grid, so any two can crossfade at any moment', () => {
+    for (const song of SONGS) {
+      expect({ bpm: song.bpm, beatsPerBar: song.beatsPerBar, bars: song.bars }, song.id).toEqual(
+        SONG_GRID,
+      );
+    }
+    expect(new Set(SONGS.map((s) => s.id)).size).toBe(SONGS.length);
   });
 
   it('catches a bar with the wrong number of steps', () => {

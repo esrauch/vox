@@ -10,7 +10,7 @@ import { suspendAudio, unlockAudio } from '../audio/context';
 import { getMixer } from '../audio/mixer';
 import { MusicPlayer, RENDER_RATE, prepareSong } from '../audio/music';
 import { SfxPlayer, prepareSfx, type SfxId } from '../audio/sfx';
-import { spookySurf } from '../audio/songs/spookySurf';
+import { spookySurf } from '../audio/songs';
 import { BeatClock } from '../beat/clock';
 
 const SONG = spookySurf;

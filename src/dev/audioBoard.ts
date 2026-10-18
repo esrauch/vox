@@ -8,7 +8,7 @@ import { unlockAudio } from '../audio/context';
 import { getMixer } from '../audio/mixer';
 import { RENDER_RATE, prepareSong } from '../audio/music';
 import { SFX, prepareSfx, type SfxId } from '../audio/sfx';
-import { SONGS } from '../audio/songs/spookySurf';
+import { SONGS } from '../audio/songs';
 import { loopSeconds, type Song } from '../audio/synth/render';
 import { encodeWav, levels } from '../audio/wav';
 
@@ -25,14 +25,23 @@ const status = $('#status');
 
 const params = new URLSearchParams(location.search);
 const renderMode = params.get('render');
-const song = SONGS[0] as Song;
+/** Seconds to crossfade when switching songs. */
+const CROSSFADE = 2;
 
 if (renderMode) void renderForTool(renderMode, params.get('id') ?? '');
 else interactive();
 
 function interactive(): void {
+  /** What's playing: one song's stems through its own fader, so songs can crossfade. */
+  let current: {
+    song: Song;
+    bus: GainNode;
+    voices: { source: AudioBufferSourceNode; gain: GainNode; stem: string }[];
+  } | null = null;
+  /** When the first song started: every later song starts on the same beat grid. */
+  let origin = 0;
+  let layer: 'setup' | 'play' = 'play';
   const muted = new Set<string>();
-  let playing: { source: AudioBufferSourceNode; gain: GainNode; stem: string }[] = [];
 
   const button = (row: HTMLElement, text: string, onClick: () => void): void => {
     const b = document.createElement('button');
@@ -42,48 +51,84 @@ function interactive(): void {
   };
 
   const stopSong = (): void => {
-    for (const p of playing) p.source.stop();
-    playing = [];
+    for (const v of current?.voices ?? []) v.source.stop();
+    current?.bus.disconnect();
+    current = null;
   };
 
-  const playSong = async (layer: 'setup' | 'play'): Promise<void> => {
+  /**
+   * Play a song in time with whatever is playing. Every song shares one beat
+   * grid, so the new one starts at the same point in its loop as the old one
+   * is in its own, and the two crossfade over CROSSFADE seconds.
+   */
+  const playSong = async (song: Song): Promise<void> => {
     const ctx = await unlockAudio();
     status.textContent = `Rendering ${song.name}…`;
     const stems = await prepareSong(song);
-    stopSong();
-    const when = ctx.currentTime + 0.1;
-    for (const stem of song.stems) {
+    const now = ctx.currentTime + 0.05;
+    const old = current;
+    if (!old) origin = now;
+    const offset = (now - origin) % loopSeconds(song);
+    const bus = ctx.createGain();
+    bus.connect(getMixer(ctx).music);
+    if (old) {
+      bus.gain.setValueAtTime(0, now);
+      bus.gain.linearRampToValueAtTime(1, now + CROSSFADE);
+      old.bus.gain.setValueAtTime(1, now);
+      old.bus.gain.linearRampToValueAtTime(0, now + CROSSFADE);
+      for (const v of old.voices) v.source.stop(now + CROSSFADE);
+    }
+    if (old?.song !== song) muted.clear();
+    const voices = song.stems.flatMap((stem) => {
       const buffer = stems.get(stem.id);
-      if (!buffer) continue;
+      if (!buffer) return [];
       const source = ctx.createBufferSource();
       source.buffer = buffer;
       source.loop = true;
       const gain = ctx.createGain();
       gain.gain.value = song.layers[layer].includes(stem.id) && !muted.has(stem.id) ? 1 : 0;
-      source.connect(gain).connect(getMixer(ctx).music);
-      source.start(when);
-      playing.push({ source, gain, stem: stem.id });
-    }
+      source.connect(gain).connect(bus);
+      source.start(now, offset);
+      return [{ source, gain, stem: stem.id }];
+    });
+    current = { song, bus, voices };
+    showStems(song);
     draw(mixStems(stems, song.layers[layer]));
-    status.textContent = `${song.name} · ${song.bpm} BPM · ${song.bars} bars (${loopSeconds(song)}s loop) · ${layer} layer`;
+    const how = old ? `crossfading from ${old.song.name}` : 'from the top';
+    status.textContent = `${song.name} · ${song.bpm} BPM · ${song.bars} bars (${loopSeconds(song)}s loop) · ${layer} mix · ${how}`;
   };
 
-  button(songRow, `▶ ${song.name}: setup`, () => void playSong('setup'));
-  button(songRow, `▶ ${song.name}: full`, () => void playSong('play'));
+  const showStems = (song: Song): void => {
+    stemRow.replaceChildren();
+    for (const stem of song.stems) {
+      const label = document.createElement('label');
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = !muted.has(stem.id);
+      box.addEventListener('change', () => {
+        if (box.checked) muted.delete(stem.id);
+        else muted.add(stem.id);
+        for (const v of current?.voices ?? []) {
+          if (v.stem === stem.id) v.gain.gain.value = box.checked ? 1 : 0;
+        }
+      });
+      label.append(box, ` ${stem.id}`);
+      stemRow.append(label);
+    }
+  };
+
+  for (const song of SONGS) button(songRow, `▶ ${song.name}`, () => void playSong(song));
   button(songRow, '■ Stop', stopSong);
-  for (const stem of song.stems) {
-    const label = document.createElement('label');
-    const box = document.createElement('input');
-    box.type = 'checkbox';
-    box.checked = true;
-    box.addEventListener('change', () => {
-      if (box.checked) muted.delete(stem.id);
-      else muted.add(stem.id);
-      for (const p of playing) if (p.stem === stem.id) p.gain.gain.value = box.checked ? 1 : 0;
-    });
-    label.append(box, ` ${stem.id}`);
-    stemRow.append(label);
-  }
+  const setupToggle = document.createElement('label');
+  const setupBox = document.createElement('input');
+  setupBox.type = 'checkbox';
+  setupBox.addEventListener('change', () => {
+    layer = setupBox.checked ? 'setup' : 'play';
+    if (current) void playSong(current.song);
+  });
+  setupToggle.append(setupBox, ' setup mix');
+  songRow.append(setupToggle);
+  showStems(SONGS[0]);
 
   for (const id of Object.keys(SFX) as SfxId[]) {
     button(sfxRow, id, async () => {

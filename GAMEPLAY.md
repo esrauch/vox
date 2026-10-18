@@ -106,7 +106,7 @@ Each screen is one field-length climb, in two phases.
 - **The music never stops.** One song plays continuously, through setup, play, touchdowns and new runs, with no break or restart. Setup is a breather in the *game*, not the music: patrols keep hopping on the beat while you place your squad, and after **HIKE!** your players hop on their own beats of the same song.
 - **The tempo is the difficulty dial.** Each place has its own track and tempo, and the beat picks up as you climb. Boss screens get their own song.
 
-**The soundtrack:** cheerful Halloween music with a strong, clear pulse: spooky surf rock, a swinging organ, monster-mash bop.
+**The soundtrack:** cheerful Halloween music with a strong, clear pulse: spooky surf rock, a swinging organ, monster-mash bop. Four loops so far, from friendliest to most intense: *Graveyard Shuffle* (swung monster-mash bop), *Spooky Surf* (the one the game plays now), *Midnight Chase* (driving) and *Skeleton Stomp* (the boss). They all share one tempo and loop length, so the game can crossfade between them at any moment, e.g. as the run gets harder.
 
 ### Reading the Beat: Visual Indicators
 
