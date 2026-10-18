@@ -5,6 +5,11 @@
  * Defender spots are relative: `x` is a column (0-10), `y` is rows (half-yards)
  * past the line of scrimmage. The pass rush isn't placed: it's drawn against your
  * line by the pocket view, and only shortens the pocket clock. The Safety always lines up deep (sim/drive.ts).
+ *
+ * Every defense is lopsided, with a strong side and a weak side (most of all
+ * the still Scarecrows and the patrolling Bats, since Covers follow your
+ * receivers wherever they go): that's what Flip is for, to send the play at
+ * the weak side.
  */
 import type { DefenderKind } from '../sim/types';
 
@@ -45,8 +50,8 @@ export const FOREST: AreaDef = {
     rushers: 1,
     defenders: [
       { kind: 'cover', x: 1, y: 4 },
-      { kind: 'cover', x: 9, y: 4 },
-      { kind: 'zone', x: 5, y: 10 },
+      { kind: 'cover', x: 9, y: 6 },
+      { kind: 'zone', x: 3, y: 10 },
       safety,
     ],
   },
@@ -69,9 +74,9 @@ export const FOREST: AreaDef = {
       witches: 2,
       rushers: 1,
       defenders: [
-        { kind: 'cover', x: 1, y: 4 },
+        { kind: 'cover', x: 1, y: 6 },
         { kind: 'cover', x: 9, y: 4 },
-        { kind: 'zone', x: 5, y: 10 },
+        { kind: 'zone', x: 7, y: 10 },
         safety,
       ],
     },
@@ -82,9 +87,9 @@ export const FOREST: AreaDef = {
       defenders: [
         { kind: 'cover', x: 1, y: 4 },
         { kind: 'cover', x: 9, y: 4 },
-        { kind: 'bat', x: 0, y: 6 },
-        { kind: 'bat', x: 4, y: 10 },
-        { kind: 'bat', x: 7, y: 6 },
+        { kind: 'bat', x: 0, y: 8 },
+        { kind: 'bat', x: 5, y: 4 },
+        { kind: 'bat', x: 5, y: 12 },
         safety,
       ],
     },
@@ -95,9 +100,9 @@ export const FOREST: AreaDef = {
       defenders: [
         { kind: 'cover', x: 2, y: 4 },
         { kind: 'cover', x: 8, y: 4 },
-        { kind: 'zone', x: 2, y: 10 },
-        { kind: 'zone', x: 5, y: 14 },
-        { kind: 'zone', x: 8, y: 10 },
+        { kind: 'zone', x: 1, y: 8 },
+        { kind: 'zone', x: 4, y: 11 },
+        { kind: 'zone', x: 8, y: 14 },
         safety,
       ],
     },
@@ -110,9 +115,9 @@ export const FOREST: AreaDef = {
       { kind: 'cover', x: 0, y: 4 },
       { kind: 'cover', x: 4, y: 6 },
       { kind: 'cover', x: 10, y: 4 },
-      { kind: 'zone', x: 3, y: 12 },
-      { kind: 'zone', x: 7, y: 12 },
-      { kind: 'bat', x: 5, y: 8 },
+      { kind: 'zone', x: 2, y: 10 },
+      { kind: 'zone', x: 5, y: 14 },
+      { kind: 'bat', x: 5, y: 6 },
       safety,
     ],
   },

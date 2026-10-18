@@ -70,4 +70,18 @@ describe('areas', () => {
       }
     }
   });
+
+  it('every defense is lopsided, so Flip matters', () => {
+    const key = (d: { kind: string; x: number; y: number }): string => `${d.kind}@${d.x},${d.y}`;
+    for (const area of AREAS) {
+      for (const spec of [area.intro, area.challenge, ...area.gimmicks, area.boss]) {
+        const spots = new Set(spec.defenders.map(key));
+        const mirrored = spec.defenders.map((d) => key({ ...d, x: COLS - 1 - d.x }));
+        expect(
+          mirrored.every((m) => spots.has(m)),
+          spec.name,
+        ).toBe(false);
+      }
+    }
+  });
 });

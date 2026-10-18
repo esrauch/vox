@@ -78,7 +78,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 ## A Down: Call the Play, Then Throw
 
 1. **Draw three play cards** from your deck and **call one** (tap it; tap another to change your mind). All three go to the discard pile at the snap. When the deck runs out, the discard pile is shuffled back in.
-2. **A card is the whole play:** where your players line up and **every player's route**, drawn on the field as a preview before you commit. **Flip** mirrors it left or right. That's the only adjustment: you don't place players by hand.
+2. **A card is the whole play:** where your players line up and **every player's route**, drawn on the field as a preview before you commit. **Flip** mirrors it left or right. That's the only adjustment: you don't place players by hand. Every defense is lopsided (its Scarecrows and Bats bunch to one side), so Flip is how you send the play at the weak side.
 3. **The defense is visible before you choose** (*Into the Breach* style): every defender, its coverage ring and its job, where the Bats circle and the Witch flies. Picking the card that beats this defense *is* the puzzle.
 4. **HIKE!** Receivers run their routes on the beat. Defenders cover them, and the pass rush comes for the QB.
 5. **Pull back and release** to throw before **the pocket collapses** (see *The Pocket*), leading your receiver into open space.
