@@ -68,7 +68,7 @@ A small state machine covers the screens: `Boot → Title → [Drive: (Call a pl
 
 ### No ECS framework
 
-The scale is a few dozen units on a 9×16 grid, so plain typed objects and arrays are enough.
+The scale is a dozen or so units on an 11×26 grid of half-yard tiles, so plain typed objects and arrays are enough.
 
 ---
 
