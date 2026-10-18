@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 
+/** How far through the glide what arrives casts its shadow again. */
+const SHADOW_BACK = 0.8;
+
 type FadeMaterial = THREE.Material & { opacity: number };
 
 /** A see-through copy of a material, and the opacity the original had. */
@@ -12,6 +15,8 @@ interface Fade {
 interface Arrival {
   readonly mesh: THREE.Mesh;
   readonly original: THREE.Material | THREE.Material[];
+  /** Whether it casts a shadow once it has arrived. */
+  readonly castShadow: boolean;
   readonly fade: Fade;
   /** The opacity it fades in from (0..1 of its own). */
   readonly from: number;
@@ -23,6 +28,10 @@ interface Arrival {
  * it stood, as a still copy fading away behind the camera, and what lines up
  * for the next drive fades in where it stands (the next defense from its
  * waiting ghosts, the QB and the line from nothing).
+ *
+ * Shadows don't fade (three.js draws them whatever a material's opacity), so
+ * nothing casts one while it's see-through: the leaving copies never do, and
+ * what arrives gets its shadow back as it turns solid.
  */
 export class Crossfade {
   private readonly leaving = new THREE.Group();
@@ -45,7 +54,9 @@ export class Crossfade {
       const copy = object.clone();
       copy.position.z += rows;
       copy.traverse((o) => {
-        if (o instanceof THREE.Mesh) o.material = fadeOf(o.material, fades).material;
+        if (!(o instanceof THREE.Mesh)) return;
+        o.material = fadeOf(o.material, fades).material;
+        o.castShadow = false;
       });
       this.leaving.add(copy);
     }
@@ -59,8 +70,9 @@ export class Crossfade {
       object.traverse((o) => {
         if (!(o instanceof THREE.Mesh)) return;
         const fade = fadeOf(o.material, fades);
-        this.arrivals.push({ mesh: o, original: o.material, fade, from });
+        this.arrivals.push({ mesh: o, original: o.material, castShadow: o.castShadow, fade, from });
         o.material = fade.material;
+        o.castShadow = false;
       });
     }
   }
@@ -69,8 +81,11 @@ export class Crossfade {
   update(t: number): void {
     const out = Math.max(0, 1 - t * 2);
     for (const f of this.leavingFades) f.material.opacity = f.base * out;
-    for (const a of this.arrivals)
+    for (const a of this.arrivals) {
       a.fade.material.opacity = a.fade.base * (a.from + (1 - a.from) * t);
+      // Its shadow comes back once it's nearly solid.
+      a.mesh.castShadow = a.castShadow && t >= SHADOW_BACK;
+    }
   }
 
   /** The glide is over: drop the copies, and give everything that arrived its own material back. */
@@ -81,6 +96,7 @@ export class Crossfade {
     const disposed = new Set<THREE.Material>();
     for (const a of this.arrivals) {
       a.mesh.material = a.original;
+      a.mesh.castShadow = a.castShadow;
       if (!disposed.has(a.fade.material)) a.fade.material.dispose();
       disposed.add(a.fade.material);
     }
