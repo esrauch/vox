@@ -110,7 +110,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **Leading your receiver is the skill:** put the reticle where it will be when the ball lands.
 - **Only the QB throws. There are no laterals**, except on trick-play cards.
 - **Throw range** is measured from the line of scrimmage: from **a yard behind it** (for a Screen) to **11 yards past it**.
-- **Quick passes are quick:** a throw up to 5 yards lands **one beat** after the release; anything longer takes **two**, which gives the defense time to close in.
+- **One sliding arc, no throw modes:** the farther you throw, **the higher the ball flies** (the peak grows with the distance squared) **and the longer it's in the air** (about a beat per 2½ yards). The dashed aiming line shows the arc.
+- **A defender can only bat a pass down where it's low** (below its reach, and passing close to it). A short pass stays low the whole way, so anyone under its path can knock it down; a long pass climbs out of reach right from the release and only comes back within reach as it drops toward the landing, where the coverage rings decide it.
 - **The pull sensitivity** is a tuning value (`tuning.aim`).
 
 ---

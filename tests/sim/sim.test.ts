@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { STARTER_DECK } from '../../src/content/cards';
 import { tuning } from '../../src/content/tuning';
 import { openness } from '../../src/sim/coverage';
+import { arcPeak, flightTicks } from '../../src/sim/flight';
 import { boxCircuit, pocketTicks, qbTile } from '../../src/sim/drive';
 import { COLS, ROWS, key, vec } from '../../src/sim/grid';
 import { witchColumn } from '../../src/sim/hazards';
@@ -302,7 +303,7 @@ describe('passes', () => {
   });
 
   it('with nobody in reach is incomplete', () => {
-    const r = pass([], vec(9, 12), tuning.throw.longTicks);
+    const r = pass([], vec(9, 12), 3);
     expect(ofType(r.events, 'incomplete')).toHaveLength(1);
     expect(ofType(r.events, 'downEnded')[0]).toEqual({
       type: 'downEnded',
@@ -311,12 +312,30 @@ describe('passes', () => {
     });
   });
 
-  it('quick passes land in one beat, long ones in two', () => {
-    const state = playState([{ pos: vec(5, 10) }]);
-    const landsOn = (y: number) =>
-      ofType(step(state, { throwAt: vec(5, y) }).events, 'thrown')[0]?.landsOn;
-    expect(landsOn(10)).toBe(1 + tuning.throw.quickTicks);
-    expect(landsOn(14)).toBe(1 + tuning.throw.longTicks);
+  it('the farther the pass, the higher it flies and the longer it takes', () => {
+    expect(arcPeak(5)).toBeLessThan(arcPeak(10));
+    expect(arcPeak(10)).toBeLessThan(arcPeak(20));
+    expect(flightTicks(vec(5, 0), vec(5, 5))).toBe(1);
+    expect(flightTicks(vec(5, 0), vec(5, 20))).toBe(4);
+  });
+
+  it('a short, low pass is batted down by a defender under its path', () => {
+    // A 10-tile pass up the middle, a defender halfway along it.
+    const r = pass([{ kind: 'zone', pos: vec(5, 5) }], vec(5, 10));
+    expect(ofType(r.events, 'blocked')[0]?.by).toBe(200);
+  });
+
+  it('a long pass sails over a defender under its path, and is out of reach from the release', () => {
+    const state = playState(
+      [{ pos: vec(5, 20), route: '.' }],
+      [
+        { kind: 'zone', pos: vec(5, 2) },
+        { kind: 'zone', pos: vec(5, 10) },
+      ],
+    );
+    const r = run(step(state, { throwAt: vec(5, 20) }).state, 4);
+    expect(ofType(r.events, 'blocked')).toHaveLength(0);
+    expect(ofType(r.events, 'caught')).toHaveLength(1);
   });
 
   it('throw range is measured from the line of scrimmage', () => {

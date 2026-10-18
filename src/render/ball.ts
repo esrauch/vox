@@ -4,6 +4,7 @@ import type { ScreenState, Vec } from '../sim/types';
 import { getGeometry, voxelMaterial } from '../voxel/models';
 import { tilt } from './experiments';
 import { qbHand } from './qb';
+import { flightDistance } from '../sim/flight';
 import { arcPoint } from './throwArc';
 import type { UnitViews } from './units';
 import { tileToWorld } from './view';
@@ -93,7 +94,14 @@ export class BallView {
     if (flight) {
       const span = flight.landsOn - flight.releasedAt;
       const t = Math.min(1, Math.max(0, (beatPos - flight.releasedAt) / span));
-      arcPoint(this.ball.position, qbHand(screen.qb), tileToWorld(flight.target, 0.6), t);
+      const distance = flightDistance(screen.qb, flight.target);
+      arcPoint(
+        this.ball.position,
+        qbHand(screen.qb),
+        tileToWorld(flight.target, 0.15),
+        t,
+        distance,
+      );
       this.ball.rotation.x = t * Math.PI * 4;
 
       this.landing.position.copy(tileToWorld(flight.target, 0.03));

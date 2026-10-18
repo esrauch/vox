@@ -56,12 +56,20 @@ export const tuning = {
     draftOffer: 3,
   },
   throw: {
-    /** Passes up to this far from the QB (tiles: 5 yards) are quick… */
-    quickRange: 10,
-    /** …and land this many ticks after the release (one beat)… */
-    quickTicks: 2,
-    /** …and longer ones take this many (two beats): time for the defense to close in. */
-    longTicks: 4,
+    /** Flight time: one tick per this many tiles of distance (at least one tick). */
+    tilesPerTick: 5,
+    /**
+     * The arc's peak above the straight line, in tiles: this times the
+     * distance squared (capped). Short passes stay low; long ones climb.
+     */
+    arcPerTile2: 0.006,
+    maxArc: 6,
+    /** Height of the ball at the release, just under a defender's reach. */
+    releaseHeight: 1,
+    /** A defender can get a hand on a ball lower than this… */
+    reach: 1.2,
+    /** …if it passes within this many tiles of it. */
+    blockRadius: 0.8,
     /** Throws land from this many rows behind the line of scrimmage (negative)… */
     minAhead: -2,
     /** …to this many rows past it. */

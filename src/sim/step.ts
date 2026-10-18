@@ -18,7 +18,8 @@
  *   4. The carrier crossing the first-down line wins the drive.
  *   5. The pocket clock runs down, the pass rush pushes the line back, and
  *      at zero, with the ball still in the QB's hand, it's a sack.
- *   6. A Witch crossing the pass blocks it.
+ *   6. A Witch crossing the pass blocks it; so does a defender it passes
+ *      low enough to reach (sim/flight.ts: the longer the pass, the higher).
  *   7. A ball due this tick lands: blocked if it comes down inside a
  *      defender's coverage ring, otherwise caught by the closest player in
  *      reach, or incomplete.
@@ -29,6 +30,7 @@ import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
 import { coveringDefender } from './coverage';
 import { COLS, END_ROW, ROWS, dist, eq, inBounds, key, vec } from './grid';
+import { flightTicks, reachable } from './flight';
 import { snatches, witchColumn } from './hazards';
 import { endDown, nextDown } from './run';
 import { actsOn } from './stats';
@@ -72,6 +74,7 @@ export function step(prev: RunState, input: BeatInput = {}): SimResult {
   }
   if (runPocket(state, events)) return { state, events };
   if (checkSnatch(state, events)) return { state, events };
+  if (checkBatted(state, events)) return { state, events };
   if (resolveLanding(state, events)) return { state, events };
   updateIntents(state.screen);
   return { state, events };
@@ -102,12 +105,6 @@ export function throwProblem(state: RunState, target: Vec): ThrowProblem | null 
   if (target.y > Math.min(ROWS - 0.5, los + tuning.throw.maxAhead + 0.5)) return 'tooFar';
   if (target.y < los + tuning.throw.minAhead - 0.5) return 'tooClose';
   return null;
-}
-
-/** How long a pass is in the air: quick passes land in one beat, longer ones in two. */
-export function flightTicks(from: Vec, target: Vec): number {
-  const far = Math.hypot(target.x - from.x, target.y - from.y) > tuning.throw.quickRange;
-  return far ? tuning.throw.longTicks : tuning.throw.quickTicks;
 }
 
 function tryThrow(state: RunState, target: Vec, events: SimEvent[]): void {
@@ -324,6 +321,33 @@ function pushRush(state: RunState, events: SimEvent[]): void {
     }
     if (!eq(from, d.pos)) events.push({ type: 'hop', id: d.id, from, to: d.pos });
   }
+}
+
+/**
+ * A defender batting the pass down in the air: wherever the ball passed this
+ * tick (checked in a few steps), if it was low enough to reach and close to
+ * an up defender, it bounces off. The landing itself is checked in
+ * resolveLanding.
+ */
+function checkBatted(state: RunState, events: SimEvent[]): boolean {
+  const { screen, tick } = state;
+  const ball = screen.ball;
+  if (ball.at !== 'flight' || tick >= ball.landsOn) return false;
+  const span = ball.landsOn - ball.releasedOn;
+  const STEPS = 4;
+  for (let i = 1; i <= STEPS; i++) {
+    const t = (tick - 1 - ball.releasedOn + i / STEPS) / span;
+    if (t <= 0 || t >= 1) continue;
+    const by = screen.defenders
+      .filter((d) => isUp(d) && !engaged(state, d) && reachable(ball.from, ball.target, t, d.pos))
+      .sort(byId)[0];
+    if (!by) continue;
+    events.push({ type: 'blocked', by: by.id, at: by.pos });
+    screen.ball = { at: 'dead', pos: by.pos, bounced: true };
+    endDown(state, 'blocked', state.drive.los, events);
+    return true;
+  }
+  return false;
 }
 
 /** A Blitzer is tied up by your line while the pocket (or a run's hold) lasts: it can't chase or tackle. */

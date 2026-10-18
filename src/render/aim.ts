@@ -3,6 +3,7 @@ import { common, hexToNumber, team } from '../content/palettes';
 import { tuning } from '../content/tuning';
 import type { Vec } from '../sim/types';
 import { qbHand } from './qb';
+import { flightDistance } from '../sim/flight';
 import { arcPoint } from './throwArc';
 import { tileToWorld } from './view';
 
@@ -65,10 +66,11 @@ export class AimView {
     if (!this.target) return;
     const from = qbHand(this.from);
     const to = tileToWorld(this.target, 0.1);
+    const distance = flightDistance(this.from, this.target);
     const march = (time * 0.12) % (1 / DASHES);
     this.dashes.forEach((dash, i) => {
       const t = i / DASHES + march;
-      arcPoint(dash.position, from, to, t);
+      arcPoint(dash.position, from, to, t, distance);
       dash.visible = t <= 1;
     });
   }
