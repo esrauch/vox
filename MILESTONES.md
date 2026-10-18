@@ -159,7 +159,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 - [x] **Swap in the new theme's models:** football-player Walk-ons (`team/walkOn`), a bigger QB in reversed colors with its throwing arm up (`team/qb`), and a jack-o'-lantern football (`team/ball`). The old Elder Bough models are removed, and the code now says QB instead of Big.
 - [ ] The Haunted Forest, Walk-ons, and **two recruit kinds** (e.g. the Bat and the Pumpkin-head, in team helmets).
-- [ ] The Haunted Forest's hazards: **Rolling Pumpkin** (ground lane) and **Witch on a Broom** (air lane that snatches passes), plus **Tombstones** (static obstacles) if time allows. Each needs a model, a beat pattern, a one-beat telegraph and a setup-phase preview.
+- [~] The Haunted Forest's hazards: **Rolling Pumpkin** (ground lane) and **Witch on a Broom** (air lane that snatches passes), plus **Tombstones** (static obstacles) if time allows. Each needs a model, a beat pattern, a one-beat telegraph and a setup-phase preview. *The Witch is in (one per screen on a throw-band row, flying one tile per beat and wrapping, visible before HIKE); her edge flash telegraph isn't built yet. The pumpkin and tombstones are still to do.*
 - [ ] Endless screens from strip-based generation, with a simple difficulty ramp.
 - [ ] A draft with **recruit** and **Walk-on upgrade** cards only, in a plain UI.
 - [ ] The pile of balls, wipeouts, game over, and a score in yards.
@@ -294,6 +294,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-17:** The Witch on a Broom is in: one per screen, flying across a throw-band row one tile per beat, wrapping off one side and back in from the other, before HIKE too. A pass crossing her row near her is **SNATCHED!** (a fumble); runners pass under her.
 - **2026-10-17:** Code cleanup for extension: dead code removed; Smalls renamed to players; one definition per defender kind (`content/defenders.ts`) with an explicit `ignoresSnap` flag; `step(state, BeatInput)` and a pure `dispatch`; throw problems as codes; `game.ts` split into conductor, feedback and slingshot; `Markers` split into QB, ball and aim views.
 - **2026-10-17:** Cleanup: the music is the global tick. PLAY starts the song and its clock; sim beat = song beat − run start, with no timer or re-anchoring. Pausing suspends the audio, freezing the beat with it. Removed the music layers from the player, HUD badges and the rhythm-era judgement kinds.
 - **2026-10-17:** One global beat: it ticks in every phase and never resets. Before HIKE only Bats move; players and the other defenders wait for the snap. The setup-only idle beat is gone.
