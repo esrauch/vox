@@ -1,43 +1,41 @@
 /**
  * The beat step: advance a run by exactly one beat (TECHNICAL.md §3). Pure:
- * the input state is never modified, and the same state plus the same throw
+ * the input state is never modified, and the same state plus the same input
  * always gives the same result.
  *
  * The beat is global: it ticks in every phase, in time with the music, and
- * never resets. What changes is who acts on it. Outside play (before HIKE and
- * between screens) only defenders that ignore the snap move (the Bats; see
- * content/defenders.ts), and nothing collides; everyone else waits.
+ * never resets. What changes is who acts on it. Before the snap only
+ * defenders that ignore it move (the Bats); everyone else waits. After a down
+ * ends, it stays on screen for a few beats, then the next down lines up.
  *
- * Order within a beat in play:
+ * Order within a beat in play (GAMEPLAY.md, A Down):
  *   1. Knocked-down units recover a little.
- *   2. A throw tapped for this beat leaves the QB's hand.
- *   3. Units hop (on their hop beats) and collisions resolve.
- *   4. A defender next to the QB sacks it (only while it holds the ball).
- *   5. A Witch snatches a pass crossing her row near her.
- *   6. A ball due this beat lands: catch, interception or miss.
- *   7. Touchdown and wipeout checks.
+ *   2. A throw released for this beat leaves the QB's hand.
+ *   3. Units hop (on their hop beats). Your players and defenders can't share
+ *      a tile; a defender meeting the carrier tackles it (unless it fends off).
+ *   4. The carrier crossing the first-down line wins the drive.
+ *   5. A defender next to the QB while it holds the ball sacks it (or the play clock runs out).
+ *   6. A Witch crossing the pass blocks it.
+ *   7. A ball due this beat lands: a catch, a block (the receiver was covered) or incomplete.
  *   8. Everyone decides next beat's hop (the telegraph).
  */
 import { DEFENDERS } from '../content/defenders';
-import { playerKind } from '../content/players';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
-import { snatches } from './hazards';
-import { COLS, END_ROW, eq, inBounds, key, nextToQb } from './grid';
-import { setUpScreen, yards } from './run';
-import { actsOn, hitsSurvived } from './stats';
+import { coveringDefender, openness } from './coverage';
+import { COLS, END_ROW, ROWS, eq, inBounds, key, touches, vec } from './grid';
+import { snatches, witchColumn } from './hazards';
+import { endDown, nextDown } from './run';
+import { actsOn } from './stats';
 import type {
   BeatInput,
   CatchQuality,
-  DeathCause,
   Defender,
-  FumbleReason,
-  HitResult,
+  PlayerUnit,
   RunState,
   SimEvent,
   SimResult,
   ThrowProblem,
-  PlayerUnit,
   Unit,
   Vec,
 } from './types';
@@ -46,31 +44,46 @@ export function step(prev: RunState, input: BeatInput = {}): SimResult {
   const state = structuredClone(prev);
   const events: SimEvent[] = [];
   state.beat += 1;
+
+  if (state.phase === 'downOver') {
+    if (--state.pause <= 0) nextDown(state, events);
+    return { state, events };
+  }
   if (state.phase !== 'play') {
+    // Before the snap (and in the draft), only snap-ignorers move, without contact.
     resolveMoves(state, events);
     updateIntents(state.screen);
     return { state, events };
   }
-  for (const u of liveUnits(state)) if (u.downBeats > 0) u.downBeats--;
 
+  state.downBeat++;
+  for (const u of allUnits(state)) if (u.downBeats > 0) u.downBeats--;
   if (input.throwAt) tryThrow(state, input.throwAt, events);
-  resolveMoves(state, events);
-  if (state.phase === 'play') checkSack(state, events);
+  const tackled = resolveMoves(state, events);
+  if (checkFirstDown(state, events)) return { state, events };
+  if (tackled) {
+    endDown(state, 'tackled', tackled.pos.y, events);
+    return { state, events };
+  }
+  if (checkSack(state, events)) return { state, events };
+  if (checkSnatch(state, events)) return { state, events };
+  if (resolveLanding(state, events)) return { state, events };
   updateIntents(state.screen);
-  if (state.phase === 'play') checkSnatch(state, events);
-  if (state.phase === 'play') resolveLanding(state, events);
-  if (state.phase === 'play') checkTouchdown(state, events);
-  if (state.phase === 'play') checkWipeout(state, events);
-  if (state.phase === 'play') updateIntents(state.screen);
   return { state, events };
 }
 
-function liveUnits(state: RunState): Unit[] {
-  return [...state.screen.players, ...state.screen.defenders].filter((u) => u.alive);
+function allUnits(state: RunState): Unit[] {
+  return [...state.screen.players, ...state.screen.defenders];
 }
 
 const byId = (a: { id: number }, b: { id: number }): number => a.id - b.id;
-const isUp = (u: Unit): boolean => u.alive && u.downBeats === 0;
+const isUp = (u: Unit): boolean => u.downBeats === 0;
+
+function carrierOf(state: RunState): PlayerUnit | null {
+  const { ball } = state.screen;
+  if (ball.at !== 'carried') return null;
+  return state.screen.players.find((p) => p.id === ball.by) ?? null;
+}
 
 // ── Throwing ────────────────────────────────────────────────────────────────
 
@@ -78,10 +91,11 @@ const isUp = (u: Unit): boolean => u.alive && u.downBeats === 0;
 export function throwProblem(state: RunState, target: Vec): ThrowProblem | null {
   if (state.phase !== 'play') return 'notInPlay';
   if (state.screen.ball.at !== 'qb') return 'noBall';
-  // Targets are free points in tile units (not grid-locked); the band is rows minRow..maxRow inclusive.
+  // Targets are free points in tile units (not grid-locked), measured from the line of scrimmage.
   if (target.x < -0.5 || target.x > COLS - 0.5) return 'offField';
-  if (target.y > tuning.throw.maxRow + 0.5) return 'tooFar';
-  if (target.y < tuning.throw.minRow - 0.5) return 'tooClose';
+  const { los } = state.drive;
+  if (target.y > Math.min(ROWS - 0.5, los + tuning.throw.maxAhead + 0.5)) return 'tooFar';
+  if (target.y < los + tuning.throw.minAhead - 0.5) return 'tooClose';
   return null;
 }
 
@@ -92,11 +106,12 @@ function tryThrow(state: RunState, target: Vec, events: SimEvent[]): void {
     return;
   }
   const landsOn = state.beat + tuning.throw.flightBeats;
-  state.screen.ball = { at: 'flight', target, releasedOn: state.beat, landsOn };
+  const from = state.screen.qb;
+  state.screen.ball = { at: 'flight', from, target, releasedOn: state.beat, landsOn };
   events.push({ type: 'thrown', target, landsOn });
 }
 
-// ── Movement and collisions ────────────────────────────────────────────────
+// ── Movement, blocking and tackles ─────────────────────────────────────────
 
 /** Whether a unit moves in the current phase: everyone in play, only snap-ignorers outside it. */
 function movesNow(state: RunState, u: Unit): boolean {
@@ -104,65 +119,74 @@ function movesNow(state: RunState, u: Unit): boolean {
 }
 
 /**
- * Everyone due to hop this beat hops. In play, players and defenders that
- * meet collide; outside play only snap-ignoring defenders move, and they pass
- * through players without contact.
+ * Everyone due to hop this beat hops. Your players and defenders never share
+ * a tile: whoever would step into the other waits (that's how blockers work).
+ * The one exception is the carrier: a defender meeting it tackles it, unless
+ * it has a fend-off left, which knocks the defender down instead. Returns the
+ * tackled carrier, if any.
  */
-function resolveMoves(state: RunState, events: SimEvent[]): void {
-  const { beat, screen } = state;
-  const contact = state.phase === 'play';
-  const units = liveUnits(state).sort(byId);
+function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
+  const { beat } = state;
+  const carrier = carrierOf(state);
+  const units = allUnits(state).sort(byId);
   const moving = new Map<number, Vec>();
   for (const u of units) {
-    if (u.downBeats > 0 || !u.intent || !inBounds(u.intent)) continue;
+    if (!isUp(u) || !u.intent || !inBounds(u.intent)) continue;
     if (!actsOn(u.stats, beat) || !movesNow(state, u)) continue;
     moving.set(u.id, u.intent);
   }
   const finalOf = (u: Unit): Vec => moving.get(u.id) ?? u.pos;
-
-  // Players against defenders. A cancelled hop can cause a new conflict, so
-  // repeat until nothing changes (each pair resolves at most once).
   const players = units.filter((u): u is PlayerUnit => u.side === 'player');
   const defenders = units.filter((u): u is Defender => u.side === 'defender');
-  const resolved = new Set<string>();
-  for (let changed = true; changed;) {
-    changed = false;
-    cancelDefenderConflicts(units, moving);
-    for (const d of defenders) {
-      for (const s of players) {
-        const pair = `${s.id}:${d.id}`;
-        if (!contact || !s.alive || !d.alive || resolved.has(pair) || state.screen !== screen) {
-          continue;
-        }
-        const sMoves = moving.has(s.id);
-        const dMoves = moving.has(d.id);
-        const meet = eq(finalOf(s), finalOf(d));
-        const swap = sMoves && dMoves && eq(finalOf(s), d.pos) && eq(finalOf(d), s.pos);
-        if (!meet && !swap) continue;
-        resolved.add(pair);
-        changed = true;
+  const meets = (p: Unit, d: Unit): boolean =>
+    eq(finalOf(p), finalOf(d)) ||
+    (moving.has(p.id) && moving.has(d.id) && eq(finalOf(p), d.pos) && eq(finalOf(d), p.pos));
 
-        // A knocked-down unit is just an obstacle: whoever hopped into it stays put.
-        if (s.downBeats > 0 || d.downBeats > 0) {
-          moving.delete(s.id);
-          moving.delete(d.id);
-          continue;
-        }
-        collide(state, s, d, moving, events);
+  // Blocking: a player and a defender can't end up on one tile or pass through
+  // each other, except the carrier and a defender (a tackle). A cancelled hop
+  // can cause a new clash, so repeat until nothing changes.
+  for (let changed = true; changed;) {
+    changed = cancelDefenderConflicts(defenders, moving);
+    for (const p of players) {
+      if (p === carrier) continue;
+      for (const d of defenders) {
+        if (!meets(p, d)) continue;
+        // The defender always waits; the player waits too if it would still land on it.
+        if (moving.delete(d.id)) changed = true;
+        if (eq(finalOf(p), finalOf(d)) && moving.delete(p.id)) changed = true;
       }
     }
   }
 
-  // A tackle fumble resets the screen; the old units are gone, so stop here.
-  if (state.screen !== screen) return;
+  let tackled: PlayerUnit | null = null;
+  if (carrier && state.phase === 'play') {
+    for (const d of defenders) {
+      if (!isUp(d) || !meets(carrier, d)) continue;
+      if (carrier.fendOff > 0) {
+        carrier.fendOff--;
+        d.downBeats = tuning.units.knockdownBeats;
+        moving.delete(d.id);
+        events.push({ type: 'fendedOff', id: carrier.id, defender: d.id });
+        events.push({ type: 'knockedDown', id: d.id });
+        continue;
+      }
+      tackled = carrier;
+      events.push({ type: 'tackled', id: carrier.id, by: d.id });
+      break;
+    }
+  }
 
   for (const u of units) {
+    if (u.side === 'player' && state.phase === 'play' && actsOn(u.stats, beat) && isUp(u)) {
+      u.routeStep++;
+    }
     const to = moving.get(u.id);
-    if (!u.alive || !to) continue;
+    if (!to) continue;
     events.push({ type: 'hop', id: u.id, from: u.pos, to });
     u.pos = to;
     if (u.side === 'defender') advancePatrol(u);
   }
+  return tackled;
 }
 
 /** After a hop, a patrolling defender moves on to the next tile of its circuit. */
@@ -174,11 +198,14 @@ function advancePatrol(d: Defender): void {
 
 /**
  * Two defenders can't share a tile or swap places. Defenders that aren't
- * moving keep their tile; among movers, the lower id wins. Players never block
- * each other: they can share a tile and hop past one another.
+ * moving keep their tile; among movers, the lower id wins. Returns whether
+ * anything was cancelled.
  */
-function cancelDefenderConflicts(units: readonly Unit[], moving: Map<number, Vec>): void {
-  const defenders = units.filter((u) => u.side === 'defender' && u.alive);
+function cancelDefenderConflicts(
+  defenders: readonly Defender[],
+  moving: Map<number, Vec>,
+): boolean {
+  let any = false;
   for (let changed = true; changed;) {
     changed = false;
     const claimed = new Set(defenders.filter((u) => !moving.has(u.id)).map((u) => key(u.pos)));
@@ -190,111 +217,77 @@ function cancelDefenderConflicts(units: readonly Unit[], moving: Map<number, Vec
       );
       if (claimed.has(key(to)) || swapper) {
         moving.delete(u.id);
-        changed = true;
+        changed = any = true;
         break;
       }
       claimed.add(key(to));
     }
   }
+  return any;
 }
 
-/**
- * A player and a defender collide. The defender wins, unless the player can
- * fend it off. A player that trades (a Walk-on) without the ball takes the
- * defender down with it.
- */
-function collide(
-  state: RunState,
-  s: PlayerUnit,
-  d: Defender,
-  moving: Map<number, Vec>,
-  events: SimEvent[],
-): void {
-  if (s.fendOff > 0) {
-    s.fendOff--;
-    events.push({ type: 'fendedOff', id: s.id, defender: d.id });
-    knockDown(d, events);
-    moving.delete(d.id);
-    return;
-  }
-  const carrying = state.screen.ball.at === 'carried' && state.screen.ball.by === s.id;
-  const trades = !carrying && playerKind(s.kindId).trades;
-  const result = hit(state, s, 'defender', events);
-  const defenderResult = trades ? hit(state, d, 'walkOn', events) : null;
-  if (result === 'down') moving.delete(s.id);
-  if (result === 'down' || defenderResult === 'down') moving.delete(d.id);
-  if (carrying) fumble(state, 'tackle', events);
+// ── How a down ends ─────────────────────────────────────────────────────────
+
+/** The carrier over the first-down line wins the drive. */
+function checkFirstDown(state: RunState, events: SimEvent[]): boolean {
+  const carrier = carrierOf(state);
+  if (!carrier || carrier.pos.y < state.drive.firstDown) return false;
+  endDown(state, 'firstDown', carrier.pos.y, events);
+  return true;
 }
 
-/** A unit takes a hit. Heft decides whether it's knocked down or killed (Heft 0: killed). */
-function hit(state: RunState, u: Unit, cause: DeathCause, events: SimEvent[]): HitResult {
-  u.hitsTaken++;
-  if (u.hitsTaken <= hitsSurvived(u.stats)) {
-    knockDown(u, events);
-    return 'down';
-  }
-  u.alive = false;
-  u.intent = null;
-  events.push({ type: 'died', id: u.id, cause });
-  if (u.side === 'player') {
-    // A dead recruit is gone for good: its slot reverts to a Walk-on.
-    if (!playerKind(u.kindId).returns) {
-      const slot = state.slots[u.slot];
-      if (slot) slot.kindId = 'walkOn';
-    }
-  }
-  return 'dead';
-}
-
-function knockDown(u: Unit, events: SimEvent[]): void {
-  u.downBeats = tuning.units.knockdownBeats;
-  events.push({ type: 'knockedDown', id: u.id });
-}
-
-// ── Sacks ───────────────────────────────────────────────────────────────────
-
-/**
- * Any defender that's up and next to the QB while it still holds the ball
- * sacks it, on the beat it gets there. Once the ball is thrown, the QB is safe.
- */
-function checkSack(state: RunState, events: SimEvent[]): void {
+/** A defender next to the QB while it still holds the ball sacks it; so does running out the play clock. */
+function checkSack(state: RunState, events: SimEvent[]): boolean {
   const { screen } = state;
-  if (screen.ball.at !== 'qb') return;
-  if (screen.defenders.some((d) => isUp(d) && nextToQb(d.pos))) fumble(state, 'sack', events);
+  if (screen.ball.at !== 'qb') return false;
+  const by = screen.defenders.find((d) => isUp(d) && touches(d.pos, screen.qb));
+  if (!by && state.downBeat < tuning.drive.playClockBeats) return false;
+  events.push({ type: 'sacked', by: by?.id ?? null });
+  screen.ball = { at: 'dead', pos: screen.qb, bounced: false };
+  endDown(state, 'sacked', state.drive.los - tuning.drive.sackLoss, events);
+  return true;
 }
 
-// ── Hazards ─────────────────────────────────────────────────────────────────
-
-/** A pass crossing a Witch's row near her is snatched out of the air: a fumble. */
-function checkSnatch(state: RunState, events: SimEvent[]): void {
+/** A pass crossing a Witch's row near her bounces off her. */
+function checkSnatch(state: RunState, events: SimEvent[]): boolean {
   const { screen, beat } = state;
-  if (screen.hazards.some((h) => snatches(h, screen.ball, beat))) fumble(state, 'snatched', events);
+  const witch = screen.hazards.find((h) => snatches(h, screen.ball, beat));
+  if (!witch) return false;
+  const at = vec(witchColumn(witch, beat), witch.row);
+  events.push({ type: 'blocked', by: witch.id, at });
+  screen.ball = { at: 'dead', pos: at, bounced: true };
+  endDown(state, 'blocked', state.drive.los, events);
+  return true;
 }
 
-// ── The ball landing ───────────────────────────────────────────────────────
-
-function resolveLanding(state: RunState, events: SimEvent[]): void {
+/**
+ * The ball comes down: the closest of your players within reach is the
+ * receiver. If it's covered (inside a purple ring), the pass bounces off the
+ * covering defender; otherwise it's a catch. Nobody in reach is incomplete.
+ */
+function resolveLanding(state: RunState, events: SimEvent[]): boolean {
   const { screen, beat } = state;
   const ball = screen.ball;
-  if (ball.at !== 'flight' || ball.landsOn !== beat) return;
+  if (ball.at !== 'flight' || ball.landsOn !== beat) return false;
   const target = ball.target;
   const away = (p: Vec): number => Math.hypot(p.x - target.x, p.y - target.y);
-
-  // The best receiver: the closest of your players within its catch radius.
   const receiver = screen.players
-    .filter((s) => isUp(s) && away(s.pos) <= catchRadius(s, 'ok'))
+    .filter((p) => isUp(p) && away(p.pos) <= catchRadius(p, 'ok'))
     .sort((a, b) => away(a.pos) - away(b.pos) || a.id - b.id)[0];
-  // A defender right under the ball, and closer than the receiver, picks it off.
-  const picker = screen.defenders
-    .filter((d) => isUp(d) && away(d.pos) <= tuning.catch.intercept)
-    .sort((a, b) => away(a.pos) - away(b.pos) || a.id - b.id)[0];
-  if (picker && (!receiver || away(picker.pos) < away(receiver.pos))) {
-    fumble(state, 'interception', events);
-    return;
-  }
+
   if (!receiver) {
-    fumble(state, 'miss', events);
-    return;
+    events.push({ type: 'incomplete', at: target });
+    screen.ball = { at: 'dead', pos: target, bounced: false };
+    endDown(state, 'incomplete', state.drive.los, events);
+    return true;
+  }
+  if (openness(screen, receiver.pos) === 'covered') {
+    const by = coveringDefender(screen, receiver.pos);
+    const at = by?.pos ?? receiver.pos;
+    events.push({ type: 'blocked', by: by?.id ?? receiver.id, at });
+    screen.ball = { at: 'dead', pos: at, bounced: true };
+    endDown(state, 'blocked', state.drive.los, events);
+    return true;
   }
   const d = away(receiver.pos);
   const quality: CatchQuality =
@@ -303,72 +296,20 @@ function resolveLanding(state: RunState, events: SimEvent[]): void {
       : d <= catchRadius(receiver, 'good')
         ? 'good'
         : 'ok';
-  catchBall(state, receiver, quality, events);
+  screen.ball = { at: 'carried', by: receiver.id };
+  const clean = quality === 'perfect';
+  if (clean) receiver.fendOff += 1;
+  events.push({ type: 'caught', id: receiver.id, clean, quality });
+  // A catch over the line is a first down on the spot.
+  if (receiver.pos.y >= state.drive.firstDown || receiver.pos.y >= END_ROW) {
+    endDown(state, 'firstDown', receiver.pos.y, events);
+    return true;
+  }
+  updateIntents(screen);
+  return false;
 }
 
 /** How far from a receiver a ball can land and still be caught at a given quality (Hands widens it). */
-export function catchRadius(s: PlayerUnit, quality: CatchQuality): number {
-  return tuning.catch[quality] + s.stats.hands * tuning.catch.perHands;
-}
-
-/** A catch. A perfect one is a Clean Catch: the receiver can fend off one defender. */
-function catchBall(
-  state: RunState,
-  s: PlayerUnit,
-  quality: CatchQuality,
-  events: SimEvent[],
-): void {
-  state.screen.ball = { at: 'carried', by: s.id };
-  const clean = quality === 'perfect';
-  if (clean) s.fendOff += 1;
-  events.push({ type: 'caught', id: s.id, clean, quality });
-}
-
-// ── Fumbles, touchdowns, wipeouts ─────────────────────────────────────────
-
-/**
- * Lose the ball in play for good. If any are left on the pile, the whole
- * screen resets to setup: every Walk-on back, the defenders back at their
- * starting tiles, and the QB holding the next ball. Dead recruits stay dead.
- */
-function fumble(state: RunState, reason: FumbleReason, events: SimEvent[]): void {
-  loseBall(state, events, (ballsLeft) => ({ type: 'fumble', reason, ballsLeft }));
-}
-
-/** Take a ball off the pile, report why, then reset the screen (or end the run on the last one). */
-function loseBall(
-  state: RunState,
-  events: SimEvent[],
-  lost: (ballsLeft: number) => SimEvent,
-): void {
-  state.balls = Math.max(0, state.balls - 1);
-  events.push(lost(state.balls));
-  if (state.balls === 0) {
-    endRun(state, events);
-    return;
-  }
-  setUpScreen(state, state.screen.index);
-  events.push({ type: 'screenStarted', index: state.screen.index });
-}
-
-function checkTouchdown(state: RunState, events: SimEvent[]): void {
-  const ball = state.screen.ball;
-  if (ball.at !== 'carried') return;
-  const carrier = state.screen.players.find((s) => s.id === ball.by);
-  if (!carrier?.alive || carrier.pos.y < END_ROW) return;
-  state.screensCleared++;
-  state.phase = 'cleared';
-  events.push({ type: 'touchdown', id: carrier.id, yards: yards(state) });
-}
-
-/** If every player on the field is dead: lose a ball and restart the screen from setup. */
-function checkWipeout(state: RunState, events: SimEvent[]): void {
-  if (state.screen.players.some((s) => s.alive)) return;
-  loseBall(state, events, (ballsLeft) => ({ type: 'wipeout', ballsLeft }));
-}
-
-function endRun(state: RunState, events: SimEvent[]): void {
-  state.phase = 'over';
-  state.screen.ball = { at: 'none' };
-  events.push({ type: 'gameOver', yards: yards(state) });
+export function catchRadius(p: PlayerUnit, quality: CatchQuality): number {
+  return tuning.catch[quality] + p.stats.hands * tuning.catch.perHands;
 }

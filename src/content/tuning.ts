@@ -13,27 +13,38 @@ export const tuning = {
     measuredTaps: 12,
   },
   grid: {
-    /** A screen is about one Crossy Road screen: 9 wide, 16 tall (GAMEPLAY.md, The Grid). */
+    /** The field is about one Crossy Road screen: 9 wide, 16 tall (GAMEPLAY.md, The Grid). */
     cols: 9,
     rows: 16,
-    /** Rows 0..setupRows-1 are the setup zone. */
-    setupRows: 3,
   },
-  run: {
-    startingBalls: 3,
-    startingSlots: 5,
-    /** Yards awarded per cleared screen. */
-    yardsPerScreen: 10,
+  drive: {
+    /** The row the line of scrimmage starts on for every drive. */
+    startRow: 2,
+    /** Yards (rows) to gain for a first down. */
+    distance: 10,
+    downs: 4,
+    /** How far behind the line of scrimmage the QB lines up. */
+    qbDepth: 2,
+    /** Yards lost on a sack. */
+    sackLoss: 2,
+    /** Beats a finished down stays on screen (so you see what happened) before the next. */
+    pauseBeats: 4,
+    /** If the QB still holds the ball this many beats after the snap, it's a sack anyway. */
+    playClockBeats: 14,
+  },
+  cards: {
+    /** Play cards drawn before each down. */
+    handSize: 3,
+    /** New cards offered after a won drive. */
+    draftOffer: 3,
   },
   throw: {
-    /** Beats from release to landing (the Fast Throw perk makes it 1). */
+    /** Beats from release to landing. */
     flightBeats: 2,
-    /**
-     * Throws can only land in the middle half of the field: the bottom quarter
-     * (rows 0-3) is too close to the QB, and the top quarter (12-15) has to be run.
-     */
-    minRow: 4,
-    maxRow: 11,
+    /** Throws land from this many rows behind the line of scrimmage (negative)… */
+    minAhead: -1,
+    /** …to this many rows past it. */
+    maxAhead: 11,
   },
   aim: {
     /** Slingshot aiming: how far the target moves per pixel of pull. */
@@ -50,8 +61,10 @@ export const tuning = {
     ok: 1.15,
     /** Each point of Hands widens every catch radius by this much. */
     perHands: 0.3,
-    /** A defender this close, and closer than any receiver, intercepts. */
-    intercept: 0.6,
+  },
+  coverage: {
+    /** A player within this many tiles outside a coverage ring is yellow (coverage is close). */
+    nearBand: 1,
   },
   camera: {
     /** Camera pitch in degrees above the horizon. */
@@ -70,7 +83,7 @@ export const tuning = {
     ui: 0.5,
   },
   units: {
-    /** Beats a knocked-down unit stays down. */
-    knockdownBeats: 2,
+    /** Beats a knocked-down unit stays down: longer than a hop, so a carrier that fends one off gets past. */
+    knockdownBeats: 3,
   },
 } as const;

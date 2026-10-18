@@ -1,26 +1,20 @@
 import * as THREE from 'three';
-import { biomes, hexToNumber, type Hex } from '../content/palettes';
-import { tuning } from '../content/tuning';
-import { COLS, END_ROW, ROWS, SETUP_ROWS, inThrowBand, vec } from '../sim/grid';
+import { biomes, hexToNumber, team, type Hex } from '../content/palettes';
+import { COLS, ROWS, vec } from '../sim/grid';
+import type { DriveState } from '../sim/types';
 import { tileToWorld } from './view';
 
 /**
- * The static field: a checkerboard of tiles with the setup zone, end zone
- * and throwing band marked. One instanced mesh for the tiles keeps the draw-call count low (TECHNICAL.md §5).
+ * The static field: a checkerboard of tiles. One instanced mesh for the tiles
+ * keeps the draw-call count low (TECHNICAL.md §5). The lines that move with
+ * the drive are DriveLines.
  */
 export function createField(): THREE.Group {
   const group = new THREE.Group();
-
   const palette = biomes.forest;
   const color = (hex: Hex): THREE.Color => new THREE.Color(hexToNumber(hex));
   const light = color(palette.grass);
   const dark = color(palette.grassDark);
-  const setup = color(palette.setup);
-  const setupDark = color(palette.setupDark);
-  const end = color(palette.endZone);
-  const endDark = color(palette.endZoneDark);
-  // Rows a throw can't reach are dimmed a touch: a subtle hint, not a wall.
-  const outOfRange = 0.86;
 
   const tile = new THREE.BoxGeometry(1, 0.3, 1);
   const tiles = new THREE.InstancedMesh(tile, new THREE.MeshLambertMaterial(), COLS * ROWS);
@@ -29,30 +23,45 @@ export function createField(): THREE.Group {
   let i = 0;
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
-      const odd = (x + y) % 2 === 1;
-      let color = (odd ? dark : light).clone();
-      if (y < SETUP_ROWS) color = (odd ? setupDark : setup).clone();
-      if (y === END_ROW) color = (odd ? endDark : end).clone();
-      else if (!inThrowBand(y)) color.multiplyScalar(outOfRange);
       const p = tileToWorld(vec(x, y), -0.15);
       matrix.makeTranslation(p.x, p.y, p.z);
       tiles.setMatrixAt(i, matrix);
-      tiles.setColorAt(i, color);
+      tiles.setColorAt(i, (x + y) % 2 === 1 ? dark : light);
       i++;
     }
   }
   group.add(tiles);
+  return group;
+}
 
-  // Faint chalk lines at the edges of the throwing band.
-  const chalk = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.22 });
-  for (const edge of [tuning.throw.minRow - 0.5, tuning.throw.maxRow + 0.5]) {
-    const line = new THREE.Mesh(new THREE.PlaneGeometry(COLS, 0.06), chalk);
-    line.rotation.x = -Math.PI / 2;
-    line.position.set(0, 0.005, -edge);
-    group.add(line);
+/**
+ * The lines that move with the drive, painted across the field: the line of
+ * scrimmage (white, under the front edge of its row) and the first-down line
+ * (gold, at the front edge of the row you have to reach).
+ */
+export class DriveLines {
+  private readonly scrimmage: THREE.Mesh;
+  private readonly firstDown: THREE.Mesh;
+
+  constructor(scene: THREE.Scene) {
+    const line = (color: number, opacity: number, width: number): THREE.Mesh => {
+      const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(COLS, width),
+        new THREE.MeshBasicMaterial({ color, transparent: true, opacity }),
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      scene.add(mesh);
+      return mesh;
+    };
+    this.scrimmage = line(0xffffff, 0.55, 0.08);
+    this.firstDown = line(hexToNumber(team.accent), 0.9, 0.12);
   }
 
-  return group;
+  update(drive: DriveState): void {
+    // A row's front edge (nearer the camera) is half a tile below its centre.
+    this.scrimmage.position.set(0, 0.006, -(drive.los - 0.5));
+    this.firstDown.position.set(0, 0.007, -(drive.firstDown - 0.5));
+  }
 }
 
 /** A thin square outline lying on a tile. */

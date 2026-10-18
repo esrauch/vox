@@ -3,7 +3,7 @@
  * sound effects and HUD pops. The words for every pop live here.
  */
 import type { SfxId } from '../audio/sfx';
-import type { CatchQuality, FumbleReason, ScreenState, SimEvent, ThrowProblem } from '../sim/types';
+import type { CatchQuality, ScreenState, SimEvent, ThrowProblem } from '../sim/types';
 import type { Hud } from '../ui/hud';
 
 export const THROW_PROBLEM_TEXT: Readonly<Record<ThrowProblem, string>> = {
@@ -14,17 +14,18 @@ export const THROW_PROBLEM_TEXT: Readonly<Record<ThrowProblem, string>> = {
   tooClose: 'too close',
 };
 
-/** Fumbles with their own pop; the rest get the crowd's chant. */
-const FUMBLE_TEXT: Partial<Record<FumbleReason, string>> = {
-  sack: 'SACKED!',
-  snatched: 'SNATCHED!',
-};
-
 const CATCH_TEXT: Readonly<Record<CatchQuality, string>> = {
   perfect: 'PERFECT!',
   good: 'GOOD!',
   ok: 'OK',
 };
+
+/** How a tackle's gain reads. */
+function gainText(gained: number): string {
+  if (gained > 0) return `+${gained} ${gained === 1 ? 'YARD' : 'YARDS'}`;
+  if (gained < 0) return `LOSS OF ${-gained}`;
+  return 'NO GAIN';
+}
 
 export function react(
   events: readonly SimEvent[],
@@ -44,20 +45,33 @@ export function react(
         play(e.quality === 'perfect' ? 'cleanCatch' : 'catch');
         hud.pop(CATCH_TEXT[e.quality], 'good');
         break;
-      case 'died':
-        play('burst');
-        break;
-      case 'fumble':
-        if (e.reason === 'sack') play('sack');
+      case 'blocked':
+        // Every failed pass gets the comedy of a fumble, but it only costs the down.
         play('fumble');
         play('chant');
-        hud.pop(FUMBLE_TEXT[e.reason] ?? 'FEE FI FO FUMBLE!', 'bad');
+        hud.pop('BLOCKED!', 'bad');
         break;
-      case 'touchdown':
-        play('touchdown');
+      case 'incomplete':
+        play('fumble');
+        hud.pop('INCOMPLETE', 'bad');
         break;
-      case 'wipeout':
-        hud.pop('WIPEOUT!', 'bad');
+      case 'sacked':
+        play('sack');
+        hud.pop('SACKED!', 'bad');
+        break;
+      case 'tackled':
+        play('burst');
+        break;
+      case 'fendedOff':
+        hud.pop('SHRUGGED OFF!', 'good');
+        break;
+      case 'downEnded':
+        if (e.result === 'firstDown') {
+          play('touchdown');
+          hud.pop('FIRST DOWN!', 'good');
+        } else if (e.result === 'tackled') {
+          hud.pop(gainText(e.gained), e.gained > 0 ? 'good' : 'bad');
+        }
         break;
       case 'throwRejected':
         hud.pop(THROW_PROBLEM_TEXT[e.reason], 'bad');

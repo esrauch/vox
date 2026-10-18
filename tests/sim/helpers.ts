@@ -1,50 +1,71 @@
-import { playerKind, WALK_ON } from '../../src/content/players';
+import { DEFENDERS } from '../../src/content/defenders';
+import { WALK_ON } from '../../src/content/players';
 import { updateIntents } from '../../src/sim/ai';
+import { qbTile } from '../../src/sim/drive';
 import { createRun } from '../../src/sim/run';
-import { createDefenders } from '../../src/sim/screen';
 import { step } from '../../src/sim/step';
-import type { DefenderKind, RunState, SimEvent, PlayerUnit, Vec } from '../../src/sim/types';
+import type {
+  Defender,
+  DefenderKind,
+  PlayerUnit,
+  RunState,
+  SimEvent,
+  Vec,
+} from '../../src/sim/types';
 
 export interface PlayerSpec {
   pos: Vec;
-  kindId?: string;
+  /** One move per hop (U D L R .); default: straight up for a while. */
+  route?: string;
 }
 
 /**
- * A run already in play (beat 0, just hiked) with exactly the given players
- * and defenders, so a test can set up one situation precisely.
+ * A down already in play (beat 0, just snapped) with exactly the given
+ * players and defenders: line of scrimmage on row 2, first-down line on row
+ * 12, the QB on (4, 0) with the ball, no hazards. Player ids start at 100 and
+ * defender ids at 200.
  */
 export function playState(
   players: PlayerSpec[],
-  defenders: { kind: DefenderKind; pos: Vec }[] = [],
+  defenders: { kind: DefenderKind; pos: Vec; marking?: number }[] = [],
 ): RunState {
   const state = createRun(1);
-  state.slots = players.map((s) => ({ kindId: s.kindId ?? WALK_ON.id }));
-  const units: PlayerUnit[] = players.map((spec, i) => {
-    const kind = playerKind(spec.kindId ?? WALK_ON.id);
-    return {
-      id: 100 + i,
-      side: 'player',
-      slot: i,
-      kindId: kind.id,
-      stats: kind.stats,
-      pos: spec.pos,
-      fendOff: 0,
-      alive: true,
-      downBeats: 0,
-      hitsTaken: 0,
-      intent: null,
-    };
-  });
+  const units: PlayerUnit[] = players.map((spec, i) => ({
+    id: 100 + i,
+    side: 'player',
+    kindId: WALK_ON.id,
+    stats: WALK_ON.stats,
+    pos: spec.pos,
+    route: spec.route ?? 'UUUUUUUUUUUU',
+    routeStep: 0,
+    fendOff: 0,
+    downBeats: 0,
+    intent: null,
+  }));
+  const defs: Defender[] = defenders.map((d, i) => ({
+    id: 200 + i,
+    side: 'defender',
+    kind: d.kind,
+    pos: d.pos,
+    home: d.pos,
+    stats: DEFENDERS[d.kind].stats,
+    downBeats: 0,
+    intent: null,
+    patrol: null,
+    patrolIndex: 0,
+    marking: d.marking ?? null,
+  }));
+  state.drive = { ...state.drive, los: 2, start: 2, firstDown: 12, down: 1 };
   state.screen = {
-    index: 0,
     players: units,
-    defenders: createDefenders(defenders, 200),
+    defenders: defs,
     hazards: [],
     ball: { at: 'qb' },
+    qb: qbTile(2),
   };
   state.phase = 'play';
   state.beat = 0;
+  state.downBeat = 0;
   updateIntents(state.screen);
   return state;
 }
@@ -62,19 +83,23 @@ export function run(state: RunState, n: number): { state: RunState; events: SimE
 }
 
 export const player = (state: RunState, id: number): PlayerUnit => {
-  const s = state.screen.players.find((u) => u.id === id);
-  if (!s) throw new Error(`no player ${id}`);
-  return s;
+  const p = state.screen.players.find((u) => u.id === id);
+  if (!p) throw new Error(`no player ${id}`);
+  return p;
+};
+
+export const defender = (state: RunState, id: number): Defender => {
+  const d = state.screen.defenders.find((u) => u.id === id);
+  if (!d) throw new Error(`no defender ${id}`);
+  return d;
 };
 
 export const ofType = <T extends SimEvent['type']>(events: SimEvent[], type: T) =>
   events.filter((e): e is Extract<SimEvent, { type: T }> => e.type === type);
 
-/** Pin every Bat in place (a one-tile patrol), for tests that need a stationary interceptor. */
-export function standStill(state: RunState): RunState {
-  for (const d of state.screen.defenders) {
-    if (d.patrol) Object.assign(d, { patrol: [d.pos], patrolIndex: 0 });
-  }
+/** Give the ball to a player (as if it had just caught it). */
+export function carry(state: RunState, id: number): RunState {
+  state.screen.ball = { at: 'carried', by: id };
   updateIntents(state.screen);
   return state;
 }

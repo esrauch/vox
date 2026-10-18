@@ -3,32 +3,18 @@ import type { Vec } from './types';
 
 export const COLS = tuning.grid.cols;
 export const ROWS = tuning.grid.rows;
-export const SETUP_ROWS = tuning.grid.setupRows;
-/** The top row. A carrier reaching it scores. */
+/** The top row. */
 export const END_ROW = ROWS - 1;
-
-/** The QB stands at the middle of the bottom row and never moves. */
-export const QB_POS: Vec = { x: Math.floor(COLS / 2), y: 0 };
+/** The middle column: plays are drawn around it, and the QB stands in it. */
+export const MID_COL = Math.floor(COLS / 2);
 
 export const vec = (x: number, y: number): Vec => ({ x, y });
 export const eq = (a: Vec | null | undefined, b: Vec | null | undefined): boolean =>
   !!a && !!b && a.x === b.x && a.y === b.y;
-export const add = (a: Vec, b: Vec): Vec => ({ x: a.x + b.x, y: a.y + b.y });
 export const key = (v: Vec): string => `${v.x},${v.y}`;
-
-export const UP: Vec = { x: 0, y: 1 };
 
 export function inBounds(v: Vec): boolean {
   return v.x >= 0 && v.x < COLS && v.y >= 0 && v.y < ROWS;
-}
-
-/** Whether a throw may land on this row: only the middle half of the field. */
-export function inThrowBand(y: number): boolean {
-  return y >= tuning.throw.minRow && y <= tuning.throw.maxRow;
-}
-
-export function inSetupZone(v: Vec): boolean {
-  return inBounds(v) && v.y < SETUP_ROWS && !eq(v, QB_POS);
 }
 
 /** Manhattan distance: units hop in the four directions. */
@@ -36,9 +22,14 @@ export function dist(a: Vec, b: Vec): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
-/** Whether a tile touches the QB (up, left or right). A defender standing there sacks it. */
-export function nextToQb(v: Vec): boolean {
-  return dist(v, QB_POS) === 1;
+/** Straight-line distance between tile centres (or free points). */
+export function distance(a: Vec, b: Vec): number {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+/** Whether a tile touches another (up, down, left or right). */
+export function touches(a: Vec, b: Vec): boolean {
+  return dist(a, b) === 1;
 }
 
 /**
@@ -51,4 +42,16 @@ export function stepToward(from: Vec, to: Vec): Vec {
   if (dx === 0 && dy === 0) return from;
   if (Math.abs(dy) >= Math.abs(dx)) return vec(from.x, from.y + Math.sign(dy));
   return vec(from.x + Math.sign(dx), from.y);
+}
+
+/** The other useful hop toward `to`: along the smaller gap (or sideways if lined up). */
+export function stepAround(from: Vec, to: Vec): Vec {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  if (Math.abs(dy) >= Math.abs(dx)) {
+    if (dx !== 0) return vec(from.x + Math.sign(dx), from.y);
+    return vec(from.x + (from.x < COLS - 1 ? 1 : -1), from.y);
+  }
+  if (dy !== 0) return vec(from.x, from.y + Math.sign(dy));
+  return vec(from.x, from.y + (from.y < ROWS - 1 ? 1 : -1));
 }

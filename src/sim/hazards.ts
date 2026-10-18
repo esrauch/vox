@@ -5,10 +5,10 @@
  * The Witch on a Broom flies across her row, one tile per beatsPerTile beats,
  * and wraps around: leaving one side, she's back at the other. She's in the
  * air, so runners pass under her; only a pass crossing her row near her is
- * hit (snatched, a fumble).
+ * hit: it bounces off her (blocked).
  */
 import { HAZARDS } from '../content/hazards';
-import { COLS, QB_POS } from './grid';
+import { COLS } from './grid';
 import type { BallState, Hazard } from './types';
 
 /**
@@ -28,17 +28,18 @@ export function witchColumn(h: Hazard, beat: number): number {
 /**
  * Where and when a pass in the air crosses row `row`: the beat it's over the
  * row (the first beat at or after the crossing) and its column there. Null
- * if the pass never reaches the row. Passes fly straight from the QB to the
+ * if the pass never crosses the row. Passes fly straight from the QB to the
  * target, evenly over their flight beats.
  */
 export function passCrossing(ball: BallState, row: number): { beat: number; x: number } | null {
   if (ball.at !== 'flight') return null;
-  const rise = ball.target.y - QB_POS.y;
-  const t = (row - QB_POS.y) / rise;
+  const { from, target } = ball;
+  const rise = target.y - from.y;
+  const t = (row - from.y) / rise;
   if (rise <= 0 || t <= 0 || t > 1) return null;
   return {
     beat: ball.releasedOn + Math.ceil(t * (ball.landsOn - ball.releasedOn)),
-    x: QB_POS.x + (ball.target.x - QB_POS.x) * t,
+    x: from.x + (target.x - from.x) * t,
   };
 }
 

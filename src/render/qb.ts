@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { QB_POS } from '../sim/grid';
+import type { Vec } from '../sim/types';
 import { getGeometry, modelHeight, voxelMaterial } from '../voxel/models';
 import { tilt } from './experiments';
 import { tileToWorld } from './view';
@@ -18,13 +18,14 @@ const HAND = new THREE.Vector3(0.4, modelHeight(QB_MODEL) + 0.02, 0.05).applyAxi
   tilt,
 );
 
-/** Where the QB holds the ball, in world space: every throw starts here. */
-export function qbHand(): THREE.Vector3 {
-  return tileToWorld(QB_POS).add(QB_OFFSET).add(HAND);
+/** Where the QB (standing on `qb`) holds the ball, in world space: every throw starts here. */
+export function qbHand(qb: Vec): THREE.Vector3 {
+  return tileToWorld(qb).add(QB_OFFSET).add(HAND);
 }
 
 /**
- * The QB. It never moves and faces the camera so its carved face is visible.
+ * The QB. It never moves during a down (it lines up behind the line of
+ * scrimmage each down) and faces the camera so its carved face is visible.
  * It holds its throwing arm up while it has the ball, and lowers it the
  * moment the ball leaves its hand.
  */
@@ -32,13 +33,13 @@ export class QbView {
   private readonly mesh = new THREE.Mesh(getGeometry(QB_MODEL), voxelMaterial);
 
   constructor(scene: THREE.Scene) {
-    this.mesh.position.copy(tileToWorld(QB_POS)).add(QB_OFFSET);
     this.mesh.castShadow = true;
     this.mesh.rotation.x = tilt;
     scene.add(this.mesh);
   }
 
-  update(holdingBall: boolean): void {
+  update(qb: Vec, holdingBall: boolean): void {
+    this.mesh.position.copy(tileToWorld(qb)).add(QB_OFFSET);
     this.mesh.geometry = getGeometry(holdingBall ? QB_MODEL : QB_THROWN_MODEL);
   }
 }

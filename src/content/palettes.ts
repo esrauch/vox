@@ -76,10 +76,6 @@ export const biomes = {
   forest: {
     grass: '#4f7f4c',
     grassDark: '#447245',
-    setup: '#5d8d57',
-    setupDark: '#53814f',
-    endZone: '#c98a3a',
-    endZoneDark: '#b97c31',
     floor: '#253a2c',
     skyTop: '#1c1236',
     skyMid: '#4a2f6e',

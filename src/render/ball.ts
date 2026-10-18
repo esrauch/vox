@@ -26,8 +26,9 @@ export interface Flight {
 
 /**
  * The ball, wherever it is: in the QB's raised hand, flying (with a landing
- * ring and one pip per beat left), or held overhead by a carrier, who also
- * gets a pulsing ring on the ground.
+ * ring and one pip per beat left), held overhead by a carrier (who also gets
+ * a pulsing ring on the ground), or dead when the down is over: a blocked
+ * pass bounces off whatever blocked it, and an incomplete one drops.
  *
  * A throw is drawn from the moment of release (`launch`), a fraction of a beat
  * before the sim takes it on the next beat, flying a little faster or slower
@@ -39,6 +40,8 @@ export class BallView {
   private readonly pips: THREE.Mesh[] = [];
   private readonly carrierRing: THREE.Mesh;
   private launched: Flight | null = null;
+  /** When the ball went dead (beat position), for the bounce. */
+  private deadSince: number | null = null;
 
   constructor(scene: THREE.Scene) {
     this.ball.castShadow = true;
@@ -81,8 +84,9 @@ export class BallView {
   update(screen: ScreenState, beatPos: number, units: UnitViews, time: number): boolean {
     const ball = screen.ball;
     const flight = this.flight(screen, beatPos);
-    this.ball.visible = ball.at !== 'none';
+    this.ball.visible = true;
     this.ball.rotation.y = time * 1.5;
+    if (ball.at !== 'dead') this.deadSince = null;
     this.ball.scale.setScalar(ball.at === 'carried' ? CARRIED_SCALE : 1);
     this.landing.visible = flight !== null;
     this.carrierRing.visible = ball.at === 'carried';
@@ -90,7 +94,7 @@ export class BallView {
     if (flight) {
       const span = flight.landsOn - flight.releasedAt;
       const t = Math.min(1, Math.max(0, (beatPos - flight.releasedAt) / span));
-      arcPoint(this.ball.position, qbHand(), tileToWorld(flight.target, 0.6), t);
+      arcPoint(this.ball.position, qbHand(screen.qb), tileToWorld(flight.target, 0.6), t);
       this.ball.rotation.x = t * Math.PI * 4;
 
       this.landing.position.copy(tileToWorld(flight.target, 0.03));
@@ -98,7 +102,18 @@ export class BallView {
       this.pips.forEach((pip, i) => (pip.visible = i < beatsLeft));
       this.landing.scale.setScalar(1 + (1 - (beatPos % 1)) * 0.15);
     } else if (ball.at === 'qb') {
-      this.ball.position.copy(qbHand());
+      this.ball.position.copy(qbHand(screen.qb));
+    } else if (ball.at === 'dead') {
+      // A blocked pass pops up off the defender and drops beside it; an incomplete one just lies there.
+      this.deadSince ??= beatPos;
+      const t = Math.min(1, (beatPos - this.deadSince) / 1.5);
+      const ground = tileToWorld(ball.pos, 0.15);
+      if (ball.bounced) {
+        ground.x += t * 0.6;
+        ground.y += Math.sin(t * Math.PI) * 1.6 + (1 - t) * 0.9;
+        this.ball.rotation.x = t * Math.PI * 3;
+      }
+      this.ball.position.copy(ground);
     } else if (ball.at === 'carried') {
       const p = units.positionOf(ball.by);
       if (p) {

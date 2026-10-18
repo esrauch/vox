@@ -1,416 +1,320 @@
 import { describe, expect, it } from 'vitest';
-import { TEST_RECRUIT } from '../../src/content/players';
-import { QB_POS, SETUP_ROWS, eq, key, vec } from '../../src/sim/grid';
-import { replay, type Input } from '../../src/sim/replay';
-import { createRun, dispatch } from '../../src/sim/run';
-import { boxCircuit, createDefenders, generateSpawns } from '../../src/sim/screen';
-import { step } from '../../src/sim/step';
+import { STARTER_DECK } from '../../src/content/cards';
+import { tuning } from '../../src/content/tuning';
+import { openness } from '../../src/sim/coverage';
+import { boxCircuit, qbTile } from '../../src/sim/drive';
+import { key, vec } from '../../src/sim/grid';
 import { witchColumn } from '../../src/sim/hazards';
-import type { Hazard } from '../../src/sim/types';
-import { ofType, playState, run, player, standStill } from './helpers';
+import { replay, type Input } from '../../src/sim/replay';
+import { createRun, dispatch, downAndDistance, endDown, nextDown } from '../../src/sim/run';
+import { step } from '../../src/sim/step';
+import type { Hazard, RunState, SimEvent } from '../../src/sim/types';
+import { carry, defender, ofType, playState, player, run } from './helpers';
 
-describe('creating a run', () => {
-  it('starts in setup with 3 balls and 5 Walk-on slots', () => {
-    const state = createRun(42);
+const PAUSE = tuning.drive.pauseBeats;
+
+describe('a run', () => {
+  it('starts on the first drive: 1st & 10, a hand of three, the defense lined up', () => {
+    const state = createRun(1);
     expect(state.phase).toBe('setup');
-    expect(state.balls).toBe(3);
-    expect(state.slots).toHaveLength(5);
-    expect(state.slots.every((s) => s.kindId === 'walkOn')).toBe(true);
-    expect(state.screen.players).toHaveLength(5);
+    expect(state.drive).toMatchObject({ index: 0, kind: 'intro', down: 1, los: 2, firstDown: 12 });
+    expect(downAndDistance(state)).toBe('1st & 10');
+    expect(state.deck.hand).toHaveLength(3);
+    expect(state.deck.owned).toEqual(STARTER_DECK);
+    expect(state.screen.players).toHaveLength(0); // nobody lines up until you call a play
+    expect(state.screen.defenders.length).toBeGreaterThan(0);
+    expect(state.screen.qb).toEqual(vec(4, 0));
   });
 
-  it('spawns defenders deterministically, outside the setup zone', () => {
-    expect(generateSpawns(7, 3)).toEqual(generateSpawns(7, 3));
-    expect(generateSpawns(7, 3)).not.toEqual(generateSpawns(8, 3));
-    for (const spawn of generateSpawns(7, 10))
-      expect(spawn.pos.y).toBeGreaterThanOrEqual(SETUP_ROWS);
+  it('calling a play lines your players up for it; Flip mirrors it', () => {
+    const state = createRun(1);
+    const called = dispatch(state, { type: 'call', hand: 0 }).state;
+    expect(called.called).toEqual({ hand: 0, flipped: false });
+    expect(called.screen.players.length).toBeGreaterThan(0);
+    const flipped = dispatch(called, { type: 'flip' }).state;
+    const xs = (s: RunState) => s.screen.players.map((p) => p.pos.x).sort();
+    expect(xs(flipped)).toEqual(
+      xs(called)
+        .map((x) => 8 - x)
+        .sort(),
+    );
+  });
+
+  it('HIKE needs a called play; it discards the hand and Covers pick their marks', () => {
+    const state = createRun(1);
+    expect(dispatch(state, { type: 'hike' }).state.phase).toBe('setup');
+    const hiked = dispatch(dispatch(state, { type: 'call', hand: 1 }).state, {
+      type: 'hike',
+    }).state;
+    expect(hiked.phase).toBe('play');
+    expect(hiked.deck.hand).toHaveLength(0);
+    expect(hiked.deck.discard).toHaveLength(3);
+    const marks = hiked.screen.defenders.filter((d) => d.kind === 'cover').map((d) => d.marking);
+    expect(marks.every((m) => m !== null)).toBe(true);
+    expect(new Set(marks).size).toBe(marks.length);
+  });
+
+  it('a Draw hands the ball off at the snap', () => {
+    let state = createRun(1);
+    state = { ...state, deck: { ...state.deck, hand: ['draw', 'go', 'slant'] } };
+    state = dispatch(dispatch(state, { type: 'call', hand: 0 }).state, { type: 'hike' }).state;
+    expect(state.screen.ball).toEqual({ at: 'carried', by: state.screen.players[0]!.id });
+  });
+
+  it('the beat ticks before the snap, and carries on through HIKE', () => {
+    let state = run(createRun(1), 3).state;
+    expect(state.phase).toBe('setup');
+    expect(state.beat).toBe(3);
+    state = dispatch(dispatch(state, { type: 'call', hand: 0 }).state, { type: 'hike' }).state;
+    expect(step(state).state.beat).toBe(4);
   });
 });
 
-describe('setup', () => {
-  it('places players only inside the setup zone, swapping with an occupant', () => {
-    let state = createRun(1);
-    const [a, b] = state.screen.players;
-    const aPos = a!.pos;
-    const bPos = b!.pos;
-    state = dispatch(state, { type: 'place', slot: a!.slot, tile: vec(0, 9) }).state;
-    expect(player(state, a!.id).pos).toEqual(aPos);
-    state = dispatch(state, { type: 'place', slot: a!.slot, tile: bPos }).state;
-    expect(player(state, a!.id).pos).toEqual(bPos);
-    expect(player(state, b!.id).pos).toEqual(aPos);
-  });
-
-  it('remembers the formation for the next screen', () => {
-    let state = createRun(1);
-    state = dispatch(state, { type: 'place', slot: 0, tile: vec(0, 0) }).state;
-    expect(state.formation[0]).toEqual(vec(0, 0));
-  });
-
-  it('starts play on hike, with every player heading straight up', () => {
-    const before = createRun(1);
-    const { state, events } = dispatch(before, { type: 'hike' });
-    expect(events).toEqual([{ type: 'hiked' }]);
-    expect(state.phase).toBe('play');
-    expect(before.phase).toBe('setup'); // actions are pure, like step()
-    expect(state.screen.players.every((s) => eq(s.intent, vec(s.pos.x, s.pos.y + 1)))).toBe(true);
-  });
-});
-
-describe('hopping on the beat', () => {
-  it('hops a Hustle-0 Walk-on every 2 beats, straight up', () => {
-    let state = playState([{ pos: vec(1, 2) }]);
-    state = run(state, 1).state;
-    expect(player(state, 100).pos).toEqual(vec(1, 2));
-    state = run(state, 1).state;
-    expect(player(state, 100).pos).toEqual(vec(1, 3));
+describe('routes', () => {
+  it('each player takes one move of its route per hop, then stands', () => {
+    let state = playState([{ pos: vec(1, 2), route: 'URU' }]);
+    const at = () => player(state, 100).pos;
     state = run(state, 2).state;
-    expect(player(state, 100).pos).toEqual(vec(1, 4));
+    expect(at()).toEqual(vec(1, 3));
+    state = run(state, 2).state;
+    expect(at()).toEqual(vec(2, 3));
+    state = run(state, 2).state;
+    expect(at()).toEqual(vec(2, 4));
+    state = run(state, 4).state;
+    expect(at()).toEqual(vec(2, 4)); // the route ran out
   });
 
-  it('faces where it will hop next', () => {
-    const state = playState([{ pos: vec(1, 2) }]);
-    expect(player(state, 100).intent).toEqual(vec(1, 3));
+  it('the carrier ignores its route and runs straight up', () => {
+    const state = carry(playState([{ pos: vec(1, 5), route: 'RRRR' }]), 100);
+    expect(player(run(state, 2).state, 100).pos).toEqual(vec(1, 6));
   });
 });
 
-describe('throwing and catching', () => {
-  it('only allows throws into the middle half of the field', () => {
-    const state = playState([{ pos: vec(1, 2) }]);
-    const reason = (y: number) =>
-      ofType(step(state, { throwAt: vec(1, y) }).events, 'throwRejected')[0]?.reason;
-    expect(reason(12)).toBe('tooFar'); // the top quarter has to be run
-    expect(reason(3)).toBe('tooClose'); // the bottom quarter is too close
-    expect(reason(4)).toBeUndefined();
-    expect(reason(11)).toBeUndefined();
+describe('blocking: players and defenders never share a tile', () => {
+  it('a player waits rather than step into a defender', () => {
+    const state = playState([{ pos: vec(2, 2), route: 'U' }], [{ kind: 'zone', pos: vec(2, 3) }]);
+    expect(player(run(state, 2).state, 100).pos).toEqual(vec(2, 2));
   });
 
-  it('rejects a throw while the ball is in the air', () => {
-    const state = playState([{ pos: vec(1, 2) }]);
-    const thrown = step(state, { throwAt: vec(1, 5) });
-    const again = step(thrown.state, { throwAt: vec(1, 4) });
-    expect(ofType(again.events, 'throwRejected')[0]?.reason).toBe('noBall');
+  it('a Blitzer goes around a blocker instead of through it', () => {
+    const state = playState(
+      [{ pos: vec(4, 2), route: '.' }],
+      [{ kind: 'blitzer', pos: vec(4, 4) }],
+    );
+    const r = run(state, 4);
+    expect(ofType(r.events, 'hop').some((e) => e.id === 200 && key(e.to) === '4,2')).toBe(false);
+    expect(defender(r.state, 200).pos).toEqual(vec(5, 3));
+  });
+});
+
+describe('tackles', () => {
+  // A carrier on (4, 6) and a Cover two tiles ahead: they meet on (4, 7) on beat 2.
+  const meeting = (fendOff = 0) => {
+    const state = carry(playState([{ pos: vec(4, 6) }], [{ kind: 'cover', pos: vec(4, 8) }]), 100);
+    player(state, 100).fendOff = fendOff;
+    return state;
+  };
+
+  it('a defender meeting the carrier tackles it: the next down starts there', () => {
+    const r = run(meeting(), 2);
+    expect(ofType(r.events, 'tackled')).toEqual([{ type: 'tackled', id: 100, by: 200 }]);
+    expect(ofType(r.events, 'downEnded')).toEqual([
+      { type: 'downEnded', result: 'tackled', gained: 5 },
+    ]);
+    expect(r.state.phase).toBe('downOver');
+    const next = run(r.state, PAUSE).state;
+    expect(next.phase).toBe('setup');
+    expect(next.drive).toMatchObject({ down: 2, los: 7 });
+    expect(next.screen.qb).toEqual(qbTile(7));
+    expect(downAndDistance(next)).toBe('2nd & 5');
   });
 
-  it('lands 2 beats after release; right on the receiver is a perfect (Clean) catch', () => {
-    const r1 = step(playState([{ pos: vec(1, 3) }]), { throwAt: vec(1, 4) });
-    expect(ofType(r1.events, 'thrown')[0]?.landsOn).toBe(3);
-    const r3 = run(r1.state, 2);
-    expect(ofType(r3.events, 'caught')).toEqual([
+  it('a fend-off (from a Clean Catch) knocks the tackler down instead', () => {
+    const r = run(meeting(1), 4);
+    expect(ofType(r.events, 'fendedOff')).toHaveLength(1);
+    expect(ofType(r.events, 'downEnded')).toHaveLength(0);
+    expect(player(r.state, 100).pos).toEqual(vec(4, 8));
+  });
+});
+
+describe('coverage rings', () => {
+  const screenWith = (kind: 'cover' | 'zone' | 'blitzer' | 'safety' | 'bat') =>
+    playState([], [{ kind, pos: vec(4, 6) }]).screen;
+
+  it('a Cover covers the tiles around it, and the next tile out is tight', () => {
+    const s = screenWith('cover');
+    expect(openness(s, vec(4, 7))).toBe('covered');
+    expect(openness(s, vec(5, 7))).toBe('tight');
+    expect(openness(s, vec(4, 8))).toBe('tight');
+    expect(openness(s, vec(4, 9))).toBe('open');
+  });
+
+  it('a Scarecrow (Zone) and the Safety cover a wide area', () => {
+    expect(openness(screenWith('zone'), vec(4, 8))).toBe('covered');
+    expect(openness(screenWith('safety'), vec(6, 6))).toBe('covered');
+  });
+
+  it('a Blitzer has no ring, and a knocked-down defender covers nothing', () => {
+    expect(openness(screenWith('blitzer'), vec(4, 7))).toBe('open');
+    const s = screenWith('cover');
+    s.defenders[0]!.downBeats = 2;
+    expect(openness(s, vec(4, 7))).toBe('open');
+  });
+});
+
+describe('passes', () => {
+  // The receiver stands on (4, 6); a pass thrown on beat 1 lands on beat 3.
+  const pass = (defenders: Parameters<typeof playState>[1], target = vec(4, 6)) => {
+    const state = playState([{ pos: vec(4, 6), route: '.' }], defenders);
+    return run(step(state, { throwAt: target }).state, 2);
+  };
+
+  it('to an open receiver is a catch; right on it is a Clean Catch', () => {
+    const r = pass([]);
+    expect(ofType(r.events, 'caught')).toEqual([
       { type: 'caught', id: 100, clean: true, quality: 'perfect' },
     ]);
-    expect(r3.state.screen.ball).toEqual({ at: 'carried', by: 100 });
-    expect(player(r3.state, 100).fendOff).toBe(1);
-  });
-
-  it('throws land anywhere; how close the receiver is sets the catch quality', () => {
-    // The receiver will be on (1, 4) when the ball lands on beat 3.
-    const quality = (x: number, y: number) =>
-      ofType(
-        run(step(playState([{ pos: vec(1, 3) }]), { throwAt: vec(x, y) }).state, 2).events,
-        'caught',
-      )[0]?.quality;
-    expect(quality(1.2, 4.1)).toBe('perfect');
-    expect(quality(1.5, 4.4)).toBe('good');
-    expect(quality(1, 5)).toBe('ok'); // a whole tile ahead
-    expect(quality(1, 5.5)).toBeUndefined(); // too far: a miss
-  });
-
-  it('a defender right under the ball, closer than the receiver, intercepts it', () => {
-    const state = standStill(playState([{ pos: vec(1, 3) }], [{ kind: 'picker', pos: vec(2, 6) }]));
-    const r = run(step(state, { throwAt: vec(1.9, 5.8) }).state, 2);
-    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('interception');
-  });
-
-  it('counts a ball landing on an empty tile as a fumble', () => {
-    const r1 = step(playState([{ pos: vec(1, 2) }]), { throwAt: vec(6, 6) });
-    const r3 = run(r1.state, 2);
-    expect(ofType(r3.events, 'fumble')).toEqual([{ type: 'fumble', reason: 'miss', ballsLeft: 2 }]);
-    expect(r3.state.screen.ball).toEqual({ at: 'qb' });
-  });
-
-  it('a fumble resets the whole screen to setup with the next ball', () => {
-    // Run the Walk-ons upfield, then lose the ball: everything goes back to the start.
-    let state = createRun(5);
-    state = dispatch(state, { type: 'hike' }).state;
-    const startTiles = state.screen.players.map((s) => key(s.pos));
-    const defenderTiles = state.screen.defenders.map((d) => key(d.pos));
-    state = run(state, 4).state;
-    const r = run(step(state, { throwAt: vec(0, 11) }).state, 2);
-    expect(ofType(r.events, 'fumble')).toHaveLength(1);
-    expect(ofType(r.events, 'screenStarted')).toEqual([{ type: 'screenStarted', index: 0 }]);
-    expect(r.state.phase).toBe('setup');
-    expect(r.state.balls).toBe(2);
-    expect(r.state.screen.players.every((s) => s.alive)).toBe(true);
-    expect(r.state.screen.players.map((s) => key(s.pos))).toEqual(startTiles);
-    expect(r.state.screen.defenders.map((d) => key(d.pos))).toEqual(defenderTiles);
-  });
-
-  it('counts a defender on the landing tile as an interception', () => {
-    const state = standStill(playState([{ pos: vec(1, 2) }], [{ kind: 'picker', pos: vec(6, 6) }]));
-    const bat = state.screen.defenders[0]!.pos;
-    const r = run(step(state, { throwAt: bat }).state, 2);
-    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('interception');
-  });
-});
-
-describe('Players never block each other', () => {
-  it('a carrier behind a Walk-on that has stopped at the top still scores', () => {
-    const state = playState([{ pos: vec(2, 13) }, { pos: vec(2, 14) }]);
-    state.screen.ball = { at: 'carried', by: 100 };
-    const r = run(state, 4);
-    expect(ofType(r.events, 'touchdown')).toHaveLength(1);
-    expect(player(r.state, 100).pos).toEqual(vec(2, 15));
-    expect(player(r.state, 101).pos).toEqual(vec(2, 15)); // sharing the end-zone tile
-  });
-});
-
-describe('collisions', () => {
-  it('a Walk-on without the ball trades itself: it and the defender both die', () => {
-    const state = playState(
-      [{ pos: vec(2, 2) }, { pos: vec(0, 2) }],
-      [{ kind: 'chaser', pos: vec(2, 4) }],
-    );
-    const r = run(state, 2);
-    expect(ofType(r.events, 'died')).toEqual([
-      { type: 'died', id: 100, cause: 'defender' },
-      { type: 'died', id: 200, cause: 'walkOn' },
-    ]);
-    expect(player(r.state, 100).alive).toBe(false);
-    expect(r.state.screen.defenders[0]?.alive).toBe(false);
-  });
-
-  it('stacked Walk-ons: the first clears the way for the one behind', () => {
-    const state = playState(
-      [{ pos: vec(2, 2) }, { pos: vec(2, 1) }],
-      [{ kind: 'chaser', pos: vec(2, 4) }],
-    );
-    const r = run(state, 4);
-    expect(player(r.state, 100).alive).toBe(false);
-    expect(player(r.state, 101).alive).toBe(true);
-    expect(player(r.state, 101).pos).toEqual(vec(2, 3));
-  });
-
-  it('tackling the carrier is a fumble', () => {
-    const state = playState(
-      [{ pos: vec(2, 3) }, { pos: vec(4, 1) }],
-      [{ kind: 'chaser', pos: vec(2, 5) }],
-    );
-    state.screen.ball = { at: 'carried', by: 100 };
-    const r = run(state, 2);
-    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('tackle');
-    expect(r.state.balls).toBe(2);
-    // The carrier doesn't trade: the defender survives.
-    expect(r.state.screen.defenders[0]?.alive).toBe(true);
-  });
-
-  it('a player that can fend off knocks the defender down instead', () => {
-    const state = playState(
-      [{ pos: vec(2, 3) }, { pos: vec(4, 1) }],
-      [{ kind: 'chaser', pos: vec(2, 5) }],
-    );
-    state.screen.ball = { at: 'carried', by: 100 };
-    player(state, 100).fendOff = 1;
-    const r = run(state, 2);
-    expect(ofType(r.events, 'fendedOff')).toHaveLength(1);
-    expect(r.state.screen.defenders[0]?.downBeats).toBeGreaterThan(0);
-    expect(player(r.state, 100).pos).toEqual(vec(2, 4));
-    expect(player(r.state, 100).fendOff).toBe(0);
     expect(r.state.screen.ball).toEqual({ at: 'carried', by: 100 });
+    expect(player(r.state, 100).fendOff).toBe(1);
+  });
+
+  it('to a covered receiver bounces off the defender: the down is used, no gain', () => {
+    const r = pass([{ kind: 'cover', pos: vec(4, 7) }]);
+    expect(ofType(r.events, 'blocked')).toEqual([{ type: 'blocked', by: 200, at: vec(4, 7) }]);
+    expect(ofType(r.events, 'downEnded')).toEqual([
+      { type: 'downEnded', result: 'blocked', gained: 0 },
+    ]);
+    expect(r.state.screen.ball).toEqual({ at: 'dead', pos: vec(4, 7), bounced: true });
+    expect(run(r.state, PAUSE).state.drive).toMatchObject({ down: 2, los: 2 });
+  });
+
+  it('a Bat next to the receiver blocks it too', () => {
+    const r = pass([{ kind: 'bat', pos: vec(5, 6) }]);
+    expect(ofType(r.events, 'downEnded')[0]?.result).toBe('blocked');
+  });
+
+  it('with nobody in reach is incomplete', () => {
+    const r = pass([], vec(7, 7));
+    expect(ofType(r.events, 'incomplete')).toHaveLength(1);
+    expect(ofType(r.events, 'downEnded')[0]).toEqual({
+      type: 'downEnded',
+      result: 'incomplete',
+      gained: 0,
+    });
+  });
+
+  it('throw range is measured from the line of scrimmage', () => {
+    const state = playState([{ pos: vec(4, 6) }]);
+    const reason = (y: number) =>
+      ofType(step(state, { throwAt: vec(4, y) }).events, 'throwRejected')[0]?.reason;
+    expect(reason(0)).toBe('tooClose');
+    expect(reason(1)).toBeUndefined(); // a row behind the line: a Screen
+    expect(reason(13)).toBeUndefined();
+    expect(reason(14)).toBe('tooFar');
   });
 });
 
-describe('Bats (Pickers) patrol a 4×4 box', () => {
-  it('builds a clockwise 12-tile circuit that stays on the field', () => {
-    const circuit = boxCircuit(vec(8, 14));
+describe('sacks', () => {
+  it('a defender next to the QB while it holds the ball sacks it: 2 yards back', () => {
+    const state = playState([], [{ kind: 'blitzer', pos: vec(5, 4) }]);
+    state.drive.los = 6;
+    Object.assign(state.screen, { qb: qbTile(6) });
+    const r = step(state);
+    expect(ofType(r.events, 'sacked')).toEqual([{ type: 'sacked', by: 200 }]);
+    expect(ofType(r.events, 'downEnded')[0]).toEqual({
+      type: 'downEnded',
+      result: 'sacked',
+      gained: -2,
+    });
+    expect(r.state.drive.los).toBe(4);
+  });
+
+  it('holding the ball past the play clock is a sack too', () => {
+    const r = run(playState([]), tuning.drive.playClockBeats);
+    expect(ofType(r.events, 'sacked')).toEqual([{ type: 'sacked', by: null }]);
+  });
+
+  it("can't push you back behind the drive's starting line", () => {
+    const r = run(playState([]), tuning.drive.playClockBeats);
+    expect(r.state.drive.los).toBe(2);
+    expect(ofType(r.events, 'downEnded')[0]?.gained).toBe(0);
+  });
+});
+
+describe('the defense', () => {
+  it('a Cover follows its receiver one beat behind, so a cut opens a gap', () => {
+    let state = playState(
+      [{ pos: vec(2, 3), route: 'RRRR' }],
+      [{ kind: 'cover', pos: vec(2, 5), marking: 100 }],
+    );
+    state = run(state, 4).state;
+    expect(player(state, 100).pos).toEqual(vec(4, 3));
+    expect(defender(state, 200).pos).toEqual(vec(2, 3));
+    expect(openness(state.screen, player(state, 100).pos)).toBe('tight');
+  });
+
+  it('Blitzers and the Safety chase the carrier after a catch', () => {
+    const state = carry(
+      playState(
+        [{ pos: vec(1, 6) }],
+        [
+          { kind: 'blitzer', pos: vec(4, 2) },
+          { kind: 'safety', pos: vec(4, 12) },
+        ],
+      ),
+      100,
+    );
+    const r = run(state, 2).state;
+    expect(defender(r, 200).pos).toEqual(vec(4, 3)); // up toward the carrier, not down to the QB
+    expect(defender(r, 201).pos).toEqual(vec(4, 11));
+  });
+
+  it('the Safety holds its row, sliding level with your deepest receiver', () => {
+    const state = playState(
+      [{ pos: vec(1, 8), route: '.' }],
+      [{ kind: 'safety', pos: vec(4, 12) }],
+    );
+    expect(defender(run(state, 2).state, 200).pos).toEqual(vec(3, 12));
+  });
+
+  it('a Scarecrow never moves', () => {
+    const state = carry(playState([{ pos: vec(4, 3) }], [{ kind: 'zone', pos: vec(4, 6) }]), 100);
+    expect(defender(run(state, 6).state, 200).pos).toEqual(vec(4, 6));
+  });
+});
+
+describe('Bats', () => {
+  it('patrol a 4×4 box: 12 tiles clockwise, one hop apart, on the field', () => {
+    const circuit = boxCircuit(vec(7, 14));
     expect(circuit).toHaveLength(12);
-    expect(new Set(circuit.map(key)).size).toBe(12);
     for (const t of circuit) {
       expect(t.x).toBeGreaterThanOrEqual(0);
-      expect(t.x).toBeLessThan(9);
-      expect(t.y).toBeGreaterThanOrEqual(SETUP_ROWS);
-      expect(t.y).toBeLessThan(15);
+      expect(t.x).toBeLessThanOrEqual(8);
+      expect(t.y).toBeLessThanOrEqual(15);
     }
-    // Each step is one tile in one of the four directions, and it loops.
     circuit.forEach((t, i) => {
       const n = circuit[(i + 1) % circuit.length]!;
       expect(Math.abs(n.x - t.x) + Math.abs(n.y - t.y)).toBe(1);
     });
   });
 
-  it('circles during setup, before HIKE, and keeps going from there after', () => {
-    let state = createRun(1);
-    state.screen.defenders.splice(0, state.screen.defenders.length);
-    state.screen.defenders.push(...createDefenders([{ kind: 'picker', pos: vec(2, 6) }], 900));
-    const start = state.screen.defenders[0]!.pos;
-    state = run(state, 4).state; // four setup beats: two hops (Hustle 0)
-    expect(state.beat).toBe(4);
-    const bat = state.screen.defenders[0]!;
-    expect(bat.patrolIndex).toBe(2);
-    expect(bat.pos).not.toEqual(start);
-    state = dispatch(state, { type: 'hike' }).state;
-    const after = run(state, 2).state.screen.defenders[0]!;
-    expect(after.patrolIndex).toBe(3);
-    expect(after.pos).toEqual(bat.patrol![3]);
-  });
-});
-
-describe('the global beat', () => {
-  it('ticks during setup, but only Bats move: players and other defenders wait for HIKE', () => {
+  it('circle before the snap, while everyone else waits', () => {
     const state = createRun(1);
-    state.screen.defenders.splice(0, state.screen.defenders.length);
-    state.screen.defenders.push(
-      ...createDefenders(
-        [
-          { kind: 'chaser', pos: vec(2, 8) },
-          { kind: 'picker', pos: vec(5, 6) },
-        ],
-        900,
-      ),
-    );
-    const before = structuredClone(state.screen);
-    const r = run(state, 6);
-    expect(r.state.beat).toBe(6);
+    const patrol = boxCircuit(vec(2, 6));
+    const bat = {
+      ...state.screen.defenders[0]!,
+      id: 900,
+      kind: 'bat' as const,
+      pos: patrol[0]!,
+      patrol,
+      patrolIndex: 0,
+    };
+    const before = state.screen.defenders.map((d) => d.pos);
+    state.screen.defenders.push(bat);
+    const r = run(state, 4);
     expect(r.state.phase).toBe('setup');
-    expect(r.state.screen.players.map((u) => u.pos)).toEqual(before.players.map((u) => u.pos));
-    expect(r.state.screen.defenders[0]!.pos).toEqual(before.defenders[0]!.pos);
-    expect(r.state.screen.defenders[1]!.pos).not.toEqual(before.defenders[1]!.pos);
-    expect(new Set(ofType(r.events, 'hop').map((e) => e.id))).toEqual(new Set([901]));
-  });
-
-  it('carries on through HIKE without resetting', () => {
-    let state = run(createRun(1), 3).state;
-    state = dispatch(state, { type: 'hike' }).state;
-    expect(state.beat).toBe(3);
-    expect(step(state).state.beat).toBe(4);
-  });
-});
-
-describe('sacks', () => {
-  // A runner off to the side, and a Blitzer coming straight down at the QB.
-  const blitzSetup = () => playState([{ pos: vec(0, 2) }], [{ kind: 'blitzer', pos: vec(4, 4) }]);
-
-  it('a Blitzer sacks the QB on the beat it reaches it', () => {
-    const r = run(blitzSetup(), 6); // hops on beats 2, 4 and 6, to (4, 1)
-    expect(ofType(r.events, 'fumble')).toEqual([{ type: 'fumble', reason: 'sack', ballsLeft: 2 }]);
-  });
-
-  it('does not sack one beat early', () => {
-    expect(ofType(run(blitzSetup(), 5).events, 'fumble')).toHaveLength(0);
-  });
-
-  it('any defender next to the QB sacks it', () => {
-    for (const kind of ['chaser', 'waller', 'picker'] as const) {
-      const state = playState([{ pos: vec(0, 2) }], [{ kind, pos: vec(3, 0) }]);
-      // Bats spawn on their box circuit, so put this one beside the QB by hand.
-      Object.assign(state.screen.defenders[0]!, { pos: vec(3, 0), home: vec(3, 0) });
-      const r = step(standStill(state));
-      expect(ofType(r.events, 'fumble')[0]?.reason, kind).toBe('sack');
-    }
-  });
-
-  it('a knocked-down defender next to the QB does not sack it', () => {
-    const state = standStill(playState([{ pos: vec(0, 2) }], [{ kind: 'chaser', pos: vec(3, 0) }]));
-    state.screen.defenders[0]!.downBeats = 2;
-    expect(ofType(step(state).events, 'fumble')).toHaveLength(0);
-  });
-
-  it('chases the carrier once the ball is caught, instead of hanging around the QB', () => {
-    const state = playState([{ pos: vec(1, 6) }], [{ kind: 'blitzer', pos: vec(4, 2) }]);
-    state.screen.ball = { at: 'carried', by: 100 };
-    const r = run(state, 2);
-    // From (4, 2) toward the carrier on (1, 6/7): up first (the larger gap), not down to the QB.
-    expect(r.state.screen.defenders[0]!.pos).toEqual(vec(4, 3));
-  });
-
-  it('is irrelevant once the ball is thrown', () => {
-    let state = run(blitzSetup(), 4).state;
-    state = step(state, { throwAt: vec(0, 5) }).state; // throw on beat 5, landing on beat 7 where the runner will be
-    const r = run(state, 4); // the Blitzer reaches the QB on beat 6, but the ball is gone
-    expect(ofType(r.events, 'caught')).toHaveLength(1);
-    expect(ofType(r.events, 'fumble')).toHaveLength(0);
-  });
-});
-
-describe('touchdowns, wipeouts and the end of a run', () => {
-  it('scores when the carrier reaches the top row, then moves to the next screen', () => {
-    const state = playState([{ pos: vec(2, 14) }, { pos: vec(4, 1) }]);
-    state.screen.ball = { at: 'carried', by: 100 };
-    const r = run(state, 2);
-    expect(ofType(r.events, 'touchdown')).toEqual([{ type: 'touchdown', id: 100, yards: 10 }]);
-    expect(r.state.phase).toBe('cleared');
-    const next = dispatch(r.state, { type: 'nextScreen' }).state;
-    expect(next.phase).toBe('setup');
-    expect(next.screen.index).toBe(1);
-    expect(next.screen.players.every((s) => s.alive)).toBe(true);
-  });
-
-  it('a wipeout costs a ball and restarts the screen from setup, Walk-ons back', () => {
-    const state = playState([{ pos: vec(2, 2) }], [{ kind: 'chaser', pos: vec(2, 4) }]);
-    const r = run(state, 2);
-    expect(ofType(r.events, 'wipeout')).toEqual([{ type: 'wipeout', ballsLeft: 2 }]);
-    expect(r.state.phase).toBe('setup');
-    expect(r.state.screen.index).toBe(0);
-    expect(r.state.screen.players.every((s) => s.alive)).toBe(true);
-  });
-
-  it('a dead recruit is gone: its slot reverts to a Walk-on', () => {
-    const state = playState(
-      [{ pos: vec(2, 2), kindId: TEST_RECRUIT.id }, { pos: vec(4, 1) }],
-      [{ kind: 'chaser', pos: vec(2, 4) }],
-    );
-    player(state, 100).hitsTaken = 1; // Heft 1 survives one hit; this is its second
-    const r = run(state, 2);
-    expect(ofType(r.events, 'died').map((e) => e.id)).toEqual([100]);
-    expect(r.state.slots[0]?.kindId).toBe('walkOn');
-  });
-
-  it('ends the run when the last ball is lost', () => {
-    const state = playState([{ pos: vec(1, 2) }]);
-    state.balls = 1;
-    const r = run(step(state, { throwAt: vec(6, 6) }).state, 2);
-    expect(r.state.phase).toBe('over');
-    expect(ofType(r.events, 'gameOver')).toHaveLength(1);
-    expect(step(r.state).events).toHaveLength(0);
-  });
-});
-
-describe('determinism', () => {
-  const inputs: Input[] = [
-    { kind: 'action', action: { type: 'place', slot: 0, tile: vec(0, 0) } },
-    { kind: 'action', action: { type: 'hike' } },
-    ...Array.from({ length: 60 }, (_, i): Input =>
-      i % 9 === 3 ? { kind: 'beat', throwAt: vec(i % 9, 3 + (i % 8)) } : { kind: 'beat' },
-    ),
-  ];
-
-  it('replays to exactly the same state and events', () => {
-    expect(replay(1234, inputs)).toEqual(replay(1234, inputs));
-  });
-
-  it('never modifies the state passed to step()', () => {
-    const state = playState([{ pos: vec(1, 2) }], [{ kind: 'chaser', pos: vec(1, 6) }]);
-    const before = JSON.stringify(state);
-    step(state, { throwAt: vec(1, 3) });
-    expect(JSON.stringify(state)).toBe(before);
-  });
-
-  it('keeps its invariants through long random runs', () => {
-    for (let seed = 1; seed <= 25; seed++) {
-      let state = createRun(seed);
-      state = dispatch(state, { type: 'hike' }).state;
-      for (let beat = 0; beat < 200 && state.phase !== 'over'; beat++) {
-        if (state.phase === 'cleared') state = dispatch(state, { type: 'nextScreen' }).state;
-        if (state.phase === 'setup') state = dispatch(state, { type: 'hike' }).state;
-        const input = beat % 7 === 0 ? { throwAt: vec((seed + beat) % 9, 2 + (beat % 10)) } : {};
-        state = step(state, input).state;
-        const live = [...state.screen.players, ...state.screen.defenders].filter((u) => u.alive);
-        // Defenders never share a tile (Players may).
-        const tiles = live.filter((u) => u.side === 'defender').map((u) => key(u.pos));
-        expect(new Set(tiles).size).toBe(tiles.length);
-        expect(live.some((u) => eq(u.pos, QB_POS))).toBe(false);
-        expect(state.balls).toBeGreaterThanOrEqual(0);
-      }
-    }
+    expect(defender(r.state, 900).patrolIndex).toBe(2);
+    expect(r.state.screen.defenders.slice(0, -1).map((d) => d.pos)).toEqual(before);
   });
 });
 
@@ -424,44 +328,121 @@ describe('the Witch on a Broom', () => {
   });
 
   it('flies one tile per beat across her row and wraps to the other side', () => {
-    const right = witch(6, 7, 1);
-    expect([0, 1, 2, 3].map((b) => witchColumn(right, b))).toEqual([7, 8, 0, 1]);
-    const left = witch(6, 1, -1);
-    expect([0, 1, 2, 3].map((b) => witchColumn(left, b))).toEqual([1, 0, 8, 7]);
+    expect([0, 1, 2, 3].map((b) => witchColumn(witch(6, 7, 1), b))).toEqual([7, 8, 0, 1]);
+    expect([0, 1, 2, 3].map((b) => witchColumn(witch(6, 1, -1), b))).toEqual([1, 0, 8, 7]);
   });
 
-  it('flies on the global beat, before HIKE too', () => {
-    const state = createRun(1);
-    const h = state.screen.hazards[0]!;
-    const later = run(state, 3).state;
-    expect(later.phase).toBe('setup');
-    expect(witchColumn(h, later.beat)).not.toBe(witchColumn(h, state.beat));
+  it('blocks a pass crossing her row near her', () => {
+    // From the QB on (4, 0) to (4, 8), thrown on beat 1, the ball crosses row 4 on beat 2.
+    const state = playState([{ pos: vec(4, 8), route: '.' }]);
+    Object.assign(state.screen, { hazards: [witch(4, 2, 1)] });
+    const r = run(step(state, { throwAt: vec(4, 8) }).state, 2);
+    expect(ofType(r.events, 'blocked')).toEqual([{ type: 'blocked', by: 900, at: vec(4, 4) }]);
+  });
+});
+
+describe('drives', () => {
+  const wonDrive = () => run(carry(playState([{ pos: vec(4, 11) }]), 100), 2);
+
+  it('the carrier over the first-down line wins the drive; then the draft', () => {
+    const r = wonDrive();
+    expect(ofType(r.events, 'downEnded')).toEqual([
+      { type: 'downEnded', result: 'firstDown', gained: 10 },
+    ]);
+    const draft = run(r.state, PAUSE).state;
+    expect(draft.phase).toBe('draft');
+    expect(draft.drivesWon).toBe(1);
+    expect(draft.offer).toHaveLength(3);
   });
 
-  // A pass from the QB (4, 0) to (4, 8), thrown on beat 1, crosses row 4 halfway: on beat 2.
-  const passOverRow4 = (startX: number) => {
-    const state = playState([{ pos: vec(4, 6) }]);
-    Object.assign(state.screen, { hazards: [witch(4, startX, 1)] });
-    return run(step(state, { throwAt: vec(4, 8) }).state, 2);
-  };
-
-  it('snatches a pass that crosses her row near her: a fumble', () => {
-    // She's on column 2 at beat 0, so column 4 on beat 2, as the ball crosses.
-    const r = passOverRow4(2);
-    expect(ofType(r.events, 'fumble')[0]?.reason).toBe('snatched');
+  it('drafting adds a card and starts the next drive; removing thins the deck', () => {
+    const draft = run(wonDrive().state, PAUSE).state;
+    const picked = dispatch(draft, { type: 'draft', offer: 0 }).state;
+    expect(picked.deck.owned).toHaveLength(draft.deck.owned.length + 1);
+    expect(picked.phase).toBe('setup');
+    expect(picked.drive).toMatchObject({ index: 1, kind: 'challenge', down: 1, los: 2 });
+    const removed = dispatch(draft, { type: 'remove', owned: 0 }).state;
+    expect(removed.deck.owned).toHaveLength(draft.deck.owned.length - 1);
   });
 
-  it('lets a pass through when she is elsewhere in her row', () => {
-    const r = passOverRow4(7);
-    expect(ofType(r.events, 'fumble')).toHaveLength(0);
-    expect(ofType(r.events, 'caught')).toHaveLength(1);
+  it('failing on 4th down is game over', () => {
+    let state = playState([]);
+    state.drive.down = 4;
+    const r = run(run(state, tuning.drive.playClockBeats).state, PAUSE);
+    expect(r.state.phase).toBe('over');
+    expect(ofType(r.events, 'gameOver')).toHaveLength(1);
+    // Short of the 4th: the next down.
+    state = playState([]);
+    state.drive.down = 3;
+    expect(run(run(state, tuning.drive.playClockBeats).state, PAUSE).state.drive.down).toBe(4);
   });
 
-  it('never touches runners: players pass under her', () => {
-    const state = playState([{ pos: vec(2, 3) }]);
-    Object.assign(state.screen, { hazards: [witch(4, 0, 1)] }); // over column 2 on beat 2
-    const r = run(state, 8);
-    expect(ofType(r.events, 'died')).toHaveLength(0);
-    expect(r.state.screen.players[0]!.pos.y).toBeGreaterThan(4);
+  it('an area is four drives: intro, challenge, gimmick, boss; winning the boss clears it', () => {
+    let s = createRun(7);
+    const kinds: string[] = [s.drive.kind];
+    for (let i = 0; i < 4; i++) {
+      s = structuredClone(s);
+      const events: SimEvent[] = [];
+      endDown(s, 'firstDown', s.drive.firstDown, events);
+      nextDown(s, events);
+      if (s.phase === 'draft') s = dispatch(s, { type: 'skipDraft' }).state;
+      if (s.phase === 'setup') kinds.push(s.drive.kind);
+    }
+    expect(kinds).toEqual(['intro', 'challenge', 'gimmick', 'boss']);
+    expect(s.phase).toBe('won');
+    expect(s.drivesWon).toBe(4);
+  });
+});
+
+describe('determinism', () => {
+  it('replays the same run from the same seed and inputs', () => {
+    const inputs: Input[] = [
+      { kind: 'beat' },
+      { kind: 'action', action: { type: 'call', hand: 1 } },
+      { kind: 'action', action: { type: 'hike' } },
+      ...Array.from({ length: 40 }, (_, i): Input =>
+        i === 5 ? { kind: 'beat', throwAt: vec(3, 7) } : { kind: 'beat' },
+      ),
+    ];
+    expect(replay(1234, inputs)).toEqual(replay(1234, inputs));
+  });
+
+  it('never modifies the state passed to step() or dispatch()', () => {
+    const state = createRun(3);
+    const before = JSON.stringify(state);
+    step(state);
+    dispatch(state, { type: 'call', hand: 0 });
+    expect(JSON.stringify(state)).toBe(before);
+  });
+
+  it('keeps its invariants through long random runs', () => {
+    for (let seed = 1; seed <= 15; seed++) {
+      let state = createRun(seed);
+      for (let beat = 0; beat < 400 && state.phase !== 'over' && state.phase !== 'won'; beat++) {
+        if (state.phase === 'setup' && beat % 3 === 0) {
+          state = dispatch(state, { type: 'call', hand: beat % 3 }).state;
+          state = dispatch(state, { type: 'hike' }).state;
+        }
+        if (state.phase === 'draft') state = dispatch(state, { type: 'draft', offer: 0 }).state;
+        const throwAt =
+          state.phase === 'play' && state.downBeat === 3
+            ? vec((seed + beat) % 9, state.drive.los + 2 + (beat % 6))
+            : undefined;
+        state = step(state, throwAt ? { throwAt } : {}).state;
+        const { players, defenders, ball } = state.screen;
+        const tiles = defenders.map((d) => key(d.pos));
+        expect(new Set(tiles).size).toBe(tiles.length);
+        if (state.phase === 'play') {
+          // Only the carrier (being tackled) ever shares a tile with an up defender.
+          for (const p of players) {
+            const carrying = ball.at === 'carried' && ball.by === p.id;
+            const sharing = defenders.some((d) => d.downBeats === 0 && key(d.pos) === key(p.pos));
+            if (!carrying) expect(sharing).toBe(false);
+          }
+        }
+        expect(state.drive.down).toBeGreaterThanOrEqual(1);
+        expect(state.drive.down).toBeLessThanOrEqual(4);
+      }
+    }
   });
 });

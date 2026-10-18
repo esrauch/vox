@@ -10,28 +10,25 @@
   font-weight: 800;
 }
 
-.hud-balls {
-  display: flex;
-  gap: 6px;
-  min-height: 22px;
-}
-
-.hud-pile-ball {
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
-  background: var(--pumpkin);
-  box-shadow:
-    inset 0 -4px 0 rgb(0 0 0 / 0.18),
-    0 2px 0 var(--ink);
-}
-
-.hud-yards {
-  font-size: 0.95rem;
+.hud-banner {
+  font-size: 0.85rem;
   color: var(--ink);
-  background: rgb(255 255 255 / 0.7);
+  background: rgb(255 255 255 / 0.75);
   padding: 4px 10px;
   border-radius: 999px;
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-downs {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: white;
+  background: var(--ink);
+  padding: 4px 12px;
+  border-radius: 12px;
 }
 
 .hud-message {
@@ -60,7 +57,7 @@
 
 .hud-pop {
   position: absolute;
-  bottom: calc(env(safe-area-inset-bottom) + 150px);
+  bottom: calc(env(safe-area-inset-bottom) + 190px);
   left: 0;
   right: 0;
   text-align: center;
@@ -99,10 +96,138 @@
   gap: 8px;
 }
 
-.hud-controls {
-  height: 96px;
+.hud-hand {
   display: grid;
-  place-items: center;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 460px;
+  height: 78px;
+  visibility: hidden;
+}
+
+.hud-hand.show {
+  visibility: visible;
+}
+
+.hud-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: var(--bone);
+  box-shadow:
+    inset 0 -4px 0 rgb(0 0 0 / 0.12),
+    0 3px 0 var(--ink);
+}
+
+.hud-card strong {
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.hud-card span {
+  font-size: 0.68rem;
+  line-height: 1.15;
+  opacity: 0.8;
+}
+
+.hud-card.called {
+  background: var(--pumpkin);
+  color: white;
+  translate: 0 -4px;
+}
+
+.hud-controls {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hud-flip {
+  height: 52px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-weight: 900;
+  color: var(--ink);
+  background: var(--bone);
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.hud-draft {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 16px;
+  background: rgb(20 14 36 / 0.82);
+  color: white;
+}
+
+.hud-draft[hidden] {
+  display: none;
+}
+
+.hud-draft h2 {
+  margin: 4px 0 0;
+  font-size: 1.1rem;
+}
+
+.hud-draft-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.hud-draft-row .hud-card {
+  min-height: 96px;
+}
+
+.hud-draft-deck {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 460px;
+}
+
+.hud-chip {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.8rem;
+  color: white;
+  background: rgb(255 255 255 / 0.16);
+}
+
+.hud-chip span {
+  display: none;
+}
+
+.hud-skip {
+  margin-top: 6px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--bone);
 }
 
 .hud-action {

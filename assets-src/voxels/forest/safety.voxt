@@ -1,0 +1,42 @@
+# Forest Safety: an owl. It perches deep and sees everything. Two big ear tufts
+# and a round head read from the steep camera; huge glowing eyes on the front.
+size 7 9 5
+voxel 0.12
+mirror x
+colors
+  P purple
+  d purpleDark
+  l purpleLight
+  g glow
+  k ink
+  h horn
+slice 0
+  P...
+  PPPP
+  PggP
+  Pgkh
+  PPPh
+  dlll
+  dlll
+  .dll
+  ..h.
+slice 1-3
+  P...
+  PPPP
+  PPPP
+  PPPP
+  PPPP
+  dPPP
+  dPPP
+  .dPP
+  ....
+slice 4
+  ....
+  .PPP
+  PPPP
+  PPPP
+  PPPP
+  dPPP
+  dPPP
+  .dPP
+  ....

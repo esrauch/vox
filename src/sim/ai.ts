@@ -1,88 +1,110 @@
 /**
- * Per-beat decisions (GAMEPLAY.md, What's in the Way). Every unit's intent is
- * decided one beat ahead, so it always faces where it's about to hop.
+ * Per-beat decisions (GAMEPLAY.md, The Defense). Every unit's intent is
+ * decided one beat ahead, so it always shows where it's about to hop.
+ *
+ * - Your players run their card's route, one move per hop; the carrier runs
+ *   straight up the field.
+ * - Defenders do their job (content/defenders.ts). Once the ball is caught,
+ *   every defender that moves chases the carrier, except planted Zones and
+ *   patrolling Bats.
  */
 import { DEFENDERS } from '../content/defenders';
-import { QB_POS, END_ROW, dist, eq, stepToward, vec } from './grid';
-import type { Defender, ScreenState, PlayerUnit, Vec } from './types';
-
-const isActive = (u: { alive: boolean; downBeats: number }): boolean =>
-  u.alive && u.downBeats === 0;
+import type { Move } from '../content/cards';
+import { END_ROW, eq, inBounds, stepAround, stepToward, vec } from './grid';
+import type { Defender, PlayerUnit, ScreenState, Vec } from './types';
 
 export function updateIntents(screen: ScreenState): void {
-  for (const s of screen.players) s.intent = s.alive ? playerIntent(s) : null;
+  const carrierId = screen.ball.at === 'carried' ? screen.ball.by : null;
+  for (const p of screen.players) p.intent = playerIntent(p, p.id === carrierId);
   for (const d of screen.defenders) {
-    const intent = d.alive ? defenderIntent(d, screen) : null;
-    d.intent = intent && !eq(intent, QB_POS) && !eq(intent, d.pos) ? intent : null;
+    const intent = defenderIntent(d, screen);
+    d.intent = intent && !eq(intent, screen.qb) && !eq(intent, d.pos) ? intent : null;
   }
 }
 
-/** Walk-ons are dumb: they hop straight up their column, even into danger. */
-function playerIntent(s: PlayerUnit): Vec | null {
-  if (s.pos.y >= END_ROW) return null;
-  return vec(s.pos.x, s.pos.y + 1);
+/** The carrier runs straight up; everyone else takes the next move of its route. */
+function playerIntent(p: PlayerUnit, carrying: boolean): Vec | null {
+  if (carrying) return p.pos.y < END_ROW ? vec(p.pos.x, p.pos.y + 1) : null;
+  const move = p.route[p.routeStep] as Move | undefined;
+  const to = move ? moveTile(p.pos, move) : null;
+  return to && inBounds(to) ? to : null;
+}
+
+function moveTile(from: Vec, move: Move): Vec | null {
+  switch (move) {
+    case 'U':
+      return vec(from.x, from.y + 1);
+    case 'D':
+      return vec(from.x, from.y - 1);
+    case 'L':
+      return vec(from.x - 1, from.y);
+    case 'R':
+      return vec(from.x + 1, from.y);
+    case '.':
+      return null;
+  }
 }
 
 function defenderIntent(d: Defender, screen: ScreenState): Vec | null {
-  switch (DEFENDERS[d.kind].movement) {
-    case 'chase': {
-      const target = chaseTarget(d, screen);
-      return target ? stepToward(d.pos, target) : null;
+  const job = DEFENDERS[d.kind].job;
+  if (job === 'zone') return null;
+  if (job === 'patrol') return patrolNext(d);
+  const carrier = carrierOf(screen);
+  if (carrier) return stepToward(d.pos, carrier.pos);
+  switch (job) {
+    case 'cover': {
+      // Man coverage, one beat behind: it heads for where its receiver is now,
+      // so by the time it gets there the receiver has moved on.
+      const mark = screen.players.find((p) => p.id === d.marking);
+      return mark ? stepToward(d.pos, mark.pos) : null;
     }
-    case 'blitz': {
-      // Straight for the QB (reaching it while it holds the ball is a sack).
-      // Once someone has caught the ball, it gives up the rush and chases them.
-      const { ball } = screen;
-      const carrier = ball.at === 'carried' && screen.players.find((s) => s.id === ball.by);
-      return stepToward(d.pos, carrier && carrier.alive ? carrier.pos : QB_POS);
+    case 'rush': {
+      // Straight for the QB, going around one of your players in the way.
+      const ahead = stepToward(d.pos, screen.qb);
+      return occupiedByPlayer(screen, ahead) ? stepAround(d.pos, screen.qb) : ahead;
     }
-    case 'wall': {
-      const target = wallTarget(d, screen);
-      return target ? stepToward(d.pos, target) : null;
+    case 'safety': {
+      // Holds its row, sliding level with your deepest receiver.
+      const deepest = [...screen.players].sort((a, b) => b.pos.y - a.pos.y || a.id - b.id)[0];
+      return deepest && deepest.pos.x !== d.pos.x
+        ? vec(d.pos.x + Math.sign(deepest.pos.x - d.pos.x), d.pos.y)
+        : null;
     }
-    case 'patrol':
-      // Loops its circuit whatever the ball does: a pattern you learn, and it
-      // picks off any pass that comes down under it.
-      return patrolNext(d);
   }
 }
 
-/** Chasers go for the carrier, then the ball's landing tile, then the nearest runner. */
-function chaseTarget(d: Defender, screen: ScreenState): Vec | null {
+function carrierOf(screen: ScreenState): PlayerUnit | null {
   const { ball } = screen;
-  if (ball.at === 'carried') {
-    const carrier = screen.players.find((s) => s.id === ball.by);
-    if (carrier?.alive) return carrier.pos;
-  }
-  if (ball.at === 'flight') return landingTile(ball.target);
-  return nearest(d.pos, screen.players.filter(isActive));
+  if (ball.at !== 'carried') return null;
+  return screen.players.find((p) => p.id === ball.by) ?? null;
 }
 
-/** Wall-ers hold their row and slide into the column of the nearest player coming their way. */
-function wallTarget(d: Defender, screen: ScreenState): Vec | null {
-  const below = screen.players.filter((s) => isActive(s) && s.pos.y < d.home.y);
-  if (below.length === 0) return null;
-  const target = [...below].sort(
-    (a, b) =>
-      d.home.y - a.pos.y - (d.home.y - b.pos.y) ||
-      Math.abs(a.pos.x - d.pos.x) - Math.abs(b.pos.x - d.pos.x) ||
-      a.id - b.id,
-  )[0] as PlayerUnit;
-  return vec(target.pos.x, d.home.y);
-}
-
-function nearest(from: Vec, units: readonly PlayerUnit[]): Vec | null {
-  const best = [...units].sort((a, b) => dist(from, a.pos) - dist(from, b.pos) || a.id - b.id)[0];
-  return best ? best.pos : null;
-}
-
-/** Throws land on free points; defenders head for the tile the ball comes down on. */
-function landingTile(target: Vec): Vec {
-  return vec(Math.round(target.x), Math.round(target.y));
+function occupiedByPlayer(screen: ScreenState, at: Vec): boolean {
+  return screen.players.some((p) => eq(p.pos, at));
 }
 
 /** The next tile of a defender's patrol circuit. */
 export function patrolNext(d: Defender): Vec | null {
   if (!d.patrol || d.patrol.length === 0) return null;
   return d.patrol[(d.patrolIndex + 1) % d.patrol.length] ?? null;
+}
+
+/**
+ * At the snap, each Cover picks a receiver to mark: the nearest one nobody
+ * else is marking yet (Covers choose in id order).
+ */
+export function assignMarks(screen: ScreenState): void {
+  const taken = new Set<number>();
+  for (const d of [...screen.defenders].sort((a, b) => a.id - b.id)) {
+    if (DEFENDERS[d.kind].job !== 'cover') continue;
+    const mark = screen.players
+      .filter((p) => !taken.has(p.id))
+      .sort(
+        (a, b) =>
+          Math.hypot(a.pos.x - d.pos.x, a.pos.y - d.pos.y) -
+            Math.hypot(b.pos.x - d.pos.x, b.pos.y - d.pos.y) || a.id - b.id,
+      )[0];
+    d.marking = mark?.id ?? null;
+    if (mark) taken.add(mark.id);
+  }
 }

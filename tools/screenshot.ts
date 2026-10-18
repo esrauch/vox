@@ -2,7 +2,8 @@
  * Screenshot the game at phone size, headlessly, to check how it looks
  * (the field, scenery and readability) without a phone in hand.
  *
- *   npm run screenshot                 → previews/game.png (setup screen, seed 8)
+ *   npm run screenshot                 → previews/game.png (the title, over the first down, seed 8)
+ *   npm run screenshot -- 3 call       → seed 3, the first card called (its routes previewed)
  *   npm run screenshot -- 3 play       → seed 3, a moment after HIKE!
  *   npm run screenshot -- 8 play pitch=50 low   → with extra URL params, saved as previews/low.png
  *
@@ -36,15 +37,21 @@ try {
   page.on('pageerror', (e) => console.error(`page error: ${e.message}`));
   await page.goto(`http://localhost:${port}/?seed=${seed}${extraQuery ? `&${extraQuery}` : ''}`);
   await page.waitForTimeout(1500);
+  if (when === 'call' || when === 'play') {
+    await page.click('.hud-action'); // PLAY
+    await page.waitForTimeout(400);
+    await page.click('.hud-hand .hud-card >> nth=0');
+    await page.waitForTimeout(400);
+  }
   if (when === 'play') {
-    await page.click('.hud-action');
+    await page.click('.hud-action'); // HIKE!
     await page.waitForTimeout(2600);
   }
   mkdirSync(join(ROOT, 'previews'), { recursive: true });
   const file = join(
     ROOT,
     'previews',
-    name ? `${name}.png` : when === 'play' ? 'game-play.png' : 'game.png',
+    name ? `${name}.png` : when === 'setup' ? 'game.png' : `game-${when}.png`,
   );
   await page.screenshot({ path: file });
   console.log(file.replace(`${ROOT}/`, ''));

@@ -26,6 +26,12 @@
       "license": "original"
     },
     {
+      "path": "assets-src/voxels/forest/safety.voxt",
+      "source": "Original voxel model (Forest Safety: an owl), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
       "path": "assets-src/voxels/forestProps/deadTree.voxt",
       "source": "Original voxel model (Forest prop: dead tree), written by Claude",
       "author": "Claude",

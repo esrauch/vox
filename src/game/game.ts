@@ -4,20 +4,25 @@
  *
  * Each frame, the sim steps every beat that has been *heard* since the last
  * one, in every phase; the phase only decides who moves (see sim/step.ts).
+ *
+ * The flow (GAMEPLAY.md, The Core Loop): before each down, tap one of three
+ * play cards (Flip mirrors it) and HIKE; pull back and release to throw; the
+ * down ends; after a won drive, draft a card; a failed 4th down ends the run.
  */
+import { playCard } from '../content/cards';
 import { AimView } from '../render/aim';
 import { BallView } from '../render/ball';
-import { createField } from '../render/field';
+import { DriveLines, createField } from '../render/field';
 import { HazardViews } from '../render/hazards';
 import { QbView } from '../render/qb';
+import { RoutePreview } from '../render/routes';
 import { createForestScenery } from '../render/scenery';
 import { UnitViews } from '../render/units';
 import { View } from '../render/view';
-import { eq, inSetupZone } from '../sim/grid';
-import { createRun, dispatch, yards } from '../sim/run';
+import { createRun, dispatch, downAndDistance } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
-import type { Action, RunState, Vec } from '../sim/types';
-import { Hud } from '../ui/hud';
+import type { Action, DriveKind, RunState, SimEvent, Vec } from '../sim/types';
+import { Hud, type CardFace } from '../ui/hud';
 import { Conductor } from './conductor';
 import { THROW_PROBLEM_TEXT, react } from './feedback';
 import { aimTarget, throwTiming } from './slingshot';
@@ -25,6 +30,18 @@ import { aimTarget, throwTiming } from './slingshot';
 export interface GameOptions {
   seed: number;
 }
+
+const DRIVE_KIND_NAME: Readonly<Record<DriveKind, string>> = {
+  intro: 'Intro',
+  challenge: 'Challenge',
+  gimmick: 'Gimmick',
+  boss: 'Boss',
+};
+
+const face = (id: string): CardFace => {
+  const c = playCard(id);
+  return { name: c.name, blurb: c.blurb };
+};
 
 export class Game {
   private state: RunState;
@@ -37,6 +54,8 @@ export class Game {
   private readonly view: View;
   private readonly units: UnitViews;
   private readonly hazards: HazardViews;
+  private readonly lines: DriveLines;
+  private readonly routes: RoutePreview;
   private readonly qb: QbView;
   private readonly ball: BallView;
   private readonly aimView: AimView;
@@ -46,8 +65,6 @@ export class Game {
   private aim: { start: { x: number; y: number }; target: Vec } | null = null;
   /** A released throw, waiting for the beat the sim takes it on. */
   private queuedThrow: { beat: number; target: Vec } | null = null;
-  /** Dragging a player in setup. */
-  private drag: { id: number; slot: number; tile: Vec } | null = null;
 
   constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement, options: GameOptions) {
     this.seed = options.seed;
@@ -55,12 +72,21 @@ export class Game {
     this.view = new View(canvas);
     const { scene } = this.view;
     scene.add(createField(), createForestScenery(scene, this.view));
+    this.lines = new DriveLines(scene);
+    this.routes = new RoutePreview(scene);
     this.units = new UnitViews(scene);
     this.hazards = new HazardViews(scene);
     this.qb = new QbView(scene);
     this.ball = new BallView(scene);
     this.aimView = new AimView(scene);
-    this.hud = new Hud(uiRoot, { onAction: () => void this.onAction() });
+    this.hud = new Hud(uiRoot, {
+      onAction: () => void this.onAction(),
+      onCard: (hand) => this.act({ type: 'call', hand }),
+      onFlip: () => this.act({ type: 'flip' }),
+      onDraft: (offer) => this.act({ type: 'draft', offer }),
+      onRemove: (owned) => this.act({ type: 'remove', owned }),
+      onSkip: () => this.act({ type: 'skipDraft' }),
+    });
 
     this.resetViews();
     this.syncHud();
@@ -89,10 +115,13 @@ export class Game {
     // neither does the sim: after a hiccup it catches up rather than drifting.
     while (this.state.beat < beat) this.stepBeat();
 
-    this.units.update(this.state.screen, beat, pos - beat);
+    const { screen, drive } = this.state;
+    this.units.update(screen, pos - beat);
     this.hazards.update(pos, now / 1000);
-    const holding = this.ball.update(this.state.screen, pos, this.units, now / 1000);
-    this.qb.update(holding);
+    this.lines.update(drive);
+    this.routes.update(this.state);
+    const holding = this.ball.update(screen, pos, this.units, now / 1000);
+    this.qb.update(screen.qb, holding);
     this.aimView.update(now / 1000);
     this.view.render();
   }
@@ -112,23 +141,40 @@ export class Game {
     const prev = this.state;
     const { state, events } = step(prev, input);
     this.state = state;
-    if (events.some((e) => e.type === 'screenStarted')) this.resetViews();
-    else this.units.beginBeat(prev.screen, state.screen, state.beat);
-    react(events, state.screen, this.hud, (id) => this.conductor.play(id));
+    this.afterChange(events, prev);
+  }
+
+  /** Apply an action between beats (calling a play, Flip, HIKE, the draft). */
+  private act(action: Action): void {
+    if (!this.conductor.started || this.paused) return;
+    this.conductor.play('uiClick');
+    const prev = this.state;
+    const { state, events } = dispatch(prev, action);
+    this.state = state;
+    this.afterChange(events, prev);
+  }
+
+  /** After the state changes: rebuild or animate the views, react, and refresh the HUD. */
+  private afterChange(events: readonly SimEvent[], prev: RunState): void {
+    if (events.some((e) => e.type === 'downStarted' || e.type === 'driveStarted')) {
+      this.resetViews();
+    } else {
+      this.units.sync(this.state.screen);
+      this.units.beginBeat(prev.screen, this.state.screen);
+    }
+    react(events, this.state.screen, this.hud, (id) => this.conductor.play(id));
     this.syncHud();
   }
 
-  /** Rebuild the views of everything on the field (a new or restarted screen). */
+  /** Rebuild the views of everything on the field (a new down or drive). */
   private resetViews(): void {
     this.units.reset(this.state.screen);
     this.hazards.reset(this.state.screen);
+    this.ball.launch(null);
+    this.queuedThrow = null;
   }
 
   // ── Phases and the HUD ──────────────────────────────────────────────────
-
-  private act(action: Action): void {
-    this.state = dispatch(this.state, action).state;
-  }
 
   private async onAction(): Promise<void> {
     this.conductor.play('uiClick');
@@ -141,16 +187,12 @@ export class Game {
       this.paused = false;
       await this.conductor.resume();
     } else if (phase === 'setup') {
-      // The beat is already running: players start on their next hop beat.
       this.act({ type: 'hike' });
-    } else if (phase === 'cleared') {
-      this.act({ type: 'nextScreen' });
-      this.resetViews();
-    } else if (phase === 'over') {
+      return;
+    } else if (phase === 'over' || phase === 'won') {
       this.seed++;
       this.state = createRun(this.seed);
       this.runStart = Math.floor(this.conductor.beatAt() ?? 0) - this.state.beat;
-      this.queuedThrow = null;
       this.resetViews();
     }
     this.syncHud();
@@ -166,24 +208,44 @@ export class Game {
   }
 
   private syncHud(): void {
-    const { phase, screen } = this.state;
-    this.hud.setBalls(this.state.balls);
-    this.hud.setYards(yards(this.state), screen.index);
+    const { phase, drive, deck, called } = this.state;
+    const { drivesWon, yards } = this.state;
+    const summary = `${drivesWon} ${drivesWon === 1 ? 'drive' : 'drives'} won · ${yards} yds`;
+    const banner =
+      phase === 'over' || phase === 'won'
+        ? summary
+        : `${drive.index + 1}/4 ${DRIVE_KIND_NAME[drive.kind]}: ${drive.name}`;
+    // Between downs the line of scrimmage has moved but the down hasn't: the pop says what happened.
+    const live = phase === 'setup' || phase === 'play';
+    this.hud.setTop(banner, live ? downAndDistance(this.state) : null);
+
+    const ready = this.conductor.started && !this.paused;
+    this.hud.setHand(ready && phase === 'setup' ? deck.hand.map(face) : null, called?.hand ?? null);
+    this.hud.setDraft(
+      ready && phase === 'draft'
+        ? { offer: this.state.offer.map(face), deck: deck.owned.map(face) }
+        : null,
+    );
+
     if (!this.conductor.started) this.hud.setPrompt('Fourth & Ghoul', 'PLAY');
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
-    else if (phase === 'setup') this.hud.setPrompt('Place your squad', 'HIKE!');
-    else if (phase === 'cleared') this.hud.setPrompt('TOUCHDOWN!', 'NEXT');
-    else if (phase === 'over') this.hud.setPrompt(`${yards(this.state)} yards`, 'AGAIN');
+    else if (phase === 'setup') this.hud.setPrompt(null, called ? 'HIKE!' : null);
+    else if (phase === 'over') this.hud.setPrompt('Turnover on downs!', 'AGAIN');
+    else if (phase === 'won') this.hud.setPrompt('The forest is cleared!', 'AGAIN');
     else this.hud.setPrompt(null, null);
     if (phase !== 'play') this.setAim(null);
   }
 
-  // ── Input: slingshot throws in play, dragging players in setup ──────────
+  // ── Input: slingshot throws ─────────────────────────────────────────────
 
   private setAim(aim: { start: { x: number; y: number }; target: Vec } | null): void {
     this.aim = aim;
     this.aimView.set(
-      aim && { target: aim.target, valid: throwProblem(this.state, aim.target) === null },
+      aim && {
+        from: this.state.screen.qb,
+        target: aim.target,
+        valid: throwProblem(this.state, aim.target) === null,
+      },
     );
   }
 
@@ -191,45 +253,23 @@ export class Game {
     if (!this.conductor.started || this.paused) return;
     const { phase, screen } = this.state;
     // In play, a drag that starts anywhere on the screen aims a throw.
-    if (phase === 'play') {
-      if (screen.ball.at !== 'qb') return;
-      this.view.canvas.setPointerCapture(e.pointerId);
-      const start = { x: e.clientX, y: e.clientY };
-      this.setAim({ start, target: aimTarget(start, start) });
-      return;
-    }
-    if (phase !== 'setup') return;
-    const tile = this.view.tileAt(e.clientX, e.clientY);
-    const player = tile && screen.players.find((s) => eq(s.pos, tile));
-    if (!tile || !player) return;
-    this.drag = { id: player.id, slot: player.slot, tile };
-    this.units.setDragging({ id: player.id, tile });
+    if (phase !== 'play' || screen.ball.at !== 'qb') return;
+    this.view.canvas.setPointerCapture(e.pointerId);
+    const start = { x: e.clientX, y: e.clientY };
+    this.setAim({ start, target: aimTarget(screen.qb, start, start) });
   }
 
   private onPointerMove(e: PointerEvent): void {
-    if (this.aim) {
-      const target = aimTarget(this.aim.start, { x: e.clientX, y: e.clientY });
-      this.setAim({ ...this.aim, target });
-      return;
-    }
-    if (!this.drag) return;
-    const tile = this.view.tileAt(e.clientX, e.clientY);
-    if (tile && inSetupZone(tile)) {
-      this.drag.tile = tile;
-      this.units.setDragging({ id: this.drag.id, tile });
-    }
+    if (!this.aim) return;
+    const target = aimTarget(this.state.screen.qb, this.aim.start, {
+      x: e.clientX,
+      y: e.clientY,
+    });
+    this.setAim({ ...this.aim, target });
   }
 
   private onPointerUp(e: PointerEvent): void {
-    if (this.aim) {
-      this.release(this.aim.target, e.timeStamp);
-      return;
-    }
-    if (!this.drag) return;
-    this.act({ type: 'place', slot: this.drag.slot, tile: this.drag.tile });
-    this.drag = null;
-    this.units.setDragging(null);
-    this.resetViews();
+    if (this.aim) this.release(this.aim.target, e.timeStamp);
   }
 
   /** Releasing throws if the aim is allowed (the sim takes it on the next beat); otherwise it cancels. */
@@ -238,7 +278,7 @@ export class Game {
     if (this.paused || this.state.phase !== 'play') return;
     const problem = throwProblem(this.state, target);
     if (problem) {
-      // Letting go short of the throwing band just cancels; anywhere else, say why.
+      // Letting go short of the throwing range just cancels; anywhere else, say why.
       if (problem !== 'tooClose') this.hud.pop(THROW_PROBLEM_TEXT[problem], 'bad');
       return;
     }

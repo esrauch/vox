@@ -27,6 +27,7 @@ export class AimView {
     opacity: 0.9,
   });
   private target: Vec | null = null;
+  private from: Vec = { x: 0, y: 0 };
 
   constructor(scene: THREE.Scene) {
     for (const radius of [tuning.catch.perfect, tuning.catch.ok]) {
@@ -48,8 +49,9 @@ export class AimView {
     scene.add(this.reticle, this.arc);
   }
 
-  /** Show the aim at a free point (tile units), or hide it with null. */
-  set(aim: { target: Vec; valid: boolean } | null): void {
+  /** Show the aim from the QB's tile to a free point (tile units), or hide it with null. */
+  set(aim: { from: Vec; target: Vec; valid: boolean } | null): void {
+    if (aim) this.from = aim.from;
     this.target = aim?.target ?? null;
     this.reticle.visible = aim !== null;
     this.arc.visible = aim !== null;
@@ -61,7 +63,7 @@ export class AimView {
   /** `time` in seconds drives the marching dashes. */
   update(time: number): void {
     if (!this.target) return;
-    const from = qbHand();
+    const from = qbHand(this.from);
     const to = tileToWorld(this.target, 0.1);
     const march = (time * 0.12) % (1 / DASHES);
     this.dashes.forEach((dash, i) => {
