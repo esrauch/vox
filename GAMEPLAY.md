@@ -4,7 +4,7 @@ This doc covers what the player *does*: the design pillars, the run structure, a
 
 **The north star: snappy, fast, silly, fun.** It's a **portrait, one-thumb phone game** with **voxel** graphics, and **everything moves to the beat**. It looks like *Crossy Road*, calls plays like a pocket-sized *Retro Bowl* or *Madden*, builds a deck like *Slay the Spire*, and has a roguelite's "one more run."
 
-Items marked **▲** are recommendations or details that are still open to change.
+Items marked **▲** are recommendations or details that are still open to change. Every number is a starting value in `tuning.ts` or the content files, to tune by playtesting.
 
 **Words used here:**
 - **Area:** a themed place (the Haunted Forest first). Each area is four drives.
@@ -67,18 +67,18 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 - **Every failed pass gets the comedy of a fumble:** the ball bounces loose, the crowd chants *"FEE! FI! FO! FUMBLE!"*. But it only costs the down.
 - **Every down starts fresh:** your players line up again behind the new line of scrimmage.
-- ▲ **The QB and the camera follow the line of scrimmage:** each down, the QB lines up just behind it and the view keeps the line of scrimmage near the bottom and the first-down line in sight.
+- **The QB lines up two rows behind the line of scrimmage** each down. *(Prototype: the camera shows the whole 16-row field, every drive starts on row 2, and the first-down line is row 12. Following the line of scrimmage with the camera is still open.)*
 - ▲ **Getting 10 yards in one play should be rare** (see *The Safety*). A typical drive is a short gain, a short gain, and a nervy 3rd or 4th down.
 
 ---
 
 ## A Down: Call the Play, Then Throw
 
-1. **Draw three play cards** from your deck and **call one**. The other two go to the discard pile. When the deck runs out, the discard pile is shuffled back in.
+1. **Draw three play cards** from your deck and **call one** (tap it; tap another to change your mind). All three go to the discard pile at the snap. When the deck runs out, the discard pile is shuffled back in.
 2. **A card is the whole play:** where your players line up and **every player's route**, drawn on the field as a preview before you commit. **Flip** mirrors it left or right. That's the only adjustment: you don't place players by hand.
 3. **The defense is visible before you choose** (*Into the Breach* style): every defender, its coverage ring and its job, where the Bats circle and the Witch flies. Picking the card that beats this defense *is* the puzzle.
 4. **HIKE!** Receivers run their routes on the beat. Defenders cover them, and the pass rush comes for the QB.
-5. **Pull back and release** to throw to an open receiver before you're sacked (**about 4–6 beats**), leading it to where it will be.
+5. **Pull back and release** to throw to an open receiver before you're sacked (**about 4–6 beats**), leading it to where it will be. Even with no rush, the QB is sacked if it still holds the ball after 14 beats (the play clock).
 6. **After a catch, the carrier runs straight upfield** on its own until it's tackled or crosses the first-down line. You don't steer it. *(Future candidate: special players on cards with their own running AI.)*
 
 ---
@@ -100,7 +100,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **The reticle is a free point, not a tile.** It shows a small ring for a **perfect** catch and a larger one for an **ok** catch, and turns red only where a throw isn't allowed at all. **It never warns about coverage:** you read the rings.
 - **Leading your receiver is the skill:** put the reticle where it will be when the ball lands.
 - **Only the QB throws. There are no laterals**, except on trick-play cards.
-- ▲ **Throw range** is measured from the line of scrimmage. The prototype's fixed band (rows 4–11 of the screen) needs revisiting so short plays like the Screen work.
+- **Throw range** is measured from the line of scrimmage: from **1 row behind it** (for a Screen) to **11 rows past it**.
 - **The pull sensitivity** is a tuning value (`tuning.aim`).
 
 ---
@@ -110,7 +110,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **Every defender that covers shows a purple ring** on the turf around it: **its coverage**.
 - **Every one of your players shows a ring that says whether it could catch right now:**
   - **Green:** clear. No coverage nearby; a ball arriving now is a safe catch.
-  - **Yellow:** a ball arriving now would still be caught, but coverage is close (▲ *within one tile of a purple ring*). By the time the ball lands, it may not be.
+  - **Yellow:** a ball arriving now would still be caught, but coverage is close (*within one tile of a purple ring*). By the time the ball lands, it may not be.
   - **Red:** covered (inside a purple ring). A ball arriving now would be blocked.
 - **The rings update every beat.** Reading them, and how they'll change during the ball's flight, *is* the throw.
 
@@ -126,7 +126,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 ### Tackling
 
 - **A tackle is contact:** the carrier is down when it and a defender meet on a tile, or swap tiles. Any defender can tackle.
-- **A fend-off** (from a Clean Catch or a card) knocks that defender down instead, and the carrier keeps running.
+- **A fend-off** (from a Clean Catch or a card) knocks that defender down for 3 beats instead, and the carrier keeps running.
+- **Blocking is just standing in the way:** your players and defenders **never share a tile**. Whoever would step into the other waits, so a player on a "." route is a blocker, and a Blitzer has to go around it. Only the carrier can be stepped into, and that's a tackle.
 - **Your players never block each other.** They can share a tile and hop past one another.
 
 ---
@@ -137,11 +138,11 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 
 | Defender | Forest creature | Job | Coverage ring |
 |---|---|---|---|
-| **Cover** | Garden Gnome | **Man coverage.** At the snap, each picks a receiver (▲ *the nearest one not already covered*) and shadows it **one beat behind**, so a route's cut opens a beat or two of separation. After a catch, it **chases the carrier**. | Small (▲ *about 1 tile*), moving with it |
-| **Zone** | Scarecrow | **Doesn't move.** Planted on its tile, it guards a wide area. | **Wide** (▲ *about 2 tiles*) |
+| **Cover** | Garden Gnome | **Man coverage.** At the snap, each picks a receiver (the nearest one not already covered) and shadows it **one beat behind**, so a route's cut opens a beat or two of separation. After a catch, it **chases the carrier**. | Small (about 1 tile), moving with it |
+| **Zone** | Scarecrow | **Doesn't move.** Planted on its tile, it guards a wide area. | **Wide** (about 2 tiles) |
 | **Blitzer** | Rhino Beetle | **The pass rush.** It goes straight for the QB: how close the rushers are is your throw clock. Reaching the QB while it holds the ball is a sack. **Once the ball is caught, it chases the carrier** like a Cover. | **None** |
-| **Safety** | ▲ *An Owl: perched deep, it sees everything* | **The deep guard.** It hangs back near the first-down line and slides across to stay level with your deepest receiver, so **a deep pass is almost always blocked**, and a carrier running up the middle runs into it. Beating the Safety (a decoy, a flood to one side, a trick play) is how you gain 10 in one play. | **Wide** (▲ *about 2 tiles*), moving with it |
-| **Bat** | Bat | **Patrols** a fixed 4×4 box circuit, one tile per hop, whatever the play is doing. It's already circling before the snap, so you can time a throw past it. A pass under it bounces off. | Small, moving with it |
+| **Safety** | **Owl**: perched deep, it sees everything | **The deep guard.** It hangs back near the first-down line and slides across to stay level with your deepest receiver, so **a deep pass is almost always blocked**, and a carrier running up the middle runs into it. Beating the Safety (a decoy, a flood to one side, a trick play) is how you gain 10 in one play. | **Wide** (about 2 tiles), moving with it |
+| **Bat** | Bat | **Patrols** a fixed 4×4 box circuit, one tile per hop, whatever the play is doing. It's already circling before the snap, so you can time a throw past it. A pass to a player beside it bounces off. | Small (about 1 tile), moving with it |
 
 - **Later drives and areas** add more Covers and Blitzers, plant more Scarecrows, and lengthen the distance ("4th and 15").
 - **Before the snap, only the Bats move.** Everyone else waits for HIKE.
@@ -170,8 +171,8 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 
 ## The Deck: the Only Progression
 
-- **A run starts with a small deck** of 6–8 basic plays, e.g. **Go** (deep), **Slant**, **Out**, **Curl**, **Screen** (short, with blockers) and **Draw** (a handoff: no throw at all).
-- **After every won drive, pick one of three new cards** to add to the deck, **or remove one** to thin it.
+- **A run starts with a deck of 8 basic plays:** **Go** (deep), **Slant** ×2, **Out**, **Curl** ×2, **Screen** (a short toss behind two blockers) and **Draw** (a handoff behind two blockers: no throw at all). Every play uses **four Walk-ons**. The first draft pool adds **Four Verticals**, **Mesh**, **Flood** and **Quick Out** (content/cards.ts).
+- **After every won drive, pick one of three new cards** to add to the deck, **or cut one** to thin it (never below three), or skip.
 - **Cards can bring players who exist only for that play.** For example: **Bat Route** (a Bat receiver flies over defenders), **Skeleton Sneak** (the carrier reassembles after its first tackle), **Pumpkin Decoy** (a rolling pumpkin drags coverage away).
 - **Trick plays are cards too.** For example: **Flea Flicker** (a pitch back, then a deep throw), **Hook and Ladder** (a lateral after the catch), **Hail Mary** (huge range, tiny catch window), **Statue of Liberty**.
 - **The cards on offer come from the area you're in:** the forest offers forest creatures and forest tricks.
@@ -296,11 +297,8 @@ Designs we built or considered. They aren't in the game, but they're worth remem
 
 ## Open Questions
 
-- **How does the camera follow a drive?** Scroll with the line of scrimmage, or show the whole 10 yards at once?
-- **Throw range from the line of scrimmage:** how short and how long can a pass be?
-- **Who plays where on a card?** How many Walk-ons does a play use (5?), and how are blockers shown?
-- **What does each defense look like?** How a drive's defense is generated for Intro, Challenge, Gimmick and Boss.
-- **Gimmicks and Bosses:** the list for the forest, and the Treant's rules.
-- **The Safety's look:** an Owl, or something else?
+- **How does the camera follow a drive?** The prototype shows the whole field; a drive that starts deeper, or longer distances ("4th and 15"), would need it to scroll.
+- **The forest's Gimmicks and Boss:** the prototype has three Gimmicks (Witching Hour, Bat Cave, Scarecrow Field) and a placeholder Boss defense (The Treant's Guard, content/areas.ts). The Treant itself is still to design.
+- **After the last area:** the prototype ends the run with "The forest is cleared!"; the next area is still to come.
 - **When does the music change?** By drive type, area, or tension (4th down)?
 - **Should playing with the sound off be supported?** The beat is also visible (bouncing) and felt (haptic ticks), but is that enough?

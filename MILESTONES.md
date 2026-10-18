@@ -4,7 +4,7 @@ This is a **living plan**. We work through it top to bottom and update it as we 
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** build the **M2 first playable slice** of the new core loop (decided 2026-10-18, GAMEPLAY.md): drives and downs, play cards with routes and Flip, defensive jobs with coverage rings, blocks instead of interceptions, and the Safety. The four song loops are waiting for a listen.
+**Current focus:** **playtest the M2 first playable on a phone** (2026-10-18): does calling plays against a visible defense, reading the rings and throwing on the break make every down tense? Watch whether 10-yard plays are rare, whether 4 downs feel fair, and how long a drive takes. Then the rest of M2 (juice, the Witch's edge flash) and M3 tuning. The four song loops are still waiting for a listen.
 
 **Still open from earlier:** the M1.1 iPhone test, and switching Pages to GitHub Actions.
 
@@ -158,17 +158,17 @@ The base systems everything else is built on. **Each one is built and verified o
 
 - [x] **Swap in the new theme's models:** football-player Walk-ons (`team/walkOn`), a bigger QB in reversed colors with its throwing arm up (`team/qb`), and a jack-o'-lantern football (`team/ball`). The old Elder Bough models are removed, and the code now says QB instead of Big.
 - [-] ~~The Haunted Forest, Walk-ons, and two recruit kinds.~~ Special players now come from play cards.
-- [ ] **Drives and downs:** a line of scrimmage, a first-down line 10 rows upfield, four downs. A tackle ends the down (the next starts there), an incompletion uses the down, a sack uses it and loses 2 yards, and an interception or a failed 4th down is **game over**. A down-and-distance HUD ("2nd & 6") and the first-down line on the field.
-- [ ] **Play cards:** each sets the formation and every route, with **Flip** to mirror it. A deck with draw 3, play 1, discard, reshuffle. Six starter plays: Go, Slant, Out, Curl, Screen, Draw. Players follow their routes; after a catch the carrier runs straight up.
-- [ ] **Defensive jobs and coverage rings:** Covers (gnomes) shadow a receiver one beat behind and pursue after a catch; Zones (scarecrows) stand still with a wide ring; Blitzers rush the QB (no ring); a new **Safety** hangs deep and keeps you from gaining 10 in one play; Bats patrol. Purple coverage rings on defenders, and green/yellow/red rings on your players.
-- [ ] **Blocks, not interceptions:** a pass to a covered (red) receiver bounces off the defender; an uncaught pass is incomplete. Both just use the down. A model for the Safety (an Owl?).
-- [ ] **The pre-snap UI:** three cards to pick from, the chosen play's routes previewed on the field, Flip and HIKE.
-- [~] The Haunted Forest's hazards: **Rolling Pumpkin** (ground lane) and **Witch on a Broom** (an air lane: a pass crossing near her bounces off), plus **Tombstones** (static obstacles) if time allows. Each needs a model, a beat pattern, a one-beat telegraph and a setup-phase preview. *The Witch is in (one per screen on a throw-band row, flying one tile per beat and wrapping, visible before HIKE). In the current code her snatch is still a fumble; under the new rules it's a block. Her edge flash telegraph isn't built yet. The pumpkin and tombstones are still to do.*
-- [ ] **One area of four drives:** Intro, Challenge, Gimmick and Boss (placeholder Gimmick and Boss), then a "next area" stub.
-- [ ] **The draft after a won drive:** one of three play cards, or remove one, in a plain UI.
-- [ ] Game over and a score (drives won, yards gained).
+- [x] **Drives and downs:** a line of scrimmage, a first-down line 10 rows upfield, four downs. A tackle ends the down (the next starts there), an incompletion or a block uses the down, a sack uses it and loses 2 yards (plus a 14-beat play clock), and a failed 4th down is **game over**. A down-and-distance HUD ("2nd & 6") and the lines on the field.
+- [x] **Play cards:** each sets the formation and every route, with **Flip** to mirror it. A deck with draw 3, play 1, discard, reshuffle. Six starter plays: Go, Slant, Out, Curl, Screen, Draw (an 8-card starter deck), plus four more in the draft pool. Players follow their routes; after a catch the carrier runs straight up.
+- [x] **Defensive jobs and coverage rings:** Covers (gnomes) shadow a receiver one beat behind and pursue after a catch; Zones (scarecrows) stand still with a wide ring; Blitzers rush the QB (no ring); a new **Safety** hangs deep and keeps you from gaining 10 in one play; Bats patrol. Purple coverage rings on defenders, and green/yellow/red rings on your players.
+- [x] **Blocks, not interceptions:** a pass to a covered (red) receiver bounces off the defender; an uncaught pass is incomplete. Both just use the down. The Safety is an Owl (`forest/safety`). Blocking works by standing in the way: players and defenders never share a tile.
+- [x] **The pre-snap UI:** three cards to pick from, the chosen play's routes previewed on the field, Flip and HIKE.
+- [~] The Haunted Forest's hazards: **Rolling Pumpkin** (ground lane) and **Witch on a Broom** (an air lane: a pass crossing near her bounces off), plus **Tombstones** (static obstacles) if time allows. Each needs a model, a beat pattern, a one-beat telegraph and a setup-phase preview. *The Witch is in (on the Witching Hour Gimmick and the Boss drive, flying one tile per beat and wrapping, visible before the snap); a pass crossing near her is blocked. Her edge flash telegraph isn't built yet. The pumpkin and tombstones are still to do.*
+- [x] **One area of four drives:** Intro, Challenge, a seeded Gimmick (Witching Hour, Bat Cave or Scarecrow Field) and a placeholder Boss defense (The Treant's Guard); clearing it ends the run with "The forest is cleared!".
+- [x] **The draft after a won drive:** one of three play cards, or cut one, or skip, in a plain UI.
+- [x] Game over ("Turnover on downs!") and a score (drives won, yards gained). *(No best score saved yet.)*
 - [-] ~~Endless screens from strip-based generation; the pile of balls and wipeouts.~~ Replaced by drives and game over on a lost drive.
-- [ ] One song and the core SFX.
+- [x] One song (Spooky Surf, continuous) and the core SFX, hooked to the new events.
 - [ ] Basic juice: cube bursts, hit-pause, screen shake, the fumble chant (a placeholder is fine).
 
 **Done when:** a playtester on a phone finishes a run and *asks to go again*. Record what they found confusing, unfair or boring, and feed it back into M0 and M3.
@@ -298,6 +298,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-18:** **M2 first playable built:** drives and downs, play cards (an 8-card starter deck, draw 3, Flip), the draft, one area of four drives, defensive jobs with coverage rings, blocks instead of interceptions, blocking by standing in the way, the Safety (a new Owl model), the route preview, the lines of scrimmage and first down, and a new HUD. 88 tests.
 - **2026-10-18:** Blitzers chase the carrier once the ball is caught. The design docs were reworked to match the new core loop: GAMEPLAY.md rewritten around areas, drives, downs, play cards and coverage (the old design moved to *History*), THEME.md's pitch, team and defenders updated, TECHNICAL.md's architecture, content and state of play updated, and M0 and M3–M10 re-scoped.
 - **2026-10-18:** Coverage designed: purple coverage rings on defenders; green, yellow or red rings on your players; no interceptions (covered passes bounce off and use the down); Covers, Zones (scarecrows), Blitzers, Bats and a new deep **Safety** that makes a 10-yard gain in one play rare. Carriers always run straight up.
 - **2026-10-18:** Steering the carrier tried and **discarded**: it didn't make the game. The core loop moves to play cards and four downs to gain 10 yards (being specified).
