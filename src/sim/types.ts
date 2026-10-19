@@ -43,7 +43,10 @@ export interface RosterPlayer {
 
 /** Your four players' forms as a hand (GAMEPLAY.md, Team Hands). */
 export type TeamHand =
-  { readonly kind: 'mash' } | { readonly kind: 'four'; readonly form: Form } | null;
+  | { readonly kind: 'mash' }
+  | { readonly kind: 'finalGirls' }
+  | { readonly kind: 'four'; readonly form: Form }
+  | null;
 
 /** A draft pick: a random human becomes a monster, or a random player trains a stat. */
 export type DraftOffer =

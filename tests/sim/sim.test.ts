@@ -558,14 +558,26 @@ describe('drives', () => {
     const draft = run(r.state, PAUSE).state;
     expect(draft.phase).toBe('draft');
     expect(draft.drivesWon).toBe(1);
-    expect(draft.offer).toHaveLength(3);
+    expect(draft.offer).toHaveLength(4);
   });
 
-  it('the draft offers one transform and two training picks while there are humans', () => {
-    const draft = run(wonDrive().state, PAUSE).state;
-    expect(draft.offer.map((o) => o.kind)).toEqual(['transform', 'train', 'train']);
-    const stats = draft.offer.flatMap((o) => (o.kind === 'train' ? [o.stat] : []));
-    expect(new Set(stats).size).toBe(2);
+  it('the draft offers four picks: one or two transforms (different forms), the rest training', () => {
+    const counts = new Set<number>();
+    for (let seed = 1; seed <= 40; seed++) {
+      const draft = run(
+        run(carry(playState([{ pos: vec(5, 22) }], [], seed), 100), 1).state,
+        PAUSE,
+      ).state;
+      expect(draft.offer).toHaveLength(4);
+      const forms = draft.offer.flatMap((o) => (o.kind === 'transform' ? [o.form] : []));
+      const stats = draft.offer.flatMap((o) => (o.kind === 'train' ? [o.stat] : []));
+      expect(forms.length).toBeGreaterThanOrEqual(1);
+      expect(forms.length).toBeLessThanOrEqual(2);
+      expect(new Set(forms).size).toBe(forms.length);
+      expect(new Set(stats).size).toBe(stats.length);
+      counts.add(forms.length);
+    }
+    expect([...counts].sort()).toEqual([1, 2]);
   });
 
   it('a transform turns a random human into that monster, and starts the next drive', () => {
@@ -593,11 +605,15 @@ describe('drives', () => {
     monsters.roster.forEach((p) => (p.form = 'ghost'));
     const later = run(monsters, PAUSE).state;
     expect(later.offer.map((o) => o.kind)).toEqual(['train', 'train', 'train']);
+    expect(new Set(later.offer.map((o) => (o.kind === 'train' ? o.stat : ''))).size).toBe(3);
   });
 
   it('training gives a random player +1 to a stat', () => {
     const draft = run(wonDrive().state, PAUSE).state;
-    const r = dispatch(draft, { type: 'draft', offer: 1 });
+    const r = dispatch(draft, {
+      type: 'draft',
+      offer: draft.offer.findIndex((o) => o.kind === 'train'),
+    });
     const trained = ofType(r.events, 'trained')[0]!;
     expect(r.state.roster[trained.slot]!.training[trained.stat]).toBe(1);
   });
@@ -678,15 +694,27 @@ describe('the roster', () => {
     expect(teamHand(roster)).toBeNull();
     (['human', 'ghost', 'werewolf', 'golem'] as const).forEach((f, i) => (roster[i]!.form = f));
     expect(teamHand(roster)).toEqual({ kind: 'mash' });
-    // A Mash gives everyone every skill.
+    // A Mash gives everyone every skill, and +1 to everything.
     expect(playerSkills(roster, 0).rerolls.sort()).toEqual(['break', 'shake']);
     expect(playerSkills(roster, 0).frenzy).toEqual(['break']);
+    expect(playerStats(roster, 0)).toEqual({ hustle: 1, hands: 1, heft: 1 });
     roster.forEach((p) => (p.form = 'golem'));
     expect(teamHand(roster)).toEqual({ kind: 'four', form: 'golem' });
-    // Four Golems: Stand Firm on every check, and +2 Heft.
-    expect(playerSkills(roster, 0).rerolls.sort()).toEqual(['break', 'catch', 'shake']);
+    // Four Golems: +2 Heft, and only their own skill.
+    expect(playerSkills(roster, 0).rerolls).toEqual(['break']);
     expect(playerStats(roster, 0).heft).toBe(4 + 2);
     roster.forEach((p) => (p.form = 'human'));
+    expect(teamHand(roster)).toBeNull();
+  });
+
+  it('Final Girls: four humans with two training picks between them get +1 to everything', () => {
+    const roster = startingRoster();
+    roster[0]!.training = { hustle: 1, hands: 0, heft: 0 };
+    expect(teamHand(roster)).toBeNull();
+    roster[3]!.training = { hustle: 0, hands: 1, heft: 0 };
+    expect(teamHand(roster)).toEqual({ kind: 'finalGirls' });
+    expect(playerStats(roster, 0)).toEqual({ hustle: 2, hands: 1, heft: 1 });
+    roster[1]!.form = 'ghost';
     expect(teamHand(roster)).toBeNull();
   });
 

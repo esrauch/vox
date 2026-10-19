@@ -51,8 +51,10 @@ export const tuning = {
   cards: {
     /** Play cards drawn before each down. */
     handSize: 3,
-    /** New cards offered after a won drive. */
-    draftOffer: 3,
+    /** Picks offered after a won drive: one or two transforms (while a human is left), the rest training. */
+    draftOffer: 4,
+    /** The most transforms one draft offers (each a different form). */
+    maxTransforms: 2,
   },
   throw: {
     /** Flight time: one tick per this many tiles of distance (at least one tick). */

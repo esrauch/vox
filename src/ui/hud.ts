@@ -163,7 +163,8 @@ export class Hud {
     roster.append(...draft.roster.map(rosterRow));
     const hand = document.createElement('p');
     hand.className = 'hud-roster-hand';
-    hand.textContent = draft.hand ?? 'No team hand yet: all different, or four of a kind';
+    hand.textContent =
+      draft.hand ?? 'No team hand yet: all different, four of a kind, or all human and trained';
     const skip = document.createElement('button');
     skip.className = 'hud-skip';
     skip.textContent = 'Skip';

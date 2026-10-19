@@ -242,11 +242,11 @@ The three checks:
 
 - **Four skill players**, each with a **punny name**, a voxel model, and **Hustle, Hands and Heft**. They're shown in a **roster panel**, left to right in the order they line up, with their numbers. **The order is fixed:** you can't rearrange it. ▲ *Names like Gus Grimsby, Lefty Graves, Big Bert Barrow, Kid Carver.*
 - **Everyone starts human, and the four start identical** (0 / 0 / 0).
-- **After every won drive, draft one of three, or skip.** The offers are:
-  - **One transform**, of a random form: *Werewolf Bite*, *Ghostly Touch* or *Golem Clay*. **A random one of your humans** becomes that monster, for the rest of the run. **Only humans can be transformed**, and there's no way back. With four players, the randomness is only *which* human, and that's part of the fun. Because only one form is on offer each time, the one your hand needs isn't always there.
-  - **Two training offers:** *+1 Hustle*, *+1 Hands* or *+1 Heft* **to a random player**. Small, steady growth, and the "good now" pick against waiting for a transform.
+- **After every won drive, draft one of four, or skip.** The offers are:
+  - **One or two transforms** (two are always different forms), each of a random form: *Werewolf Bite*, *Ghostly Touch* or *Golem Clay*. **A random one of your humans** becomes that monster, for the rest of the run. **Only humans can be transformed**, and there's no way back. With four players, the randomness is only *which* human, and that's part of the fun. Because only one or two forms are on offer each time, the one your hand needs isn't always there.
+  - **Training for the rest:** *+1 Hustle*, *+1 Hands* or *+1 Heft* **to a random player**. Small, steady growth, and the "good now" pick against waiting for a transform.
   - ▲ *Later: trick plays (see The Playbook).*
-- **Once all four are monsters,** all three offers are training.
+- **Once all four are monsters,** the draft offers one of each training.
 
 ### The Monsters
 
@@ -267,8 +267,9 @@ Your four players' forms make a **hand**, like a poker hand. **A full hand is me
 
 | Hand | Your four | Bonus ▲ |
 |---|---|---|
-| **Monster Mash** | All different: one Human, one Ghost, one Werewolf, one Golem | **Every player gets every skill** |
-| **Four of a Kind** | Four of the same monster | **The skill works on every check, and its stat gets +2** |
+| **Monster Mash** | All different: one Human, one Ghost, one Werewolf, one Golem | **Every player gets every skill, and +1 to every stat** |
+| **Four of a Kind** | Four of the same monster | **+2 to that form's stat** (Hustle for Ghosts, Heft for Werewolves and Golems) |
+| **Final Girls** | All four still human, with at least two training picks between them | **+1 to every stat**. An easy one: just turn down the transforms and train twice |
 
 - **The tension:** a Monster Mash needs exactly one of each monster *and* a human who stays human; a Four of a Kind means passing on every transform of the wrong kind. Each transform either moves you toward a hand or breaks one.
 - **Picks that are good now but don't scale:** training is a sure +1 today; a transform is a step toward a hand that might never come together.

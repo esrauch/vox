@@ -46,9 +46,12 @@ export function rosterRows(state: RunState): RosterRow[] {
 export function handText(state: RunState): string | null {
   const hand = teamHand(state.roster);
   if (!hand) return null;
-  if (hand.kind === 'mash') return 'Monster Mash: every player has every skill';
+  if (hand.kind === 'mash')
+    return 'Monster Mash: every player has every skill, and +1 to everything';
+  if (hand.kind === 'finalGirls')
+    return 'Final Girls: four humans who stuck together. +1 to everything';
   const form = FORMS[hand.form];
-  return `Four of a Kind: ${form.name}s. Their skill works on every check, and +2 ${STAT_NAME[form.main]}`;
+  return `Four of a Kind: ${form.name}s. +2 ${STAT_NAME[form.main]}`;
 }
 
 export function draftView(state: RunState): DraftView {

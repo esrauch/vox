@@ -22,7 +22,7 @@ import { createRng, deriveSeed, type Rng } from '../src/sim/rng';
 import { teamHand } from '../src/sim/roster';
 import { createRun, dispatch } from '../src/sim/run';
 import { step, throwProblem } from '../src/sim/step';
-import type { Form, PlayerUnit, RunState, SimEvent, Vec } from '../src/sim/types';
+import type { Form, PlayerUnit, RunState, SimEvent, TeamHand, Vec } from '../src/sim/types';
 
 const RUNS = Number(process.argv[2]) || 200;
 /** Throw once the best receiver's odds are at least this. */
@@ -40,8 +40,8 @@ interface Scenario {
 }
 
 const SCENARIOS: readonly Scenario[] = [
-  { name: 'Four humans, skip every draft', draft: 'skip' },
-  { name: 'Humans, always train', draft: 'train' },
+  { name: 'Never upgrade (skip every draft)', draft: 'skip' },
+  { name: 'Always train (Final Girls after two)', draft: 'train' },
   { name: 'Drafting toward a Monster Mash', draft: 'mash' },
   { name: 'Drafting toward Four of a Kind', draft: 'four' },
   {
@@ -153,8 +153,9 @@ function botThrow(state: RunState, rng: Rng): Vec | null {
 function draftPick(state: RunState, policy: DraftPolicy): number | null {
   const { offer, roster } = state;
   const train = offer.findIndex((o) => o.kind === 'train');
-  const transform = offer.findIndex((o) => o.kind === 'transform');
-  const t = offer[transform];
+  /** The first transform on offer that `fits` its form, or -1. */
+  const transformTo = (fits: (form: Form) => boolean): number =>
+    offer.findIndex((o) => o.kind === 'transform' && fits(o.form));
   switch (policy) {
     case 'skip':
       return null;
@@ -163,14 +164,14 @@ function draftPick(state: RunState, policy: DraftPolicy): number | null {
     case 'mash': {
       // Take a monster the team doesn't have yet, while keeping one human.
       const humans = roster.filter((p) => p.form === 'human').length;
-      const fits = t?.kind === 'transform' && !roster.some((p) => p.form === t.form) && humans > 1;
-      return fits ? transform : train >= 0 ? train : null;
+      const pick = humans > 1 ? transformTo((f) => !roster.some((p) => p.form === f)) : -1;
+      return pick >= 0 ? pick : train >= 0 ? train : null;
     }
     case 'four': {
       // Commit to the first monster offered, and take only that one.
       const monster = roster.find((p) => p.form !== 'human')?.form;
-      const fits = t?.kind === 'transform' && (!monster || t.form === monster);
-      return fits ? transform : train >= 0 ? train : null;
+      const pick = transformTo((f) => !monster || f === monster);
+      return pick >= 0 ? pick : train >= 0 ? train : null;
     }
   }
 }
@@ -217,6 +218,13 @@ function countEvents(t: Tally, prev: RunState, events: readonly SimEvent[]): voi
   }
 }
 
+function handName(hand: TeamHand): string {
+  if (!hand) return 'none';
+  if (hand.kind === 'mash') return 'Monster Mash';
+  if (hand.kind === 'finalGirls') return 'Final Girls';
+  return `Four ${hand.form}s`;
+}
+
 function playRun(seed: number, scenario: Scenario, t: Tally): void {
   const rng = createRng(deriveSeed(seed, 'bot'));
   let state = createRun(seed);
@@ -235,7 +243,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
       driveKey = key;
       bump(t.attempts, key);
       const hand = teamHand(state.roster);
-      bump(t.hands, hand ? (hand.kind === 'mash' ? 'Monster Mash' : `Four ${hand.form}s`) : 'none');
+      bump(t.hands, handName(hand));
     }
     if (state.phase === 'setup') {
       const prev = state;

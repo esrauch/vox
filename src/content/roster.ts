@@ -73,3 +73,9 @@ export const MONSTERS: readonly Form[] = ['ghost', 'werewolf', 'golem'];
 
 /** What a Four of a Kind adds to its form's main stat. */
 export const FOUR_OF_A_KIND_BONUS = 2;
+/** What a Monster Mash adds to every stat (on top of every player having every skill). */
+export const MASH_BONUS = 1;
+/** Final Girls: four humans with at least this many training picks between them… */
+export const FINAL_GIRLS_TRAINING = 2;
+/** …get this on every stat. */
+export const FINAL_GIRLS_BONUS = 1;

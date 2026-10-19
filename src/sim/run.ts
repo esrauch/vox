@@ -269,19 +269,24 @@ export function nextDown(state: RunState, events: SimEvent[]): void {
 const STATS: readonly (keyof Stats)[] = ['hustle', 'hands', 'heft'];
 
 /**
- * The draft (GAMEPLAY.md, Your Roster): one transform of a random form while
- * there's a human left to transform, and training for the rest.
+ * The draft (GAMEPLAY.md, Your Roster): four picks. While there's a human
+ * left to transform, one or two of them are transforms (two are always
+ * different forms) and the rest are training; after that, one of each training.
  */
 function draftOffer(state: RunState): DraftOffer[] {
   const rng = createRng(deriveSeed(state.seed, 'draft', state.drivesWon));
   const offer: DraftOffer[] = [];
+  const draw = <T>(from: T[]): T => from.splice(rng.int(0, from.length - 1), 1)[0] as T;
   if (state.roster.some((p) => p.form === 'human')) {
-    offer.push({ kind: 'transform', form: rng.pick(MONSTERS) });
+    const forms = [...MONSTERS];
+    const transforms = rng.int(1, tuning.cards.maxTransforms);
+    for (let i = 0; i < transforms && forms.length > 0; i++) {
+      offer.push({ kind: 'transform', form: draw(forms) });
+    }
   }
   const stats = [...STATS];
   while (offer.length < tuning.cards.draftOffer && stats.length > 0) {
-    const stat = stats.splice(rng.int(0, stats.length - 1), 1)[0] as keyof Stats;
-    offer.push({ kind: 'train', stat });
+    offer.push({ kind: 'train', stat: draw(stats) });
   }
   return offer;
 }
