@@ -42,11 +42,12 @@ What goes: the grid and the beat-locked tick, play cards and the hand, the dice 
 - [x] **Bodies:** circles with position, velocity, mass (1.25 ^ Heft), top speed (Hustle) and reach (Hands). Overlaps are pushed apart by weight; Scarecrows are planted; your players pass through each other.
 - [x] **Roles and jobs:** Blockers get between a rusher and the QB (after the catch, between the nearest defender and the carrier); route runners run their waypoints and go for a ball coming down near them; Rushers charge the QB, Covers trail their mark, the Owl hangs deep and comes down, Bats loop; after the catch everyone chases.
 - [x] **The ball:** the throw arc, catching by reach, contested balls won by Hands (ties to you), low passes batted down, the Witch.
+- [x] **Handing off:** tap a Runner to snap and hand it the ball, or hand off in the first second after the snap, on any play (Retro Bowl's run-or-pass choice, without play cards). The Dive is the play built for it. *(2026-10-19)*
 - [x] **The carrier:** swipe steering (a lane nudged 1½ yards a swipe), tackles on contact, breaking free 2 Heft heavier, pancakes 3 Heft heavier, out of bounds.
 - [x] **How a down ends:** tackled, incomplete, batted, sacked, out of bounds, over the line; drives, areas and the run (three areas), with a placeholder pause where the upgrade pick will go.
 - [x] **Tests** (`tests/arcade/`), and **the balance runs** (`npm run balance:arcade`) with a bot that throws and steers.
 
-**First balance numbers** (30 runs a build, before any tuning): downs last only **about 1.2 seconds** (the target is 4 to 8); all-human teams win about 2 drives of 12; Ghost Catchers alone win most runs (Hands decides too much); Werewolf Runners barely matter (Runners only carry on the Dive); pancakes happen only with Golem Blockers and broken tackles almost never. All of it is A2 tuning.
+**First balance numbers** (30 runs a build, before any tuning; the bot hands off on the Dive): runs gain about **0 yards** (the intro's rusher lines up right in the Dive's path, and any touch is a tackle; Golem Blockers get it to 2½); downs last only **about 1.2 seconds** (the target is 4 to 8); all-human teams win about 2 drives of 12; Ghost Catchers alone win most runs (Hands decides too much); Werewolf Runners barely matter (Runners only carry on the Dive); pancakes happen only with Golem Blockers and broken tackles almost never. All of it is A2 tuning.
 
 ## A2. First Playable
 

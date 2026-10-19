@@ -27,7 +27,7 @@ Tap PLAY and you're on the field. The ball is snapped the moment you pull back o
 ## Design Pillars
 
 1. **Playing in five seconds.** From opening the game to the first snap is one tap. No draft, no team setup, no tutorial wall. Everything you need to know, you learn by doing it once.
-2. **Arcade, not simulation.** Two verbs: **throw** and **steer**. Everything else (blocking, routes, the defense) happens on its own, at speed.
+2. **Arcade, not simulation.** Two verbs: **throw** (or hand off) and **steer**. Everything else (blocking, routes, the defense) happens on its own, at speed.
 3. **Impact.** Every play ends in something physical: a crunching tackle, a pancake block, a bounced pass, a carrier dragging a gnome for five yards. If a moment doesn't *hit*, it's not done.
 4. **Readable at a glance.** Who's on your team, what role each player has, who's open and who's about to hit you, in under a second, on a phone. The roles are three silhouettes; the stats are things you *see* happen, never numbers you have to read.
 5. **Start weak, build up.** Like *Slay the Spire*, *Dungeon Clawler* or *Balatro*: limited resources and very easy opponents at first, then your team grows and the forest fights back harder.
@@ -66,18 +66,18 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## A Down
 
-1. **The play is picked for you.** One of **four plays**, at random (and randomly mirrored), lines your team up: where your Catchers will run, whether it's a pass or a handoff. Its name flashes up ("SLANTS!") and the routes show for a moment. There's nothing to choose: you're already playing.
+1. **The play is picked for you.** One of **four plays**, at random (and randomly mirrored), lines your team up: where your Catchers will run and who stays home to block. Its name flashes up ("SLANTS!") and the routes show for a moment. You don't pick it: the only choice is pass or run (step 2).
 
    | Play | What happens |
    |---|---|
    | **Slants** | The outside Catchers cut inside; the slot goes deep; a Runner leaks into the flat. |
    | **Deep Shot** | All three Catchers go long; both Runners stay home to block. |
    | **Curl & Flat** | The Catchers run out and turn back; the Runners swing out to the flats. |
-   | **Dive** | A handoff: a Runner takes it straight up the middle behind the Blockers; the Catchers run off, dragging their Covers away. |
-2. **Pull back anywhere to snap.** The same pull aims the throw.
+   | **Dive** | Built for a run: a Runner charges straight up the middle behind the Blockers; the Catchers run off, dragging their Covers away. Tap the Runner to give it the ball. |
+2. **Pass or run, your call.** **Pull back anywhere** to snap and aim a throw, or **tap a Runner** to snap and hand it the ball. You can also hand off in the first second after the snap, while the QB still has it. Any play can be a run; the Dive is built for one.
 3. **The play happens at full speed, on its own.** Blockers lock up with the pass rush and shove; Catchers run their routes; Covers chase them; the Owl hangs deep.
 4. **Release to throw.** The ball flies to where you aimed; the arc rises the further you throw, so long passes sail over defenders underneath and short ones are quick but low.
-5. **If someone catches it, you're steering.** On a handoff play, you're steering the Runner from the snap.
+5. **If someone catches it, you're steering.** On a handoff, you're steering the Runner from the moment it has the ball.
 6. **The down ends with a tackle, a dead ball, a sack, or the line.**
 
 ### The pocket
@@ -105,6 +105,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | When | Gesture | What it does |
 |---|---|---|
 | **Before the snap** | **Pull back anywhere** | Snap the ball and start aiming. The further you pull, the further the throw. |
+| **Before the snap, or just after** | **Tap a Runner** | Hand it the ball (snapping first, if it's before the snap). You're steering it from then on. |
 | **Aiming** | **Release** | Throw. Letting go too close to the QB cancels. |
 | **Carrying** | **Swipe left or right** | Nudge the carrier a step to that side. |
 | **Between drives** | **Tap a card** | Take that upgrade. |

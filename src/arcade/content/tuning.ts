@@ -69,6 +69,8 @@ export const arcadeTuning = {
     maxAhead: 30,
     /** Letting go closer to the QB than this cancels the throw. */
     minDistance: 2,
+    /** You can hand off to a Runner up to this long after the snap (or tap one to snap and hand off at once). */
+    handoffWindow: 1,
   },
   carrier: {
     /** How far one swipe moves the carrier's lane. */

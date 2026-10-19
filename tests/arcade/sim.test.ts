@@ -56,18 +56,45 @@ describe('a run', () => {
     expect(after.field.players.map((p) => p.pos)).toEqual(before);
   });
 
-  it('the snap starts the play; Covers pick marks; a Dive hands off to its Runner', () => {
-    const s = createRun(1);
-    const snapped = dispatch(s, { type: 'snap' });
+  it('the snap starts the play, and Covers pick marks', () => {
+    const snapped = dispatch(createRun(1), { type: 'snap' });
     expect(snapped.state.phase).toBe('play');
     const covers = snapped.state.field.defenders.filter((d) => d.kind === 'cover');
     expect(covers.every((d) => d.mark !== null)).toBe(true);
+  });
+});
 
-    const dive = PLAYS.findIndex((p) => p.id === 'dive');
-    const ds = { ...structuredClone(s), play: { index: dive, flipped: false } };
-    const handed = dispatch(ds, { type: 'snap' });
-    expect(ofType(handed.events, 'handoff')).toHaveLength(1);
-    expect(handed.state.field.ball.at).toBe('carried');
+describe('handing off', () => {
+  const runnerOf = (s: RunState) => s.field.players.find((p) => p.role === 'runner')!;
+  const catcherOf = (s: RunState) => s.field.players.find((p) => p.role === 'catcher')!;
+
+  it('tapping a Runner before the snap snaps the ball and hands it off', () => {
+    const s = createRun(1);
+    const r = dispatch(s, { type: 'handoff', id: runnerOf(s).id });
+    expect(r.state.phase).toBe('play');
+    expect(r.events.map((e) => e.type)).toEqual(['snapped', 'handoff']);
+    expect(r.state.field.ball).toEqual({ at: 'carried', by: runnerOf(s).id });
+  });
+
+  it('works on any play, in the first second after the snap, while the QB has the ball', () => {
+    const s = dispatch(createRun(2), { type: 'snap' }).state;
+    const soon = run(s, 0.5).state;
+    expect(dispatch(soon, { type: 'handoff', id: runnerOf(s).id }).state.field.ball.at).toBe(
+      'carried',
+    );
+    const late = run(s, arcadeTuning.throw.handoffWindow + 0.2).state;
+    if (late.phase === 'play') {
+      expect(dispatch(late, { type: 'handoff', id: runnerOf(s).id }).state.field.ball.at).not.toBe(
+        'carried',
+      );
+    }
+  });
+
+  it('only to a Runner: tapping anyone else does nothing, not even the snap', () => {
+    const s = createRun(1);
+    const r = dispatch(s, { type: 'handoff', id: catcherOf(s).id });
+    expect(r.state.phase).toBe('setup');
+    expect(r.events).toHaveLength(0);
   });
 });
 

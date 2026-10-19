@@ -162,7 +162,11 @@ export interface StepInput {
   readonly steer?: -1 | 1;
 }
 
-export type Action = { readonly type: 'snap' } | { readonly type: 'skipDraft' };
+export type Action =
+  | { readonly type: 'snap' }
+  /** Tap a Runner: hand it the ball (snapping first, if it's before the snap). */
+  | { readonly type: 'handoff'; readonly id: number }
+  | { readonly type: 'skipDraft' };
 
 export type ThrowProblem = 'notInPlay' | 'noBall' | 'offField' | 'tooFar' | 'tooClose';
 

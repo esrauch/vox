@@ -7,12 +7,13 @@
  *
  *   npm run balance:arcade [runs per scenario]
  *
- * The bot snaps at once and throws to the receiver with the most room where
+ * The bot snaps at once and hands off on the Dive; otherwise it throws to the receiver with the most room where
  * the ball will come down (leading it, with some aim error), as soon as one
  * is clear, when a rusher gets close, or after a few seconds. Carrying, it
  * swipes away from the defender in its lane and away from the sideline.
  * There are no upgrades yet: each scenario fixes the team's forms.
  */
+import { PLAYS } from '../src/arcade/content/plays';
 import { arcadeTuning } from '../src/arcade/content/tuning';
 import { carrierOf, qbOf } from '../src/arcade/sim/ai';
 import { flightTime } from '../src/arcade/sim/ball';
@@ -60,6 +61,10 @@ interface Tally {
   yards: number;
   results: Map<string, number>;
   passes: number;
+  handoffs: number;
+  /** Yards and downs on handoffs, and on everything else. */
+  run: { yards: number; downs: number };
+  pass: { yards: number; downs: number };
   catches: number;
   contested: number;
   pancakes: number;
@@ -70,12 +75,20 @@ const bump = (m: Map<string, number>, k: string, by = 1): void => {
   m.set(k, (m.get(k) ?? 0) + by);
 };
 
-/** The bot's input this step. */
-function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }): StepInput {
+/** What the bot does this step: a step input, or a handoff to a Runner. */
+type BotMove = StepInput & { readonly handoff?: number };
+
+function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }): BotMove {
   if (state.phase !== 'play') return {};
   const { field } = state;
   const qb = qbOf(state);
   const since = state.time - state.snappedAt;
+
+  // On the Dive (the play built for it), hand off to the Runner charging up the middle.
+  if (field.ball.at === 'qb' && qb && since < 0.1 && PLAYS[state.play.index]?.id === 'dive') {
+    const runner = field.players.find((p) => p.role === 'runner' && p.job.kind === 'route');
+    if (runner) return { handoff: runner.id };
+  }
 
   if (field.ball.at === 'qb' && qb && since > 0.4) {
     const receivers = field.players.filter((p) => p.job.kind === 'route' && p.down <= 0);
@@ -115,16 +128,25 @@ function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }): StepInp
   return {};
 }
 
-function swipe(dir: -1 | 1, state: RunState, lastSwipe: { at: number }): StepInput {
+function swipe(dir: -1 | 1, state: RunState, lastSwipe: { at: number }): BotMove {
   lastSwipe.at = state.time;
   return { steer: dir };
 }
 
-function count(t: Tally, events: readonly ArcadeEvent[], state: RunState): void {
+function count(
+  t: Tally,
+  events: readonly ArcadeEvent[],
+  state: RunState,
+  ran: { now: boolean },
+): void {
   for (const e of events) {
     switch (e.type) {
       case 'thrown':
         t.passes++;
+        break;
+      case 'handoff':
+        t.handoffs++;
+        ran.now = true;
         break;
       case 'caught':
         t.catches++;
@@ -141,6 +163,12 @@ function count(t: Tally, events: readonly ArcadeEvent[], state: RunState): void 
         t.yards += e.gained;
         t.downTime += state.time - state.snappedAt;
         bump(t.results, e.result);
+        {
+          const kind = ran.now ? t.run : t.pass;
+          kind.yards += e.gained;
+          kind.downs++;
+        }
+        ran.now = false;
         break;
       default:
         break;
@@ -158,6 +186,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
   }));
   let state = createRun(seed, roster);
   const lastSwipe = { at: -1 };
+  const ran = { now: false };
   let driveKey = '';
   for (let guard = 0; guard < 200000 && state.phase !== 'over' && state.phase !== 'won'; guard++) {
     const key = `${state.drive.area}:${state.drive.kind}`;
@@ -173,9 +202,15 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
       state = dispatch(state, { type: 'snap' }).state;
       continue;
     }
-    const r = step(state, botInput(state, rng, lastSwipe));
+    const move = botInput(state, rng, lastSwipe);
+    if (move.handoff !== undefined) {
+      const h = dispatch(state, { type: 'handoff', id: move.handoff });
+      count(t, h.events, state, ran);
+      state = h.state;
+    }
+    const r = step(state, move.handoff !== undefined ? {} : move);
     if (r.events.some((e) => e.type === 'driveWon')) bump(t.wins, key);
-    count(t, r.events, state);
+    count(t, r.events, state, ran);
     state = r.state;
   }
   t.runs++;
@@ -198,7 +233,7 @@ function report(scenario: Scenario, t: Tally): void {
     .join(' · ');
   console.log(`  downs end: ${results}`);
   console.log(
-    `  completions ${pct(t.catches, t.passes)} (contested ${pct(t.contested, t.catches)}) · ` +
+    `  yards a run ${(t.run.yards / Math.max(1, t.run.downs)).toFixed(1)} (${t.run.downs}) · yards a pass play ${(t.pass.yards / Math.max(1, t.pass.downs)).toFixed(1)} · completions ${pct(t.catches, t.passes)} (contested ${pct(t.contested, t.catches)}) · ` +
       `pancakes ${(t.pancakes / t.runs).toFixed(1)}/run · broken tackles ${(t.breaks / t.runs).toFixed(1)}/run`,
   );
   [0, 1, 2].forEach((area) => {
@@ -223,6 +258,9 @@ for (const scenario of SCENARIOS) {
     yards: 0,
     results: new Map(),
     passes: 0,
+    handoffs: 0,
+    run: { yards: 0, downs: 0 },
+    pass: { yards: 0, downs: 0 },
     catches: 0,
     contested: 0,
     pancakes: 0,

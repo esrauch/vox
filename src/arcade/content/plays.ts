@@ -1,8 +1,9 @@
 /**
  * The four plays (GAMEPLAY.md, A Down). Each down one is picked at random,
  * and randomly mirrored. A route is waypoints relative to the player's start
- * (yards: x across, y upfield); `block` stays home and blocks; a handoff play
- * gives one roster slot the ball at the snap.
+ * (yards: x across, y upfield); `block` stays home and blocks. On any play
+ * you can tap a Runner to hand it the ball instead of throwing (sim/run.ts);
+ * the Dive is the play built for it.
  */
 export type Assignment =
   | { readonly kind: 'route'; readonly to: readonly { readonly x: number; readonly y: number }[] }
@@ -13,8 +14,6 @@ export interface Play {
   readonly name: string;
   /** One assignment per roster slot (2 Blockers, 2 Runners, 3 Catchers). Blockers always block. */
   readonly slots: readonly Assignment[];
-  /** A handoff to this roster slot: no throw. */
-  readonly handoff?: number;
 }
 
 const block: Assignment = { kind: 'block' };
@@ -61,8 +60,15 @@ export const PLAYS: readonly Play[] = [
   {
     id: 'dive',
     name: 'Dive',
-    // A handoff straight up the middle; the other Runner leads; the Catchers run off.
-    handoff: 2,
-    slots: [block, block, route([0, 2]), block, route([0, 16]), route([0, 16]), route([0, 14])],
+    // Built for a handoff: a Runner charges up the middle, the other stays home; the Catchers run off.
+    slots: [
+      block,
+      block,
+      route([0, 3], [0, 12]),
+      block,
+      route([0, 16]),
+      route([0, 16]),
+      route([0, 14]),
+    ],
   },
 ];

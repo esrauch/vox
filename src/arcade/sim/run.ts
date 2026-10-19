@@ -147,6 +147,9 @@ export function dispatch(prev: RunState, action: Action): ArcadeResult {
     case 'snap':
       snap(state, events);
       break;
+    case 'handoff':
+      handoff(state, action.id, events);
+      break;
     case 'skipDraft':
       if (state.phase === 'draft') state.phase = 'setup';
       break;
@@ -154,24 +157,30 @@ export function dispatch(prev: RunState, action: Action): ArcadeResult {
   return { state, events };
 }
 
-/** The snap: Covers pick their marks; a handoff play gives its Runner the ball. */
+/** The snap: the play starts, and Covers pick their marks. */
 function snap(state: RunState, events: ArcadeEvent[]): void {
   if (state.phase !== 'setup') return;
   state.phase = 'play';
   state.snappedAt = state.time;
   assignMarks(state);
   events.push({ type: 'snapped' });
-  const play = PLAYS[state.play.index];
-  const runner =
-    play?.handoff !== undefined
-      ? state.field.players.find((p) => p.slot === play.handoff)
-      : undefined;
-  if (runner) {
-    runner.job = { kind: 'carry' };
-    state.field.ball = { at: 'carried', by: runner.id };
-    state.field.lane = runner.pos.x;
-    events.push({ type: 'handoff', id: runner.id });
-  }
+}
+
+/**
+ * Hand the ball to a Runner instead of throwing (GAMEPLAY.md, A Down):
+ * before the snap (it snaps first) or within the handoff window after it,
+ * while the QB still has the ball. You're steering it from then on.
+ */
+function handoff(state: RunState, id: number, events: ArcadeEvent[]): void {
+  const runner = state.field.players.find((p) => p.id === id && p.role === 'runner' && p.down <= 0);
+  if (!runner) return;
+  if (state.phase === 'setup') snap(state, events);
+  if (state.phase !== 'play' || state.field.ball.at !== 'qb') return;
+  if (state.time - state.snappedAt > arcadeTuning.throw.handoffWindow) return;
+  runner.job = { kind: 'carry' };
+  state.field.ball = { at: 'carried', by: runner.id };
+  state.field.lane = runner.pos.x;
+  events.push({ type: 'handoff', id: runner.id });
 }
 
 /** End the down: move the line of scrimmage, and show what happened for a moment. */
