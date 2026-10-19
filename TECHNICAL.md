@@ -4,6 +4,8 @@ This doc covers how we build it: the stack, the architecture, the beat clock, re
 
 Items marked **▲ Decision** are recommendations that are still open to change.
 
+> **2026-10-19: the design moved to real-time arcade football** (GAMEPLAY.md, branch `design/arcade`): continuous movement instead of a grid, eight players a side, physical stats (weight, speed, reach) instead of dice, no play cards, and the music as soundtrack only. **This doc still describes the code as built:** the grid simulation that ticks on the beat (§3, §4 and §10 change most). The plan is a deterministic fixed-timestep simulation with circle bodies, kept pure and testable like the current one, with the headless balance runs carried over. The rendering, voxel and audio pipelines stand.
+
 ---
 
 ## 1. Goals and Constraints

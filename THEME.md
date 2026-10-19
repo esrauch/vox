@@ -8,11 +8,13 @@ This document is about who, where and what it feels like. It does not cover rule
 
 ## The Pitch in One Breath
 
-**A football team playing through a haunted forest.** Your squad is plain, cheerful football players, and you're the one calling the plays. Drive by drive they fight their way up the field, four downs at a time, past gnomes, scarecrows, owls and bats that don't want them there. Your playbook grows as you go, and the forest's own creatures turn up in it: a bat in a football helmet on a deep route, a skeleton who pulls himself together after a tackle, a pumpkin rolling out as a decoy. Make the first down, add a play to the book, and keep going until a 4th down goes wrong.
+**Arcade Halloween Football.** A football team playing through a haunted forest, one drive at a time, past gnomes, scarecrows, owls and bats that don't want them there. You throw, you steer the carrier, and everything else crashes together on its own. You start as eight plain, keen humans; drive by drive, the forest rubs off on them: a Blocker turns to stone, a Runner sprouts fur, a Catcher drifts through defenders like a sheet on the wind. Keep going until a 4th down goes wrong.
 
-**The feel:** snappy, fast, silly and fun. It's closer to *Crossy Road* than to *Blood Bowl*: pick it up in seconds, laugh every few seconds, one more go. **It's a portrait, one-thumb phone game in voxels**, and everything moves to the beat of a cheerful Halloween soundtrack.
+**The feel:** snappy, fast, silly, and above all *physical*: every play ends in a pile-up. It's closer to *Crossy Road* and *Retro Bowl* than to *Blood Bowl*: pick it up in seconds, laugh every few seconds, one more go. **It's a portrait, one-thumb phone game in voxels**, to a cheerful Halloween soundtrack.
 
-Inspirations: *Crossy Road* (feel, readability, chunky toy-like look), *Retro Bowl* (pocket-sized football you can read at a glance), *Slay the Spire* and *Balatro* (a deck that becomes your run), *Crypt of the NecroDancer* (everything moves to the beat), *Blood Bowl* (fantasy football), and the joy of a team of misfits that somehow works.
+Inspirations: *Retro Bowl* (pocket-sized arcade football: throw, then run), *Crossy Road* (feel, readability, the chunky toy-like look), *Blood Bowl* (fantasy teams with clear roles), *Slay the Spire*, *Balatro* and *Dungeon Clawler* (start weak, build a run that snowballs), and the joy of a team of misfits that somehow works.
+
+> **2026-10-19:** the pitch and *Our Team* follow the arcade redesign (GAMEPLAY.md). The rest of this doc still mentions play cards and the beat in places; the forest, the art direction and the opposition stand.
 
 ## Core Fantasy
 
@@ -46,28 +48,26 @@ Inspirations: *Crossy Road* (feel, readability, chunky toy-like look), *Retro Bo
 
 ## Our Team
 
-### Walk-ons
+### Eight players in three roles
 
-**Every play is run by the same squad of vanilla football players**: identical Walk-ons in gold helmets and orange jerseys. They're plain, keen and expendable, and they line up again for the next down however many times they get flattened. (The model is `team/walkOn`.)
+**Your team is the QB and eight players: three Blockers, two Runners and three Catchers**, all in gold helmets and orange jerseys. **The role is the silhouette**, so you never have to ask who does what:
+- **Blockers:** big, wide and low, built like fridges in shoulder pads.
+- **Runners:** lean, always leaning forward, as if they've already started.
+- **Catchers:** tall and long-armed, gloves the size of their heads.
 
-### Special players: the forest on your cards
+They start as plain humans, keen and a bit useless, and line up again however many times they get flattened.
 
-**Creatures of the haunted forest turn up on play cards, and every one of them puts on a football helmet** for that play. A card might bring a Bat to run a deep route, or a Skeleton to carry the ball. They only exist for the play on their card; the deck is the team.
+### Monsters: the forest rubs off
 
-Candidates (each wearing the team helmet, with a role you can read from its shape):
+**Transforms turn your players into monsters, each suited to one role**, and every one of them keeps the team helmet on:
 
-| Special player | Good at | Look |
-|---|---|---|
-| **Bat** | Catching passes out of the air | Wings spread, hovering, with a tiny helmet. |
-| **Skeleton** | Getting back up after a hit | Bones in shoulder pads, which rattle apart and click back together. |
-| **Pumpkin-head** | Running | A jack-o'-lantern head under the helmet, glowing through the face mask. |
-| **Werewolf** | Breaking tackles | Big, hairy, the helmet barely fits. |
-| **Mummy** | Holding onto the ball | Wrapped up tight, trailing a bandage. |
-| **Ghost** | Slipping past defenders | A sheet with a helmet floating on top. |
-| **Black Cat** | Speed and lucky catches | Low and quick, tail up. |
-| **Witch** | Trick plays | A pointy hat squashed under the helmet. |
-| **Frankenstein's Monster** | Raw strength | Square, green, bolts poking out of the helmet. |
-| **Owl** | Seeing the whole field | Round, wide-eyed, wings folded. *(Also a candidate for the defense's Safety: a wild, purple, helmetless owl.)* |
+| Monster | Role | Good at | Look |
+|---|---|---|---|
+| **Golem** | Blocker | Not moving when hit; flattening things | A stack of mossy stones, the helmet jammed on top. |
+| **Werewolf** | Runner | Speed that builds as it runs | Big, hairy, the helmet barely fits. |
+| **Ghost** | Catcher | Reach, and drifting through defenders | A sheet with a helmet floating on top, arms trailing. |
+
+Later candidates: the Skeleton (falls apart forward when tackled), the Mummy (never drops it), the Pumpkin-head, the Black Cat, Frankenstein's Monster.
 
 ### The ball
 
