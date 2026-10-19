@@ -2,7 +2,7 @@
 
 This doc covers what the player *does*: the design pillars, the run structure, a drive, a down, the controls, and how players and defenders interact. It builds on [THEME.md](THEME.md). Exact numbers live in `src/content/tuning.ts`.
 
-**The north star: snappy, fast, silly, fun.** It's a **portrait, one-thumb phone game** with **voxel** graphics, and **everything moves to the beat**. It looks like *Crossy Road*, calls plays like a pocket-sized *Retro Bowl* or *Madden*, builds a deck like *Slay the Spire*, and has a roguelite's "one more run."
+**The north star: snappy, fast, silly, fun.** It's a **portrait, one-thumb phone game** with **voxel** graphics, and **everything moves to the beat**. It looks like *Crossy Road*, calls plays like a pocket-sized *Retro Bowl* or *Madden*, rolls its contests like a friendlier *Blood Bowl*, builds a team like *Balatro* builds a hand, and has a roguelite's "one more run."
 
 Items marked **▲** are recommendations or details that are still open to change. Every number is a starting value in `tuning.ts` or the content files, to tune by playtesting.
 
@@ -10,16 +10,18 @@ Items marked **▲** are recommendations or details that are still open to chang
 - **Area:** a themed place (the Haunted Forest first). Each area is four drives.
 - **Drive:** one level: **four downs to gain 10 yards**. **Down:** one play.
 - **Line of scrimmage:** where the current down starts. **First-down line:** 10 yards past where the drive started; get the ball over it to win the drive.
-- **Play card:** a play you call. It sets the formation and every route, and can bring special players or tricks.
+- **Play card:** a play you call. It sets the formation and every route. **Trick plays** are one-use cards that change the defense.
+- **Roster:** your four skill players, who run every play. They start human and can be **transformed** into monsters.
 - **The quarterback (QB):** the one player who throws. It never moves during a play.
-- **Players:** everyone else on your team, the ones who run, catch and carry. **Walk-ons** are the plain players on every play; **special players** come only with the card that brings them.
+- **Players:** everyone else on your team, the ones who run, catch and carry: your roster. Each has **Hustle, Hands and Heft**.
+- **Check:** a hidden roll that settles a contest between one of your players and a defender: your stat minus theirs, on a curve that favors you.
 - **Carrier:** whoever has the ball after a catch.
 
 ---
 
 ## The Game in One Breath
 
-Every drive, you have **four downs to gain 10 yards**. Each down you **draw three play cards and call one**: it lines your players up and sets their routes. The defense is right there for you to read: every defender's coverage is a purple ring, and every one of your players shows green, yellow or red for whether it's open. Snap the ball, **pull back and release** to hit an open receiver before the pass rush gets you, and watch the catch run straight upfield until it's tackled. Make the line and you **draft a new play card**. Miss on 4th down and **the run is over**. Each themed area is four drives (Intro, Challenge, Gimmick, Boss), then on to the next. **Your deck is your team. Go as far as you can.**
+Every drive, you have **four downs to gain 10 yards**. Each down you **draw three play cards and call one**: it lines your four players up and sets their routes. The defense is right there for you to read: every defender's coverage is a purple ring, and every one of your players shows green, yellow or red for its odds of catching right now. Snap the ball, **pull back and release** to hit an open receiver before the pass rush gets you, and watch the catch run straight upfield, shaking and breaking tackles, until it's brought down. Catches, shakes and broken tackles are **checks**: your player's stat against the defender's, rolled on a curve that's on your side. Make the line and you **draft**: a **transform** that turns one of your humans into a Ghost, Werewolf or Golem, or a **trick play**. Build the right team (all different, or four of a kind) and it becomes unstoppable. Miss on 4th down and **the run is over**. Each themed area is four drives (Intro, Challenge, Gimmick, Boss), then on to the next. **Your roster is your build. Go as far as you can.**
 
 ---
 
@@ -48,9 +50,10 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **The four drives are one continuous march down the field.** The first three go for a first down; **the Boss drive goes for the end zone**: its line is the goal line, with the end zone painted past it, the readout says "& Goal", and making it is a **TOUCHDOWN!**
 - **Between drives the march doesn't stop:** after a first down, the camera glides forward up the field (the new line of scrimmage lands where the old first-down line was) with the next drive's defense already lined up, the draft happens in front of it, and play carries on. Your new card is in the shuffle for that drive's first hand.
 - **One Long Field.** On the first three drives the field never seems to end: the turf and the sidelines run on past the first-down line into the fog, and the next drive's defense already stands up there, faded like ghosts in the mist, on the tiles it will line up on. Play still stops at the first-down line; the ghosts are scenery and never touch the ball. When the drive is won the camera glides up to them and they become the real defense. Nothing pops at the hand-over: the old drive's players fade where they stood as the camera leaves them, and the new drive's line and QB fade in as it arrives. On the Boss drive there's no next defense: the field ends at the end zone, with the woods behind it.
-- **Then the run moves on to the next area**, with its own defenders, hazards, card pool and song.
+- **Then the run moves on to the next area**, with its own defenders (a little stiffer each area), hazards, trick plays and song.
 - **There are no lives. Losing a drive is game over.** You get four downs, and that's it: every down counts. **The only way to lose is running out of downs.** There are no interceptions and no turnovers.
-- **After every won drive, you draft** (see *The Deck*).
+- **The main game is three areas: 12 drives and three Bosses.** ▲ *A strong team (see Team Hands) should carry you through it; without one you need luck.*
+- **After every won drive, you draft** (see *Your Roster*).
 
 ---
 
@@ -64,7 +67,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   |---|---|
   | **Tackled** | The down is over. The next down starts from where the carrier went down. |
   | **Incomplete** (nobody is there to catch it) | The down is used, with no gain. |
-  | **Blocked** (the receiver was covered: the ball **bounces off the covering defender**) | The down is used, with no gain. |
+  | **Blocked or dropped** (a defender bats it down, or the receiver loses the catch check: the ball **bounces off the defender**) | The down is used, with no gain. |
   | **Sacked** (the pocket clock runs out before the throw) | The down is used, and you lose 2 yards. |
   | **4th down fails** | **The drive is lost: game over.** |
 
@@ -78,7 +81,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 ## A Down: Call the Play, Then Throw
 
 1. **Draw three play cards** from your deck and **call one** (tap it; tap another to change your mind). All three go to the discard pile at the snap. When the deck runs out, the discard pile is shuffled back in.
-2. **A card is the whole play:** where your players line up and **every player's route**, drawn on the field as a preview before you commit. **Flip** mirrors it left or right. That's the only adjustment: you don't place players by hand. Every defense is lopsided (its Scarecrows and Bats bunch to one side), so Flip is how you send the play at the weak side.
+2. **A card is the whole play:** where your players line up and **every player's route**, drawn on the field as a preview before you commit. **Your roster fills the play's four spots from left to right.** **Flip** mirrors it left or right, and **players are matched to spots after the flip**, so Flip also decides *which* player runs which route: your Ghost takes the deep route, or flip it and your Golem does. That's the only adjustment: you don't place players by hand. Every defense is lopsided (its Scarecrows and Bats bunch to one side), so Flip is how you send the play at the weak side.
 3. **The defense is visible before you choose** (*Into the Breach* style): every defender, its coverage ring and its job, where the Bats circle and the Witch flies. Picking the card that beats this defense *is* the puzzle.
 4. **HIKE!** Receivers run their routes on the beat. Defenders cover them, and the pass rush comes for the QB.
 5. **Pull back and release** to throw before **the pocket collapses** (see *The Pocket*), leading your receiver into open space.
@@ -88,7 +91,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **It's a countdown you can see, nothing more.** Two linemen stand in front of the QB, either side of the middle, with **two rushers** (rhino beetles) pressed against them, leaving a lane up the middle for runs. From the snap, **the pocket clock runs: 6 beats** on an ordinary play. As it runs down, **the rush pushes your line back toward the QB**, and **pips over the line count the beats left** (white, then red for the last one). At zero, with the ball still in the QB's hand, it's a **sack**.
 - **The line and the rushers are only drawn.** They don't block passes, bat the ball, chase or tackle.
 - **Blockers buy time:** every player a play leaves at home (a "." route, like the Screen's two blockers) adds 1½ beats. **A defense that brings extra rushers** (the Boss brings two) takes 1½ beats away per extra rusher. The pocket never holds for less than 3 beats.
-- **Runs have no pocket clock:** a Draw hands the ball off at the snap.
+- **Runs have no pocket clock:** a Run hands the ball off at the snap.
 
 ## Controls
 
@@ -116,28 +119,38 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Coverage: Who's Open, at a Glance
 
-- **Scarecrows (and Bats) show a purple ring** on the turf: a low pass inside it is knocked away. Covers and the Safety have **no ring**: they can only bat down a low pass that comes right past them. The rings go away once the ball is caught.
-- **Every one of your players shows a ring that says whether it could catch right now:**
-  - **Green:** clear. No coverage nearby; a ball arriving now is a safe catch.
-  - **Yellow:** coverage is close (*within half a yard of a purple ring*). A ball thrown right at it now would still be caught, but by the time it lands, it may not be.
-  - **Red:** covered (inside a purple ring). A ball thrown right at it would be blocked; lead it into open space instead.
-- **The rings update every beat.** Reading them, and how they'll change during the ball's flight, *is* the throw.
+- **Scarecrows (and Bats) show a purple ring** on the turf: a pass coming down inside it is **contested**. Covers and the Safety have **no ring**: they contest a pass only by being right beside it. The rings go away once the ball is caught.
+- **Every one of your players shows a ring with its odds of catching a ball arriving now** (the Hands check below, with no numbers shown):
+  - **Green:** a likely catch (about 70% or better), or nobody contesting at all.
+  - **Yellow:** close to a coin flip.
+  - **Red:** a long shot. Lead it into open space instead.
+- **The rings update every beat.** Reading them, and how they'll change during the ball's flight, *is* the throw. A team with better Hands sees more green: the same coverage is less of a threat.
 
 ### Catching
 
-- **The ball lands at a free point**, and the **closest player within catch reach** is the receiver. How close decides the catch: **perfect** (within about ⅓ of a tile), **good** (about ¾) or **ok** (about 1.15). Hands widens all three.
-- **A perfect catch is a Clean Catch:** the carrier **fends off one tackle** (shown by a glowing outline).
-- **The catch window is the gold stretch:** along the ball's path, the first thing within reach of it while it's low decides the pass. **A defender right beside the ball bats it down**; **inside a Scarecrow's (or Bat's) ring it's knocked away**; **one of your players near it catches it**, even short of the reticle. So **leading the receiver away from its defender is the skill**: a receiver with a Cover right behind it can still catch a ball put on its far side.
+- **The ball lands at a free point**, and the **closest player within catch reach** is the receiver. How close decides the catch's quality: **perfect** (within about ⅓ of a tile), **good** (about ¾) or **ok** (about 1.15).
+- **An uncontested catch is safe.** A ball that comes down with no defender beside it and outside every ring is always caught.
+- **A contested catch is a Hands check** (see *Checks*): your receiver's Hands minus the contesting defender's Hands, **+1 for a perfect throw, −1 for an ok one**, and **−1 for each extra defender** contesting it. Fail it and the ball is knocked away: the down is over.
+- **The catch window is the gold stretch:** along the ball's path, the first thing within reach of it while it's low decides the pass. **A defender right beside the ball with no receiver near it bats it down.** **One of your players near it catches it** (or contests for it), even short of the reticle. So **leading the receiver away from its defender is still the skill**: a better throw is a better check, and an open one needs no check at all.
 - **If nobody is within reach, it's incomplete.**
-- **There are no interceptions.** The Witch crossing the pass also **blocks** it: it bounces off.
-- The game pops "PERFECT!", "GOOD!" or "OK", and "BLOCKED!" when one bounces.
+- **There are no interceptions.** The Witch crossing the pass still **blocks** it: it bounces off.
+- The game pops "PERFECT!", "GOOD!" or "OK", "CAUGHT!" when a contested catch is won, and "DROPPED!" or "BLOCKED!" when it isn't.
 
 ### Tackling
 
-- **A tackle is contact:** the carrier is down when a defender reaches it: they meet on a tile or swap tiles, or the defender ends a beat **right next to it** (in front, behind or beside, not diagonally). So a chaser one step behind catches the carrier rather than trailing it up the field. Any defender can tackle.
-- **A fend-off** (from a Clean Catch or a card) knocks that defender down instead, long enough for the carrier to get clear, and the carrier keeps running.
-- **Blocking is just standing in the way:** your players and defenders **never share a tile**. Whoever would step into the other waits, so a player on a "." route is a blocker that defenders have to go around. Only the carrier can be stepped into, and that's a tackle.
+- **A tackle is contact:** a defender reaches the carrier when they meet on a tile or swap tiles, or the defender ends a beat **right next to it** (in front, behind or beside, not diagonally). So a chaser one step behind catches up with the carrier rather than trailing it up the field. Any defender can tackle.
+- **Contact isn't the end any more: it's two checks, in order** (see *Checks*):
+  1. **Shake it (Hustle):** your carrier's Hustle minus the tackler's Hustle. Win and the carrier slips past: the defender is left a tile behind and stumbles for a beat.
+  2. **Break it (Heft):** if the shake fails, your carrier's Heft minus the tackler's Heft. Win and the tackler is knocked down long enough for the carrier to get clear.
+  3. Lose both and the carrier is **tackled**.
+- **Blocking is just standing in the way:** your players and defenders **never share a tile**. Whoever would step into the other waits, so a player on a "." route is a blocker that defenders have to go around. Only the carrier can be stepped into, and that's a tackle attempt.
 - **Your players never block each other.** They can share a tile and hop past one another.
+
+### Getting Open
+
+- **Everyone moves one tile per hop.** Hustle never makes a player faster: raw speed would be too strong, and it would break the grid's beat.
+- **Instead, Hustle is how a receiver gets away from its Cover.** Every hop that a Cover is marking a receiver, the receiver makes a **Hustle check** (its Hustle minus the Cover's). Win and the receiver **shakes the mark**: the Cover falls a tile further behind and loses the receiver until it catches up, so the receiver's ring turns green. Lose and the mark holds.
+- So a high-Hustle receiver is open more of the time, and a slow one needs a route that cuts away from its Cover.
 
 ---
 
@@ -153,7 +166,17 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 | **Safety** | **Owl**: perched deep, it sees everything | **The deep guard, always between the ball and the first-down line.** It hangs back near the line and slides across its row to stay level with your deepest receiver; while a pass is in the air, it slides toward where it will land. **After a catch it gets into the carrier's column first, then comes down to meet it** (a carrier already past it is just chased). So **a deep pass coming down near it is batted away**, and a carrier rarely gets by it. Beating the Safety (a decoy, a flood to one side, a trick play) is how you gain 10 in one play. | **None** |
 | **Bat** | Bat | **Patrols** a fixed box circuit (3 yards square), one tile per hop, whatever the play is doing. It's already circling before the snap, so you can time a throw past it. A pass coming down near it bounces off. | Small (half a yard), moving with it |
 
-- **Later drives and areas** add more Covers and rushers, plant more Scarecrows, and lengthen the distance ("4th and 15").
+- **Defenders have Hustle, Hands and Heft too**, set by their kind, and they're what your checks are rolled against. ▲ *Starting values:*
+
+  | Defender | Hustle | Hands | Heft |
+  |---|---|---|---|
+  | Cover (Gnome) | 1 | 0 | 0 |
+  | Zone (Scarecrow) | — | 1 | 1 |
+  | Safety (Owl) | 1 | 1 | 1 |
+  | Bat | — | 0 | −1 |
+
+- **The opposition gets stiffer:** every area adds **+1 to every defender's stats**, and a Boss's defenders get another +1. The first-down line stays 10 yards and the drive stays pass-or-fail; what changes is the odds behind it, so your roster has to keep up.
+- **Later drives and areas** also add more Covers and rushers, plant more Scarecrows, and lengthen the distance ("4th and 15").
 - **Before the snap, only the Bats move.** Everyone else waits for HIKE.
 
 ### Hazards
@@ -178,16 +201,78 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 
 ---
 
-## The Deck: the Only Progression
+## Checks: Stats and the Dice *(designed 2026-10-18, not built yet)*
 
-- **A run starts with a deck of 8 basic plays:** **Go** (deep), **Slant** ×2, **Out**, **Curl** ×2, **Screen** (a short toss behind two blockers) and **Draw** (a handoff behind two blockers: no throw at all). Every play uses **four Walk-ons**. The first draft pool adds **Four Verticals**, **Mesh**, **Flood** and **Quick Out** (content/cards.ts).
-- **After every won drive, pick one of three new cards** to add to the deck, **or cut one** to thin it (never below three), or skip.
-- **Cards can bring players who exist only for that play.** For example: **Bat Route** (a Bat receiver flies over defenders), **Skeleton Sneak** (the carrier reassembles after its first tackle), **Pumpkin Decoy** (a rolling pumpkin drags coverage away).
-- **Trick plays are cards too.** For example: **Flea Flicker** (a pitch back, then a deep throw), **Hook and Ladder** (a lateral after the catch), **Hail Mary** (huge range, tiny catch window), **Statue of Liberty**.
-- **The cards on offer come from the area you're in:** the forest offers forest creatures and forest tricks.
-- **Nothing else carries over between drives.** If it matters, it's on a card.
-- **Card names and art should be jokes.** The draft is part of the comedy, not a spreadsheet.
-- ▲ *Card rarity, and upgraded versions of cards ("veteran" plays), come later.*
+Every contest between one of your players and a defender is a **check**: **your stat minus theirs, plus modifiers**, looked up on one table. The idea is distilled from *Blood Bowl* and *Blitz Bowl* (compare two stats, roll, and let a marker make it harder), but much simpler, and **on your side**: this is a one-player game, so the dice don't have to be fair. They're there to make big moments, not frustration.
+
+| Your edge | ≤ −4 | −3 | −2 | −1 | 0 | +1 | +2 | +3 | **≥ +4** |
+|---|---|---|---|---|---|---|---|---|---|
+| **Success** | 10% | 15% | 25% | 40% | **60%** | 75% | 88% | 95% | **100%** |
+
+- **+4 or more is certain.** That's a goal you can build toward: a Golem that's +4 against everything in the area simply never goes down.
+- **An even matchup is 60%, not 50%.** A fair fight leans your way.
+- **There's always a long shot.** Even far outmatched, 1 in 10 comes off.
+- **Negative stats are fine.** A Ghost with Heft −2 goes down to almost anyone; that's the price of its Hustle.
+- **A safety net:** ▲ *each failed check gives that player +1 on its next check of the same kind, until one succeeds, so bad luck can't run on and on.*
+- **The numbers live on the roster, never on the field.** The field shows the odds as ring colors, and the results as pops ("SHOOK HIM!", "BROKE IT!", "DROPPED!").
+- **The rolls come from the run's seed**, so the same run always plays out the same way (TECHNICAL.md).
+
+The three checks:
+
+| Stat | Check | Against | When |
+|---|---|---|---|
+| **Hustle** | **Shake:** get away | The defender's Hustle | Every hop a Cover marks a receiver (getting open), and when a defender reaches the carrier (slipping the tackle) |
+| **Hands** | **Catch:** hold on | The contesting defender's Hands; +1 perfect throw, −1 ok throw, −1 per extra defender | A pass that comes down contested |
+| **Heft** | **Break:** stay up | The tackler's Heft | When the shake fails |
+
+---
+
+## The Playbook *(designed 2026-10-18, not built yet)*
+
+- **Six plays, fixed.** You start every run with the same six and never gain or lose one. ▲ *Run (a handoff up the middle, renamed from Draw), Slant, Out, Go, Screen and Mesh.*
+- **Every play uses all four of your players**: some run routes and some stay home to block. Your roster fills its spots from left to right (see *A Down*).
+- **Your roster is what changes between runs and between drives**, so the same six plays play differently every time: a Run with a Golem carrying is a different play from a Run with a Ghost.
+- **Trick plays** (purple cards) are the only cards you add. Each is **used once**, is **a down of its own** (you gain no yards), and **changes the defense for the rest of the drive**. They change the board, never the rules. The first one: **Pumpkin Bomb**, which the QB lobs like a pass; where it lands it **removes every defender in a 4×4** for the rest of the drive. Because it costs a down, it can't save a 4th down: use it on 1st to 3rd to set up the rest of the drive, or save it for the Boss.
+- ▲ *More trick plays: Hex Jar (one defender becomes a frog for the drive), Torch (every Scarecrow burns), Tombstone (a permanent wall tile), Bat Net (every Bat is caught).*
+
+---
+
+## Your Roster: the Progression *(designed 2026-10-18, not built yet)*
+
+- **Four skill players**, each with a **punny name**, a voxel model, and **Hustle, Hands and Heft**. They're shown in a **roster panel**, left to right in the order they line up, with their numbers. ▲ *Names like Gus Grimsby, Lefty Graves, Big Bert Barrow, Kid Carver.*
+- **Everyone starts human.** Humans are average at everything.
+- **After every won drive, draft one of three, or skip.** The offers are:
+  - **Transforms:** *Werewolf Bite*, *Ghostly Touch*, *Golem Clay*. **A random one of your humans** becomes that monster, for the rest of the run. **Only humans can be transformed**, and there's no way back. With four players, the randomness is only *which* human, and that's part of the fun.
+  - **Trick plays** (see *The Playbook*).
+- **Once all four are monsters,** the draft only offers trick plays.
+
+### The Monsters
+
+Each form shifts a player's stats (plus and minus) and brings **one reroll skill**: a skill bends the dice, the way *Blood Bowl*'s Sure Hands and Dodge do. Every form has one look, one strength and one weakness, readable from its model alone. ▲ *Starting values:*
+
+| Form | Hustle | Hands | Heft | Skill | Plays like |
+|---|---|---|---|---|---|
+| **Human** | 0 | 0 | 0 | — | Average at everything |
+| **Ghost** | +3 | 0 | −2 | **Phase:** reroll a failed shake | Always open, and goes down to anyone |
+| **Werewolf** | +1 | −1 | +1 | **Frenzy:** after a broken tackle, the next break is +2 | Gets stronger the more it's hit |
+| **Golem** | −2 | 0 | +4 | **Stand Firm:** reroll a failed break | Slow, and almost impossible to bring down |
+
+The MVP has exactly these three monsters: with a human, that's the four different forms a Monster Mash needs.
+
+### Team Hands
+
+Your four players' forms make a **hand**, like a poker hand. **A full hand is meant to be overpowered**: enough to carry you through the main game's three Bosses. Getting one takes good picks and some luck, since a single wrong transform can ruin it, and you have to decide when to give up on one hand and chase another.
+
+| Hand | Your four | Bonus ▲ |
+|---|---|---|
+| **Monster Mash** | All different: one Human, one Ghost, one Werewolf, one Golem | **Every player gets every skill** |
+| **Four of a Kind** | Four of the same monster | **The skill works on every check, and its stat gets +2** |
+| *Pair, Three of a Kind* | ▲ *Smaller hands along the way* | ▲ *A small bonus, so the journey feels good* |
+
+- **The tension:** a Monster Mash needs exactly one of each monster *and* a human who stays human; a Four of a Kind means passing on every transform of the wrong kind. Each transform either moves you toward a hand or breaks one.
+- **Picks that are good now but don't scale:** ▲ *for example, a form that's strong straight away against a form whose bonus only matters once your hand is complete.*
+- ▲ *The roster panel lists the hands with your progress toward each ("Monster Mash ●●○○"), as Balatro does.*
+- ▲ *The Boss is shown at the start of the area, so you know what your build has to beat.*
 
 ---
 
@@ -222,7 +307,8 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 | **Down and distance** | A plain readout, e.g. **"3rd & 4"**, and the **first-down line** drawn across the field. |
 | **The play you're calling** | Each card's routes drawn on the field as a preview, before you commit. |
 | **Coverage** | A **purple ring** around every covering defender. |
-| **Who's open** | A **green, yellow or red ring** under each of your players. |
+| **Who's open** | A **green, yellow or red ring** under each of your players: its odds of catching right now. |
+| **Your team's numbers** | Only on the **roster panel**, never on the field. Check results show as pops. |
 | **Where a unit will hop next** | A **small arrow toward its next tile**. Models never turn: they always face the camera (except the Witch, who faces the way she's flying). |
 | **The reticle** | While you pull: a free point with a small *perfect* ring and a larger *ok* ring, and a dashed arc marching from the QB's hand to it. |
 | **Where the ball will land** | A landing ring with **countdown pips**. |
@@ -239,17 +325,9 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 
 ## How the Attributes Show Up
 
-**Every player and every defender has Hustle, Hands and Heft**, whole numbers starting at 0. **0 is the plain baseline**, and every point above it is an upgrade. Walk-ons are 0 / 0 / 0; special players on cards are better at something.
+**Every player and every defender has Hustle, Hands and Heft**: small whole numbers around 0, which can go negative. A human is 0 / 0 / 0. They only ever matter through checks (see *Checks*): **Hustle** shakes a mark or a tackler, **Hands** wins a contested catch, and **Heft** breaks a tackle. **Nobody moves faster than one tile per hop.**
 
-**The QB has no stats.** Cards can bend its throw (a Hail Mary's range, a quick-release play).
-
-| Attribute | At **0** | At 1+ |
-|---|---|---|
-| **Hustle** | Hops **every tick** (2 yards a second). | ▲ *Faster: e.g. two hops a tick.* |
-| **Hands** | The normal catch reach. | ▲ *Wider catch reach.* |
-| **Heft** | **Tackled on the first contact.** | ▲ *Breaks tackles.* |
-
-**Fends off** is separate: a charge that beats one tackle (from a Clean Catch, or a card).
+**The QB has no stats.** Trick plays can bend its throw.
 
 ---
 
@@ -284,12 +362,15 @@ The smallest version that proves the fun:
 - **Play cards:** six starter plays with formations, routes and Flip; draw 3, call 1.
 - **The defense:** Covers, Zones, a Safety and Bats, the drawn pass rush, Scarecrow rings and green, yellow and red player rings. Blocks instead of interceptions.
 - **The Witch** as the first hazard.
-- **The draft** after a won drive: one of three cards, or remove one.
 - One looping song, the core sound effects, and basic juice.
 
-**Then:** trick-play cards and special players, the Rolling Pumpkin, a real Boss, a second area.
+*(All of the above is built.)*
 
-**Later:** card rarity and upgrades, team looks, daily runs.
+**Next (designed 2026-10-18):** the **checks** (Hustle, Hands and Heft against the defenders', on the friendly curve), the **roster** of four with its panel, the **three transforms** and the **two team hands**, **Pumpkin Bomb** as the first trick play, the fixed playbook of six, and defenses that stiffen by area.
+
+**Then:** more trick plays, the Rolling Pumpkin, a real Boss, a second and third area (the main game: 12 drives, three Bosses).
+
+**Later:** more monsters, team looks, daily runs.
 
 ---
 
@@ -301,6 +382,8 @@ Designs we built or considered. They aren't in the game, but they're worth remem
 - **Steering the carrier** *(tried 2026-10-17, discarded 2026-10-18):* swipe to sidestep or wait after the catch. It didn't make the game.
 - **The pocket and Blockers** *(removed in M1.3):* a single tile in front of the QB held by a Blocker with a hold counter that Blitzers wore down. It added a role and a counter to learn.
 - **A hold counter for sacks** *(replaced 2026-10-17):* Blitzers attacked a 3-point counter. Now the pocket clock decides the sack.
+- **The deck as the only progression** *(built in M2, replaced in design 2026-10-18):* after a won drive you drafted a new play card, or cut one. **Why it was replaced:** new plays were different but never *better*, so the draft didn't matter. Ideas considered on the way: rarer play cards with bonuses (white, blue, orange), monsters attached to cards, swapping players in and out of a roster, and Souls as a currency for overkill yards. The roster of four with transforms and checks replaced them, because stats against stats give the build something to scale.
+- **Fixed fend-offs and the Clean Catch** *(replaced in design 2026-10-18):* a perfect catch used to fend off one tackle. Now a perfect throw is +1 on the catch check, and breaking tackles is the Heft check.
 - **The Giant Quarterback** *(the original premise):* you were the **Big**, a hulking monster QB, and your team was tiny creatures (the **Smalls**). The comedy of scale might return as a boss.
 
 ---
@@ -311,4 +394,6 @@ Designs we built or considered. They aren't in the game, but they're worth remem
 - **The forest's Gimmicks and Boss:** the prototype has three Gimmicks (Witching Hour, Bat Cave, Scarecrow Field) and a placeholder Boss defense (The Treant's Guard, content/areas.ts). The Treant itself is still to design.
 - **After the last area:** the prototype ends the run with "The forest is cleared!"; the next area is still to come.
 - **When does the music change?** By drive type, area, or tension (4th down)?
+- **Checks:** the exact curve, the defender stats per area, whether the safety net is needed, and how big the team-hand bonuses must be to feel overpowered without being boring. All of it needs playtesting.
+- **Picks that start strong but don't scale:** which offers fill that role (a form, a trick play, or a third kind of offer).
 - **Should playing with the sound off be supported?** The beat is also visible (bouncing) and felt (haptic ticks), but is that enough?
