@@ -4,7 +4,7 @@ This is a **living plan** for **Arcade Halloween Football**, the design in [GAME
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** **A0, the open decisions**, then **A1, the real-time simulation**. Work happens on the branch `design/arcade`. The earlier grid design (and its milestones) are in git history and summed up in GAMEPLAY.md, *History*.
+**Current focus:** **A1, the real-time simulation**, built alongside the old one in `src/arcade/` so the current game keeps running until A2 switches over. Work happens on the branch `design/arcade`. The earlier grid design (and its milestones) are in git history and summed up in GAMEPLAY.md, *History*.
 
 ---
 
@@ -26,11 +26,11 @@ What goes: the grid and the beat-locked tick, play cards and the hand, the dice 
 
 ## A0. Decisions Before Building
 
-- [ ] **Steering:** drag left and right to steer, flick up to juke. Does the carrier run upfield on its own, or do you control its speed too?
-- [ ] **On the field:** all eight plus the QB (the current plan), or fewer per play?
-- [ ] **Field scale and camera:** how wide the field is, how big the characters are, and whether the camera follows the ball or shows the full width.
-- [ ] **Who upgrades land on:** a random player in the role, or you choose.
-- [ ] **The playbook:** the six to eight plays the random pick comes from, with a mix of passes and handoffs.
+- [x] **Steering:** the carrier charges upfield on its own; each swipe left or right nudges it a little to that side. No juke. *(2026-10-19)*
+- [x] **On the field:** eight a side: the QB plus seven (2 Blockers, 2 Runners, 3 Catchers). *(2026-10-19)*
+- [x] **Camera:** third person, behind and above the QB, lower than before, following the play. *(2026-10-19)*
+- [x] **The playbook:** four new plays (Slants, Deep Shot, Curl & Flat, Dive), picked at random and randomly mirrored. *(2026-10-19)*
+- [ ] **Who upgrades land on:** a random player in the role, or you choose. *(Needed for A2.)*
 
 ---
 
@@ -42,7 +42,7 @@ What goes: the grid and the beat-locked tick, play cards and the hand, the dice 
 - [ ] **Bodies:** circles with position, velocity, mass (Heft), top speed (Hustle) and reach (Hands). Collisions push by mass.
 - [ ] **Roles and jobs:** Blockers find a rusher and shove it; Runners and Catchers run their routes; the defense's Rushers, Covers, Scarecrows, the Owl and Bats do their jobs.
 - [ ] **The ball:** the throw arc (kept from the grid design), catching by reach, contested balls won by Hands, batted-down low passes, the Witch.
-- [ ] **The carrier:** steering input, the juke, tackles as collisions, breaking free on a big Heft gap.
+- [ ] **The carrier:** swipe steering, tackles as collisions, breaking free on a big Heft gap, out of bounds.
 - [ ] **How a down ends:** tackled, incomplete, batted down, sacked, over the line.
 - [ ] **Tests** for each of these, and **the balance runs ported** to the new sim, with a bot that throws and steers.
 

@@ -12,7 +12,7 @@ Items marked **▲** are recommendations or details still open to change. Every 
 - **Area:** a themed place (the Haunted Forest first). Each area is four drives.
 - **Drive:** four downs to gain 10 yards. **Down:** one play, a few seconds long.
 - **Line of scrimmage:** where the current down starts. **First-down line:** 10 yards past where the drive started.
-- **Your team:** the QB plus **eight players**, each a **Blocker**, a **Runner** or a **Catcher**.
+- **Your team:** **eight on the field**: the QB plus seven players, each a **Blocker**, a **Runner** or a **Catcher**.
 - **Carrier:** whoever has the ball after a catch or a handoff. **You steer the carrier.**
 - **Heft, Hustle, Hands:** your players' (and defenders') three stats. They're physics, not dice: weight, speed and reach.
 
@@ -20,7 +20,7 @@ Items marked **▲** are recommendations or details still open to change. Every 
 
 ## The Game in One Breath
 
-Tap PLAY and you're on the field. The ball is snapped the moment you pull back on the screen: the play is picked for you, your Blockers shove the pass rush, your Catchers break for open grass, and you **release to throw**. The moment someone catches it, **you're steering**: weave the carrier through the forest's gnomes and owls, flick to juke, and see how far you get before they bury you. Four downs to make 10 yards. Make it and you **pick an upgrade**: a Catcher becomes a Ghost, a Blocker becomes a Golem, someone gets faster. Miss on 4th down and the run is over. You start as a team of plain, weak humans against a sleepy defense; by the third area you're a pack of monsters against the whole forest.
+Tap PLAY and you're on the field. The ball is snapped the moment you pull back on the screen: the play is picked for you, your Blockers shove the pass rush, your Catchers break for open grass, and you **release to throw**. The moment someone catches it, **you're steering**: the carrier charges upfield, and each swipe nudges it a little left or right through the forest's gnomes and owls. See how far you get before they bury you. Four downs to make 10 yards. Make it and you **pick an upgrade**: a Catcher becomes a Ghost, a Blocker becomes a Golem, someone gets faster. Miss on 4th down and the run is over. You start as a team of plain, weak humans against a sleepy defense; by the third area you're a pack of monsters against the whole forest.
 
 ---
 
@@ -66,7 +66,14 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## A Down
 
-1. **The play is picked for you.** A random play from the playbook lines your team up: where your Catchers will run, whether it's a pass or a handoff. Its name flashes up ("SLANT!") and the routes show for a moment. There's nothing to choose: you're already playing. ▲ *A small playbook of six to eight plays, so formations vary but nobody has to learn them.*
+1. **The play is picked for you.** One of **four plays**, at random (and randomly mirrored), lines your team up: where your Catchers will run, whether it's a pass or a handoff. Its name flashes up ("SLANTS!") and the routes show for a moment. There's nothing to choose: you're already playing.
+
+   | Play | What happens |
+   |---|---|
+   | **Slants** | The outside Catchers cut inside; the slot goes deep; a Runner leaks into the flat. |
+   | **Deep Shot** | All three Catchers go long; both Runners stay home to block. |
+   | **Curl & Flat** | The Catchers run out and turn back; the Runners swing out to the flats. |
+   | **Dive** | A handoff: a Runner takes it straight up the middle behind the Blockers; the Catchers run off, dragging their Covers away. |
 2. **Pull back anywhere to snap.** The same pull aims the throw.
 3. **The play happens at full speed, on its own.** Blockers lock up with the pass rush and shove; Catchers run their routes; Covers chase them; the Owl hangs deep.
 4. **Release to throw.** The ball flies to where you aimed; the arc rises the further you throw, so long passes sail over defenders underneath and short ones are quick but low.
@@ -86,8 +93,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### After the catch: steering
 
-- **Drag left and right to steer.** The carrier always runs upfield on its own; you only choose the lane. ▲
-- **Flick up to juke:** a quick burst and sidestep that a tackler can't grab. ▲ *One juke per carry (more with upgrades), so it's a decision, not a spam button.*
+- **Swipe left or right to steer, a little at a time.** The carrier always charges upfield on its own; each swipe nudges it over a step to that side. You're choosing the lane, not driving.
+- **Don't run out of bounds:** a carrier over the sideline is down there.
 - **Tackles are collisions.** A defender that hits the carrier brings it down, unless the carrier is **much heavier**: then the defender bounces off and the carrier keeps going (Heft). A faster carrier simply outruns chasers (Hustle).
 - **Your Blockers keep blocking** after the catch, shoving defenders out of the carrier's way, so running behind them is the safe lane.
 
@@ -99,8 +106,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 |---|---|---|
 | **Before the snap** | **Pull back anywhere** | Snap the ball and start aiming. The further you pull, the further the throw. |
 | **Aiming** | **Release** | Throw. Letting go too close to the QB cancels. |
-| **Carrying** | **Drag left or right** | Steer the carrier. ▲ |
-| **Carrying** | **Flick up** | Juke. ▲ |
+| **Carrying** | **Swipe left or right** | Nudge the carrier a step to that side. |
 | **Between drives** | **Tap a card** | Take that upgrade. |
 
 **One thumb, portrait.** Nothing needs two hands, and nothing needs precise timing to a beat.
@@ -109,15 +115,17 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Your Team
 
-**The QB plus eight players, every one on the field every down.** Each has one of three roles, and **the role is the silhouette**: you know what a player does by looking at it.
+**Eight on the field: the QB plus seven players**, every one on the field every down. Each has one of three roles, and **the role is the silhouette**: you know what a player does by looking at it.
 
 | Role | How many | Looks | Does | Main stat |
 |---|---|---|---|---|
-| **Blocker** | 3 | Big, wide, low | Holds off the rush, shoves defenders out of the carrier's way | **Heft** |
-| **Runner** | 2 | Lean, leaning forward | Takes handoffs, breaks away | **Hustle** |
+| **Blocker** | 2 | Big, wide, low | Holds off the rush, shoves defenders out of the carrier's way | **Heft** |
+| **Runner** | 2 | Lean, leaning forward | Takes handoffs, breaks away; on a pass play, one stays home to block | **Hustle** |
 | **Catcher** | 3 | Tall, long arms | Gets open, catches | **Hands** |
 
-▲ *Eight on the field plus the QB, against up to eight defenders. The field gets wider and the characters smaller to fit (THEME.md); the three silhouettes have to stay readable at that size.*
+▲ *Up to eight defenders against them.*
+
+**The camera sits behind and above the QB**, lower than a top-down view: a third-person look down the field, like standing just behind your own line. It follows the play upfield. The three silhouettes have to read from there at phone size.
 
 **The stats are physics, never dice.** Everything that matters, you can see happen:
 
@@ -219,9 +227,10 @@ The tension: every pick is either toward a bonus or a sure, small boost now.
 
 The smallest version that proves the fun:
 - **One area of four drives**, played three times with the defense scaling up.
-- **The QB and eight players** in three roles, all human, with **throw** and **steer**.
-- **A real-time play:** blocking as shoving, routes, a real pass rush, catching by reach, tackles as collisions, the juke.
-- **A random play each down** from a small playbook.
+- **The QB and seven players** in three roles, all human, with **throw** and **steer**.
+- **A real-time play:** blocking as shoving, routes, a real pass rush, catching by reach, tackles as collisions, swipes to steer.
+- **A random play each down** from the four.
+- **The third-person camera** behind and above the QB, following the play.
 - **The defense:** Rushers, Covers, a Safety, Scarecrows and Bats, scaling by drive and area. The Witch.
 - **Upgrades** after each won drive: the three transforms and training.
 - **Impact:** hit-pause, shake, flying bodies, the catch slow-mo, sound on every contact.
@@ -241,9 +250,7 @@ The smallest version that proves the fun:
 
 ## Open Questions
 
-- ▲ **Steering:** drag to steer and flick to juke is the first try. Does the carrier run upfield on its own, or do you control its speed too?
-- ▲ **How many on the field:** all eight plus the QB, or a squad of eight with fewer on the field per play? Eight a side is a lot of bodies on a phone.
-- **The camera** for a wider field: does it follow the ball, or show the whole width and scroll with the play?
 - **Who the upgrades land on:** a random player in the role, or you choose?
+- **Field width** and how far the camera sees ahead (to tune in the first playable).
 - **The forest's Boss:** the Treant is still to design.
 - **Sound off:** with no rhythm gameplay, it should play fine muted. Check it.
