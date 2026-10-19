@@ -4,7 +4,7 @@ This is a **living plan** for **Arcade Halloween Football**, the design in [GAME
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** **A1, the real-time simulation**, built alongside the old one in `src/arcade/` so the current game keeps running until A2 switches over. Work happens on the branch `design/arcade`. The earlier grid design (and its milestones) are in git history and summed up in GAMEPLAY.md, *History*.
+**Current focus:** **A2, the first playable**: render the arcade sim with the third-person camera, wire throw and swipe, and tune pacing (downs are far too short) with `npm run balance:arcade`. A1 (the simulation) is built in `src/arcade/`. Work happens on the branch `design/arcade`. The earlier grid design (and its milestones) are in git history and summed up in GAMEPLAY.md, *History*.
 
 ---
 
@@ -18,7 +18,7 @@ Built for the earlier designs and carried over as they are:
 - [x] **Audio:** the synth, the mixer, the sound effects, four song loops on one shared grid (Spooky Surf is in the game; the other three are waiting for a listen).
 - [x] **UI:** the DOM HUD, the drive banner, down and distance, pops, the self-hosted Creepster font (no flash of fallback text).
 - [x] **The run's shape:** drives of four downs to gain 10 yards, areas of four drives (Intro, Challenge, Gimmick, Boss), the Boss drive going for a touchdown, game over on a failed 4th down.
-- [x] **Headless balance runs:** `npm run balance` plays whole runs through the sim with a bot. It has to be ported to the new simulation (A1).
+- [x] **Headless balance runs:** `npm run balance` (the grid sim) and `npm run balance:arcade` (the new sim, A1).
 
 What goes: the grid and the beat-locked tick, play cards and the hand, the dice checks, and the roster-of-four prototype.
 
@@ -36,15 +36,17 @@ What goes: the grid and the beat-locked tick, play cards and the hand, the dice 
 
 ## A1. The Real-Time Simulation
 
-**Done when** a whole down plays out in the sim alone, deterministically, and the tests and balance runs pass.
+**Done when** a whole down plays out in the sim alone, deterministically, and the tests and balance runs pass. **Built 2026-10-19** in `src/arcade/` (alongside the old grid sim, which the game still renders until A2).
 
-- [ ] **A fixed-timestep sim** (for example 60 steps a second), pure and seeded like the old one: the same seed and inputs always give the same run.
-- [ ] **Bodies:** circles with position, velocity, mass (Heft), top speed (Hustle) and reach (Hands). Collisions push by mass.
-- [ ] **Roles and jobs:** Blockers find a rusher and shove it; Runners and Catchers run their routes; the defense's Rushers, Covers, Scarecrows, the Owl and Bats do their jobs.
-- [ ] **The ball:** the throw arc (kept from the grid design), catching by reach, contested balls won by Hands, batted-down low passes, the Witch.
-- [ ] **The carrier:** swipe steering, tackles as collisions, breaking free on a big Heft gap, out of bounds.
-- [ ] **How a down ends:** tackled, incomplete, batted down, sacked, over the line.
-- [ ] **Tests** for each of these, and **the balance runs ported** to the new sim, with a bot that throws and steers.
+- [x] **A fixed-timestep sim** at 60 steps a second, pure and seeded: the same seed and inputs always give the same run (`src/arcade/sim/step.ts`, `run.ts`).
+- [x] **Bodies:** circles with position, velocity, mass (1.25 ^ Heft), top speed (Hustle) and reach (Hands). Overlaps are pushed apart by weight; Scarecrows are planted; your players pass through each other.
+- [x] **Roles and jobs:** Blockers get between a rusher and the QB (after the catch, between the nearest defender and the carrier); route runners run their waypoints and go for a ball coming down near them; Rushers charge the QB, Covers trail their mark, the Owl hangs deep and comes down, Bats loop; after the catch everyone chases.
+- [x] **The ball:** the throw arc, catching by reach, contested balls won by Hands (ties to you), low passes batted down, the Witch.
+- [x] **The carrier:** swipe steering (a lane nudged 1½ yards a swipe), tackles on contact, breaking free 2 Heft heavier, pancakes 3 Heft heavier, out of bounds.
+- [x] **How a down ends:** tackled, incomplete, batted, sacked, out of bounds, over the line; drives, areas and the run (three areas), with a placeholder pause where the upgrade pick will go.
+- [x] **Tests** (`tests/arcade/`), and **the balance runs** (`npm run balance:arcade`) with a bot that throws and steers.
+
+**First balance numbers** (30 runs a build, before any tuning): downs last only **about 1.2 seconds** (the target is 4 to 8); all-human teams win about 2 drives of 12; Ghost Catchers alone win most runs (Hands decides too much); Werewolf Runners barely matter (Runners only carry on the Dive); pancakes happen only with Golem Blockers and broken tackles almost never. All of it is A2 tuning.
 
 ## A2. First Playable
 
@@ -104,4 +106,5 @@ What goes: the grid and the beat-locked tick, play cards and the hand, the dice 
 
 ## Changelog
 
+- **2026-10-19:** **A1 built: the real-time simulation** in `src/arcade/` (content, sim, tests, `npm run balance:arcade`). Eight a side at 60 steps a second; stats as weight, speed and reach; the four plays; the forest's defenses scaling by drive and area. The first balance numbers say downs are far too short and Hands decides too much; tuning comes with the first playable.
 - **2026-10-19:** **The plan starts over for Arcade Halloween Football.** GAMEPLAY.md was rewritten from first principles: real time instead of the grid and the beat, throw then steer, the QB plus eight players as Blockers, Runners and Catchers, physical stats instead of dice, a random play each down, no draft at the start, and a run that builds up against a defense that scales. The earlier milestones and changelog are in git history.

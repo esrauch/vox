@@ -5,6 +5,8 @@ This doc covers how we build it: the stack, the architecture, the beat clock, re
 Items marked **▲ Decision** are recommendations that are still open to change.
 
 > **2026-10-19: the design moved to real-time arcade football** (GAMEPLAY.md, branch `design/arcade`): continuous movement instead of a grid, eight players a side, physical stats (weight, speed, reach) instead of dice, no play cards, and the music as soundtrack only. **This doc still describes the code as built:** the grid simulation that ticks on the beat (§3, §4 and §10 change most). The plan is a deterministic fixed-timestep simulation with circle bodies, kept pure and testable like the current one, with the headless balance runs carried over. The rendering, voxel and audio pipelines stand.
+>
+> **The new simulation is built (A1) in `src/arcade/`**, beside the old one: `content/` (`tuning.ts` as `arcadeTuning`: every arcade number; `team.ts`: roles, line-up, base stats, forms; `plays.ts`: the four plays as waypoint routes; `defense.ts`: defender kinds and the forest's drives) and `sim/` (`types.ts`; `vec.ts`; `random.ts`: `rngFor`, seeded with a full avalanche mix; `bodies.ts`: stats into physics, mass = 1.25 ^ Heft, and both line-ups; `ai.ts`: each body's target; `physics.ts`: moving and pushing apart by weight; `ball.ts`: the arc and who gets the ball; `step.ts`: the 60 Hz step; `run.ts`: drives, downs, the random play, the snap, areas). Tests are in `tests/arcade/` (`playState` builds a snapped down with exact bodies). `npm run balance:arcade` (`tools/arcade-balance.ts`) plays whole runs with a bot that throws and swipes, and reports drive win rates, how downs end, and how long they take.
 
 ---
 
