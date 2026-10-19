@@ -449,6 +449,8 @@ Everything a future session (human or Claude) needs to carry on without the orig
 - **`voxel/`**: `voxt.ts` (parser), `mesh.ts` (greedy mesher), `models.ts` (loads every `.voxt` through `import.meta.glob`, caches geometry, `voxelMaterial`, `modelHeight`), `vox.ts` (MagicaVoxel import).
 - **`dev/`** plus `/dev/*.html`: the beat-clock page, the screen inspector (`screen.html?seed=N`), the model viewer, the sound board. In dev builds the game is exposed as `window.game` for console debugging.
 
+**Balance runs:** `npm run balance [runs]` (`tools/balance.ts`) plays whole runs straight through the sim, with no rendering, audio or browser (about 2,000 runs a minute). A simple bot calls random plays and throws to the receiver with the best odds, and it reports drive win rates by area and drive, check success rates and team hands for a set of team builds. Use it to compare builds and tune numbers; the bot isn't a good player, so its absolute win rates are only a guide.
+
 Tests live in `tests/` and mirror these folders (115 at last count). Simulation tests build exact downs with `tests/sim/helpers.ts`: `playState(players, defenders)` is a down just snapped (line of scrimmage on row 3, first-down line on row 23, QB on (5, 0), no pocket clock unless you set `state.pocket`, player ids from 100, defender ids from 200), plus `run`, `carry`, `player`, `defender`, `ofType`. Players can be given `stats`, `form`, `rerolls` and `frenzy`. Checks are seeded, so tests use `STAR` stats (every check succeeds: +4 is certain) or `DUD` stats with `seedWhere` (the first seed that gives the unlikely result).
 
 ### How to make a voxel model (the recipe that works)
