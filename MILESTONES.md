@@ -33,7 +33,7 @@ Most of the design is settled. What's left is listed here, grouped by when it ha
 - [ ] **Throw range** measured from the line of scrimmage (the old fixed band of rows 4–11 doesn't fit short plays).
 - [ ] **The camera during a drive:** follow the line of scrimmage, or show all 10 yards.
 - [ ] **The starter deck:** the six plays' exact formations and routes, and how many players a play uses.
-- [ ] **What 1+ means** for Hustle, Hands and Heft, and the defenders' values. *(Decide during M2 tuning.)*
+- [x] **What the stats mean:** checks (GAMEPLAY.md, Checks): Hustle shakes, Hands catches, Heft breaks tackles, against the defenders' values on a curve that favors you. *(Designed and prototyped 2026-10-18.)*
 - [ ] **The Safety's look** (an Owl?).
 
 **Superseded by the new loop:** the earlier decisions about starting slots, balls as lives, wipeouts, the draft mix, interceptions, fumble resets, Walk-on trades, the Big's counter and placement-based setup. The history is in GAMEPLAY.md, *History*.
@@ -298,6 +298,7 @@ The base systems everything else is built on. **Each one is built and verified o
 
 ## Changelog
 
+- **2026-10-18:** **Roster and checks prototype** (branch `design/roster-stats`): the progression is now your four players, not play cards. They start as identical humans; each draft offers one transform (a random human becomes a Ghost, Werewolf or Golem) and two training picks (+1 to a random player). Monster Mash and Four of a Kind are the team hands. Contests are checks: Hustle shakes a mark at a route's cut or a tackler, Hands wins a contested catch, Heft breaks a tackle, on a curve where +4 is certain; the safety net and reroll skills bend the dice. The playbook is six fixed plays (Draw renamed Run). The run is the forest three times, +1 to the defense each time. Fixed fend-offs and the Clean Catch are gone. Monsters are placeholders (a colored block on the head) until the mechanic is proven; trick plays are on hold. Also fixed: a Bat could line up on another defender's tile.
 - **2026-10-18:** One Long Field: on the first three drives the turf and sidelines run on past the first-down line, and the next defense waits up there as faded ghosts on its real tiles; the glide reveals them. The Boss drive's field ends at the end zone and the woods.
 - **2026-10-18:** The four drives are one continuous march: after a first down the camera glides forward with the next defense already lined up, then the draft, then play. The Boss drive goes for the end zone ("& Goal", an end zone painted past the goal line, TOUCHDOWN!).
 - **2026-10-18:** The pocket is only a countdown: three linemen and three rushers drawn in front of the QB, pushed back as the clock runs, a sack at zero. Blitzers are no longer units (a defense's `rushers` count shortens the clock), so nothing at the line blocks passes or tackles; runs have no clock.

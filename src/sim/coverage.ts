@@ -1,16 +1,16 @@
 /**
- * Coverage rings (GAMEPLAY.md, Coverage): every covering defender has a
- * purple ring, and every one of your players is green, yellow or red.
+ * Coverage (GAMEPLAY.md, Coverage and Catching): which defenders contest a
+ * pass coming down at a point, and each of your players' ring, green, yellow
+ * or red by its odds of winning a catch right now.
  *
- * - **Red (covered):** inside a ring. A pass arriving now is blocked.
- * - **Yellow (tight):** within `tuning.coverage.nearBand` tiles outside a
- *   ring. A pass arriving now is caught, but it may not be by the time it lands.
- * - **Green (open):** clear.
+ * A defender contests a ball that comes down right beside it (it can get a
+ * hand to it) or inside its purple ring (Scarecrows and Bats).
  */
 import { DEFENDERS } from '../content/defenders';
 import { tuning } from '../content/tuning';
+import { chance, checkEdge } from './checks';
 import { distance } from './grid';
-import type { Defender, ScreenState, Vec } from './types';
+import type { Defender, PlayerUnit, RunState, ScreenState, Vec } from './types';
 
 export type Openness = 'open' | 'tight' | 'covered';
 
@@ -19,34 +19,33 @@ export function coverageRadius(d: Defender): number {
   return d.downTicks > 0 ? 0 : DEFENDERS[d.kind].coverage;
 }
 
-/**
- * How open a tile is for a ball thrown right at it: covered if a defender is
- * close enough to bat a low ball there, or it's inside a Scarecrow's (or
- * Bat's) ring; tight if one is nearly that close.
- */
-export function openness(screen: ScreenState, at: Vec): Openness {
-  let worst: Openness = 'open';
-  for (const d of screen.defenders) {
-    if (d.downTicks > 0) continue;
-    const reach = Math.max(coverageRadius(d), tuning.throw.blockRadius);
-    const gap = distance(d.pos, at) - reach;
-    if (gap <= 0) return 'covered';
-    if (gap <= tuning.coverage.nearBand) worst = 'tight';
-  }
-  return worst;
+/** Every defender that's up and would contest a ball coming down at `at`, nearest first. */
+export function contestants(screen: ScreenState, at: Vec): Defender[] {
+  return screen.defenders
+    .filter(
+      (d) =>
+        d.downTicks === 0 &&
+        distance(d.pos, at) <= Math.max(coverageRadius(d), tuning.throw.blockRadius),
+    )
+    .sort((a, b) => distance(a.pos, at) - distance(b.pos, at) || a.id - b.id);
 }
 
-/** The nearest defender whose ring covers a tile (the one a blocked pass bounces off), or null. */
-export function coveringDefender(screen: ScreenState, at: Vec): Defender | null {
-  let best: Defender | null = null;
-  let bestDist = Infinity;
-  for (const d of screen.defenders) {
-    const r = coverageRadius(d);
-    const dd = distance(d.pos, at);
-    if (r > 0 && dd <= r && dd < bestDist) {
-      best = d;
-      bestDist = dd;
-    }
-  }
-  return best;
+/**
+ * A player's odds of catching a good throw arriving at its tile right now:
+ * 1 uncontested, otherwise its Hands check against the best contesting
+ * defender (with the safety net, and −1 per extra defender).
+ */
+export function catchChance(state: RunState, player: PlayerUnit): number {
+  const contest = contestants(state.screen, player.pos);
+  const best = [...contest].sort((a, b) => b.stats.hands - a.stats.hands || a.id - b.id)[0];
+  if (!best) return 1;
+  const modifier = -tuning.checks.perExtraDefender * (contest.length - 1);
+  return chance(checkEdge(state, 'catch', player, best, modifier));
+}
+
+/** A player's ring: green for a likely catch, yellow for about a coin flip, red for a long shot. */
+export function openness(state: RunState, player: PlayerUnit): Openness {
+  const p = catchChance(state, player);
+  const { bands } = tuning.checks;
+  return p >= bands.open ? 'open' : p >= bands.tight ? 'tight' : 'covered';
 }

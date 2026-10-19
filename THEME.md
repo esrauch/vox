@@ -97,7 +97,7 @@ Candidates (each wearing the team helmet, with a role you can read from its shap
 
 ## Attributes
 
-Every player and every defender is described by **three attributes**, the **Three H's**: whole numbers starting at 0. Walk-ons are a perfectly average 0 / 0 / 0, and special players are better in one or two.
+Every player and every defender is described by **three attributes**, the **Three H's**: small whole numbers around 0, which can go negative. Your players start as perfectly average humans (0 / 0 / 0) and are transformed into monsters that are better at one thing and worse at another (GAMEPLAY.md, Your Roster).
 
 | Attribute | What it means | Who's known for it |
 |---|---|---|

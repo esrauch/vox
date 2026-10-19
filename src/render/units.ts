@@ -3,14 +3,21 @@ import { DEFENDERS } from '../content/defenders';
 import { common, hexToNumber, team } from '../content/palettes';
 import { coverageRadius, openness, type Openness } from '../sim/coverage';
 import { eq } from '../sim/grid';
-import { getGeometry, voxelMaterial } from '../voxel/models';
-import type { ScreenState, Unit, Vec } from '../sim/types';
+import { getGeometry, modelHeight, voxelMaterial } from '../voxel/models';
+import type { Form, RunState, ScreenState, Unit, Vec } from '../sim/types';
 import { tilt } from './experiments';
 import { tileToWorld } from './view';
 
-const SPECIAL_COLOR = hexToNumber(team.accent);
-/** The plain football player. */
+/** The plain football player: every one of your players, for now. */
 const WALK_ON_MODEL = 'team/walkOn';
+const WALK_ON_HEIGHT = modelHeight(WALK_ON_MODEL);
+/** Placeholder looks for the monsters: a block of this color on the head. */
+const FORM_COLOR: Readonly<Record<Exclude<Form, 'human'>, number>> = {
+  ghost: 0xf2f0ff,
+  werewolf: 0x8a5a33,
+  golem: 0x8c8f99,
+};
+const GOLEM_SCALE = 1.2;
 
 /** How much of a beat a hop takes. The rest of the beat the unit stands still. */
 const HOP_SHARE = 0.55;
@@ -44,8 +51,8 @@ interface UnitView {
  * (an arrow shows where they'll hop next) and tip over when knocked down.
  *
  * The rings on the turf are the coverage telegraph: every covering defender
- * shows its purple ring, and every one of your players shows whether a pass
- * arriving now would be caught (green or yellow) or blocked (red).
+ * shows its purple ring, and every one of your players shows its odds of
+ * catching a pass arriving now: green likely, yellow a coin flip, red a long shot.
  */
 export class UnitViews {
   private readonly views = new Map<number, UnitView>();
@@ -53,7 +60,7 @@ export class UnitViews {
     number,
     THREE.MeshBasicMaterial | THREE.MeshLambertMaterial
   >();
-  private readonly specialBox = new THREE.BoxGeometry(0.55, 0.55, 0.55);
+  private readonly badgeGeo = new THREE.BoxGeometry(0.3, 0.24, 0.3);
   private readonly arrowGeo = new THREE.ConeGeometry(0.13, 0.28, 4).rotateX(-Math.PI / 2);
   private readonly arrowMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
   /** A unit-radius ring, scaled to each defender's coverage. */
@@ -94,12 +101,13 @@ export class UnitViews {
   }
 
   /** Animate to `phase` (0..1) of the current beat. */
-  update(screen: ScreenState, phase: number): void {
+  update(state: RunState, phase: number): void {
+    const { screen } = state;
     for (const u of [...screen.players, ...screen.defenders]) {
       const view = this.views.get(u.id);
       if (!view) continue;
       this.updateOne(u, view, phase);
-      this.updateRing(screen, u, view);
+      this.updateRing(state, u, view);
     }
   }
 
@@ -114,18 +122,18 @@ export class UnitViews {
   }
 
   private create(u: Unit): UnitView {
-    // Walk-ons and defenders are voxel models; special players are still placeholder cubes.
-    const model =
-      u.side === 'defender'
-        ? DEFENDERS[u.kind].model
-        : u.kindId === 'walkOn'
-          ? WALK_ON_MODEL
-          : null;
-    const body = model
-      ? new THREE.Mesh(getGeometry(model), voxelMaterial)
-      : new THREE.Mesh(this.specialBox, this.lambert(SPECIAL_COLOR));
+    const model = u.side === 'defender' ? DEFENDERS[u.kind].model : WALK_ON_MODEL;
+    const body = new THREE.Mesh(getGeometry(model), voxelMaterial);
     body.castShadow = true;
-    const base = model ? 0 : 0.275;
+    // Placeholder monsters (until their models exist): your player, with a
+    // colored block on its head for its form, and a Golem a size bigger.
+    if (u.side === 'player' && u.form !== 'human') {
+      const badge = new THREE.Mesh(this.badgeGeo, this.lambert(FORM_COLOR[u.form]));
+      badge.position.y = WALK_ON_HEIGHT + 0.12;
+      body.add(badge);
+      if (u.form === 'golem') body.scale.setScalar(GOLEM_SCALE);
+    }
+    const base = 0;
     const arrow = new THREE.Mesh(this.arrowGeo, this.arrowMat);
     const root = new THREE.Group();
     root.add(body, arrow);
@@ -187,7 +195,8 @@ export class UnitViews {
     }
   }
 
-  private updateRing(screen: ScreenState, u: Unit, view: UnitView): void {
+  private updateRing(state: RunState, u: Unit, view: UnitView): void {
+    const { screen } = state;
     view.ring.position.set(view.current.x, 0.02, view.current.z);
     if (u.side === 'defender') {
       // Coverage only matters while a pass can still be thrown or caught.
@@ -198,6 +207,6 @@ export class UnitViews {
     }
     // Open or covered matters until someone catches it (it can change while the ball's in the air).
     view.ring.visible = screen.ball.at === 'qb' || screen.ball.at === 'flight';
-    view.ring.material = this.basic(OPENNESS_COLOR[openness(screen, u.pos)]);
+    view.ring.material = this.basic(OPENNESS_COLOR[openness(state, u)]);
   }
 }

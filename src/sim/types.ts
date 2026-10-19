@@ -15,12 +15,40 @@ export interface Vec {
   readonly y: number;
 }
 
-/** Hustle / Hands / Heft. Whole numbers from 0 (GAMEPLAY.md, How the Attributes Show Up). */
+/** Hustle / Hands / Heft. Small whole numbers around 0, which can go negative (GAMEPLAY.md, Checks). */
 export interface Stats {
   readonly hustle: number;
   readonly hands: number;
   readonly heft: number;
 }
+
+/**
+ * The three checks (sim/checks.ts): shaking a mark or a tackler (Hustle),
+ * winning a contested catch (Hands), breaking a tackle (Heft).
+ */
+export type CheckKind = 'shake' | 'catch' | 'break';
+
+/** What one of your players is: everyone starts human (content/roster.ts). */
+export type Form = 'human' | 'ghost' | 'werewolf' | 'golem';
+
+/** One of your four players, for the whole run (GAMEPLAY.md, Your Roster). */
+export interface RosterPlayer {
+  readonly name: string;
+  form: Form;
+  /** Stats gained from training, on top of the form's. */
+  training: Stats;
+  /** The safety net: failures in a row, per kind of check. */
+  streak: Record<CheckKind, number>;
+}
+
+/** Your four players' forms as a hand (GAMEPLAY.md, Team Hands). */
+export type TeamHand =
+  { readonly kind: 'mash' } | { readonly kind: 'four'; readonly form: Form } | null;
+
+/** A draft pick: a random human becomes a monster, or a random player trains a stat. */
+export type DraftOffer =
+  | { readonly kind: 'transform'; readonly form: Form }
+  | { readonly kind: 'train'; readonly stat: keyof Stats };
 
 interface UnitBase {
   readonly id: number;
@@ -34,13 +62,19 @@ interface UnitBase {
 
 export interface PlayerUnit extends UnitBase {
   readonly side: 'player';
-  readonly kindId: string;
+  /** Which roster player this is (0-3, left to right as the play lines up). */
+  readonly slot: number;
+  readonly form: Form;
   /** Its route from the play card: one move per hop (content/cards.ts). */
   readonly route: string;
   /** How many of its route's moves it has used. */
   routeStep: number;
-  /** Tackles this player can still break (from a Clean Catch). */
-  fendOff: number;
+  /** Failed checks of these kinds are rolled again (its form's skill, or the team hand's). */
+  readonly rerolls: readonly CheckKind[];
+  /** Frenzy: after a success on these kinds, the next check of the kind gets an edge… */
+  readonly frenzy: readonly CheckKind[];
+  /** …and these have it waiting. */
+  frenzyReady: CheckKind[];
 }
 
 export type DefenderKind = 'cover' | 'zone' | 'safety' | 'bat';
@@ -153,8 +187,10 @@ export interface RunState {
   deck: Deck;
   /** The play called for this down (an index into the hand), and whether it's flipped. */
   called: { readonly hand: number; readonly flipped: boolean } | null;
-  /** Cards offered in the draft. */
-  offer: string[];
+  /** Your four players. */
+  roster: RosterPlayer[];
+  /** What the draft offers. */
+  offer: DraftOffer[];
   screen: ScreenState;
   /** Ticks since the snap (in play). */
   downTick: number;
@@ -180,7 +216,6 @@ export type Action =
   | { readonly type: 'flip' }
   | { readonly type: 'hike' }
   | { readonly type: 'draft'; readonly offer: number }
-  | { readonly type: 'remove'; readonly owned: number }
   | { readonly type: 'skipDraft' };
 
 /** What the player does on a tick. */
@@ -212,13 +247,21 @@ export type SimEvent =
   | {
       readonly type: 'caught';
       readonly id: number;
-      readonly clean: boolean;
       readonly quality: CatchQuality;
+      /** Whether it was won on a Hands check. */
+      readonly contested: boolean;
     }
+  /** A contested catch lost: the ball is knocked away. */
+  | { readonly type: 'dropped'; readonly id: number; readonly by: number }
+  /** A Hustle check won: a mark or a tackler shaken off. */
+  | { readonly type: 'shook'; readonly id: number; readonly defender: number }
+  /** A Heft check won: the tackler goes down instead. */
+  | { readonly type: 'brokeTackle'; readonly id: number; readonly defender: number }
+  | { readonly type: 'transformed'; readonly slot: number; readonly form: Form }
+  | { readonly type: 'trained'; readonly slot: number; readonly stat: keyof Stats }
   /** A pass bounced off a defender (or a hazard). */
   | { readonly type: 'blocked'; readonly by: number; readonly at: Vec }
   | { readonly type: 'incomplete'; readonly at: Vec }
-  | { readonly type: 'fendedOff'; readonly id: number; readonly defender: number }
   | { readonly type: 'knockedDown'; readonly id: number }
   | { readonly type: 'tackled'; readonly id: number; readonly by: number }
   | { readonly type: 'sacked'; readonly by: number | null }

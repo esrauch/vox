@@ -9,7 +9,8 @@ import { playCard } from '../content/cards';
 import { COLS, ROWS, eq, vec } from '../sim/grid';
 import { createRun, dispatch, downAndDistance } from '../sim/run';
 import { step, throwProblem } from '../sim/step';
-import type { RunState, SimEvent, SimResult, Unit, Vec } from '../sim/types';
+import type { Form, RunState, SimEvent, SimResult, Unit, Vec } from '../sim/types';
+import { offerFace } from '../game/rosterText';
 
 const $ = <T extends HTMLElement>(id: string): T => {
   const el = document.getElementById(id);
@@ -161,20 +162,27 @@ function render(): void {
       : state.phase === 'play'
         ? 'Tap a tile to queue a throw for the next beat (lands 2 beats later). Step or Auto to advance.'
         : state.phase === 'draft'
-          ? `Draft: ${state.offer.map((c) => playCard(c).name).join(', ')}. "Call next play" takes the first.`
+          ? `Draft: ${state.offer.map((o) => offerFace(o).name).join(', ')}. "Call next play" takes the first.`
           : state.phase === 'downOver'
             ? 'The down is over. Step on.'
             : 'The run is over. New run.';
 }
 
+/** One letter per form: human, Ghost, Werewolf, Golem. */
+const FORM_GLYPH: Readonly<Record<Form, string>> = {
+  human: 'h',
+  ghost: 'G',
+  werewolf: 'W',
+  golem: 'O',
+};
+
 function unitHtml(u: Unit): string {
   const arrow = u.intent ? arrowFor(u.pos, u.intent) : '';
   const state = u.downTicks > 0 ? 'down' : '';
   if (u.side === 'player') {
-    const glyph = u.kindId === 'walkOn' ? 'w' : 'R';
+    const glyph = FORM_GLYPH[u.form];
     const carrying = state === '' && isCarrier(u.id) ? '<span class="ball">●</span>' : '';
-    const fend = u.fendOff > 0 ? '⛨' : '';
-    return `<span class="player ${state}">${glyph}${fend}${arrow}</span>${carrying}`;
+    return `<span class="player ${state}">${glyph}${arrow}</span>${carrying}`;
   }
   const glyph = DEFENDERS[u.kind].glyph;
   return `<span class="defender ${state}">${glyph}${arrow}</span>`;

@@ -15,10 +15,28 @@ export interface HudHandlers {
   /** Tap a card in the hand: call that play. */
   onCard(hand: number): void;
   onFlip(): void;
-  /** In the draft: take an offered card, remove one of the deck, or skip. */
+  /** In the draft: take an offer, or skip. */
   onDraft(offer: number): void;
-  onRemove(owned: number): void;
   onSkip(): void;
+}
+
+/** One of your players on the roster panel. */
+export interface RosterRow {
+  readonly name: string;
+  /** Its form, e.g. "Werewolf". */
+  readonly form: string;
+  /** "Hustle +1 · Hands 0 · Heft −2". */
+  readonly stats: string;
+  /** Its skill, or "". */
+  readonly skill: string;
+}
+
+/** What the draft shows: the offers, your roster, and your team's hand. */
+export interface DraftView {
+  readonly offer: readonly CardFace[];
+  readonly roster: readonly RosterRow[];
+  /** The team hand you hold, e.g. "Monster Mash: every player has every skill", or null. */
+  readonly hand: string | null;
 }
 
 /** What a card face shows. */
@@ -121,12 +139,12 @@ export class Hud {
   }
 
   /**
-   * The draft after a won drive: the offered cards to take, and the deck's
-   * cards to cut instead. Null hides it.
+   * The draft after a won drive: the offers to take (or skip), and the
+   * roster panel with your players' numbers and your team's hand. Null hides it.
    */
-  setDraft(draft: { offer: readonly CardFace[]; deck: readonly CardFace[] } | null): void {
+  setDraft(draft: DraftView | null): void {
     this.draft.hidden = !draft;
-    const key = draft ? `${draft.offer.map((c) => c.name).join('|')}#${draft.deck.length}` : '';
+    const key = draft ? JSON.stringify(draft) : '';
     if (key === this.draftKey) return;
     this.draftKey = key;
     if (!draft) return;
@@ -140,21 +158,23 @@ export class Hud {
     offer.append(
       ...draft.offer.map((c, i) => cardButton(c, 'hud-card', () => this.handlers.onDraft(i))),
     );
-    const deck = document.createElement('div');
-    deck.className = 'hud-draft-deck';
-    deck.append(
-      ...draft.deck.map((c, i) => cardButton(c, 'hud-chip', () => this.handlers.onRemove(i))),
-    );
+    const roster = document.createElement('div');
+    roster.className = 'hud-roster';
+    roster.append(...draft.roster.map(rosterRow));
+    const hand = document.createElement('p');
+    hand.className = 'hud-roster-hand';
+    hand.textContent = draft.hand ?? 'No team hand yet: all different, or four of a kind';
     const skip = document.createElement('button');
     skip.className = 'hud-skip';
     skip.textContent = 'Skip';
     skip.addEventListener('click', () => this.handlers.onSkip());
     this.draft.replaceChildren(
-      heading('Add a play to your deck'),
+      heading('Pick one'),
       offer,
-      heading('…or cut one'),
-      deck,
       skip,
+      heading('Your team'),
+      roster,
+      hand,
     );
   }
 
@@ -177,4 +197,20 @@ function cardButton(face: CardFace, className: string, onClick: () => void): HTM
   b.append(name, blurb);
   b.addEventListener('click', onClick);
   return b;
+}
+
+function rosterRow(row: RosterRow): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'hud-roster-row';
+  const name = document.createElement('strong');
+  name.textContent = `${row.name} · ${row.form}`;
+  const stats = document.createElement('span');
+  stats.textContent = row.stats;
+  el.append(name, stats);
+  if (row.skill) {
+    const skill = document.createElement('em');
+    skill.textContent = row.skill;
+    el.append(skill);
+  }
+  return el;
 }

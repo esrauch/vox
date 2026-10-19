@@ -202,7 +202,7 @@ Defenders are the forest's locals, who don't want a football team tramping throu
 
 ---
 
-## Checks: Stats and the Dice *(designed 2026-10-18, not built yet)*
+## Checks: Stats and the Dice *(prototype built 2026-10-18)*
 
 Every contest between one of your players and a defender is a **check**: **your stat minus theirs, plus modifiers**, looked up on one table. The idea is distilled from *Blood Bowl* and *Blitz Bowl* (compare two stats, roll, and let a marker make it harder), but much simpler, and **on your side**: this is a one-player game, so the dice don't have to be fair. They're there to make big moments, not frustration.
 
@@ -228,7 +228,7 @@ The three checks:
 
 ---
 
-## The Playbook *(designed 2026-10-18, not built yet)*
+## The Playbook *(prototype built 2026-10-18)*
 
 - **Six plays, fixed.** You start every run with the same six and never gain or lose one. ▲ *Run (a handoff up the middle, renamed from Draw), Slant, Out, Go, Screen and Mesh.*
 - **Every play uses all four of your players**: some run routes and some stay home to block. Your roster fills its spots from left to right (see *A Down*).
@@ -238,7 +238,7 @@ The three checks:
 
 ---
 
-## Your Roster: the Progression *(designed 2026-10-18, not built yet)*
+## Your Roster: the Progression *(prototype built 2026-10-18)*
 
 - **Four skill players**, each with a **punny name**, a voxel model, and **Hustle, Hands and Heft**. They're shown in a **roster panel**, left to right in the order they line up, with their numbers. **The order is fixed:** you can't rearrange it. ▲ *Names like Gus Grimsby, Lefty Graves, Big Bert Barrow, Kid Carver.*
 - **Everyone starts human, and the four start identical** (0 / 0 / 0).
@@ -367,7 +367,7 @@ The smallest version that proves the fun:
 
 *(All of the above is built.)*
 
-**Next (designed 2026-10-18):** the **checks** (Hustle, Hands and Heft against the defenders', on the friendly curve), the **roster** of four with its panel, the **three transforms** and the **two team hands**, **Pumpkin Bomb** as the first trick play, the fixed playbook of six, and defenses that stiffen by area.
+**Prototyped (2026-10-18, placeholder looks):** the **checks** (Hustle, Hands and Heft against the defenders', on the friendly curve), the **roster** of four with its panel, the **three transforms** and the **two team hands**, the fixed playbook of six, and defenses that stiffen by area. **Next:** the monsters' models, then **Pumpkin Bomb** as the first trick play.
 
 **Then:** more trick plays, the Rolling Pumpkin, a real Boss, a second and third area (the main game: 12 drives, three Bosses).
 

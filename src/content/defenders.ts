@@ -25,6 +25,7 @@ export interface DefenderDef {
   readonly model: string;
   /** One letter for the dev screen inspector. */
   readonly glyph: string;
+  /** What your players' checks are rolled against (GAMEPLAY.md, Checks), before the area's boost. */
   readonly stats: Stats;
   readonly job: Job;
   /**
@@ -37,16 +38,13 @@ export interface DefenderDef {
   readonly ignoresSnap: boolean;
 }
 
-/** Stats are all 0 for now; tuned later (MILESTONES: "what 1+ means"). */
-const BASE: Stats = { hustle: 0, hands: 0, heft: 0 };
-
 export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
   cover: {
     name: 'Cover',
     creature: 'Garden Gnome',
     model: 'forest/chaser',
     glyph: 'C',
-    stats: BASE,
+    stats: { hustle: 1, hands: 0, heft: 0 },
     job: 'cover',
     coverage: 0,
     ignoresSnap: false,
@@ -56,7 +54,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     creature: 'Scarecrow',
     model: 'forest/waller',
     glyph: 'Z',
-    stats: BASE,
+    stats: { hustle: 0, hands: 1, heft: 1 },
     job: 'zone',
     coverage: 3,
     ignoresSnap: false,
@@ -66,7 +64,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     creature: 'Owl',
     model: 'forest/safety',
     glyph: 'S',
-    stats: BASE,
+    stats: { hustle: 1, hands: 1, heft: 1 },
     job: 'safety',
     coverage: 0,
     ignoresSnap: false,
@@ -76,7 +74,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     creature: 'Bat',
     model: 'forest/picker',
     glyph: 'V',
-    stats: BASE,
+    stats: { hustle: 0, hands: 0, heft: -1 },
     job: 'patrol',
     coverage: 1,
     ignoresSnap: true,

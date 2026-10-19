@@ -3,11 +3,13 @@
  * (calling a play, Flip, the snap, the draft). Beats are advanced by step()
  * in step.ts. See GAMEPLAY.md, The Run, A Drive and A Down.
  */
-import { DRAFT_POOL, STARTER_DECK, playCard } from '../content/cards';
+import { PLAYBOOK, playCard } from '../content/cards';
+import { MONSTERS } from '../content/roster';
 import { tuning } from '../content/tuning';
 import { assignMarks, updateIntents } from './ai';
 import {
   DRIVE_KINDS,
+  defenseBoost,
   defenseFor,
   driveHazards,
   formation,
@@ -17,7 +19,8 @@ import {
 } from './drive';
 import { END_ROW } from './grid';
 import { createRng, deriveSeed } from './rng';
-import type { Action, DownResult, RunState, SimEvent, SimResult } from './types';
+import { startingRoster } from './roster';
+import type { Action, DownResult, DraftOffer, RunState, SimEvent, SimResult, Stats } from './types';
 
 export function createRun(seed: number): RunState {
   const state: RunState = {
@@ -34,8 +37,9 @@ export function createRun(seed: number): RunState {
       down: 1,
       los: 0,
     },
-    deck: { owned: [...STARTER_DECK], draw: [], discard: [], hand: [] },
+    deck: { owned: [...PLAYBOOK], draw: [], discard: [], hand: [] },
     called: null,
+    roster: startingRoster(),
     offer: [],
     screen: { players: [], defenders: [], hazards: [], ball: { at: 'qb' }, qb: qbTile(0) },
     downTick: 0,
@@ -50,7 +54,6 @@ export function createRun(seed: number): RunState {
   return state;
 }
 
-/** Start a drive: a fresh shuffle of the deck, the line of scrimmage at the start row, 1st & 10. */
 /**
  * Start a drive: the line of scrimmage at the start row, 1st & 10, and the
  * defense lined up. With `deal`, a fresh shuffle and the first hand too;
@@ -109,7 +112,8 @@ export function setUpDown(state: RunState, events: SimEvent[]): void {
 function lineUp(state: RunState): void {
   const { drive } = state;
   const spec = defenseFor(state.seed, drive.area, drive.index);
-  const defenders = lineUpDefense(spec, drive.los, drive.firstDown, state.nextId);
+  const boost = defenseBoost(drive.area, drive.kind);
+  const defenders = lineUpDefense(spec, drive.los, drive.firstDown, state.nextId, boost);
   state.nextId += defenders.length;
   state.screen = {
     players: [],
@@ -168,8 +172,6 @@ function apply(state: RunState, action: Action): SimEvent[] {
       return hike(state);
     case 'draft':
       return draft(state, action.offer);
-    case 'remove':
-      return removeCard(state, action.owned);
     case 'skipDraft':
       return state.phase === 'draft' ? nextDrive(state) : [];
   }
@@ -180,7 +182,7 @@ function call(state: RunState, hand: number, flipped: boolean): SimEvent[] {
   const card = state.deck.hand[hand];
   if (state.phase !== 'setup' || !card) return [];
   state.called = { hand, flipped };
-  const players = formation(card, flipped, state.drive.los, state.nextId);
+  const players = formation(card, flipped, state.drive.los, state.nextId, state.roster);
   state.nextId += players.length;
   state.screen = { ...state.screen, players };
   updateIntents(state.screen);
@@ -241,15 +243,17 @@ export function nextDown(state: RunState, events: SimEvent[]): void {
   if (result?.result === 'firstDown') {
     state.drivesWon++;
     events.push({ type: 'driveWon', drive: drive.index });
-    if (drive.index >= DRIVE_KINDS.length - 1) {
+    const lastDrive = drive.index >= DRIVE_KINDS.length - 1;
+    if (lastDrive) events.push({ type: 'areaCleared', area: drive.area });
+    if (lastDrive && drive.area >= tuning.run.areas - 1) {
       state.phase = 'won';
-      events.push({ type: 'areaCleared', area: drive.area });
       return;
     }
     // The march goes on: the next drive's defense lines up straight away (the
     // camera glides forward to it), and the draft happens in front of it.
     state.offer = draftOffer(state);
-    setUpDrive(state, drive.area, drive.index + 1, events, false);
+    if (lastDrive) setUpDrive(state, drive.area + 1, 0, events, false);
+    else setUpDrive(state, drive.area, drive.index + 1, events, false);
     state.phase = 'draft';
     return;
   }
@@ -262,32 +266,47 @@ export function nextDown(state: RunState, events: SimEvent[]): void {
   setUpDown(state, events);
 }
 
-function draftOffer(state: RunState): string[] {
+const STATS: readonly (keyof Stats)[] = ['hustle', 'hands', 'heft'];
+
+/**
+ * The draft (GAMEPLAY.md, Your Roster): one transform of a random form while
+ * there's a human left to transform, and training for the rest.
+ */
+function draftOffer(state: RunState): DraftOffer[] {
   const rng = createRng(deriveSeed(state.seed, 'draft', state.drivesWon));
-  const pool = [...DRAFT_POOL];
-  const offer: string[] = [];
-  while (offer.length < tuning.cards.draftOffer && pool.length > 0) {
-    offer.push(pool.splice(rng.int(0, pool.length - 1), 1)[0] as string);
+  const offer: DraftOffer[] = [];
+  if (state.roster.some((p) => p.form === 'human')) {
+    offer.push({ kind: 'transform', form: rng.pick(MONSTERS) });
+  }
+  const stats = [...STATS];
+  while (offer.length < tuning.cards.draftOffer && stats.length > 0) {
+    const stat = stats.splice(rng.int(0, stats.length - 1), 1)[0] as keyof Stats;
+    offer.push({ kind: 'train', stat });
   }
   return offer;
 }
 
-function draft(state: RunState, offer: number): SimEvent[] {
-  const card = state.offer[offer];
-  if (state.phase !== 'draft' || !card) return [];
-  state.deck.owned.push(card);
-  return nextDrive(state);
+/** Take a draft pick. Its player is random: any human for a transform, anyone for training. */
+function draft(state: RunState, index: number): SimEvent[] {
+  const pick = state.offer[index];
+  if (state.phase !== 'draft' || !pick) return [];
+  const rng = createRng(deriveSeed(state.seed, 'draftTarget', state.drivesWon));
+  const slots = state.roster
+    .map((p, slot) => ({ p, slot }))
+    .filter(({ p }) => pick.kind === 'train' || p.form === 'human');
+  const target = slots.length > 0 ? rng.pick(slots) : null;
+  const events: SimEvent[] = [];
+  if (target && pick.kind === 'transform') {
+    target.p.form = pick.form;
+    events.push({ type: 'transformed', slot: target.slot, form: pick.form });
+  } else if (target && pick.kind === 'train') {
+    target.p.training = { ...target.p.training, [pick.stat]: target.p.training[pick.stat] + 1 };
+    events.push({ type: 'trained', slot: target.slot, stat: pick.stat });
+  }
+  return [...events, ...nextDrive(state)];
 }
 
-/** Thin the deck instead of adding to it (never below one hand). */
-function removeCard(state: RunState, owned: number): SimEvent[] {
-  if (state.phase !== 'draft' || state.deck.owned.length <= tuning.cards.handSize) return [];
-  if (owned < 0 || owned >= state.deck.owned.length) return [];
-  state.deck.owned.splice(owned, 1);
-  return nextDrive(state);
-}
-
-/** After the draft: the drive (already lined up) gets its first hand, with the new card in the shuffle. */
+/** After the draft: the drive (already lined up) gets its first hand. */
 function nextDrive(state: RunState): SimEvent[] {
   state.offer = [];
   dealDrive(state);

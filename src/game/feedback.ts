@@ -3,8 +3,10 @@
  * sound effects and HUD pops. The words for every pop live here.
  */
 import type { SfxId } from '../audio/sfx';
-import type { CatchQuality, ScreenState, SimEvent, ThrowProblem } from '../sim/types';
+import { FORMS } from '../content/roster';
+import type { CatchQuality, RunState, SimEvent, ThrowProblem } from '../sim/types';
 import { yardsText } from '../sim/run';
+import { statName } from './rosterText';
 import type { Hud } from '../ui/hud';
 
 export const THROW_PROBLEM_TEXT: Readonly<Record<ThrowProblem, string>> = {
@@ -30,12 +32,13 @@ function gainText(gained: number): string {
 
 export function react(
   events: readonly SimEvent[],
-  screen: ScreenState,
+  state: RunState,
   hud: Hud,
   play: (id: SfxId) => void,
   /** The Boss drive goes for the end zone: its "first down" is a touchdown. */
   touchdown = false,
 ): void {
+  const { screen, roster } = state;
   // One hop sound per beat, and only for your players' hops.
   const playerIds = new Set(screen.players.map((s) => s.id));
   if (events.some((e) => e.type === 'hop' && playerIds.has(e.id))) play('hop');
@@ -46,7 +49,26 @@ export function react(
         break;
       case 'caught':
         play(e.quality === 'perfect' ? 'cleanCatch' : 'catch');
-        hud.pop(CATCH_TEXT[e.quality], 'good');
+        hud.pop(e.contested ? 'CAUGHT!' : CATCH_TEXT[e.quality], 'good');
+        break;
+      case 'dropped':
+        play('fumble');
+        play('chant');
+        hud.pop('DROPPED!', 'bad');
+        break;
+      case 'shook': {
+        const carrying = screen.ball.at === 'carried' && screen.ball.by === e.id;
+        hud.pop(carrying ? 'SHOOK HIM!' : 'GOT OPEN!', 'good');
+        break;
+      }
+      case 'brokeTackle':
+        hud.pop('BROKE IT!', 'good');
+        break;
+      case 'transformed':
+        hud.pop(`${roster[e.slot]?.name ?? 'Someone'} is a ${FORMS[e.form].name}!`, 'good');
+        break;
+      case 'trained':
+        hud.pop(`${roster[e.slot]?.name ?? 'Someone'} +1 ${statName(e.stat)}`, 'good');
         break;
       case 'blocked':
         // Every failed pass gets the comedy of a fumble, but it only costs the down.
@@ -64,9 +86,6 @@ export function react(
         break;
       case 'tackled':
         play('burst');
-        break;
-      case 'fendedOff':
-        hud.pop('SHRUGGED OFF!', 'good');
         break;
       case 'downEnded':
         if (e.result === 'firstDown') {

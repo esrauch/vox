@@ -1,5 +1,5 @@
 /**
- * Play cards (GAMEPLAY.md, A Down and The Deck). A card is the whole play:
+ * Play cards (GAMEPLAY.md, A Down and The Playbook). A card is the whole play:
  * where your players line up and every player's route.
  *
  * Formations are relative, in tiles (half-yards): `x` is columns from the
@@ -70,30 +70,18 @@ export const CARDS = {
     blurb: 'The slots break for the sidelines.',
     players: [p(-5, 0, 'U16'), p(-2, 0, 'U6 L4'), p(2, 0, 'U6 R4'), p(5, 0, 'U16')],
   }),
-  curl: card({
-    id: 'curl',
-    name: 'Curl',
-    blurb: 'Everyone runs four yards and turns back.',
-    players: [p(-5, 0, 'U8 D2'), p(-2, 0, 'U8 D2'), p(2, 0, 'U8 D2'), p(5, 0, 'U8 D2')],
-  }),
   screen: card({
     id: 'screen',
     name: 'Screen',
     blurb: 'A short toss behind a wall of blockers.',
     players: [p(3, -2, 'R2'), blocker(2), blocker(3), p(-5, 0, 'U16')],
   }),
-  draw: card({
-    id: 'draw',
-    name: 'Draw',
+  run: card({
+    id: 'run',
+    name: 'Run',
     blurb: 'Hand it off and run up the middle. No throw.',
     handoff: 0,
     players: [p(0, -2, ''), blocker(-2), blocker(2), p(5, 0, 'U16')],
-  }),
-  verticals: card({
-    id: 'verticals',
-    name: 'Four Verticals',
-    blurb: 'Everybody goes deep. Somebody gets open.',
-    players: [p(-5, 0, 'U20'), p(-2, 0, 'U20'), p(2, 0, 'U20'), p(5, 0, 'U20')],
   }),
   mesh: card({
     id: 'mesh',
@@ -101,47 +89,15 @@ export const CARDS = {
     blurb: 'Two receivers cross, scraping their covers off.',
     players: [p(-4, 0, 'U3 R8'), p(4, 0, 'U5 L8'), p(-5, 0, 'U16'), p(5, 0, 'U16')],
   }),
-  flood: card({
-    id: 'flood',
-    name: 'Flood',
-    blurb: 'Three receivers flood one side at three depths.',
-    players: [p(2, 0, 'U1 R3'), p(3, 0, 'U5 R2'), p(4, 0, 'U10 R1'), p(-5, 0, 'U16')],
-  }),
-  quickOut: card({
-    id: 'quickOut',
-    name: 'Quick Out',
-    blurb: 'Two steps and out to the sideline, both sides.',
-    players: [p(-2, 0, 'U2 L3'), p(2, 0, 'U2 R3'), p(-5, 0, 'U12'), p(5, 0, 'U12')],
-  }),
 } satisfies Record<string, PlayCard>;
 
 export type CardId = keyof typeof CARDS;
 
-/** The deck every run starts with. */
-export const STARTER_DECK: readonly CardId[] = [
-  'go',
-  'slant',
-  'out',
-  'curl',
-  'screen',
-  'draw',
-  'slant',
-  'curl',
-];
-
-/** Cards the draft can offer. */
-export const DRAFT_POOL: readonly CardId[] = [
-  'verticals',
-  'mesh',
-  'flood',
-  'quickOut',
-  'go',
-  'slant',
-  'out',
-  'curl',
-  'screen',
-  'draw',
-];
+/**
+ * The playbook: the six plays every run has, fixed (GAMEPLAY.md, The
+ * Playbook). Your roster is what changes, not the plays.
+ */
+export const PLAYBOOK: readonly CardId[] = ['run', 'slant', 'out', 'go', 'screen', 'mesh'];
 
 export function playCard(id: string): PlayCard {
   const c = (CARDS as Record<string, PlayCard>)[id];

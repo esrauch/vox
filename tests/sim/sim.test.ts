@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { STARTER_DECK } from '../../src/content/cards';
+import { PLAYBOOK } from '../../src/content/cards';
 import { tuning } from '../../src/content/tuning';
-import { openness } from '../../src/sim/coverage';
+import { chance, check, checkEdge } from '../../src/sim/checks';
+import { catchChance, openness } from '../../src/sim/coverage';
 import { arcPeak, flightTicks } from '../../src/sim/flight';
 import { boxCircuit, pocketTicks, qbTile } from '../../src/sim/drive';
 import { COLS, ROWS, key, vec } from '../../src/sim/grid';
@@ -15,9 +16,10 @@ import {
   nextDown,
   yardsText,
 } from '../../src/sim/run';
+import { playerSkills, playerStats, startingRoster, teamHand } from '../../src/sim/roster';
 import { step } from '../../src/sim/step';
 import type { Hazard, RunState, SimEvent } from '../../src/sim/types';
-import { carry, defender, ofType, playState, player, run } from './helpers';
+import { DUD, STAR, carry, defender, ofType, playState, player, run, seedWhere } from './helpers';
 
 // The field is half-yard tiles: every row is half a yard, and everyone hops every tick.
 const PAUSE = tuning.drive.pauseTicks;
@@ -29,7 +31,8 @@ describe('a run', () => {
     expect(state.drive).toMatchObject({ index: 0, kind: 'intro', down: 1, los: 3, firstDown: 23 });
     expect(downAndDistance(state)).toBe('1st & 10');
     expect(state.deck.hand).toHaveLength(3);
-    expect(state.deck.owned).toEqual(STARTER_DECK);
+    expect(state.deck.owned).toEqual(PLAYBOOK);
+    expect(state.roster.map((p) => p.form)).toEqual(['human', 'human', 'human', 'human']);
     expect(state.screen.players).toHaveLength(0); // nobody lines up until you call a play
     expect(state.screen.defenders.length).toBeGreaterThan(0);
     expect(state.screen.qb).toEqual(vec(5, 0));
@@ -52,7 +55,7 @@ describe('a run', () => {
   it('HIKE needs a called play; it discards the hand, picks marks and starts the pocket clock', () => {
     let state = createRun(1);
     expect(dispatch(state, { type: 'hike' }).state.phase).toBe('setup');
-    state = { ...state, deck: { ...state.deck, hand: ['go', 'slant', 'curl'] } };
+    state = { ...state, deck: { ...state.deck, hand: ['go', 'slant', 'out'] } };
     const hiked = dispatch(dispatch(state, { type: 'call', hand: 0 }).state, {
       type: 'hike',
     }).state;
@@ -65,9 +68,9 @@ describe('a run', () => {
     expect(hiked.pocket).toEqual({ total: tuning.pocket.ticks, left: tuning.pocket.ticks });
   });
 
-  it('a Draw hands the ball off at the snap: no pocket clock, so no sack', () => {
+  it('a Run hands the ball off at the snap: no pocket clock, so no sack', () => {
     let state = createRun(1);
-    state = { ...state, deck: { ...state.deck, hand: ['draw', 'go', 'slant'] } };
+    state = { ...state, deck: { ...state.deck, hand: ['run', 'go', 'slant'] } };
     state = dispatch(dispatch(state, { type: 'call', hand: 0 }).state, { type: 'hike' }).state;
     expect(state.screen.ball).toEqual({ at: 'carried', by: state.screen.players[0]!.id });
     expect(state.pocket).toBeNull();
@@ -156,19 +159,54 @@ describe('the pocket', () => {
   });
 });
 
+describe('checks', () => {
+  it('favor you: even is 60%, +4 or better is certain, and there is always a long shot', () => {
+    expect(chance(0)).toBe(0.6);
+    expect(chance(4)).toBe(1);
+    expect(chance(9)).toBe(1);
+    expect(chance(-4)).toBe(0.1);
+    expect(chance(-20)).toBe(0.1);
+    for (let e = -4; e < 4; e++) expect(chance(e + 1)).toBeGreaterThan(chance(e));
+  });
+
+  it('a reroll skill rolls a failure again; Frenzy readies an edge after a success', () => {
+    // Over many seeds, an even shake succeeds more often with a reroll.
+    const rate = (rerolls: ('shake' | 'catch' | 'break')[]) => {
+      let won = 0;
+      for (let seed = 1; seed <= 300; seed++) {
+        const s = playState(
+          [{ pos: vec(5, 10), rerolls }],
+          [{ kind: 'cover', pos: vec(5, 11), stats: { hustle: 0 } }],
+          seed,
+        );
+        if (check(s, 'shake', player(s, 100), defender(s, 200))) won++;
+      }
+      return won / 300;
+    };
+    expect(rate(['shake'])).toBeGreaterThan(rate([]) + 0.15);
+
+    const s = playState(
+      [{ pos: vec(5, 10), stats: STAR, frenzy: ['break'] }],
+      [{ kind: 'cover', pos: vec(5, 11) }],
+    );
+    const wolf = player(s, 100);
+    expect(check(s, 'break', wolf, defender(s, 200))).toBe(true);
+    expect(wolf.frenzyReady).toEqual(['break']);
+    expect(checkEdge(s, 'break', wolf, defender(s, 200))).toBe(
+      9 - defender(s, 200).stats.heft + tuning.checks.frenzy,
+    );
+  });
+});
+
 describe('tackles', () => {
   // A carrier on (5, 10) and a Cover two tiles ahead: they meet on (5, 11) on the first tick.
-  const meeting = (fendOff = 0) => {
-    const state = carry(
-      playState([{ pos: vec(5, 10) }], [{ kind: 'cover', pos: vec(5, 12) }]),
-      100,
-    );
-    player(state, 100).fendOff = fendOff;
-    return state;
-  };
+  const meeting = (stats = DUD, seed = 1) =>
+    carry(playState([{ pos: vec(5, 10), stats }], [{ kind: 'cover', pos: vec(5, 12) }], seed), 100);
+  const tackledOn = (state: RunState) => ofType(step(state).events, 'tackled').length > 0;
 
-  it('a defender meeting the carrier tackles it: the next down starts there', () => {
-    const r = run(meeting(), 1);
+  it('a defender meeting the carrier, with both checks lost, tackles it: the next down starts there', () => {
+    const state = seedWhere((seed) => meeting(DUD, seed), tackledOn);
+    const r = run(state, 1);
     expect(ofType(r.events, 'tackled')).toEqual([{ type: 'tackled', id: 100, by: 200 }]);
     expect(ofType(r.events, 'downEnded')).toEqual([
       { type: 'downEnded', result: 'tackled', gained: 8 },
@@ -181,84 +219,133 @@ describe('tackles', () => {
     expect(downAndDistance(next)).toBe('2nd & 6');
   });
 
-  it('a fend-off (from a Clean Catch) knocks the tackler down, and the carrier gets clear', () => {
-    const r = run(meeting(1), 8);
-    expect(ofType(r.events, 'fendedOff')).toHaveLength(1);
+  it('a carrier far ahead on Hustle always shakes the tackler, who stumbles and is left behind', () => {
+    const r = run(meeting({ hustle: 9, hands: 0, heft: -9 }), 8);
+    expect(ofType(r.events, 'shook')[0]).toEqual({ type: 'shook', id: 100, defender: 200 });
     expect(ofType(r.events, 'downEnded')).toHaveLength(0);
     expect(player(r.state, 100).pos.y).toBe(18);
   });
 
-  it('a defender right behind the carrier tackles it (no trailing it up the field)', () => {
-    const state = carry(playState([{ pos: vec(5, 10) }], [{ kind: 'cover', pos: vec(5, 9) }]), 100);
-    const r = step(state);
-    expect(ofType(r.events, 'tackled')).toEqual([{ type: 'tackled', id: 100, by: 200 }]);
+  it('a carrier far ahead on Heft breaks the tackle: the tackler goes down', () => {
+    const r = run(meeting({ hustle: -9, hands: 0, heft: 9 }), 8);
+    expect(ofType(r.events, 'brokeTackle')[0]).toEqual({
+      type: 'brokeTackle',
+      id: 100,
+      defender: 200,
+    });
+    expect(ofType(r.events, 'downEnded')).toHaveLength(0);
   });
 
-  it('a chaser that hops up beside the carrier tackles it', () => {
+  it('a defender right behind the carrier tries to tackle it (no trailing it up the field)', () => {
+    const behind = (seed: number) =>
+      carry(
+        playState([{ pos: vec(5, 10), stats: DUD }], [{ kind: 'cover', pos: vec(5, 9) }], seed),
+        100,
+      );
+    const state = seedWhere(behind, tackledOn);
+    expect(ofType(step(state).events, 'tackled')).toEqual([{ type: 'tackled', id: 100, by: 200 }]);
+  });
+
+  it('a chaser that hops up beside the carrier tries to tackle it', () => {
     // The Cover on (4, 11) comes down to (4, 10) as the carrier hops up to (5, 10): side by side.
-    const state = carry(playState([{ pos: vec(5, 9) }], [{ kind: 'cover', pos: vec(4, 11) }]), 100);
-    expect(ofType(step(state).events, 'tackled')[0]?.by).toBe(200);
+    const beside = (seed: number) =>
+      carry(
+        playState([{ pos: vec(5, 9), stats: DUD }], [{ kind: 'cover', pos: vec(4, 11) }], seed),
+        100,
+      );
+    expect(ofType(step(seedWhere(beside, tackledOn)).events, 'tackled')[0]?.by).toBe(200);
+  });
+
+  it('the safety net: each failed check in a row makes the next of its kind easier', () => {
+    const state = meeting({ hustle: 0, hands: 0, heft: 0 });
+    const carrier = player(state, 100);
+    const cover = defender(state, 200);
+    const before = checkEdge(state, 'shake', carrier, cover);
+    state.roster[0]!.streak.shake = 2;
+    expect(checkEdge(state, 'shake', carrier, cover)).toBe(before + 2 * tuning.checks.safetyNet);
+    // A success resets it.
+    const won = run(meeting({ hustle: 9, hands: 0, heft: 0 }), 1);
+    expect(won.state.roster[0]!.streak.shake).toBe(0);
   });
 });
 
 describe('coverage rings', () => {
-  const screenWith = (kind: 'cover' | 'zone' | 'safety' | 'bat') =>
-    playState([], [{ kind, pos: vec(5, 10) }]).screen;
+  // A receiver on (5, 11) (or wherever) and one defender on (5, 10).
+  const ringAt = (kind: 'cover' | 'zone' | 'safety' | 'bat', at = vec(5, 11), stats = {}) => {
+    const s = playState([{ pos: at, stats }], [{ kind, pos: vec(5, 10) }]);
+    return openness(s, player(s, 100));
+  };
 
-  it('a Cover covers the tiles around it, and the next tile out is tight', () => {
-    const s = screenWith('cover');
-    expect(openness(s, vec(5, 11))).toBe('covered');
-    expect(openness(s, vec(6, 11))).toBe('tight');
-    expect(openness(s, vec(5, 12))).toBe('tight');
-    expect(openness(s, vec(5, 13))).toBe('open');
+  it('a receiver right beside a Cover is contested: about a coin flip with even Hands', () => {
+    expect(ringAt('cover')).toBe('tight');
+    expect(ringAt('cover', vec(5, 13))).toBe('open');
   });
 
-  it('a Scarecrow\u2019s ring covers a wide area; the Safety has no ring', () => {
-    expect(openness(screenWith('zone'), vec(5, 13))).toBe('covered');
-    expect(openness(screenWith('safety'), vec(8, 10))).toBe('open');
+  it('better Hands turn the same coverage green, worse turn it red', () => {
+    expect(ringAt('cover', vec(5, 11), { hands: 4 })).toBe('open');
+    expect(ringAt('cover', vec(5, 11), { hands: -3 })).toBe('covered');
   });
 
-  it('any defender right beside a tile covers it (it can bat a low ball there), unless it\u2019s down', () => {
-    expect(openness(screenWith('cover'), vec(5, 11))).toBe('covered');
-    const s = screenWith('cover');
-    s.defenders[0]!.downTicks = 2;
-    expect(openness(s, vec(5, 11))).toBe('open');
+  it('a Scarecrow\u2019s ring contests a wide area; the Safety only right beside it', () => {
+    expect(ringAt('zone', vec(5, 13))).not.toBe('open');
+    expect(ringAt('safety', vec(8, 10))).toBe('open');
+  });
+
+  it('a knocked-down defender contests nothing', () => {
+    const s = playState([{ pos: vec(5, 11) }], [{ kind: 'cover', pos: vec(5, 10) }]);
+    s.screen.defenders[0]!.downTicks = 2;
+    expect(catchChance(s, player(s, 100))).toBe(1);
   });
 });
 
 describe('passes', () => {
   // The receiver stands on (5, 10), ten tiles from the QB: a quick pass lands two ticks later.
-  const pass = (defenders: Parameters<typeof playState>[1], target = vec(5, 10), ticks = 2) => {
-    const state = playState([{ pos: vec(5, 10), route: '.' }], defenders);
+  const pass = (
+    defenders: Parameters<typeof playState>[1],
+    target = vec(5, 10),
+    ticks = 2,
+    stats = {},
+    seed = 1,
+  ) => {
+    const state = playState([{ pos: vec(5, 10), route: '.', stats }], defenders, seed);
     return run(step(state, { throwAt: target }).state, ticks);
   };
 
-  it('to an open receiver is a catch; right on it is a Clean Catch', () => {
+  it('to an open receiver is a catch, with no check; right on it is perfect', () => {
     const r = pass([]);
     expect(ofType(r.events, 'caught')).toEqual([
-      { type: 'caught', id: 100, clean: true, quality: 'perfect' },
+      { type: 'caught', id: 100, quality: 'perfect', contested: false },
     ]);
-    expect(player(r.state, 100).fendOff).toBe(1);
   });
 
-  it('coming down inside a defender’s ring, it bounces off: the down is used, no gain', () => {
-    const r = pass([{ kind: 'cover', pos: vec(5, 11) }]);
-    expect(ofType(r.events, 'blocked')).toEqual([{ type: 'blocked', by: 200, at: vec(5, 11) }]);
+  it('contested, a receiver far ahead on Hands wins the catch', () => {
+    const r = pass([{ kind: 'cover', pos: vec(5, 11) }], vec(5, 10), 2, STAR);
+    expect(ofType(r.events, 'caught')).toEqual([
+      { type: 'caught', id: 100, quality: 'perfect', contested: true },
+    ]);
+  });
+
+  it('contested and lost, the ball is knocked away: the down is used, no gain', () => {
+    const r = seedWhere(
+      (seed) => pass([{ kind: 'cover', pos: vec(5, 11) }], vec(5, 10), 2, DUD, seed),
+      (r) => ofType(r.events, 'dropped').length > 0,
+    );
+    expect(ofType(r.events, 'dropped')).toEqual([{ type: 'dropped', id: 100, by: 200 }]);
     expect(ofType(r.events, 'downEnded')).toEqual([
       { type: 'downEnded', result: 'blocked', gained: 0 },
     ]);
-    expect(r.state.screen.ball).toEqual({ at: 'dead', pos: vec(5, 11), how: 'blocked' });
     expect(run(r.state, PAUSE).state.drive).toMatchObject({ down: 2, los: 3 });
   });
 
-  it('led away from the defender, the same receiver makes the catch', () => {
-    const r = pass([{ kind: 'cover', pos: vec(5, 11) }], { x: 5, y: 9.1 });
-    expect(ofType(r.events, 'caught')).toHaveLength(1);
+  it('led away from the defender, the same receiver makes the catch uncontested', () => {
+    const r = pass([{ kind: 'cover', pos: vec(5, 11) }], { x: 5, y: 8.9 });
+    expect(ofType(r.events, 'caught')[0]?.contested).toBe(false);
   });
 
-  it('a Bat beside the receiver blocks a ball thrown right at it', () => {
-    const r = pass([{ kind: 'bat', pos: vec(6, 10) }]);
-    expect(ofType(r.events, 'downEnded')[0]?.result).toBe('blocked');
+  it('a defender right beside the ball with no receiver near bats it down', () => {
+    const r = pass([{ kind: 'cover', pos: vec(8, 10) }], vec(8.5, 10.5), 3);
+    expect(ofType(r.events, 'blocked')).toEqual([{ type: 'blocked', by: 200, at: vec(8, 10) }]);
+    expect(r.state.screen.ball).toEqual({ at: 'dead', pos: vec(8, 10), how: 'blocked' });
   });
 
   it('with nobody in reach is incomplete', () => {
@@ -325,7 +412,27 @@ describe('the defense', () => {
     state = run(state, 2).state;
     expect(player(state, 100).pos).toEqual(vec(4, 6));
     expect(defender(state, 200).pos).toEqual(vec(2, 6));
-    expect(openness(state.screen, player(state, 100).pos)).toBe('tight');
+    expect(openness(state, player(state, 100))).toBe('open');
+  });
+
+  it('a receiver making a cut shakes its Cover on a Hustle check: the Cover stumbles behind', () => {
+    // Up two, then a cut to the right, with the Cover marking from right behind.
+    const state = playState(
+      [{ pos: vec(2, 6), route: 'UURRR', stats: STAR }],
+      [{ kind: 'cover', pos: vec(2, 5), marking: 100 }],
+    );
+    const r = run(state, 3);
+    expect(ofType(r.events, 'shook')).toEqual([{ type: 'shook', id: 100, defender: 200 }]);
+    expect(defender(r.state, 200).downTicks).toBeGreaterThan(0);
+    // No cut, no check.
+    const straight = run(
+      playState(
+        [{ pos: vec(2, 6), route: 'UUUUU', stats: STAR }],
+        [{ kind: 'cover', pos: vec(2, 5), marking: 100 }],
+      ),
+      3,
+    );
+    expect(ofType(straight.events, 'shook')).toHaveLength(0);
   });
 
   it('defenders chase the carrier after a catch, and the Safety gets into its column first', () => {
@@ -454,14 +561,45 @@ describe('drives', () => {
     expect(draft.offer).toHaveLength(3);
   });
 
-  it('drafting adds a card and starts the next drive; removing thins the deck', () => {
+  it('the draft offers one transform and two training picks while there are humans', () => {
     const draft = run(wonDrive().state, PAUSE).state;
-    const picked = dispatch(draft, { type: 'draft', offer: 0 }).state;
-    expect(picked.deck.owned).toHaveLength(draft.deck.owned.length + 1);
-    expect(picked.phase).toBe('setup');
-    expect(picked.drive).toMatchObject({ index: 1, kind: 'challenge', down: 1, los: 3 });
-    const removed = dispatch(draft, { type: 'remove', owned: 0 }).state;
-    expect(removed.deck.owned).toHaveLength(draft.deck.owned.length - 1);
+    expect(draft.offer.map((o) => o.kind)).toEqual(['transform', 'train', 'train']);
+    const stats = draft.offer.flatMap((o) => (o.kind === 'train' ? [o.stat] : []));
+    expect(new Set(stats).size).toBe(2);
+  });
+
+  it('a transform turns a random human into that monster, and starts the next drive', () => {
+    const draft = run(wonDrive().state, PAUSE).state;
+    const offer = draft.offer[0]!;
+    if (offer.kind !== 'transform') throw new Error('expected a transform first');
+    const r = dispatch(draft, { type: 'draft', offer: 0 });
+    const changed = ofType(r.events, 'transformed')[0]!;
+    expect(r.state.roster[changed.slot]!.form).toBe(offer.form);
+    expect(r.state.roster.filter((p) => p.form === 'human')).toHaveLength(3);
+    expect(r.state.phase).toBe('setup');
+    expect(r.state.drive).toMatchObject({ index: 1, kind: 'challenge', down: 1, los: 3 });
+    // The playbook never changes.
+    expect(r.state.deck.owned).toEqual(PLAYBOOK);
+  });
+
+  it('only humans can be transformed; with none left, every offer is training', () => {
+    const draft = run(wonDrive().state, PAUSE).state;
+    draft.roster.forEach((p, i) => (p.form = i === 2 ? 'human' : 'golem'));
+    const r = dispatch(draft, { type: 'draft', offer: 0 });
+    if (draft.offer[0]?.kind === 'transform') {
+      expect(ofType(r.events, 'transformed')[0]?.slot).toBe(2);
+    }
+    const monsters = run(wonDrive().state, 0).state;
+    monsters.roster.forEach((p) => (p.form = 'ghost'));
+    const later = run(monsters, PAUSE).state;
+    expect(later.offer.map((o) => o.kind)).toEqual(['train', 'train', 'train']);
+  });
+
+  it('training gives a random player +1 to a stat', () => {
+    const draft = run(wonDrive().state, PAUSE).state;
+    const r = dispatch(draft, { type: 'draft', offer: 1 });
+    const trained = ofType(r.events, 'trained')[0]!;
+    expect(r.state.roster[trained.slot]!.training[trained.stat]).toBe(1);
   });
 
   it('the next drive lines up before the draft (the march goes on); its hand comes after', () => {
@@ -471,7 +609,6 @@ describe('drives', () => {
     expect(draft.deck.hand).toHaveLength(0);
     const picked = dispatch(draft, { type: 'draft', offer: 0 }).state;
     expect(picked.deck.hand).toHaveLength(3);
-    expect([...picked.deck.hand, ...picked.deck.draw]).toContain(draft.offer[0]);
   });
 
   it('the Boss drive goes for the end zone: "& Goal"', () => {
@@ -493,20 +630,71 @@ describe('drives', () => {
     expect(sackedOn(3).state.drive.down).toBe(4); // short of the 4th: the next down
   });
 
-  it('an area is four drives: intro, challenge, gimmick, boss; winning the boss clears it', () => {
+  it('an area is four drives; the main game is three areas, each stiffer than the last', () => {
     let s = createRun(7);
-    const kinds: string[] = [s.drive.kind];
-    for (let i = 0; i < 4; i++) {
+    const drives: string[] = [`${s.drive.area}:${s.drive.kind}`];
+    const coverHustle: number[] = [];
+    for (let i = 0; i < 12; i++) {
       s = structuredClone(s);
       const events: SimEvent[] = [];
       endDown(s, 'firstDown', s.drive.firstDown, events);
       nextDown(s, events);
       if (s.phase === 'draft') s = dispatch(s, { type: 'skipDraft' }).state;
-      if (s.phase === 'setup') kinds.push(s.drive.kind);
+      if (s.phase === 'setup') {
+        drives.push(`${s.drive.area}:${s.drive.kind}`);
+        const cover = s.screen.defenders.find((d) => d.kind === 'cover');
+        if (s.drive.kind === 'intro' && cover) coverHustle.push(cover.stats.hustle);
+      }
     }
-    expect(kinds).toEqual(['intro', 'challenge', 'gimmick', 'boss']);
+    const area = (a: number) => ['intro', 'challenge', 'gimmick', 'boss'].map((k) => `${a}:${k}`);
+    expect(drives).toEqual([...area(0), ...area(1), ...area(2)]);
     expect(s.phase).toBe('won');
-    expect(s.drivesWon).toBe(4);
+    expect(s.drivesWon).toBe(12);
+    // Each area's defenders are +1 on the last.
+    expect(coverHustle).toEqual([2, 3]);
+  });
+});
+
+describe('the roster', () => {
+  it('fills a play\u2019s spots from left to right, after the flip', () => {
+    let s = createRun(1);
+    s = { ...s, deck: { ...s.deck, hand: ['screen', 'go', 'slant'] } };
+    const called = dispatch(s, { type: 'call', hand: 0 }).state;
+    const leftToRight = (st: RunState) =>
+      [...st.screen.players]
+        .sort((a, b) => a.pos.x - b.pos.x || a.pos.y - b.pos.y)
+        .map((p) => p.slot);
+    expect(leftToRight(called)).toEqual([0, 1, 2, 3]);
+    const flipped = dispatch(called, { type: 'flip' }).state;
+    expect(leftToRight(flipped)).toEqual([0, 1, 2, 3]);
+    // The Screen's catcher sits right of the middle; flipped, left: a different player runs it.
+    const catcher = (st: RunState) => st.screen.players.find((p) => /^[LR]/.test(p.route));
+    expect(catcher(called)?.slot).toBe(2);
+    expect(catcher(flipped)?.slot).toBe(0);
+  });
+
+  it('team hands: all four different is a Monster Mash; four of one monster is Four of a Kind', () => {
+    const roster = startingRoster();
+    expect(teamHand(roster)).toBeNull();
+    (['human', 'ghost', 'werewolf', 'golem'] as const).forEach((f, i) => (roster[i]!.form = f));
+    expect(teamHand(roster)).toEqual({ kind: 'mash' });
+    // A Mash gives everyone every skill.
+    expect(playerSkills(roster, 0).rerolls.sort()).toEqual(['break', 'shake']);
+    expect(playerSkills(roster, 0).frenzy).toEqual(['break']);
+    roster.forEach((p) => (p.form = 'golem'));
+    expect(teamHand(roster)).toEqual({ kind: 'four', form: 'golem' });
+    // Four Golems: Stand Firm on every check, and +2 Heft.
+    expect(playerSkills(roster, 0).rerolls.sort()).toEqual(['break', 'catch', 'shake']);
+    expect(playerStats(roster, 0).heft).toBe(4 + 2);
+    roster.forEach((p) => (p.form = 'human'));
+    expect(teamHand(roster)).toBeNull();
+  });
+
+  it('a form shifts the stats, and training adds on top', () => {
+    const roster = startingRoster();
+    roster[1]!.form = 'ghost';
+    roster[1]!.training = { hustle: 0, hands: 1, heft: 0 };
+    expect(playerStats(roster, 1)).toEqual({ hustle: 3, hands: 1, heft: -2 });
   });
 });
 

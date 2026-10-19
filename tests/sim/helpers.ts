@@ -1,15 +1,17 @@
 import { DEFENDERS } from '../../src/content/defenders';
-import { WALK_ON } from '../../src/content/players';
 import { updateIntents } from '../../src/sim/ai';
 import { qbTile } from '../../src/sim/drive';
 import { createRun } from '../../src/sim/run';
 import { step } from '../../src/sim/step';
 import type {
+  CheckKind,
   Defender,
   DefenderKind,
+  Form,
   PlayerUnit,
   RunState,
   SimEvent,
+  Stats,
   Vec,
 } from '../../src/sim/types';
 
@@ -17,29 +19,41 @@ export interface PlayerSpec {
   pos: Vec;
   /** One move per hop (U D L R .); default: straight up for a while. */
   route?: string;
+  /** Default: a human, 0 / 0 / 0, no skills. */
+  stats?: Partial<Stats>;
+  form?: Form;
+  rerolls?: CheckKind[];
+  frenzy?: CheckKind[];
 }
+
+const ZERO: Stats = { hustle: 0, hands: 0, heft: 0 };
 
 /**
  * A down already in play (tick 0, just snapped) with exactly the given
  * players and defenders: line of scrimmage on row 3, first-down line on row
  * 23 (rows are half-yards), the QB on (5, 0) with the ball, no hazards and no
- * pocket clock (set `state.pocket` to test one). Player ids start at 100 and
- * defender ids at 200. Everyone hops every tick.
+ * pocket clock (set `state.pocket` to test one). Player ids start at 100
+ * (roster slot 0 up) and defender ids at 200; defenders get their kind's
+ * stats unless given others. Everyone hops every tick.
  */
 export function playState(
   players: PlayerSpec[],
-  defenders: { kind: DefenderKind; pos: Vec; marking?: number }[] = [],
+  defenders: { kind: DefenderKind; pos: Vec; marking?: number; stats?: Partial<Stats> }[] = [],
+  seed = 1,
 ): RunState {
-  const state = createRun(1);
+  const state = createRun(seed);
   const units: PlayerUnit[] = players.map((spec, i) => ({
     id: 100 + i,
     side: 'player',
-    kindId: WALK_ON.id,
-    stats: WALK_ON.stats,
+    slot: i,
+    form: spec.form ?? 'human',
+    stats: { ...ZERO, ...spec.stats },
     pos: spec.pos,
     route: spec.route ?? 'UUUUUUUUUUUU',
     routeStep: 0,
-    fendOff: 0,
+    rerolls: spec.rerolls ?? [],
+    frenzy: spec.frenzy ?? [],
+    frenzyReady: [],
     downTicks: 0,
     intent: null,
   }));
@@ -49,7 +63,7 @@ export function playState(
     kind: d.kind,
     pos: d.pos,
     home: d.pos,
-    stats: DEFENDERS[d.kind].stats,
+    stats: { ...DEFENDERS[d.kind].stats, ...d.stats },
     downTicks: 0,
     intent: null,
     patrol: null,
@@ -103,4 +117,21 @@ export function carry(state: RunState, id: number): RunState {
   state.screen.ball = { at: 'carried', by: id };
   updateIntents(state.screen);
   return state;
+}
+
+/** Stats so far ahead that every check succeeds (an edge of +4 or more is certain). */
+export const STAR: Stats = { hustle: 9, hands: 9, heft: 9 };
+/** Stats so far behind that a check almost always fails (a 10% long shot). */
+export const DUD: Stats = { hustle: -9, hands: -9, heft: -9 };
+
+/**
+ * The first seed (from 1) whose run of `make(seed)` gives what `want`
+ * checks for: for testing a check's unlikely side, with the dice fixed.
+ */
+export function seedWhere<T>(make: (seed: number) => T, want: (result: T) => boolean): T {
+  for (let seed = 1; seed < 500; seed++) {
+    const result = make(seed);
+    if (want(result)) return result;
+  }
+  throw new Error('no seed gives that');
 }

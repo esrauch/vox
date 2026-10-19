@@ -197,26 +197,34 @@
   min-height: 96px;
 }
 
-.hud-draft-deck {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+.hud-roster {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 6px;
+  width: 100%;
   max-width: 460px;
 }
 
-.hud-chip {
-  padding: 6px 10px;
-  border: 0;
-  border-radius: 999px;
-  font: inherit;
-  font-size: 0.8rem;
-  color: white;
-  background: rgb(255 255 255 / 0.16);
+.hud-roster-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  background: rgb(255 255 255 / 0.12);
 }
 
-.hud-chip span {
-  display: none;
+.hud-roster-row em {
+  font-style: normal;
+  opacity: 0.75;
+}
+
+.hud-roster-hand {
+  margin: 0;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--bone);
 }
 
 .hud-skip {

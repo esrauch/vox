@@ -12,27 +12,30 @@
  * Order within a tick in play (GAMEPLAY.md, A Down):
  *   1. Knocked-down units recover a little.
  *   2. A throw released for this tick leaves the QB's hand.
- *   3. Units hop. Your players and defenders can't share a tile. A defender
- *      that meets the carrier, or ends the tick right next to it (in front,
- *      behind or beside), tackles it, unless it fends off.
+ *   3. Units hop. Your players and defenders can't share a tile. A
+ *      receiver making a cut in its route tries to shake its mark (a Hustle
+ *      check). A defender that meets the carrier, or ends the tick right
+ *      next to it (in front, behind or beside), tries to tackle it: the
+ *      carrier tries to shake it (Hustle), then to break it (Heft).
  *   4. The carrier crossing the first-down line wins the drive.
  *   5. The pocket clock runs down; at zero, with the ball still in the QB's
  *      hand, it's a sack. (The line and the rush are only drawn: render/pocket.ts.)
  *   6. A Witch crossing the pass blocks it.
- *   7. The pass in the air: once it's low enough to touch, a defender near
- *      it bats it down, a Scarecrow's ring knocks it away, or a player near
- *      it catches it; at the turf with nobody there, it's incomplete.
+ *   7. The pass in the air: once it's low enough to touch, a defender right
+ *      beside it with no receiver near bats it down; a receiver near it
+ *      catches it, on a Hands check if defenders contest it; at the turf
+ *      with nobody there, it's incomplete.
  *   8. Everyone decides next tick's hop (the telegraph).
  */
 import { DEFENDERS } from '../content/defenders';
 import { tuning } from '../content/tuning';
 import { updateIntents } from './ai';
-import { coveringDefender } from './coverage';
+import { check } from './checks';
+import { contestants } from './coverage';
 import { COLS, END_ROW, ROWS, dist, eq, inBounds, key, vec, distance } from './grid';
 import { ballGround, catchable, flightTicks } from './flight';
 import { snatches, witchColumn } from './hazards';
 import { endDown, nextDown } from './run';
-import { actsOn } from './stats';
 import type {
   BeatInput,
   CatchQuality,
@@ -65,7 +68,9 @@ export function step(prev: RunState, input: BeatInput = {}): SimResult {
   state.downTick++;
   for (const u of allUnits(state)) if (u.downTicks > 0) u.downTicks--;
   if (input.throwAt) tryThrow(state, input.throwAt, events);
-  const tackled = resolveMoves(state, events) ?? checkContact(state, events);
+  const tackledMoving = resolveMoves(state, events);
+  shakeMarks(state, events);
+  const tackled = tackledMoving ?? checkContact(state, events);
   if (checkFirstDown(state, events)) return { state, events };
   if (tackled) {
     endDown(state, 'tackled', tackled.pos.y, events);
@@ -127,18 +132,16 @@ function movesNow(state: RunState, u: Unit): boolean {
 /**
  * Everyone due to hop this tick hops. Your players and defenders never share
  * a tile: whoever would step into the other waits (that's how blockers work).
- * The one exception is the carrier: a defender meeting it tackles it, unless
- * it has a fend-off left, which knocks the defender down instead. Returns the
- * tackled carrier, if any.
+ * The one exception is the carrier: a defender meeting it tries to tackle it
+ * (tackleAttempt). Returns the tackled carrier, if any.
  */
 function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
-  const { tick } = state;
   const carrier = carrierOf(state);
   const units = allUnits(state).sort(byId);
   const moving = new Map<number, Vec>();
   for (const u of units) {
     if (!isUp(u) || !u.intent || !inBounds(u.intent)) continue;
-    if (!actsOn(u.stats, tick) || !movesNow(state, u)) continue;
+    if (!movesNow(state, u)) continue;
     moving.set(u.id, u.intent);
   }
   const finalOf = (u: Unit): Vec => moving.get(u.id) ?? u.pos;
@@ -151,40 +154,40 @@ function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
   // Blocking: a player and a defender can't end up on one tile or pass through
   // each other, except the carrier and a defender (a tackle). A cancelled hop
   // can cause a new clash, so repeat until nothing changes.
-  for (let changed = true; changed;) {
-    changed = cancelDefenderConflicts(defenders, moving);
-    for (const p of players) {
-      for (const d of defenders) {
-        // The carrier meeting a defender is a tackle (below).
-        if (p === carrier) continue;
-        if (!meets(p, d)) continue;
-        // The defender always waits; the player waits too if it would still land on it.
-        if (moving.delete(d.id)) changed = true;
-        if (eq(finalOf(p), finalOf(d)) && moving.delete(p.id)) changed = true;
+  const settle = (): void => {
+    for (let changed = true; changed;) {
+      changed = cancelDefenderConflicts(defenders, moving);
+      for (const p of players) {
+        for (const d of defenders) {
+          // The carrier meeting a defender is a tackle (below).
+          if (p === carrier) continue;
+          if (!meets(p, d)) continue;
+          // The defender always waits; the player waits too if it would still land on it.
+          if (moving.delete(d.id)) changed = true;
+          if (eq(finalOf(p), finalOf(d)) && moving.delete(p.id)) changed = true;
+        }
       }
     }
-  }
+  };
+  settle();
 
   let tackled: PlayerUnit | null = null;
   if (carrier && state.phase === 'play') {
     for (const d of defenders) {
       if (!isUp(d) || !meets(carrier, d)) continue;
-      if (carrier.fendOff > 0) {
-        carrier.fendOff--;
-        d.downTicks = tuning.units.knockdownTicks;
+      if (!tackleAttempt(state, carrier, d, events)) {
         moving.delete(d.id);
-        events.push({ type: 'fendedOff', id: carrier.id, defender: d.id });
-        events.push({ type: 'knockedDown', id: d.id });
         continue;
       }
       tackled = carrier;
-      events.push({ type: 'tackled', id: carrier.id, by: d.id });
       break;
     }
+    // A shaken or broken tackler stays where it was, which can clash with another hop.
+    settle();
   }
 
   for (const u of units) {
-    if (u.side === 'player' && state.phase === 'play' && actsOn(u.stats, tick) && isUp(u)) {
+    if (u.side === 'player' && state.phase === 'play' && isUp(u)) {
       u.routeStep++;
     }
     const to = moving.get(u.id);
@@ -197,9 +200,9 @@ function resolveMoves(state: RunState, events: SimEvent[]): PlayerUnit | null {
 }
 
 /**
- * After everyone hops: a defender that's up and right next to the carrier (or
- * on its tile) tackles it, so a chaser one step behind catches it rather than
- * trailing it up the field. A fend-off knocks that defender down instead.
+ * After everyone hops: every defender that's up and right next to the carrier
+ * (or on its tile) tries to tackle it, in turn, so a chaser one step behind
+ * catches up with it rather than trailing it up the field.
  */
 function checkContact(state: RunState, events: SimEvent[]): PlayerUnit | null {
   const carrier = carrierOf(state);
@@ -208,17 +211,61 @@ function checkContact(state: RunState, events: SimEvent[]): PlayerUnit | null {
     .filter((d) => isUp(d) && dist(d.pos, carrier.pos) <= 1)
     .sort(byId);
   for (const d of near) {
-    if (carrier.fendOff > 0) {
-      carrier.fendOff--;
-      d.downTicks = tuning.units.knockdownTicks;
-      events.push({ type: 'fendedOff', id: carrier.id, defender: d.id });
-      events.push({ type: 'knockedDown', id: d.id });
-      continue;
-    }
-    events.push({ type: 'tackled', id: carrier.id, by: d.id });
-    return carrier;
+    if (tackleAttempt(state, carrier, d, events)) return carrier;
   }
   return null;
+}
+
+/**
+ * A defender reaching the carrier (GAMEPLAY.md, Tackling): the carrier tries
+ * to shake it (Hustle: it stumbles and is left behind), then to break it
+ * (Heft: it's knocked down). Lose both and it's a tackle. Returns whether
+ * the carrier was tackled.
+ */
+function tackleAttempt(
+  state: RunState,
+  carrier: PlayerUnit,
+  d: Defender,
+  events: SimEvent[],
+): boolean {
+  if (check(state, 'shake', carrier, d)) {
+    d.downTicks = tuning.checks.shakeTicks;
+    events.push({ type: 'shook', id: carrier.id, defender: d.id });
+    return false;
+  }
+  if (check(state, 'break', carrier, d)) {
+    d.downTicks = tuning.units.knockdownTicks;
+    events.push({ type: 'brokeTackle', id: carrier.id, defender: d.id });
+    events.push({ type: 'knockedDown', id: d.id });
+    return false;
+  }
+  events.push({ type: 'tackled', id: carrier.id, by: d.id });
+  return true;
+}
+
+/** How close a Cover has to be for a receiver's cut to shake it off (tiles). */
+const MARK_REACH = 2.5;
+
+/**
+ * Getting open (GAMEPLAY.md, Getting Open): a receiver that just made a cut
+ * in its route (a change of direction), with its Cover close by, makes a
+ * Hustle check. Win and the Cover stumbles, dropping behind, then keeps
+ * chasing. Only before the catch: after it, the Covers chase the carrier.
+ */
+function shakeMarks(state: RunState, events: SimEvent[]): void {
+  const { screen } = state;
+  if (screen.ball.at !== 'qb' && screen.ball.at !== 'flight') return;
+  for (const p of [...screen.players].sort(byId)) {
+    const move = p.route[p.routeStep - 1];
+    const before = p.route[p.routeStep - 2];
+    if (!isUp(p) || !move || !before || move === before || move === '.' || before === '.') continue;
+    const mark = screen.defenders.find(
+      (d) => d.marking === p.id && isUp(d) && distance(d.pos, p.pos) <= MARK_REACH,
+    );
+    if (!mark || !check(state, 'shake', p, mark)) continue;
+    mark.downTicks = tuning.checks.shakeTicks;
+    events.push({ type: 'shook', id: p.id, defender: mark.id });
+  }
 }
 
 /** After a hop, a patrolling defender moves on to the next tile of its circuit. */
@@ -303,10 +350,11 @@ function checkSnatch(state: RunState, events: SimEvent[]): boolean {
  * so for a long throw that's the stretch as it comes down toward the
  * reticle, and for a short one most of the way. This tick's stretch of the
  * path is checked in order, and the first thing within reach of the low ball
- * decides it:
- *   - a defender close to it bats it down;
- *   - inside a Scarecrow's (or Bat's) ring, it's knocked away;
- *   - one of your players close to it catches it (how close sets perfect, good or ok);
+ * decides it (GAMEPLAY.md, Catching):
+ *   - one of your players close to it (how close sets perfect, good or ok)
+ *     catches it, outright if no defender contests it, otherwise on a Hands
+ *     check against the best contesting defender;
+ *   - with no receiver near, a defender right beside it bats it down;
  *   - if it reaches the turf with nobody there, it's incomplete.
  */
 function resolveFlight(state: RunState, events: SimEvent[]): boolean {
@@ -319,20 +367,18 @@ function resolveFlight(state: RunState, events: SimEvent[]): boolean {
     const t = Math.min(1, (tick - 1 - ball.releasedOn + i / STEPS) / span);
     if (!catchable(ball.from, ball.target, t)) continue;
     const at = ballGround(ball.from, ball.target, t);
-    const batter = screen.defenders
-      .filter((d) => isUp(d) && distance(d.pos, at) <= tuning.throw.blockRadius)
+    const contest = contestants(screen, at);
+    const receiver = screen.players
+      .filter((p) => isUp(p) && distance(p.pos, at) <= catchRadius('ok'))
       .sort((a, b) => distance(a.pos, at) - distance(b.pos, at) || a.id - b.id)[0];
-    const by = batter ?? coveringDefender(screen, at);
-    if (by) {
-      events.push({ type: 'blocked', by: by.id, at: by.pos });
-      screen.ball = { at: 'dead', pos: by.pos, how: 'blocked' };
+    if (receiver) return catchBall(state, receiver, distance(receiver.pos, at), contest, events);
+    const batter = contest.find((d) => distance(d.pos, at) <= tuning.throw.blockRadius);
+    if (batter) {
+      events.push({ type: 'blocked', by: batter.id, at: batter.pos });
+      screen.ball = { at: 'dead', pos: batter.pos, how: 'blocked' };
       endDown(state, 'blocked', state.drive.los, events);
       return true;
     }
-    const receiver = screen.players
-      .filter((p) => isUp(p) && distance(p.pos, at) <= catchRadius(p, 'ok'))
-      .sort((a, b) => distance(a.pos, at) - distance(b.pos, at) || a.id - b.id)[0];
-    if (receiver) return catchBall(state, receiver, distance(receiver.pos, at), events);
     if (t >= 1) {
       events.push({ type: 'incomplete', at: ball.target });
       screen.ball = { at: 'dead', pos: ball.target, how: 'incomplete' };
@@ -343,19 +389,35 @@ function resolveFlight(state: RunState, events: SimEvent[]): boolean {
   return false;
 }
 
-/** A catch: how close the ball came to the receiver sets its quality; a perfect one is a Clean Catch. */
-function catchBall(state: RunState, receiver: PlayerUnit, d: number, events: SimEvent[]): boolean {
+/**
+ * A catch: how close the ball came to the receiver sets its quality. With
+ * defenders contesting it, it's a Hands check against the best of them: +1
+ * for a perfect throw, −1 for an ok one, −1 for each extra defender. Lose it
+ * and the ball is knocked away.
+ */
+function catchBall(
+  state: RunState,
+  receiver: PlayerUnit,
+  d: number,
+  contest: readonly Defender[],
+  events: SimEvent[],
+): boolean {
   const { screen } = state;
   const quality: CatchQuality =
-    d <= catchRadius(receiver, 'perfect')
-      ? 'perfect'
-      : d <= catchRadius(receiver, 'good')
-        ? 'good'
-        : 'ok';
+    d <= catchRadius('perfect') ? 'perfect' : d <= catchRadius('good') ? 'good' : 'ok';
+  const best = [...contest].sort((a, b) => b.stats.hands - a.stats.hands || a.id - b.id)[0];
+  if (best) {
+    const c = tuning.checks;
+    const modifier = c.quality[quality] - c.perExtraDefender * (contest.length - 1);
+    if (!check(state, 'catch', receiver, best, modifier)) {
+      events.push({ type: 'dropped', id: receiver.id, by: best.id });
+      screen.ball = { at: 'dead', pos: receiver.pos, how: 'blocked' };
+      endDown(state, 'blocked', state.drive.los, events);
+      return true;
+    }
+  }
   screen.ball = { at: 'carried', by: receiver.id };
-  const clean = quality === 'perfect';
-  if (clean) receiver.fendOff += 1;
-  events.push({ type: 'caught', id: receiver.id, clean, quality });
+  events.push({ type: 'caught', id: receiver.id, quality, contested: best !== undefined });
   // A catch over the line is a first down on the spot.
   if (receiver.pos.y >= state.drive.firstDown || receiver.pos.y >= END_ROW) {
     endDown(state, 'firstDown', receiver.pos.y, events);
@@ -365,7 +427,7 @@ function catchBall(state: RunState, receiver: PlayerUnit, d: number, events: Sim
   return false;
 }
 
-/** How far from a receiver a ball can land and still be caught at a given quality (Hands widens it). */
-export function catchRadius(p: PlayerUnit, quality: CatchQuality): number {
-  return tuning.catch[quality] + p.stats.hands * tuning.catch.perHands;
+/** How far from a receiver a ball can land and still be caught at a given quality. */
+export function catchRadius(quality: CatchQuality): number {
+  return tuning.catch[quality];
 }

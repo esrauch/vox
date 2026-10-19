@@ -31,6 +31,7 @@ import type { Action, DriveKind, RunState, SimEvent, Vec } from '../sim/types';
 import { Hud, type CardFace } from '../ui/hud';
 import { Conductor } from './conductor';
 import { THROW_PROBLEM_TEXT, react } from './feedback';
+import { draftView } from './rosterText';
 import { aimTarget, throwTiming } from './slingshot';
 
 /** How long the camera takes to glide forward into the next drive. */
@@ -49,6 +50,9 @@ const DRIVE_KIND_NAME: Readonly<Record<DriveKind, string>> = {
   gimmick: 'Gimmick',
   boss: 'Boss',
 };
+
+/** Which time through the forest (until there are more areas). */
+const AREA_NUMERAL: readonly string[] = ['I', 'II', 'III'];
 
 const face = (id: string): CardFace => {
   const c = playCard(id);
@@ -112,7 +116,6 @@ export class Game {
       onCard: (hand) => this.act({ type: 'call', hand }),
       onFlip: () => this.act({ type: 'flip' }),
       onDraft: (offer) => this.act({ type: 'draft', offer }),
-      onRemove: (owned) => this.act({ type: 'remove', owned }),
       onSkip: () => this.act({ type: 'skipDraft' }),
     });
 
@@ -144,7 +147,7 @@ export class Game {
     while (this.state.tick < tick) this.stepTick();
 
     const { screen, drive } = this.state;
-    this.units.update(screen, pos - tick);
+    this.units.update(this.state, pos - tick);
     this.hazards.update(pos, now / 1000);
     this.lines.update(drive);
     // One long field: it runs on past the first-down line, with the next
@@ -215,7 +218,7 @@ export class Game {
     }
     react(
       events,
-      this.state.screen,
+      this.state,
       this.hud,
       (id) => this.conductor.play(id),
       prev.drive.kind === 'boss',
@@ -295,18 +298,14 @@ export class Game {
     const banner =
       phase === 'over' || phase === 'won'
         ? summary
-        : `${drive.index + 1}/4 ${DRIVE_KIND_NAME[drive.kind]}: ${drive.name}`;
+        : `${AREA_NUMERAL[drive.area] ?? drive.area + 1} · ${drive.index + 1}/4 ${DRIVE_KIND_NAME[drive.kind]}: ${drive.name}`;
     // Between downs the line of scrimmage has moved but the down hasn't: the pop says what happened.
     const live = phase === 'setup' || phase === 'play';
     this.hud.setTop(banner, live ? downAndDistance(this.state) : null);
 
     const ready = this.conductor.started && !this.paused;
     this.hud.setHand(ready && phase === 'setup' ? deck.hand.map(face) : null, called?.hand ?? null);
-    this.hud.setDraft(
-      ready && phase === 'draft' && !this.glide
-        ? { offer: this.state.offer.map(face), deck: deck.owned.map(face) }
-        : null,
-    );
+    this.hud.setDraft(ready && phase === 'draft' && !this.glide ? draftView(this.state) : null);
 
     if (!this.conductor.started) this.hud.setPrompt('Fourth & Ghoul', 'PLAY');
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');

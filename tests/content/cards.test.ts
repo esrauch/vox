@@ -1,15 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { AREAS } from '../../src/content/areas';
-import {
-  CARDS,
-  DRAFT_POOL,
-  STARTER_DECK,
-  flipPlayer,
-  playCard,
-  route,
-} from '../../src/content/cards';
+import { CARDS, PLAYBOOK, flipPlayer, playCard, route } from '../../src/content/cards';
 import { formation, qbTile } from '../../src/sim/drive';
 import { COLS, MID_COL, key } from '../../src/sim/grid';
+import { startingRoster } from '../../src/sim/roster';
 
 describe('play cards', () => {
   const cards = Object.values(CARDS);
@@ -21,7 +15,7 @@ describe('play cards', () => {
   it('every formation lines up on the field without two players on one tile, flipped or not', () => {
     for (const c of cards) {
       for (const flipped of [false, true]) {
-        const players = formation(c.id, flipped, 3, 1);
+        const players = formation(c.id, flipped, 3, 1, startingRoster());
         for (const p of players) {
           expect(p.pos.x, c.id).toBeGreaterThanOrEqual(0);
           expect(p.pos.x, c.id).toBeLessThan(COLS);
@@ -42,8 +36,9 @@ describe('play cards', () => {
     }
   });
 
-  it('the starter deck and the draft pool only use real cards', () => {
-    for (const id of [...STARTER_DECK, ...DRAFT_POOL]) expect(() => playCard(id)).not.toThrow();
+  it('the playbook is six different plays, each for your four players', () => {
+    expect(new Set(PLAYBOOK).size).toBe(6);
+    for (const id of PLAYBOOK) expect(playCard(id).players, id).toHaveLength(4);
   });
 
   it('route() expands run-length words', () => {

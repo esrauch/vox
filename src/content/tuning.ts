@@ -93,12 +93,37 @@ export const tuning = {
     perfect: 0.35,
     good: 0.75,
     ok: 1.15,
-    /** Each point of Hands widens every catch radius by this much. */
-    perHands: 0.3,
   },
-  coverage: {
-    /** A player within this many tiles outside a coverage ring is yellow (coverage is close). */
-    nearBand: 1,
+  checks: {
+    /**
+     * A check's chance of success by your edge (your stat minus the
+     * defender's, plus modifiers), from -4 or worse up to +4 or better
+     * (GAMEPLAY.md, Checks). It favors you: even is 60%, +4 is certain, and
+     * there's always a long shot.
+     */
+    curve: [0.1, 0.15, 0.25, 0.4, 0.6, 0.75, 0.88, 0.95, 1],
+    /** The safety net: each failure in a row adds this much edge to that player's next check of the kind. */
+    safetyNet: 1,
+    /** Edge from the throw's quality on a contested catch. */
+    quality: { perfect: 1, good: 0, ok: -1 },
+    /** Edge lost for each contesting defender beyond the best one. */
+    perExtraDefender: 1,
+    /** Ticks a shaken defender stays stumbled (down): it misses about two hops, dropping behind, then keeps chasing. */
+    shakeTicks: 3,
+    /** Frenzy: edge on the next check of the kind after a success. */
+    frenzy: 2,
+    /** A player's ring: green at or above `open`, yellow at or above `tight`, red below. */
+    bands: { open: 0.75, tight: 0.4 },
+  },
+  run: {
+    /** Areas in the main game. Until there are more, the forest is played again, stiffer each time. */
+    areas: 3,
+  },
+  defense: {
+    /** Added to every defender's stats for each area after the first… */
+    perArea: 1,
+    /** …and again on the Boss drive. */
+    boss: 1,
   },
   camera: {
     /** Camera pitch in degrees above the horizon. */
