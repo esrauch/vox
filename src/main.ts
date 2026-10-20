@@ -1,3 +1,4 @@
+import { ArcadeGame } from './arcade/game';
 import { Game } from './game/game';
 import { applyPaletteVars } from './ui/paletteVars';
 
@@ -17,9 +18,11 @@ await Promise.race([
 ]);
 
 const params = new URLSearchParams(location.search);
-const game = new Game(canvas, ui, {
-  seed: Number(params.get('seed')) || Math.floor(Math.random() * 1e9),
-});
+const seed = Number(params.get('seed')) || Math.floor(Math.random() * 1e9);
+// The arcade game (GAMEPLAY.md, 2026-10-19); ?grid=1 still plays the old grid game until it's removed.
+const game = params.has('grid')
+  ? new Game(canvas, ui, { seed })
+  : new ArcadeGame(canvas, ui, { seed });
 
 // Dev builds expose the game for debugging from the console.
 if (import.meta.env.DEV) Object.assign(window, { game });

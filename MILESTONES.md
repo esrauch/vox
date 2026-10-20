@@ -4,7 +4,7 @@ This is a **living plan** for **Arcade Halloween Football**, the design in [GAME
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** **A2, the first playable**: render the arcade sim with the third-person camera, wire throw, handoff and swipe, and judge the pacing by feel (downs last about 2 seconds). A1 (the simulation) is built and tuned in `src/arcade/`. Work happens on the branch `design/arcade`. The earlier grid design (and its milestones) are in git history and summed up in GAMEPLAY.md, *History*.
+**Current focus:** **A2, the first playable**: the arcade game now renders and takes input (`src/arcade/game.ts`), untested in a browser. Next: play it, fix what's wrong with the camera, scale and controls, judge the pacing by feel, then upgrades between drives. Work happens on the branch `design/arcade`. The earlier grid design (and its milestones) are in git history and summed up in GAMEPLAY.md, *History*.
 
 ---
 
@@ -72,9 +72,9 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 - [ ] **Instant start:** one tap from the title to the first snap.
 - [ ] **A random play each down:** its name flashes up, its routes show for a moment.
-- [ ] **Throw and steer** with one thumb: pull back to snap and aim, release to throw, drag and flick to carry.
-- [ ] **The three roles as placeholder silhouettes** (scaled walk-ons are fine at first), readable at the new scale.
-- [ ] **Rendering the real-time sim:** smooth movement, the arc and landing ring, the carrier's ring, who's open.
+- [~] **Throw, hand off and steer** with one thumb: pull back to snap and aim, release to throw; tap a Runner to hand off; swipe to nudge the carrier. *(Wired 2026-10-19, not yet played on a phone.)*
+- [~] **The three roles as placeholder silhouettes:** the walk-on stretched wide (Blockers), lean (Runners) and tall (Catchers), with a colored block on the head for a monster. *(2026-10-19; readability not yet checked from the camera.)*
+- [~] **Rendering the real-time sim** (`src/arcade/game.ts`, `src/arcade/render/`): the third-person camera behind and above the QB, following the ball and the carrier; one long turf strip with the scrimmage and first-down lines (and the Boss's end zone); everyone turning to face where they're going and tipping over when down; the ball along its real arc with a landing ring; the aim's dashed arc; gold ring under the carrier, green or red under receivers; pops for every result. *(2026-10-19: built, not yet looked at in a browser. The old grid game is still at `?grid=1`.)*
 - [ ] **A defense that scales:** three or four sleepy defenders on the first drive, up to the full forest by the area III Boss.
 - [ ] **Upgrades after each won drive:** the three transforms (Golem, Werewolf, Ghost) and training, with a roster screen of simple pips.
 - [ ] **Balance from the headless runs:** a team that never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
@@ -124,6 +124,7 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-19:** **The arcade game renders.** The app now opens the arcade game (the grid game is at `?grid=1`): a third-person camera behind and above the QB, following the play; one long field; placeholder role silhouettes and monster badges; the ball's real arc; pull to throw, tap a Runner to hand off, swipe to steer. The view gained a follow-camera mode and the forest scenery a field layout, so both games share them. Not yet looked at in a browser.
 - **2026-10-19:** **The arcade sim is tuned** with the balance runs. Changes:
   - **Slower all round.**
   - **Blocks hold** a defender.

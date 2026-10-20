@@ -30,7 +30,16 @@ export class View {
   private readonly raycaster = new THREE.Raycaster();
   private readonly ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-  constructor(readonly canvas: HTMLCanvasElement) {
+  /**
+   * With `follow`, the camera isn't fitted to the field: the game places it
+   * every frame (the arcade game's third-person camera), and fit() only
+   * sizes the renderer.
+   */
+  constructor(
+    readonly canvas: HTMLCanvasElement,
+    private readonly options: { follow?: boolean; fov?: number } = {},
+  ) {
+    if (options.fov) this.camera.fov = options.fov;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
@@ -112,6 +121,11 @@ export class View {
     const h = this.canvas.clientHeight;
     if (w === 0 || h === 0) return;
     this.renderer.setSize(w, h, false);
+    if (this.options.follow) {
+      this.camera.aspect = w / h;
+      this.camera.updateProjectionMatrix();
+      return;
+    }
     const availH = Math.max(1, h - this.insets.top - this.insets.bottom);
 
     const target = new THREE.Vector3(0, 0, -(ROWS - 1) / 2);
