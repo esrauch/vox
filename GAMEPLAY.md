@@ -20,14 +20,14 @@ Items marked **▲** are recommendations or details still open to change. Every 
 
 ## The Game in One Breath
 
-Tap PLAY and you're on the field. The ball is snapped the moment you pull back on the screen: the play is picked for you, your Blockers shove the pass rush, your Catchers break for open grass, and you **release to throw**. The moment someone catches it, **you're steering**: the carrier charges upfield, and each swipe nudges it a little left or right through the forest's gnomes and owls. See how far you get before they bury you. Four downs to make 10 yards. Make it and you **pick an upgrade**: a Catcher becomes a Ghost, a Blocker becomes a Golem, someone gets faster. Miss on 4th down and the run is over. You start as a team of plain, weak humans against a sleepy defense; by the third area you're a pack of monsters against the whole forest.
+Tap PLAY and you're on the field. **Pick one of three play cards** and the ball is snapped: your Blockers shove the pass rush, your Catchers break for open grass, and an **aim line sweeps** back and forth from the QB. **Tap THROW** as it crosses an open receiver and a bullet zips out. Once someone has the ball it charges upfield on its own, and every time a gnome or an owl grabs it, **Break it!**: one well-timed tap shakes them off. See how far you get before they bury you. Four downs to make 10 yards. Make it and you **pick an upgrade**: a Catcher becomes a Ghost, a Blocker becomes a Golem, someone gets faster. Miss on 4th down and the run is over. You start as a team of plain, weak humans against a sleepy defense; by the third area you're a pack of monsters against the whole forest.
 
 ---
 
 ## Design Pillars
 
 1. **Playing in five seconds.** From opening the game to the first snap is one tap. No draft, no team setup, no tutorial wall. Everything you need to know, you learn by doing it once.
-2. **Arcade, not simulation.** Two verbs: **throw** (or hand off) and **steer**. Everything else (blocking, routes, the defense) happens on its own, at speed.
+2. **Arcade, not simulation.** One skill: **timing**. Pick a play, tap THROW as the sweeping line crosses an open receiver, tap again to break a tackle. No aiming, no steering. Everything else (blocking, routes, running, the defense) happens on its own, at speed.
 3. **Impact.** Every play ends in something physical: a crunching tackle, a pancake block, a bounced pass, a carrier dragging a gnome for five yards. If a moment doesn't *hit*, it's not done.
 4. **Readable at a glance.** Who's on your team, what role each player has, who's open and who's about to hit you, in under a second, on a phone. The roles are three silhouettes; the stats are things you *see* happen, never numbers you have to read.
 5. **Start weak, build up.** Like *Slay the Spire*, *Dungeon Clawler* or *Balatro*: limited resources and very easy opponents at first, then your team grows and the forest fights back harder.
@@ -64,41 +64,49 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ---
 
-## A Down
+## A Down *(the timing design, 2026-10-20)*
 
-1. **The play is picked for you,** and **its routes are drawn on the turf before the snap**: a dotted path and an arrow for each receiver (gold for a Runner the play sends upfield). One of **four plays**, at random (and randomly mirrored), lines your team up: where your Catchers will run and who stays home to block. Its name flashes up ("SLANTS!") and the routes show for a moment. You don't pick it: the only choice is pass or run (step 2).
+**Every input is timing, never aiming.** Pick a play, then one tap at the right moment, then one more when you're grabbed.
+
+1. **Call a play: three cards, drawn at random** from the playbook. Each shows the play's name and routes; while your finger is on a card, its routes are drawn on the turf. **Flip** mirrors all three toward the other side (the defenses are lopsided). **Tapping a card snaps the ball** at once: one tap from choice to action.
 
    | Play | What happens |
    |---|---|
    | **Slants** | The outside Catchers cut inside, then go straight upfield; the slot goes deep; one Runner checks down up the middle, the other leaks out to the flat and turns upfield along the sideline. |
    | **Deep Shot** | All three Catchers go long; both Runners slip out past the line as short check-downs. |
    | **Curl & Flat** | The Catchers run out and curl back at an angle toward the middle, and wait there; the Runners swing out to the flats, then turn upfield. |
-   | **Dive** | Built for a run: a Runner charges straight up the middle, the other leading through the hole ahead of it; the Catchers run off, dragging their Covers away. Tap the Runner to give it the ball. |
+   | **Dive** *(handoff)* | A Runner takes it straight up the middle, the other leading through the hole; the Catchers run off, dragging their Covers away. |
+   | **Sweep** *(handoff)* | A Runner takes it wide toward the sideline and turns upfield behind the other Runner; the Catchers block downfield. |
 
-   **Every Runner gets out past the line of scrimmage** (only the Blockers stay home), and no route runs deeper than a throw can reach. A curl can end coming back.
-2. **Pass or run, your call.** **Pull back anywhere** to snap and aim a throw, or **tap a Runner** to snap and hand it the ball. You can also hand off in the first second after the snap, while the QB still has it. Any play can be a run; the Dive is built for one.
-3. **The play happens at full speed, on its own.** Blockers lock up with the pass rush and shove; Catchers run their routes; Covers chase them; the Owl hangs deep.
-4. **Release to throw.** The ball flies to where you aimed; the arc rises the further you throw, so long passes sail over defenders underneath and short ones are quick but low.
-5. **If someone catches it, you're steering.** On a handoff, you're steering the Runner from the moment it has the ball.
-6. **The down ends with a tackle, a dead ball, a sack, or the line.**
+   **Every Runner gets out past the line of scrimmage** (only the Blockers stay home), and no route runs deeper than a throw can reach. A curl can end coming back. **Choosing a handoff card is choosing to run.**
+2. **The sweep.** On a pass play an **aim line sweeps from the QB**, sideline to sideline and back, like a lighthouse beam. **A receiver the line is passing over lights up.** It sweeps faster in later areas.
+3. **Two buttons:**
+   - **THROW** fires a **bullet** along the line: fast and flat. The **first one of your players it reaches** catches it (anyone within a few yards of the QB is skipped). If a defender gets to it first, it's **batted down**. If nobody's in the way, it's **incomplete**.
+   - **RUN:** the QB tucks it and runs, drifting toward the open side. For when everyone's covered.
+4. **The pocket holds for three sweeps.** If the QB still has the ball when the line finishes its third pass across, the pocket collapses: **SACKED!** A faster sweep means a quicker pocket.
+5. **After the catch, the carrier runs on its own:** it charges upfield and drifts toward the emptiest lane by itself. There's no steering: your skill goes into the tackles.
+6. **Break it!** (below) every time someone grabs the carrier.
+7. **The down ends with a tackle, a dead ball, a sack, or the line.**
 
-### The pocket
+### Break it! *(the tackle mini-game)*
 
-- **The pocket is real now:** Rhino Beetles rush the QB, and your Blockers physically hold them off: **a defender a Blocker is on is held** (barely moving) if the Blocker is at least as heavy, and only slowed if it's lighter. How long you have is **how your Blockers' Heft matches up against the rush**, not a timer: a strong line buys time, a weak one folds. A Blocker 3 Heft heavier flattens its man: a **pancake**.
-- **A rusher that gets past reaches the QB: SACKED!** You see it coming: the beetle breaks free and charges.
+**When a defender grabs the carrier, the play freezes for about a second and a break meter appears:** a marker sweeping across a bar with a **sweet spot**. Tap once:
+
+| Your tap | What happens |
+|---|---|
+| **In the sweet spot** | **BREAK!** The tackler goes flying and the carrier keeps running |
+| **Close to it** | **DRAG:** the carrier drags the tackler a few more yards, then goes down |
+| **Off, or no tap** | Tackled on the spot |
+
+- **The sweet spot is the stats:** the carrier's **Heft** against the tackler's. A Golem gets a wide spot; a Ghost against an Owl, a sliver. More Heft also means more yards on a drag.
+- **Every extra tackler already on it** shrinks the spot: a pile is hard to escape.
+- **It's the same skill as the throw**, a sweeping marker and one tap, so the whole game teaches one thing.
 
 ### Catching
 
-- **A catch is reach.** A pass coming down within a Catcher's reach is caught, and **Hands is reach**: the better the Hands, the further the ball snaps in. Lead your Catcher into open grass.
-- **A contested ball is a visible tussle.** If a defender gets a hand to it too, the one with **more Hands** comes away with it. If it's the defender, the ball is batted down (no interceptions). Ties go to you.
-- **The ball can only be touched near its two ends:** at the line, where a rusher can swat it, and where it comes down (it comes down at catching height, not the turf). In between it's over everyone's head. So **a Catcher that gets a step on its Cover is open**: the Cover can't reach a ball landing in front of the Catcher.
-
-### After the catch: steering
-
-- **Swipe left or right to steer, a little at a time.** The carrier always charges upfield on its own; each swipe nudges it over a step to that side. You're choosing the lane, not driving.
-- **Don't run out of bounds:** a carrier over the sideline is down there.
-- **Tackles are a grab and a drag.** A defender that reaches the carrier hangs on, and the carrier keeps going, slowed by the weight on it, until it's brought down: quickly by a heavy tackler or a pile, slowly by a light one. A carrier **2 Heft heavier** than its tackler sheds it outright. So Heft is yards after contact: a Golem drags gnomes for yards. A faster carrier simply outruns chasers (Hustle).
-- **Your Blockers keep blocking** after the catch, shoving defenders out of the carrier's way, so running behind them is the safe lane.
+- **A catch is reach.** The bullet is caught by the first of your players whose reach it passes through, and **Hands is reach**: better Hands catch a bullet that would have gone by.
+- **A contested ball:** if a defender can reach it at the same moment, the one with **more Hands** wins it; if it's the defender, it's batted down (no interceptions). Ties go to you.
+- **Throwing lanes matter:** a bullet passes every defender between the QB and the receiver, and any of them that can reach it bats it down. **A Scarecrow's wide ring blocks a whole lane.** So the timing is: when the line is over an open receiver *and* the lane to it is clear.
 
 ---
 
@@ -106,13 +114,14 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 | When | Gesture | What it does |
 |---|---|---|
-| **Before the snap** | **Pull back anywhere** | Snap the ball and start aiming. The further you pull, the further the throw. |
-| **Before the snap, or just after** | **Tap a Runner** | Hand it the ball (snapping first, if it's before the snap). You're steering it from then on. |
-| **Aiming** | **Release** | Throw. Letting go too close to the QB cancels. |
-| **Carrying** | **Swipe left or right** | Nudge the carrier a step to that side. |
+| **Before the snap** | **Tap Flip** | Mirror all three plays. |
+| **Before the snap** | **Touch a card** | Show its routes on the turf; **let go on it to snap** with that play (slide off to cancel). |
+| **Pass play** | **THROW** | Fire a bullet along the sweeping line. |
+| **Pass play** | **RUN** | The QB runs it himself. |
+| **Grabbed** | **Tap** (anywhere) | Break it! |
 | **Between drives** | **Tap a card** | Take that upgrade. |
 
-**One thumb, portrait.** Nothing needs two hands, and nothing needs precise timing to a beat.
+**One thumb, portrait, no aiming.** Everything is a tap at the right moment.
 
 ---
 
@@ -134,9 +143,9 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 | Stat | What it is | You see it when… |
 |---|---|---|
-| **Heft** | **Weight.** In any shove, the heavier one pushes the lighter one back; a big gap sends the light one flying. | A Blocker pancakes a beetle; a Golem carrier shrugs off a gnome. |
+| **Heft** | **Weight.** In any shove, the heavier one pushes the lighter one back; and in **Break it!**, the bigger your Heft over the tackler, the wider the sweet spot and the longer the drag. | A Blocker pancakes a beetle; a Golem carrier shrugs off a gnome. |
 | **Hustle** | **Speed.** | A Runner pulls away from the pack; a Catcher gets a step on its Cover. |
-| **Hands** | **Reach.** The ball snaps into the hands from further away, and wins a tussle for it. | A Catcher plucks a ball you overthrew. |
+| **Hands** | **Reach.** A bullet passing near snaps into the hands from further away, and a contested ball goes to the better Hands. | A Catcher plucks a bullet that was going by. |
 
 - **Everyone starts human and plain.** A fresh team is a bit slow, a bit light, a bit clumsy: good enough for the sleepy first drive, not for the Boss.
 - **The numbers live on the roster screen** (between drives), as simple pips. On the field, the stats only show through what happens.
@@ -245,6 +254,7 @@ The smallest version that proves the fun:
 
 ## History: Ideas Tried and Set Aside
 
+- **Slingshot aiming, swipe steering and the auto-picked play** *(the arcade design of 2026-10-19, replaced 2026-10-20):* each down's play was picked at random; you pulled back to aim a throw anywhere (the arc rising with distance) or tapped a Runner to hand off, and swiped to nudge the carrier's lane; tackles were a grab and a drag. **Why it was replaced:** it functioned, but it didn't click: aiming and steering were fiddly on a phone and the decisions felt thin. The timing design keeps the play cards' choice, turns the throw into one timed tap, and puts the skill after the catch into Break it!
 - **The grid, the beat, play cards and dice checks** *(built 2026-10-17 to 2026-10-19, replaced 2026-10-19):* everyone hopped one half-yard tile per beat of the music; each down you drew three play cards and called one; your four players' Hustle, Hands and Heft were rolled as hidden checks against the defenders' on a friendly curve, and a roster of four was transformed into monsters with poker-style team hands. **Why it was replaced:** it lacked impact. A balance bot that picked a random play, waited, threw at the first green ring and took random upgrades did about as well as playing it: the decisions didn't matter, the dice hid why things happened, and nothing on the grid ever collided. Kept from it: drives, downs and areas, the continuous march between drives, the defenders and the Witch, the throw arc, the transforms, and the headless balance runs.
 - **Screens to the end zone, balls as lives** *(until 2026-10-18):* you placed your squad, threw once and ran to the top of the screen; balls were lives. Replaced because placement barely mattered and waiting was free.
 - **Steering the carrier on the grid** *(tried 2026-10-17):* swipe to sidestep or wait after the catch. It didn't work on a hopping grid with no pressure, where waiting was free. **It's back in real time**, where defenders close from every side and the lane you pick is the whole skill.

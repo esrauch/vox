@@ -4,7 +4,7 @@ This is a **living plan** for **Arcade Halloween Football**, the design in [GAME
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** **A2, the first playable**: the arcade game now renders and takes input (`src/arcade/game.ts`), untested in a browser. Next: play it, fix what's wrong with the camera, scale and controls, judge the pacing by feel, then upgrades between drives. Work happens on the branch `design/arcade`. The earlier grid design (and its milestones) are in git history and summed up in GAMEPLAY.md, *History*.
+**Current focus:** **the timing design** (2026-10-20, GAMEPLAY.md, A Down): three play cards with Flip, a sweeping aim line and a THROW button for bullet passes, RUN for the QB, three sweeps before the pocket collapses, no steering, and Break it! on every tackle. Then back to A2's first playable.
 
 ---
 
@@ -124,6 +124,14 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-20:** **Designed: the timing controls.**
+  - **Three random play cards** with Flip; tapping one snaps. Handoffs are cards (Dive, and a new Sweep).
+  - **A sweeping aim line** and a THROW button for **bullet** passes: no aiming, no distance.
+  - **RUN** for the QB, who drifts to the open side.
+  - **The pocket collapses after three sweeps,** and the sweep speeds up in later areas.
+  - **No steering:** carriers find the open lane themselves.
+  - **Break it!** on every tackle: one timed tap breaks it, drags it, or not, with the sweet spot sized by Heft.
+  - **Replaces** slingshot aiming, swipe steering and the auto-picked play.
 - **2026-10-19:** **The plays reworked.**
   - **Every Runner gets past the line of scrimmage.** Only the Blockers stay home: the Runners on Slants and Deep Shot run check-downs, and on the Dive the second Runner leads through the hole.
   - **Every route finishes going upfield.** Slants cut in, then go straight up. The flats turn up the sideline.
