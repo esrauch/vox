@@ -125,6 +125,7 @@ Every training pick helps. Two things are still off target: **downs last about 2
 ## Changelog
 
 - **2026-10-19:** **The plays reworked.**
+  - **Every Runner gets past the line of scrimmage.** Only the Blockers stay home: the Runners on Slants and Deep Shot run check-downs, and on the Dive the second Runner leads through the hole.
   - **Every route finishes going upfield.** Slants cut in, then go straight up. The flats turn up the sideline.
   - **Curls come back at an angle** toward the middle, so they read as curls.
   - **No route runs deeper than a throw can reach.**

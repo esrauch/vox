@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PLAYS } from '../../src/arcade/content/plays';
-import { LINEUP } from '../../src/arcade/content/team';
+import { LINEUP, ROSTER_ROLES } from '../../src/arcade/content/team';
 import { arcadeTuning } from '../../src/arcade/content/tuning';
 
 describe('the four plays', () => {
@@ -26,6 +26,20 @@ describe('the four plays', () => {
       } else {
         expect(dy, label).toBeGreaterThan(Math.abs(dx));
       }
+    }
+  });
+
+  it('every Runner gets out past the line of scrimmage: only the Blockers stay home', () => {
+    for (const play of PLAYS) {
+      play.slots.forEach((a, slot) => {
+        const label = `${play.id} slot ${slot}`;
+        if (ROSTER_ROLES[slot] === 'blocker') return;
+        expect(a.kind, label).toBe('route');
+        if (a.kind !== 'route' || ROSTER_ROLES[slot] !== 'runner') return;
+        const start = LINEUP[slot]!;
+        const deepest = Math.max(...a.to.map((w) => start.y + w.y));
+        expect(deepest, label).toBeGreaterThan(1);
+      });
     }
   });
 

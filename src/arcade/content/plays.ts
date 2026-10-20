@@ -1,9 +1,10 @@
 /**
  * The four plays (GAMEPLAY.md, A Down). Each down one is picked at random,
  * and randomly mirrored. A route is waypoints relative to the player's start
- * (yards: x across, y upfield); `block` stays home and blocks. Every route
- * finishes going upfield (a curl's angled comeback is the one exception: the
- * curl is where it stops), and none goes deeper than a throw can reach
+ * (yards: x across, y upfield); `block` stays home and blocks (only the
+ * Blockers do). Every Runner gets out past the line of scrimmage; every route
+ * finishes going upfield, except a curl's angled comeback (the curl is where
+ * it stops); and none goes deeper than a throw can reach
  * (tests/arcade/plays.test.ts). On any play
  * you can tap a Runner to hand it the ball instead of throwing (sim/run.ts);
  * the Dive is the play built for it.
@@ -30,11 +31,12 @@ export const PLAYS: readonly Play[] = [
     id: 'slants',
     name: 'Slants',
     // The outside Catchers cut inside, then straight upfield; the slot goes deep;
-    // a Runner leaks out to the flat, then turns upfield along the sideline.
+    // one Runner checks down up the middle, the other leaks out to the flat and
+    // turns upfield along the sideline.
     slots: [
       block,
       block,
-      block,
+      route([-1.5, 3], [-1.5, 9]),
       route([2.8, 1], [6.3, 2], [6.3, 12]),
       route([0, 3], [4.2, 9], [4.2, 16]),
       route([0, 3], [-4.2, 9], [-4.2, 16]),
@@ -44,8 +46,16 @@ export const PLAYS: readonly Play[] = [
   {
     id: 'deepShot',
     name: 'Deep Shot',
-    // All three Catchers go long; both Runners stay home to block.
-    slots: [block, block, block, block, route([0, 24]), route([0, 24]), route([-1.4, 20])],
+    // All three Catchers go long; the Runners slip out past the line as check-downs.
+    slots: [
+      block,
+      block,
+      route([-2.5, 3], [-2.5, 8]),
+      route([2.5, 3], [2.5, 8]),
+      route([0, 24]),
+      route([0, 24]),
+      route([-1.4, 20]),
+    ],
   },
   {
     id: 'curlFlat',
@@ -65,12 +75,13 @@ export const PLAYS: readonly Play[] = [
   {
     id: 'dive',
     name: 'Dive',
-    // Built for a handoff: a Runner charges up the middle, the other stays home; the Catchers run off.
+    // Built for a handoff: a Runner charges up the middle with the other leading
+    // through the hole ahead of it; the Catchers run off.
     slots: [
       block,
       block,
       route([0, 3], [0, 12]),
-      block,
+      route([-0.6, 3], [-0.6, 12]),
       route([0, 16]),
       route([0, 16]),
       route([0, 14]),
