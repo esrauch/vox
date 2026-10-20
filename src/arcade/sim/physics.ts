@@ -19,7 +19,11 @@ export function allBodies(state: RunState): Body[] {
 /** Everyone moves one step toward their target. */
 export function moveBodies(state: RunState): void {
   const carrierId = state.field.ball.at === 'carried' ? state.field.ball.by : null;
+  const carrier = state.field.players.find((p) => p.id === carrierId);
+  const hanging = state.field.defenders.filter((d) => d.latch !== null);
   for (const b of allBodies(state)) {
+    // Tacklers hanging on ride along with the carrier (below).
+    if (b.side === 'defense' && b.latch) continue;
     if (b.down > 0) {
       b.down = Math.max(0, b.down - DT);
       const slow = Math.max(0, 1 - bodyTuning.friction * DT);
@@ -35,8 +39,14 @@ export function moveBodies(state: RunState): void {
     let desired = v(0, 0);
     if (target) {
       const to = sub(target, b.pos);
+      const speed =
+        b.side === 'defense'
+          ? b.speed * blockedShare(state, b, carrierId)
+          : b.id === carrierId
+            ? b.speed * (b.mass / (b.mass + hanging.reduce((m, d) => m + d.mass, 0)))
+            : b.speed;
       // Arrive: ease off over the last stretch so nobody orbits its target.
-      desired = scale(norm(to), b.speed * Math.min(1, len(to) / 0.6));
+      desired = scale(norm(to), speed * Math.min(1, len(to) / 0.6));
     }
     b.vel = add(b.vel, clampLen(sub(desired, b.vel), bodyTuning.accel * DT));
     b.pos = add(b.pos, scale(b.vel, DT));
@@ -45,11 +55,32 @@ export function moveBodies(state: RunState): void {
       b.pos = v(Math.max(-field.halfWidth, Math.min(field.halfWidth, b.pos.x)), b.pos.y);
     }
   }
+  for (const d of hanging) {
+    if (!carrier || !d.latch) continue;
+    d.pos = add(carrier.pos, d.latch);
+    d.vel = carrier.vel;
+  }
+}
+
+/**
+ * A defender being blocked: touched by one of your players who isn't the
+ * carrier or the QB. It moves at a share of its speed, held by a Blocker at
+ * least as heavy, slowed by a lighter one.
+ */
+function blockedShare(state: RunState, d: Body, carrierId: number | null): number {
+  let share = 1;
+  for (const p of state.field.players) {
+    if (p.down > 0 || p.role === 'qb' || p.id === carrierId || !touching(p, d)) continue;
+    const s = p.mass >= d.mass ? arcadeTuning.contact.held : arcadeTuning.contact.slowed;
+    share = Math.min(share, s);
+  }
+  return share;
 }
 
 /** Whether two bodies collide with each other at all. */
 function collides(a: Body, b: Body): boolean {
   if (a.down > 0 || b.down > 0) return false;
+  if ((a.side === 'defense' && a.latch) || (b.side === 'defense' && b.latch)) return false;
   return !(a.side === 'team' && b.side === 'team');
 }
 

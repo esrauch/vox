@@ -61,7 +61,7 @@ export function createRun(seed: number, roster: RosterPlayer[] = startingRoster(
     drive: { area: 0, index: 0, kind: 'intro', name: '', start: 0, firstDown: 0, down: 1, los: 0 },
     play: { index: 0, flipped: false },
     roster,
-    field: { players: [], defenders: [], witches: [], ball: { at: 'qb' }, lane: 0 },
+    field: { players: [], defenders: [], witches: [], ball: { at: 'qb' }, lane: 0, wrap: 0 },
     snappedAt: 0,
     pause: 0,
     result: null,
@@ -128,7 +128,14 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
   const boost = defenseBoost(drive.area, drive.kind, spec);
   const defenders = lineUpDefense(spec, drive, boost, state.nextId);
   state.nextId += defenders.length;
-  state.field = { players, defenders, witches: state.field.witches, ball: { at: 'qb' }, lane: 0 };
+  state.field = {
+    players,
+    defenders,
+    witches: state.field.witches,
+    ball: { at: 'qb' },
+    lane: 0,
+    wrap: 0,
+  };
   state.phase = 'setup';
   state.result = null;
   events.push({
@@ -177,9 +184,11 @@ function handoff(state: RunState, id: number, events: ArcadeEvent[]): void {
   if (state.phase === 'setup') snap(state, events);
   if (state.phase !== 'play' || state.field.ball.at !== 'qb') return;
   if (state.time - state.snappedAt > arcadeTuning.throw.handoffWindow) return;
+  // It heads for the hole the play opens: where its route was going.
+  const hole = runner.job.kind === 'route' ? runner.job.to[runner.job.to.length - 1] : undefined;
   runner.job = { kind: 'carry' };
   state.field.ball = { at: 'carried', by: runner.id };
-  state.field.lane = runner.pos.x;
+  state.field.lane = hole?.x ?? runner.pos.x;
   events.push({ type: 'handoff', id: runner.id });
 }
 

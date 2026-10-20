@@ -1,8 +1,8 @@
 /**
  * The ball in the air (GAMEPLAY.md, Catching). The arc rises the further you
- * throw: short passes stay low the whole way, long ones climb out of reach
- * and come back down near the target. While it's low, the first thing that
- * can reach it decides it:
+ * throw, and comes down at catching height, so it can only be touched near
+ * its two ends: at the line, and where it comes down. While it's low, the
+ * first thing that can reach it decides it:
  *   - your player nearest to it (within its reach) catches it, unless a
  *     defender reaching it too has more Hands (ties go to you): then it's batted;
  *   - with only a defender reaching it, it's batted down;
@@ -29,7 +29,7 @@ export function arcPeak(distance: number): number {
 
 /** The ball's height `u` (0 to 1) of the way through a throw this long. */
 export function ballHeight(distance: number, u: number): number {
-  return t.releaseHeight * (1 - u) + 4 * arcPeak(distance) * u * (1 - u);
+  return t.releaseHeight * (1 - u) + t.catchHeight * u + 4 * arcPeak(distance) * u * (1 - u);
 }
 
 /** Where a Witch is at a moment: she sweeps across her row and wraps at the sidelines. */
@@ -41,7 +41,7 @@ export function witchX(w: Witch, time: number): number {
 
 export type FlightOutcome =
   | { readonly kind: 'caught'; readonly by: Player; readonly contested: boolean }
-  | { readonly kind: 'batted'; readonly by: number; readonly at: Vec }
+  | { readonly kind: 'batted'; readonly by: number; readonly at: Vec; readonly contested: boolean }
   | { readonly kind: 'incomplete'; readonly at: Vec }
   | null;
 
@@ -54,7 +54,9 @@ export function resolveFlight(state: RunState): FlightOutcome {
 
   for (const w of state.field.witches) {
     const at = v(witchX(w, state.time), w.y);
-    if (dist(at, ground) < arcadeTuning.witch.radius) return { kind: 'batted', by: w.id, at };
+    if (dist(at, ground) < arcadeTuning.witch.radius) {
+      return { kind: 'batted', by: w.id, at, contested: false };
+    }
   }
 
   const low = ballHeight(dist(ball.from, ball.target), u) < t.reachHeight;
@@ -66,10 +68,10 @@ export function resolveFlight(state: RunState): FlightOutcome {
       .filter((d) => d.down <= 0 && dist(d.pos, ground) <= d.reach)
       .sort(byHands(ground))[0];
     if (catcher && defender && defender.stats.hands > catcher.stats.hands) {
-      return { kind: 'batted', by: defender.id, at: defender.pos };
+      return { kind: 'batted', by: defender.id, at: defender.pos, contested: true };
     }
     if (catcher) return { kind: 'caught', by: catcher, contested: defender !== undefined };
-    if (defender) return { kind: 'batted', by: defender.id, at: defender.pos };
+    if (defender) return { kind: 'batted', by: defender.id, at: defender.pos, contested: false };
   }
   if (u >= 1) return { kind: 'incomplete', at: ball.target };
   return null;

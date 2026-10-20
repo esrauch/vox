@@ -16,12 +16,20 @@
 import { PLAYS } from '../src/arcade/content/plays';
 import { arcadeTuning } from '../src/arcade/content/tuning';
 import { carrierOf, qbOf } from '../src/arcade/sim/ai';
-import { flightTime } from '../src/arcade/sim/ball';
+import { ballHeight, flightTime } from '../src/arcade/sim/ball';
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
 import { rngFor } from '../src/arcade/sim/random';
 import { step, throwProblem } from '../src/arcade/sim/step';
-import type { ArcadeEvent, Form, Role, RunState, StepInput, Vec } from '../src/arcade/sim/types';
-import { add, dist, scale, v } from '../src/arcade/sim/vec';
+import type {
+  ArcadeEvent,
+  Form,
+  Role,
+  RunState,
+  Stats,
+  StepInput,
+  Vec,
+} from '../src/arcade/sim/types';
+import { add, dist, lerp, scale, v } from '../src/arcade/sim/vec';
 import type { Rng } from '../src/sim/rng';
 
 const RUNS = Number(process.argv[2]) || 200;
@@ -37,18 +45,29 @@ interface Scenario {
   readonly name: string;
   /** Forms by role (default: all human). */
   readonly forms?: Partial<Record<Role, Form>>;
-  /** Training added to every player's stats. */
-  readonly training?: number;
+  /** Training added to every player's stats… */
+  readonly training?: Partial<Stats>;
+  /** …or only to one role's. */
+  readonly roleTraining?: Partial<Record<Role, Partial<Stats>>>;
 }
 
-const SCENARIOS: readonly Scenario[] = [
-  { name: 'All human (never upgrade)' },
-  { name: 'Trained: +1 to everything', training: 1 },
-  { name: 'Golem Blockers', forms: { blocker: 'golem' } },
-  { name: 'Werewolf Runners', forms: { runner: 'werewolf' } },
-  { name: 'Ghost Catchers', forms: { catcher: 'ghost' } },
-  { name: 'All three monsters', forms: { blocker: 'golem', runner: 'werewolf', catcher: 'ghost' } },
-];
+/** BALANCE_SCENARIO='{"name": "...", ...}' runs just that one scenario instead. */
+const custom = process.env.BALANCE_SCENARIO;
+const SCENARIOS: readonly Scenario[] = custom
+  ? [JSON.parse(custom) as Scenario]
+  : [
+      { name: 'All human (never upgrade)' },
+      { name: 'Trained: +1 Hustle', training: { hustle: 1 } },
+      { name: 'Trained: +1 Hands', training: { hands: 1 } },
+      { name: 'Trained: +1 Heft', training: { heft: 1 } },
+      { name: 'Golem Blockers', forms: { blocker: 'golem' } },
+      { name: 'Werewolf Runners', forms: { runner: 'werewolf' } },
+      { name: 'Ghost Catchers', forms: { catcher: 'ghost' } },
+      {
+        name: 'All three monsters',
+        forms: { blocker: 'golem', runner: 'werewolf', catcher: 'ghost' },
+      },
+    ];
 
 interface Tally {
   runs: number;
@@ -68,6 +87,8 @@ interface Tally {
   catches: number;
   contested: number;
   pancakes: number;
+  /** Passes batted down, by who did it. */
+  battedBy: Map<string, number>;
   breaks: number;
 }
 
@@ -98,12 +119,7 @@ function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }): BotMove
       const ft = flightTime(qb.pos, add(p.pos, scale(p.vel, 0.6)));
       const target = add(p.pos, scale(p.vel, ft));
       if (throwProblem(state, target)) continue;
-      const room = Math.min(
-        ...field.defenders
-          .filter((d) => d.down <= 0)
-          .map((d) => dist(add(d.pos, scale(d.vel, ft)), target) - d.reach),
-        99,
-      );
+      const room = pathRoom(state, qb.pos, target, ft);
       if (!best || room > best.room) best = { target, room };
     }
     const pressure = field.defenders.some((d) => d.down <= 0 && dist(d.pos, qb.pos) < PRESSURE);
@@ -126,6 +142,26 @@ function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }): BotMove
     if (ahead) return swipe(ahead.pos.x > field.lane ? -1 : 1, state, lastSwipe);
   }
   return {};
+}
+
+/**
+ * How much room a throw has: the smallest gap between any defender (where
+ * it will be) and the ball, over every stretch of the flight where the ball
+ * is low enough to touch, beyond that defender's reach.
+ */
+function pathRoom(state: RunState, from: Vec, target: Vec, ft: number): number {
+  const d = dist(from, target);
+  let room = 99;
+  for (let u = 0.05; u <= 1.0001; u += 0.05) {
+    if (ballHeight(d, Math.min(1, u)) >= arcadeTuning.throw.reachHeight) continue;
+    const ground = lerp(from, target, Math.min(1, u));
+    for (const def of state.field.defenders) {
+      if (def.down > 0) continue;
+      const at = add(def.pos, scale(def.vel, ft * u));
+      room = Math.min(room, dist(at, ground) - def.reach);
+    }
+  }
+  return room;
 }
 
 function swipe(dir: -1 | 1, state: RunState, lastSwipe: { at: number }): BotMove {
@@ -155,6 +191,11 @@ function count(
       case 'pancake':
         t.pancakes++;
         break;
+      case 'batted': {
+        const by = state.field.defenders.find((d) => d.id === e.by);
+        bump(t.battedBy, `${by ? by.kind : 'witch'}${e.contested ? ' (contested)' : ''}`);
+        break;
+      }
       case 'brokeTackle':
         t.breaks++;
         break;
@@ -178,11 +219,16 @@ function count(
 
 function playRun(seed: number, scenario: Scenario, t: Tally): void {
   const rng = rngFor(seed, 'bot');
-  const train = scenario.training ?? 0;
   const roster = startingRoster().map((p) => ({
     ...p,
     form: scenario.forms?.[p.role] ?? p.form,
-    training: { hustle: train, hands: train, heft: train },
+    training: {
+      hustle: 0,
+      hands: 0,
+      heft: 0,
+      ...scenario.training,
+      ...scenario.roleTraining?.[p.role],
+    },
   }));
   let state = createRun(seed, roster);
   const lastSwipe = { at: -1 };
@@ -232,6 +278,8 @@ function report(scenario: Scenario, t: Tally): void {
     .map(([k, n]) => `${k} ${pct(n, t.downs)}`)
     .join(' · ');
   console.log(`  downs end: ${results}`);
+  const batted = [...t.battedBy.entries()].map(([k, n]) => `${k} ${n}`).join(', ');
+  if (batted) console.log(`  batted by: ${batted}`);
   console.log(
     `  yards a run ${(t.run.yards / Math.max(1, t.run.downs)).toFixed(1)} (${t.run.downs}) · yards a pass play ${(t.pass.yards / Math.max(1, t.pass.downs)).toFixed(1)} · completions ${pct(t.catches, t.passes)} (contested ${pct(t.contested, t.catches)}) · ` +
       `pancakes ${(t.pancakes / t.runs).toFixed(1)}/run · broken tackles ${(t.breaks / t.runs).toFixed(1)}/run`,
@@ -264,6 +312,7 @@ for (const scenario of SCENARIOS) {
     catches: 0,
     contested: 0,
     pancakes: 0,
+    battedBy: new Map(),
     breaks: 0,
   };
   for (let seed = 1; seed <= RUNS; seed++) playRun(seed, scenario, t);

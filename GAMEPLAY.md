@@ -82,20 +82,20 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### The pocket
 
-- **The pocket is real now:** Rhino Beetles rush the QB, and your Blockers physically hold them off. How long you have is **how your Blockers' Heft matches up against the rush**, not a timer: a strong line buys time, a weak one folds.
+- **The pocket is real now:** Rhino Beetles rush the QB, and your Blockers physically hold them off: **a defender a Blocker is on is held** (barely moving) if the Blocker is at least as heavy, and only slowed if it's lighter. How long you have is **how your Blockers' Heft matches up against the rush**, not a timer: a strong line buys time, a weak one folds. A Blocker 3 Heft heavier flattens its man: a **pancake**.
 - **A rusher that gets past reaches the QB: SACKED!** You see it coming: the beetle breaks free and charges.
 
 ### Catching
 
 - **A catch is reach.** A pass coming down within a Catcher's reach is caught, and **Hands is reach**: the better the Hands, the further the ball snaps in. Lead your Catcher into open grass.
 - **A contested ball is a visible tussle.** If a defender gets a hand to it too, the one with **more Hands** comes away with it. If it's the defender, the ball is batted down (no interceptions). Ties go to you.
-- **Low passes can be batted down** by any defender right under them. Long, high passes clear them until they drop.
+- **The ball can only be touched near its two ends:** at the line, where a rusher can swat it, and where it comes down (it comes down at catching height, not the turf). In between it's over everyone's head. So **a Catcher that gets a step on its Cover is open**: the Cover can't reach a ball landing in front of the Catcher.
 
 ### After the catch: steering
 
 - **Swipe left or right to steer, a little at a time.** The carrier always charges upfield on its own; each swipe nudges it over a step to that side. You're choosing the lane, not driving.
 - **Don't run out of bounds:** a carrier over the sideline is down there.
-- **Tackles are collisions.** A defender that hits the carrier brings it down, unless the carrier is **much heavier**: then the defender bounces off and the carrier keeps going (Heft). A faster carrier simply outruns chasers (Hustle).
+- **Tackles are a grab and a drag.** A defender that reaches the carrier hangs on, and the carrier keeps going, slowed by the weight on it, until it's brought down: quickly by a heavy tackler or a pile, slowly by a light one. A carrier **2 Heft heavier** than its tackler sheds it outright. So Heft is yards after contact: a Golem drags gnomes for yards. A faster carrier simply outruns chasers (Hustle).
 - **Your Blockers keep blocking** after the catch, shoving defenders out of the carrier's way, so running behind them is the safe lane.
 
 ---

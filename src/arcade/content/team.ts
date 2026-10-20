@@ -48,7 +48,7 @@ export const ROLE_RADIUS: Readonly<Record<Role, number>> = {
 /** What each form adds to a player's stats. Each monster suits one role (GAMEPLAY.md, Building Up). */
 export const FORM_STATS: Readonly<Record<Form, Stats>> = {
   human: { hustle: 0, hands: 0, heft: 0 },
-  golem: { hustle: -1, hands: 0, heft: 3 },
-  werewolf: { hustle: 2, hands: 0, heft: 1 },
-  ghost: { hustle: 1, hands: 2, heft: -1 },
+  golem: { hustle: -1, hands: 0, heft: 4 },
+  werewolf: { hustle: 3, hands: 0, heft: 1 },
+  ghost: { hustle: 2, hands: 2, heft: -1 },
 };

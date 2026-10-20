@@ -31,11 +31,11 @@ export const arcadeTuning = {
      */
     mass: { perHeft: 1.25 },
     /** Hustle is speed (yards a second). */
-    speed: { base: 5.5, perHustle: 0.6, min: 2 },
+    speed: { base: 3.4, perHustle: 0.4, min: 1.5 },
     /** Hands is reach (yards from the body's centre). */
     reach: { base: 0.9, perHands: 0.25, min: 0.3 },
     /** How fast anyone changes velocity (yards a second, a second). */
-    accel: 22,
+    accel: 12,
     /** How fast a body lying down slides to a stop. */
     friction: 8,
   },
@@ -44,25 +44,44 @@ export const arcadeTuning = {
     pancakeRatio: 1.9,
     /** …for this long. */
     pancakeTime: 1.2,
+    /**
+     * A tackler that reaches the carrier hangs on, and the carrier drags it:
+     * slowed to carrier mass / (carrier mass + the weight hanging on). It's
+     * down once the weight on it, relative to its own, has added up to this
+     * many seconds (one tackler as heavy as the carrier takes this long).
+     */
+    wrapTime: 0.5,
     /** A carrier this many times heavier than its tackler breaks the tackle (2 Heft heavier)… */
     breakRatio: 1.55,
     /** …and the tackler lies there this long. */
     brokenTime: 1.0,
     /** Bodies this close (beyond touching) count as contact for a tackle or a sack. */
     slop: 0.1,
+    /**
+     * A defender a Blocker is on moves at this share of its speed: held when
+     * the Blocker is at least as heavy, slowed when it's lighter.
+     */
+    held: 0.25,
+    slowed: 0.6,
   },
   throw: {
     /** Ball speed along the ground (yards a second); flight time is distance over this… */
-    speed: 20,
+    speed: 13,
     /** …but never shorter than this. */
     minFlight: 0.35,
     /** The arc's peak above the straight line: this × distance² (capped at maxArc). */
     arcPerYard2: 0.012,
     maxArc: 4,
-    /** Height of the ball at the release. */
+    /** Height of the ball at the release… */
     releaseHeight: 0.8,
-    /** A ball lower than this can be touched: caught, or batted down. */
-    reachHeight: 1.0,
+    /** …and where it comes down: at catching height, not the turf. */
+    catchHeight: 1.0,
+    /**
+     * A ball lower than this can be touched: caught, or batted down. With the
+     * arc, that's only near the two ends of a throw: at the line, and where it
+     * comes down. A defender left a step behind its Catcher can't reach it.
+     */
+    reachHeight: 1.2,
     /** Throws land from this many yards behind the line of scrimmage… */
     minAhead: -2,
     /** …to this many past it. */
@@ -81,8 +100,8 @@ export const arcadeTuning = {
   defense: {
     /** Added to every defender's stats each area after the first… */
     perArea: 1,
-    /** …and again on the Boss drive. */
-    boss: 1,
+    /** …and again on the Boss drive (its bigger line-up is most of its step up). */
+    boss: 0,
     /** How far behind its Catcher a Cover trails. */
     coverTrail: 0.8,
     /** How far ahead a chaser leads the carrier (seconds of its velocity). */
@@ -92,7 +111,7 @@ export const arcadeTuning = {
   },
   witch: {
     /** Her speed across the field. */
-    speed: 4,
+    speed: 3,
     /** A pass whose path comes within this of her bounces off. */
     radius: 1.5,
   },

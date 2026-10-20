@@ -8,8 +8,9 @@
  *   2. Everyone moves toward their target (ai.ts, physics.ts).
  *   3. Overlaps are pushed apart by weight.
  *   4. Contact: a Blocker much heavier than a defender flattens it (a
- *      pancake); a defender touching the carrier tackles it, unless the
- *      carrier is much heavier and breaks it; a defender touching the QB
+ *      pancake); a defender reaching the carrier grabs on and the carrier
+ *      drags it, slowed, until the weight on it brings it down (unless the
+ *      carrier is much heavier and sheds it); a defender touching the QB
  *      while it holds the ball sacks it.
  *   5. The pass in the air (ball.ts).
  *   6. The carrier over the first-down line wins the drive; over the
@@ -108,16 +109,27 @@ function resolveContact(state: RunState, events: ArcadeEvent[]): boolean {
   }
 
   if (carrier) {
+    // A defender reaching the carrier grabs on, unless the carrier is much heavier and sheds it.
     for (const d of upDefenders) {
-      if (d.down > 0 || !touching(carrier, d)) continue;
+      if (d.down > 0 || d.latch || !touching(carrier, d)) continue;
       if (carrier.mass >= contact.breakRatio * d.mass) {
         d.down = contact.brokenTime;
         d.vel = scale(norm(sub(d.pos, carrier.pos)), 4);
         events.push({ type: 'brokeTackle', id: carrier.id, defender: d.id });
         continue;
       }
-      events.push({ type: 'tackled', id: carrier.id, by: d.id });
+      d.latch = scale(norm(sub(d.pos, carrier.pos)), carrier.radius + d.radius);
+      events.push({ type: 'wrapped', id: carrier.id, defender: d.id });
+    }
+    // The weight hanging on brings it down: faster the heavier it is.
+    const hanging = defenders.filter((d) => d.latch !== null).sort((a, b) => a.id - b.id);
+    const weight = hanging.reduce((m, d) => m + d.mass, 0);
+    state.field.wrap += (DT * weight) / carrier.mass;
+    const first = hanging[0];
+    if (first && state.field.wrap >= contact.wrapTime) {
+      events.push({ type: 'tackled', id: carrier.id, by: first.id });
       carrier.down = 1;
+      for (const d of hanging) d.latch = null;
       state.field.ball = { at: 'dead', pos: carrier.pos, how: 'tackled' };
       endDown(state, 'tackled', carrier.pos.y, events);
       return true;
@@ -148,11 +160,12 @@ function flight(state: RunState, events: ArcadeEvent[]): boolean {
     p.job = { kind: 'carry' };
     state.field.ball = { at: 'carried', by: p.id };
     state.field.lane = p.pos.x;
+    state.field.wrap = 0;
     events.push({ type: 'caught', id: p.id, contested: outcome.contested });
     return checkCarrier(state, events);
   }
   if (outcome.kind === 'batted') {
-    events.push({ type: 'batted', by: outcome.by, at: outcome.at });
+    events.push({ type: 'batted', by: outcome.by, at: outcome.at, contested: outcome.contested });
     state.field.ball = { at: 'dead', pos: outcome.at, how: 'batted' };
     endDown(state, 'batted', state.drive.los, events);
     return true;

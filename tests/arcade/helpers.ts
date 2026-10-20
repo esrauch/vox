@@ -88,6 +88,7 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
       down: 0,
       home: spec.pos,
       mark: spec.mark ?? null,
+      latch: null,
       patrol: null,
       patrolIndex: 0,
     };
@@ -99,6 +100,7 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
     witches: [],
     ball: { at: 'qb' },
     lane: 0,
+    wrap: 0,
   };
   state.phase = 'play';
   state.snappedAt = state.time;
@@ -139,6 +141,7 @@ export function carry(state: RunState, id: number): RunState {
   p.job = { kind: 'carry' };
   state.field.ball = { at: 'carried', by: id };
   state.field.lane = p.pos.x;
+  state.field.wrap = 0;
   return state;
 }
 

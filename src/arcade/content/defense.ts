@@ -86,32 +86,32 @@ export const FOREST: ArcadeArea = {
     name: 'A Quiet Clearing',
     witches: 0,
     boost: -1,
-    defenders: [d('rusher', 0, 1), d('cover', -9, 4), owl],
+    defenders: [d('rusher', -2.6, 1), d('cover', -9, 4), owl],
   },
   challenge: {
     name: 'Gnome Country',
     witches: 0,
     boost: 0,
-    defenders: [d('rusher', -1, 1), d('cover', -9, 4), d('cover', 9, 5), d('zone', 4, 8), owl],
+    defenders: [d('rusher', -2.6, 1), d('cover', -9, 4), d('cover', 9, 5), d('zone', 4, 8), owl],
   },
   gimmicks: [
     {
       name: 'Witching Hour',
       witches: 2,
       boost: 0,
-      defenders: [d('rusher', 0, 1), d('cover', -9, 4), d('cover', 8, 6), owl],
+      defenders: [d('rusher', -2.6, 1), d('cover', -9, 4), d('cover', 8, 6), owl],
     },
     {
       name: 'Bat Cave',
       witches: 0,
       boost: 0,
-      defenders: [d('rusher', 1, 1), d('cover', -9, 4), d('bat', 3, 5), d('bat', 6, 11), owl],
+      defenders: [d('rusher', 2.6, 1), d('cover', -9, 4), d('bat', 3, 5), d('bat', 6, 11), owl],
     },
     {
       name: 'Scarecrow Field',
       witches: 0,
       boost: 0,
-      defenders: [d('rusher', 0, 1), d('cover', 9, 4), d('zone', -6, 6), d('zone', -2, 10), owl],
+      defenders: [d('rusher', -2.6, 1), d('cover', 9, 4), d('zone', -6, 6), d('zone', -2, 10), owl],
     },
   ],
   boss: {
@@ -119,8 +119,8 @@ export const FOREST: ArcadeArea = {
     witches: 1,
     boost: 0,
     defenders: [
-      d('rusher', -1, 1),
-      d('rusher', 1.5, 1),
+      d('rusher', -2.6, 1),
+      d('rusher', 2.6, 1),
       d('cover', -9, 4),
       d('cover', 9, 4),
       d('cover', 5, 6),

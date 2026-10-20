@@ -127,6 +127,7 @@ export function lineUpDefense(
       down: 0,
       home,
       mark: null,
+      latch: null,
       patrol,
       patrolIndex: 1,
     };

@@ -4,7 +4,7 @@ This is a **living plan** for **Arcade Halloween Football**, the design in [GAME
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** **A2, the first playable**: render the arcade sim with the third-person camera, wire throw and swipe, and tune pacing (downs are far too short) with `npm run balance:arcade`. A1 (the simulation) is built in `src/arcade/`. Work happens on the branch `design/arcade`. The earlier grid design (and its milestones) are in git history and summed up in GAMEPLAY.md, *History*.
+**Current focus:** **A2, the first playable**: render the arcade sim with the third-person camera, wire throw, handoff and swipe, and judge the pacing by feel (downs last about 2 seconds). A1 (the simulation) is built and tuned in `src/arcade/`. Work happens on the branch `design/arcade`. The earlier grid design (and its milestones) are in git history and summed up in GAMEPLAY.md, *History*.
 
 ---
 
@@ -47,7 +47,24 @@ What goes: the grid and the beat-locked tick, play cards and the hand, the dice 
 - [x] **How a down ends:** tackled, incomplete, batted, sacked, out of bounds, over the line; drives, areas and the run (three areas), with a placeholder pause where the upgrade pick will go.
 - [x] **Tests** (`tests/arcade/`), and **the balance runs** (`npm run balance:arcade`) with a bot that throws and steers.
 
-**First balance numbers** (30 runs a build, before any tuning; the bot hands off on the Dive): runs gain about **0 yards** (the intro's rusher lines up right in the Dive's path, and any touch is a tackle; Golem Blockers get it to 2½); downs last only **about 1.2 seconds** (the target is 4 to 8); all-human teams win about 2 drives of 12; Ghost Catchers alone win most runs (Hands decides too much); Werewolf Runners barely matter (Runners only carry on the Dive); pancakes happen only with Golem Blockers and broken tackles almost never. All of it is A2 tuning.
+**Tuned 2026-10-19** with the balance runs (100 runs a build, the bot never upgrading during a run). Changes:
+- Everyone and the ball slowed down.
+- Blocks hold.
+- Tackles are a grab and a drag.
+- The ball comes down at catching height, so only the ends of a throw can be touched.
+- Rushers line up outside the Blockers, and handoffs head for the play's hole.
+- The Boss drive gets no extra boost.
+- Golem Heft +4, Werewolf Hustle +3, Ghost Hustle +2.
+
+Results (drives won of 12, and how often the game is beaten):
+
+| Build | Drives won | Beat the game |
+|---|---|---|
+| All human | about 5 | 0% (loses around the area II Boss) |
+| One monster type | 6 to 8 (Golem Blockers 7.9) | up to 12% |
+| All three types | about 11 | about 60% |
+
+Every training pick helps. Two things are still off target: **downs last about 2 seconds** (the target is 4 to 8), and **runs gain about half what passes do**. Both are for the first playable, judged by feel.
 
 ## A2. First Playable
 
@@ -107,5 +124,15 @@ What goes: the grid and the beat-locked tick, play cards and the hand, the dice 
 
 ## Changelog
 
+- **2026-10-19:** **The arcade sim is tuned** with the balance runs. Changes:
+  - **Slower all round.**
+  - **Blocks hold** a defender.
+  - **Tackles are a grab and a drag,** so Heft is yards after contact.
+  - **The ball comes down at catching height,** so a Cover left a step behind can't swat it. Faster Catchers used to do *worse*.
+  - **Rushers line up wide,** and handoffs head for the hole.
+  - **No extra boost on the Boss.**
+  - **Stronger monsters.**
+
+  Now every upgrade helps; plain humans lose around the area II Boss, and a full monster team beats the game about 60% of the time.
 - **2026-10-19:** **A1 built: the real-time simulation** in `src/arcade/` (content, sim, tests, `npm run balance:arcade`). Eight a side at 60 steps a second; stats as weight, speed and reach; the four plays; the forest's defenses scaling by drive and area. The first balance numbers say downs are far too short and Hands decides too much; tuning comes with the first playable.
 - **2026-10-19:** **The plan starts over for Arcade Halloween Football.** GAMEPLAY.md was rewritten from first principles: real time instead of the grid and the beat, throw then steer, the QB plus eight players as Blockers, Runners and Catchers, physical stats instead of dice, a random play each down, no draft at the start, and a run that builds up against a defense that scales. The earlier milestones and changelog are in git history.

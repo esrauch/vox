@@ -127,6 +127,21 @@ describe('stats are physics', () => {
     expect(body(r, 100).pos.y).toBeGreaterThan(body(r, 2).pos.y);
   });
 
+  it('a Blocker holds the defender it is on: it moves at a fraction of its speed', () => {
+    const rushTime = (blocked: boolean) => {
+      const s = playState(
+        blocked
+          ? [{ role: 'blocker', pos: v(0, -1.2), stats: { heft: 1 }, job: { kind: 'block' } }]
+          : [],
+        [{ kind: 'rusher', pos: v(0, 0), stats: { heft: 1 } }],
+      );
+      const r = run(s, 6);
+      return r.state.time;
+    };
+    // Unblocked, the rusher sacks the QB quickly; blocked, it takes much longer.
+    expect(rushTime(true)).toBeGreaterThan(rushTime(false) + 1);
+  });
+
   it('a Blocker 3 Heft heavier pancakes the defender it hits', () => {
     const s = playState(
       [{ role: 'blocker', pos: v(0, -2), stats: { heft: 3 }, job: { kind: 'block' } }],
@@ -170,10 +185,11 @@ describe('passes', () => {
   });
 
   it('ties go to you', () => {
-    // The two stand either side of the ball's path, so they reach it at the same moment.
+    // The two stand either side of the ball's path (not touching), so they reach it at the same moment.
     const s = playState(
-      [{ pos: v(4.37, 5.85), stats: { hands: 1 }, job: stand(v(4.37, 5.85)) }],
-      [{ kind: 'zone', pos: v(3.63, 6.15), stats: { hands: 1 } }],
+      // A job that never moves (the QB's), so neither of them steps toward the ball first.
+      [{ pos: v(4.557, 5.777), stats: { hands: 1 }, job: { kind: 'qb' } }],
+      [{ kind: 'zone', pos: v(3.443, 6.223), stats: { hands: 1 } }],
     );
     const r = run(s, 3, { throwAt: v(4, 6) });
     expect(ofType(r.events, 'caught')[0]?.contested).toBe(true);
@@ -189,9 +205,12 @@ describe('passes', () => {
   it('the further the throw, the higher the arc and the longer the flight', () => {
     expect(arcPeak(20)).toBeGreaterThan(arcPeak(8));
     expect(flightTime(v(0, 0), v(0, 20))).toBeGreaterThan(flightTime(v(0, 0), v(0, 8)));
-    // A long pass is out of reach in the middle of its flight; a short one isn't.
-    expect(ballHeight(20, 0.5)).toBeGreaterThan(arcadeTuning.throw.reachHeight);
-    expect(ballHeight(6, 0.5)).toBeLessThan(arcadeTuning.throw.reachHeight);
+    // Out of reach in the middle of its flight, within reach at both ends.
+    const reach = arcadeTuning.throw.reachHeight;
+    expect(ballHeight(20, 0.5)).toBeGreaterThan(reach);
+    expect(ballHeight(8, 0.5)).toBeGreaterThan(reach);
+    expect(ballHeight(20, 0)).toBeLessThan(reach);
+    expect(ballHeight(20, 1)).toBeLessThan(reach);
   });
 
   it('a long pass sails over a defender underneath it', () => {
@@ -225,6 +244,36 @@ describe('the carrier', () => {
     expect(run(r.state, PAUSE + 0.1).state.drive).toMatchObject({ down: 2 });
   });
 
+  it('a tackler hangs on and the carrier drags it, slowed, before it goes down', () => {
+    const s = carry(
+      playState(
+        [{ role: 'runner', pos: v(0, 2) }],
+        [{ kind: 'cover', pos: v(0, 3.4), stats: { heft: 0 } }],
+      ),
+      2,
+    );
+    const r = run(s, 3);
+    const wrapped = ofType(r.events, 'wrapped');
+    expect(wrapped).toEqual([{ type: 'wrapped', id: 2, defender: 100 }]);
+    expect(ofType(r.events, 'tackled')).toHaveLength(1);
+    // It dragged the tackler on past where it was grabbed.
+    expect(r.state.drive.los).toBeGreaterThan(2.5);
+  });
+
+  it('a heavier carrier drags a tackler further', () => {
+    const drag = (heft: number) => {
+      const s = carry(
+        playState(
+          [{ role: 'runner', pos: v(0, 2), stats: { heft } }],
+          [{ kind: 'cover', pos: v(0, 3.4), stats: { heft: 0 } }],
+        ),
+        2,
+      );
+      return run(s, 4).state.drive.los;
+    };
+    expect(drag(1)).toBeGreaterThan(drag(-1));
+  });
+
   it('a carrier 2 Heft heavier breaks the tackle and keeps going', () => {
     const s = carry(
       playState(
@@ -240,7 +289,7 @@ describe('the carrier', () => {
 
   it('a swipe nudges its lane a step to that side, and it drifts there', () => {
     const s = carry(playState([{ pos: v(0, 0) }]), 2);
-    const r = run(s, 0.8, { steer: 1 });
+    const r = run(s, 1.2, { steer: 1 });
     expect(r.state.field.lane).toBeCloseTo(arcadeTuning.carrier.steerStep);
     expect(body(r.state, 2).pos.x).toBeGreaterThan(0.8);
   });

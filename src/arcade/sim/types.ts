@@ -65,6 +65,8 @@ export interface Defender extends BodyBase {
   readonly home: Vec;
   /** The player a Cover marks (picked at the snap). */
   mark: number | null;
+  /** Hanging on to the carrier, at this offset from it (null when it isn't). */
+  latch: Vec | null;
   /** A Bat's loop, and the corner it's heading for. */
   readonly patrol: readonly Vec[] | null;
   patrolIndex: number;
@@ -102,6 +104,11 @@ export interface Field {
   ball: Ball;
   /** The carrier's lane: the x it steers for (set at the catch, moved by swipes). */
   lane: number;
+  /**
+   * How far the tacklers hanging on the carrier are to bringing it down
+   * (0 to tuning.contact.wrapTime): it builds faster the more weight is on it.
+   */
+  wrap: number;
 }
 
 export type DriveKind = 'intro' | 'challenge' | 'gimmick' | 'boss';
@@ -182,10 +189,13 @@ export type ArcadeEvent =
   | { readonly type: 'thrown'; readonly target: Vec; readonly landsAt: number }
   | { readonly type: 'throwRejected'; readonly reason: ThrowProblem }
   | { readonly type: 'caught'; readonly id: number; readonly contested: boolean }
-  | { readonly type: 'batted'; readonly by: number; readonly at: Vec }
+  /** A pass knocked down: `contested` when your player had a hand to it too and lost it. */
+  | { readonly type: 'batted'; readonly by: number; readonly at: Vec; readonly contested: boolean }
   | { readonly type: 'incomplete'; readonly at: Vec }
   | { readonly type: 'pancake'; readonly blocker: number; readonly defender: number }
   | { readonly type: 'brokeTackle'; readonly id: number; readonly defender: number }
+  /** A tackler grabbed the carrier and hangs on (it isn't down yet). */
+  | { readonly type: 'wrapped'; readonly id: number; readonly defender: number }
   | { readonly type: 'tackled'; readonly id: number; readonly by: number }
   | { readonly type: 'sacked'; readonly by: number }
   | { readonly type: 'outOfBounds'; readonly id: number }
