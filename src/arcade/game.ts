@@ -41,11 +41,15 @@ const SWIPE = 28;
 /** How close to a Runner (yards) a tap has to land to hand it the ball. */
 const TAP_REACH = 1.6;
 
-/** The camera, relative to the point it follows: behind and above. */
-const CAMERA_BACK = 8.5;
-const CAMERA_UP = 6.5;
-/** It looks this far ahead of the point it follows. */
+/**
+ * The camera: behind and above the point it follows, looking down at this
+ * angle (degrees) at a spot this far ahead of it. It pulls back as far as it
+ * needs to show the whole width of the field, with this much to spare, at
+ * the row it follows, whatever the screen's shape.
+ */
+const CAMERA_PITCH = 32;
 const LOOK_AHEAD = 7;
+const WIDTH_MARGIN = 1.06;
 
 const KIND_NAME: Readonly<Record<DriveKind, string>> = {
   intro: 'Intro',
@@ -92,6 +96,15 @@ export class ArcadeGame {
     this.state = createRun(this.seed);
     this.view = new View(canvas, { follow: true, fov: 50 });
     const { scene } = this.view;
+    // The moonlight's shadows have to cover the whole width, and well up the field.
+    Object.assign(this.view.sun.shadow.camera, {
+      left: -18,
+      right: 18,
+      top: 30,
+      bottom: -24,
+      far: 90,
+    });
+    this.view.sun.shadow.camera.updateProjectionMatrix();
     scene.add(createArcadeTurf());
     const scenery = new ForestScenery(scene, this.view, {
       halfWidth: arcadeTuning.field.halfWidth,
@@ -201,8 +214,8 @@ export class ArcadeGame {
     if (carrier) want = carrier.pos;
     else if (ball.at === 'flight')
       want = v(ball.target.x * 0.5, Math.max(want.y, ball.target.y - 6));
-    // Mostly follow upfield; only drift a little side to side.
-    want = v(want.x * 0.35, want.y);
+    // The whole width is always in view, so only follow upfield.
+    want = v(0, want.y);
     const k = 1 - Math.exp(-dt * 4);
     this.focus = v(
       this.focus.x + (want.x - this.focus.x) * k,
@@ -211,16 +224,23 @@ export class ArcadeGame {
 
     const cam = this.view.camera;
     const at = toWorld(this.focus, this.origin);
-    cam.position.set(at.x, CAMERA_UP, at.z + CAMERA_BACK);
-    cam.lookAt(at.x, 0, at.z - LOOK_AHEAD);
+    const pitch = THREE.MathUtils.degToRad(CAMERA_PITCH);
+    // The horizontal half-angle the screen shows; far enough back that the field's width fits at the followed row.
+    const halfAcross = Math.atan(Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * cam.aspect);
+    const back =
+      (arcadeTuning.field.halfWidth * WIDTH_MARGIN) / Math.tan(halfAcross) +
+      LOOK_AHEAD * Math.cos(pitch);
+    const look = new THREE.Vector3(at.x, 0, at.z - LOOK_AHEAD);
+    cam.position.set(look.x, back * Math.sin(pitch), look.z + back * Math.cos(pitch));
+    cam.lookAt(look);
     cam.updateMatrixWorld();
     // Keep the moonlight's shadows around the play, and the fog ahead of the camera.
     const { sun } = this.view;
-    sun.target.position.copy(at).add(new THREE.Vector3(0, 0, -LOOK_AHEAD));
-    sun.position.copy(sun.target.position).add(new THREE.Vector3(-9, 20, 6));
+    sun.target.position.copy(look).add(new THREE.Vector3(0, 0, -6));
+    sun.position.copy(sun.target.position).add(new THREE.Vector3(-12, 26, 8));
     if (this.view.scene.fog instanceof THREE.Fog) {
-      this.view.scene.fog.near = 22;
-      this.view.scene.fog.far = 55;
+      this.view.scene.fog.near = back + 10;
+      this.view.scene.fog.far = back + 45;
     }
   }
 
