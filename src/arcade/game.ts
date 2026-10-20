@@ -1,14 +1,17 @@
 /**
- * The arcade game controller (GAMEPLAY.md, rewritten 2026-10-19): runs the
+ * The arcade game controller (GAMEPLAY.md, A Down and Controls): runs the
  * arcade sim at its fixed 60 Hz step, draws it from a third-person camera
- * behind and above the QB that follows the play, and turns one thumb into
- * the three inputs:
+ * behind and above the QB that follows the play, and takes the timing
+ * game's inputs:
  *
- * - **Pull back anywhere** to snap (before the snap) and aim; release to throw.
- * - **Tap a Runner** (before the snap, or just after) to hand it the ball.
- * - **Swipe left or right** while carrying to nudge the carrier's lane.
+ * - **Before the snap:** three play cards and Flip. A finger on a card shows
+ *   its routes; letting go on it calls it and snaps.
+ * - **On a pass play:** THROW fires a bullet along the sweeping line; RUN
+ *   lets the QB keep it.
+ * - **In Break it!:** one tap, anywhere.
  *
- * The music is the soundtrack only: nothing waits for the beat.
+ * Keys for a desktop: Space throws (and taps Break it!), R runs, F flips,
+ * 1–3 call a card. The music is the soundtrack only: nothing waits for the beat.
  */
 import * as THREE from 'three';
 import { Conductor } from '../game/conductor';
@@ -17,30 +20,23 @@ import { View } from '../render/view';
 import { Hud } from '../ui/hud';
 import { PLAYS } from './content/plays';
 import { arcadeTuning, DT } from './content/tuning';
-import { ArcadeAim } from './render/aim';
 import { ArcadeBall } from './render/ball';
 import { ArcadeBodies } from './render/bodies';
 import { ArcadeLines, createArcadeTurf } from './render/field';
 import { ArcadeRoutes } from './render/routes';
+import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
 import { carrierOf, qbOf } from './sim/ai';
+import { lineUpTeam } from './sim/bodies';
 import { createRun, dispatch, downAndDistance } from './sim/run';
-import { step, throwProblem } from './sim/step';
-import type { ArcadeEvent, DriveKind, RunState, StepInput, Vec } from './sim/types';
-import { add, v } from './sim/vec';
+import { breakMarker, canThrow, step } from './sim/step';
+import type { Action, ArcadeEvent, DriveKind, Player, RunState, StepInput } from './sim/types';
+import { v } from './sim/vec';
+import { ArcadeControls } from './ui/controls';
 
 export interface ArcadeOptions {
   seed: number;
 }
-
-/** Yards of throw per pixel of pull. */
-const YARDS_PER_PIXEL = 0.06;
-/** A press that moves less than this (pixels) is a tap. */
-const TAP_SLOP = 12;
-/** A sideways move this far (pixels) while carrying is a swipe. */
-const SWIPE = 28;
-/** How close to a Runner (yards) a tap has to land to hand it the ball. */
-const TAP_REACH = 1.6;
 
 /**
  * The camera: behind and above the point it follows, looking down at this
@@ -67,10 +63,11 @@ export class ArcadeGame {
   private readonly view: View;
   private readonly bodies: ArcadeBodies;
   private readonly ball: ArcadeBall;
-  private readonly aimView: ArcadeAim;
+  private readonly sweep: ArcadeSweep;
   private readonly lines: ArcadeLines;
   private readonly routes: ArcadeRoutes;
   private readonly hud: Hud;
+  private readonly controls: ArcadeControls;
 
   /** Yards marched in the drives before this one: the field is one long strip. */
   private origin = 0;
@@ -78,18 +75,10 @@ export class ArcadeGame {
   private accumulator = 0;
   private lastFrame: number | null = null;
   private paused = false;
-  /** What the player did since the last step, applied on the next one. */
-  private pending: { throwAt?: Vec; steer?: -1 | 1 } = {};
-  /** The press in progress. */
-  private press: {
-    id: number;
-    start: { x: number; y: number };
-    /** A Runner under the press, if it might be a tap to hand off. */
-    runner: number | null;
-    aiming: boolean;
-    swiped: boolean;
-  } | null = null;
-  private aimTarget: Vec | null = null;
+  /** What the player pressed since the last step, applied on the next one. */
+  private pending: { throw?: boolean; scramble?: boolean; breakTap?: boolean } = {};
+  /** The card under the player's finger, if any: its routes are drawn. */
+  private previewCard: number | null = null;
   /** Where the camera looks (field yards, smoothed). */
   private focus = v(0, -4);
 
@@ -119,21 +108,23 @@ export class ArcadeGame {
     this.routes = new ArcadeRoutes(scene);
     this.bodies = new ArcadeBodies(scene);
     this.ball = new ArcadeBall(scene);
-    this.aimView = new ArcadeAim(scene);
+    this.sweep = new ArcadeSweep(scene);
     this.hud = new Hud(uiRoot, {
       onAction: () => void this.onAction(),
-      onCard: () => undefined,
-      onFlip: () => undefined,
+      onCard: (hand) => this.call(hand),
+      onCardPreview: (hand) => (this.previewCard = hand),
+      onFlip: () => this.act({ type: 'flip' }),
       onDraft: () => undefined,
       onSkip: () => undefined,
     });
-    this.hud.setHand(null, null);
     this.hud.setDraft(null);
+    this.controls = new ArcadeControls(uiRoot, {
+      onThrow: () => this.press({ throw: true }),
+      onRun: () => this.press({ scramble: true }),
+      onBreakTap: () => this.press({ breakTap: true }),
+    });
 
-    canvas.addEventListener('pointerdown', (e) => this.onDown(e));
-    canvas.addEventListener('pointermove', (e) => this.onMove(e));
-    canvas.addEventListener('pointerup', (e) => this.onUp(e));
-    canvas.addEventListener('pointercancel', () => this.cancelPress());
+    document.addEventListener('keydown', (e) => this.onKey(e));
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') this.pause();
     });
@@ -167,45 +158,63 @@ export class ArcadeGame {
     this.after(events, prev);
   }
 
-  /** Apply an action between steps (the snap, a handoff, moving on). */
-  private act(action: Parameters<typeof dispatch>[1]): void {
+  private act(action: Action): void {
+    if (!this.conductor.started || this.paused) return;
     const prev = this.state;
     const { state, events } = dispatch(prev, action);
     this.state = state;
     this.after(events, prev);
+    this.syncHud();
+  }
+
+  private call(hand: number): void {
+    this.previewCard = null;
+    this.conductor.play('uiClick');
+    this.act({ type: 'call', hand });
+  }
+
+  /** A button press, applied on the next step (if it means anything right now). */
+  private press(input: { throw?: boolean; scramble?: boolean; breakTap?: boolean }): void {
+    if (!this.conductor.started || this.paused) return;
+    this.pending = { ...this.pending, ...input };
   }
 
   private after(events: readonly ArcadeEvent[], prev: RunState): void {
     // A won drive marches on: the new drive's 0 is the old one's first-down line.
     if (events.some((e) => e.type === 'driveWon')) this.origin += prev.drive.firstDown;
-    if (events.some((e) => e.type === 'downStarted' || e.type === 'driveStarted')) {
+    if (
+      events.some(
+        (e) => e.type === 'downStarted' || e.type === 'driveStarted' || e.type === 'called',
+      )
+    ) {
       this.bodies.sync(this.state);
-      this.cancelPress();
     }
     this.react(events, prev);
-    if (events.length > 0) this.syncHud();
+    if (events.length > 0 || this.state.phase !== prev.phase) this.syncHud();
   }
 
   private draw(dt: number): void {
     const { state } = this;
     this.lines.update(state.drive, this.origin);
-    this.routes.update(state, this.origin);
-    this.bodies.update(state, this.origin, dt);
+    this.routes.update(state, this.origin, this.previewPlayers());
+    this.bodies.update(state, this.origin, dt, litPlayers(state));
     this.ball.update(state, this.origin, this.bodies);
-    const qb = qbOf(state);
-    this.aimView.set(
-      this.aimTarget && qb
-        ? {
-            from: qb.pos,
-            target: this.aimTarget,
-            valid: throwProblem(state, this.aimTarget) === null,
-          }
-        : null,
-      this.origin,
-      state.time,
-    );
+    this.sweep.update(state, this.origin);
+    this.controls.setButtons(canThrow(state) && !this.paused);
+    const t = state.tackle;
+    const marker = breakMarker(state);
+    this.controls.setMeter(t && marker !== null ? { sweet: t.sweet, near: t.near, marker } : null);
     this.follow(dt);
     this.view.render();
+  }
+
+  /** The players of the card under the finger, lined up as they'd run it (for the route preview). */
+  private previewPlayers(): Player[] | null {
+    const { state } = this;
+    if (state.phase !== 'setup' || this.previewCard === null) return null;
+    const play = PLAYS[state.hand[this.previewCard] ?? -1];
+    if (!play) return null;
+    return lineUpTeam(state.roster, play, state.flipped, state.drive.los, 0);
   }
 
   /** The third-person camera: behind and above whatever matters (the QB, the ball, the carrier). */
@@ -216,11 +225,11 @@ export class ArcadeGame {
     const ball = state.field.ball;
     let want = qb ? qb.pos : v(0, state.drive.los - 4);
     if (carrier) want = carrier.pos;
-    else if (ball.at === 'flight')
-      want = v(ball.target.x * 0.5, Math.max(want.y, ball.target.y - 6));
+    else if (ball.at === 'flight') want = v(0, Math.max(want.y, ball.target.y - 8));
     // The whole width is always in view, so only follow upfield.
     want = v(0, want.y);
-    const k = 1 - Math.exp(-dt * 4);
+    // In Break it! the camera eases in a little on the tackle.
+    const k = 1 - Math.exp(-dt * (state.phase === 'breakit' ? 2 : 4));
     this.focus = v(
       this.focus.x + (want.x - this.focus.x) * k,
       this.focus.y + (want.y - this.focus.y) * k,
@@ -254,15 +263,18 @@ export class ArcadeGame {
     const play = (id: Parameters<Conductor['play']>[0]): void => this.conductor.play(id);
     for (const e of events) {
       switch (e.type) {
-        case 'downStarted':
-          this.hud.pop(`${PLAYS[this.state.play.index]?.name.toUpperCase() ?? ''}!`, 'good');
+        case 'called':
+          this.hud.pop(`${e.play.toUpperCase()}!`, 'good');
           break;
         case 'thrown':
           play('throw');
           break;
         case 'handoff':
           play('catch');
-          this.hud.pop('HANDOFF', 'good');
+          break;
+        case 'scrambled':
+          play('hop');
+          this.hud.pop('QB RUN!', 'good');
           break;
         case 'caught':
           play(e.contested ? 'cleanCatch' : 'catch');
@@ -285,12 +297,16 @@ export class ArcadeGame {
           play('burst');
           this.hud.pop('PANCAKE!', 'good');
           break;
+        case 'grabbed':
+          play('burst');
+          break;
         case 'brokeTackle':
           play('burst');
           this.hud.pop('BROKE IT!', 'good');
           break;
-        case 'tackled':
+        case 'dragged':
           play('burst');
+          this.hud.pop('DRAG!', 'good');
           break;
         case 'outOfBounds':
           this.hud.pop('OUT OF BOUNDS', 'bad');
@@ -314,13 +330,22 @@ export class ArcadeGame {
   }
 
   private syncHud(): void {
-    const { phase, drive, drivesWon } = this.state;
+    const { phase, drive, drivesWon, hand, flipped } = this.state;
     const banner =
       phase === 'over' || phase === 'won'
         ? `${drivesWon} ${drivesWon === 1 ? 'drive' : 'drives'} won`
         : `${AREA_NUMERAL[drive.area] ?? drive.area + 1} · ${drive.index + 1}/4 ${KIND_NAME[drive.kind]}: ${drive.name}`;
-    const live = phase === 'setup' || phase === 'play';
+    const live = phase === 'setup' || phase === 'play' || phase === 'breakit';
     this.hud.setTop(banner, live ? downAndDistance(this.state) : null);
+    const ready = this.conductor.started && !this.paused;
+    const cards =
+      ready && phase === 'setup'
+        ? hand.map((i) => {
+            const p = PLAYS[i];
+            return { name: p?.name ?? '?', blurb: p?.handoff !== undefined ? 'Run' : 'Pass' };
+          })
+        : null;
+    this.hud.setHand(cards, null, { always: true, flipped });
     if (!this.conductor.started) this.hud.setPrompt('Fourth & Ghoul', 'PLAY');
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
     else if (phase === 'draft') this.hud.setPrompt('Drive won!', 'NEXT DRIVE');
@@ -353,107 +378,21 @@ export class ArcadeGame {
   private pause(): void {
     if (!this.conductor.started || this.paused) return;
     this.paused = true;
-    this.cancelPress();
+    this.pending = {};
     this.conductor.pause();
     this.syncHud();
   }
 
-  // ── Input ───────────────────────────────────────────────────────────────
-
-  /** The field point (yards, this drive's coordinates) under a screen point. */
-  private fieldAt(clientX: number, clientY: number): Vec | null {
-    const rect = this.view.canvas.getBoundingClientRect();
-    const ndc = new THREE.Vector2(
-      ((clientX - rect.left) / rect.width) * 2 - 1,
-      -((clientY - rect.top) / rect.height) * 2 + 1,
-    );
-    const ray = new THREE.Raycaster();
-    ray.setFromCamera(ndc, this.view.camera);
-    const hit = ray.ray.intersectPlane(
-      new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
-      new THREE.Vector3(),
-    );
-    return hit ? v(hit.x, -hit.z - this.origin) : null;
-  }
-
-  /** A Runner near a field point, while a handoff is still possible. */
-  private runnerAt(p: Vec | null): number | null {
-    const { state } = this;
-    if (!p || state.field.ball.at !== 'qb') return null;
-    const window = arcadeTuning.throw.handoffWindow;
-    if (state.phase === 'play' && state.time - state.snappedAt > window) return null;
-    if (state.phase !== 'setup' && state.phase !== 'play') return null;
-    const runner = state.field.players
-      .filter((q) => q.role === 'runner')
-      .map((q) => ({ q, d: Math.hypot(q.pos.x - p.x, q.pos.y - p.y) }))
-      .sort((a, b) => a.d - b.d)[0];
-    return runner && runner.d <= TAP_REACH ? runner.q.id : null;
-  }
-
-  private onDown(e: PointerEvent): void {
-    if (!this.conductor.started || this.paused || this.press) return;
+  private onKey(e: KeyboardEvent): void {
+    if (e.repeat) return;
     const { phase } = this.state;
-    if (phase !== 'setup' && phase !== 'play') return;
-    this.view.canvas.setPointerCapture(e.pointerId);
-    this.press = {
-      id: e.pointerId,
-      start: { x: e.clientX, y: e.clientY },
-      runner: this.runnerAt(this.fieldAt(e.clientX, e.clientY)),
-      aiming: false,
-      swiped: false,
-    };
-  }
-
-  private onMove(e: PointerEvent): void {
-    const press = this.press;
-    if (!press || press.id !== e.pointerId) return;
-    const dx = e.clientX - press.start.x;
-    const dy = e.clientY - press.start.y;
-    const { state } = this;
-
-    // Carrying: a sideways swipe nudges the lane, once per swipe.
-    if (carrierOf(state)) {
-      if (!press.swiped && Math.abs(dx) > SWIPE && Math.abs(dx) > Math.abs(dy)) {
-        press.swiped = true;
-        this.pending = { ...this.pending, steer: dx > 0 ? 1 : -1 };
-      }
-      return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      this.press(phase === 'breakit' ? { breakTap: true } : { throw: true });
+    } else if (e.code === 'KeyR') this.press({ scramble: true });
+    else if (e.code === 'KeyF' && phase === 'setup') this.act({ type: 'flip' });
+    else if (phase === 'setup' && ['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {
+      this.call(Number(e.code.slice(-1)) - 1);
     }
-    // Pulling back: snap (before the snap) and aim.
-    if (!press.aiming && Math.hypot(dx, dy) > TAP_SLOP && state.field.ball.at === 'qb') {
-      if (state.phase === 'setup') this.act({ type: 'snap' });
-      press.aiming = this.state.phase === 'play';
-    }
-    if (press.aiming) this.aimTarget = this.aimFor(dx, dy);
-  }
-
-  private onUp(e: PointerEvent): void {
-    const press = this.press;
-    if (!press || press.id !== e.pointerId) return;
-    this.press = null;
-    const moved = Math.hypot(e.clientX - press.start.x, e.clientY - press.start.y);
-    if (press.runner !== null && moved <= TAP_SLOP) {
-      this.act({ type: 'handoff', id: press.runner });
-      return;
-    }
-    const target = this.aimTarget;
-    this.aimTarget = null;
-    if (!press.aiming || !target) return;
-    const problem = throwProblem(this.state, target);
-    if (!problem) this.pending = { ...this.pending, throwAt: target };
-    else if (problem !== 'tooClose')
-      this.hud.pop(problem === 'tooFar' ? 'OUT OF RANGE' : 'OFF THE FIELD', 'bad');
-  }
-
-  private cancelPress(): void {
-    this.press = null;
-    this.aimTarget = null;
-  }
-
-  /** Slingshot aiming: pull back and down to throw forward; pull left to aim right. */
-  private aimFor(dx: number, dy: number): Vec | null {
-    const qb = qbOf(this.state);
-    if (!qb) return null;
-    return add(qb.pos, v(-dx * YARDS_PER_PIXEL, dy * YARDS_PER_PIXEL));
   }
 }

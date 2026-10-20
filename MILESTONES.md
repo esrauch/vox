@@ -4,7 +4,7 @@ This is a **living plan** for **Arcade Halloween Football**, the design in [GAME
 
 **Status key:** `[ ]` to do · `[~]` in progress · `[x]` done · `[-]` dropped
 
-**Current focus:** **the timing design** (2026-10-20, GAMEPLAY.md, A Down): three play cards with Flip, a sweeping aim line and a THROW button for bullet passes, RUN for the QB, three sweeps before the pocket collapses, no steering, and Break it! on every tackle. Then back to A2's first playable.
+**Current focus:** **play the timing design** (built 2026-10-20, not yet looked at in a browser): three cards and Flip, the sweep and THROW/RUN, Break it!. Then back to A2: upgrades between drives, and the feel.
 
 ---
 
@@ -124,6 +124,15 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-20:** **Built: the timing design.**
+  - **Three cards a down,** with Flip. A finger on a card shows its routes; letting go calls and snaps. Handoffs are the Dive and a new Sweep.
+  - **The aim line sweeps** sideline to sideline. Receivers it's over light up gold. THROW fires a bullet along it, and the first thing that reaches it decides it: a Scarecrow's ring blocks a whole lane.
+  - **RUN:** the QB keeps it, drifting to the open side.
+  - **The pocket** holds for 3 sweeps, and the sweep is faster each area.
+  - **Carriers choose their own lanes.**
+  - **Break it!** freezes the play on every grab, with a sweet spot sized by Heft and narrowed by extra tacklers: break, drag or tackled.
+  - **The balance bot** plays it (it reacts to a catchable throw a quarter of the time, and hits Break it! 60% of the time). Plain humans win about 4 drives of 12; downs last about 4 seconds; runs and passes gain about the same, around 3.8 yards each. Ghost Catchers do worse than humans for now: their Heft −1 narrows Break it!.
+  - **Keys:** Space, R, F and 1–3.
 - **2026-10-20:** **Designed: the timing controls.**
   - **Three random play cards** with Flip; tapping one snaps. Handoffs are cards (Dive, and a new Sweep).
   - **A sweeping aim line** and a THROW button for **bullet** passes: no aiming, no distance.

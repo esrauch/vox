@@ -5,9 +5,9 @@
  *
  * - **Blockers** (and anyone on a block assignment) get between a rusher and
  *   the QB; after a catch or handoff, between the nearest defender and the carrier.
- * - **Route runners** run their waypoints; whoever is nearest to where a pass
- *   will land goes for the ball.
- * - **The carrier** charges upfield in its lane (moved by your swipes).
+ * - **Route runners** run their waypoints (a bullet comes to them).
+ * - **The carrier** charges upfield in its lane, picking the emptiest lane
+ *   itself (chooseLane).
  * - **Rushers** charge the QB. **Covers** trail their mark. **Scarecrows** are
  *   planted. **The Owl** hangs deep, level with your deepest player, and
  *   comes down to meet the carrier. **Bats** loop their square. After the
@@ -29,12 +29,6 @@ export function qbOf(state: RunState): Player | null {
   return state.field.players.find((p) => p.role === 'qb') ?? null;
 }
 
-/** Where a pass in the air will come down, if one is. */
-function landing(state: RunState): Vec | null {
-  const ball = state.field.ball;
-  return ball.at === 'flight' ? ball.target : null;
-}
-
 const up = (b: { down: number }): boolean => b.down <= 0;
 
 export function playerTarget(state: RunState, p: Player): Vec | null {
@@ -48,14 +42,6 @@ export function playerTarget(state: RunState, p: Player): Vec | null {
     case 'block':
       return blockTarget(state, p, carrier);
     case 'route': {
-      // Go for the ball if it's coming down nearest to us.
-      const land = landing(state);
-      if (land) {
-        const nearest = state.field.players
-          .filter((q) => q.role !== 'qb' && up(q))
-          .sort((a, b) => dist(a.pos, land) - dist(b.pos, land) || a.id - b.id)[0];
-        if (nearest?.id === p.id) return land;
-      }
       if (carrier) return blockTarget(state, p, carrier);
       const job = p.job;
       const to = job.to[job.index];
@@ -107,12 +93,10 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
   const carrier = carrierOf(state);
   if (carrier) return add(carrier.pos, scale(carrier.vel, defense.chaseLead));
   const qb = qbOf(state);
-  const land = landing(state);
   switch (d.kind) {
     case 'rusher':
       return qb ? qb.pos : null;
     case 'cover': {
-      if (land && dist(d.pos, land) < 8) return land;
       const mark = state.field.players.find((p) => p.id === d.mark);
       if (!mark) return null;
       // Trail the mark: aim a little behind where it's going.
@@ -121,7 +105,6 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
       return add(mark.pos, scale(behind, defense.coverTrail));
     }
     case 'safety': {
-      if (land) return land;
       const deepest = state.field.players
         .filter((p) => p.role !== 'qb')
         .sort((a, b) => b.pos.y - a.pos.y || a.id - b.id)[0];
@@ -144,4 +127,32 @@ export function assignMarks(state: RunState): void {
     d.mark = mark?.id ?? null;
     if (mark) taken.add(mark.id);
   }
+}
+
+/**
+ * The lane a carrier runs for (GAMEPLAY.md: no steering): of the lanes
+ * across the field, the one with the most room ahead of it, counting the
+ * defenders still up in front, preferring to stay near where it is. The QB
+ * running it does the same: it drifts to the open side.
+ */
+export function chooseLane(state: RunState, carrier: Player): number {
+  const hw = arcadeTuning.field.halfWidth - 0.8;
+  const ahead = state.field.defenders.filter(
+    (d) => up(d) && d.pos.y > carrier.pos.y - 0.5 && d.pos.y < carrier.pos.y + 9,
+  );
+  let best = carrier.pos.x;
+  let bestScore = -Infinity;
+  for (let x = -hw; x <= hw + 1e-6; x += 0.5) {
+    // Room: the nearest defender to this lane, counting the ones closer up the field as nearer.
+    const room = Math.min(
+      ...ahead.map((d) => Math.abs(d.pos.x - x) + 0.35 * (d.pos.y - carrier.pos.y)),
+      6,
+    );
+    const score = room - 0.15 * Math.abs(x - carrier.pos.x);
+    if (score > bestScore) {
+      bestScore = score;
+      best = x;
+    }
+  }
+  return best;
 }

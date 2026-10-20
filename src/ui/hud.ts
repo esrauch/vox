@@ -14,6 +14,8 @@ export interface HudHandlers {
   onAction(): void;
   /** Tap a card in the hand: call that play. */
   onCard(hand: number): void;
+  /** A finger on a card in the hand (null when it lifts or leaves): preview that play. */
+  onCardPreview?(hand: number | null): void;
   onFlip(): void;
   /** In the draft: take an offer, or skip. */
   onDraft(offer: number): void;
@@ -123,16 +125,28 @@ export class Hud {
   }
 
   /** The hand of play cards (null hides it), which one is called (Flip shows once one is). */
-  setHand(cards: readonly CardFace[] | null, called: number | null): void {
-    this.flipButton.hidden = !cards || called === null;
-    const key = cards ? `${cards.map((c) => c.name).join('|')}#${called}` : '';
+  setHand(
+    cards: readonly CardFace[] | null,
+    called: number | null,
+    /** Show Flip even before a card is called (it mirrors the whole hand); `flipped` marks it on. */
+    flip: { readonly always: boolean; readonly flipped: boolean } = {
+      always: false,
+      flipped: false,
+    },
+  ): void {
+    this.flipButton.hidden = !cards || (called === null && !flip.always);
+    this.flipButton.classList.toggle('on', flip.flipped);
+    const key = cards ? `${cards.map((c) => c.name + c.blurb).join('|')}#${called}` : '';
     if (key === this.handKey) return;
     this.handKey = key;
     this.hand.classList.toggle('show', !!cards);
     this.hand.replaceChildren(
       ...(cards ?? []).map((c, i) =>
-        cardButton(c, `hud-card interactive${i === called ? ' called' : ''}`, () =>
-          this.handlers.onCard(i),
+        cardButton(
+          c,
+          `hud-card interactive${i === called ? ' called' : ''}`,
+          () => this.handlers.onCard(i),
+          (on) => this.handlers.onCardPreview?.(on ? i : null),
         ),
       ),
     );
@@ -188,8 +202,19 @@ export class Hud {
   }
 }
 
-function cardButton(face: CardFace, className: string, onClick: () => void): HTMLButtonElement {
+function cardButton(
+  face: CardFace,
+  className: string,
+  onClick: () => void,
+  onPreview?: (on: boolean) => void,
+): HTMLButtonElement {
   const b = document.createElement('button');
+  if (onPreview) {
+    b.addEventListener('pointerdown', () => onPreview(true));
+    for (const ev of ['pointerleave', 'pointercancel', 'pointerup'] as const) {
+      b.addEventListener(ev, () => onPreview(false));
+    }
+  }
   b.className = className;
   const name = document.createElement('strong');
   name.textContent = face.name;

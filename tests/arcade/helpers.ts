@@ -1,8 +1,10 @@
 import { DEFENDERS } from '../../src/arcade/content/defense';
+import { DT, arcadeTuning } from '../../src/arcade/content/tuning';
 import { ROLE_RADIUS, ROLE_STATS } from '../../src/arcade/content/team';
 import { defenderPhysics, physicsOf } from '../../src/arcade/sim/bodies';
+import { scanTime } from '../../src/arcade/sim/ball';
 import { createRun } from '../../src/arcade/sim/run';
-import { step } from '../../src/arcade/sim/step';
+import { breakMarker, step } from '../../src/arcade/sim/step';
 import type {
   ArcadeEvent,
   Defender,
@@ -100,7 +102,7 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
     witches: [],
     ball: { at: 'qb' },
     lane: 0,
-    wrap: 0,
+    drag: null,
   };
   state.phase = 'play';
   state.snappedAt = state.time;
@@ -141,9 +143,55 @@ export function carry(state: RunState, id: number): RunState {
   p.job = { kind: 'carry' };
   state.field.ball = { at: 'carried', by: id };
   state.field.lane = p.pos.x;
-  state.field.wrap = 0;
+  state.field.drag = null;
   return state;
 }
 
 /** A job that holds its spot (a one-waypoint route to where it stands). */
 export const stand = (at: Vec): Job => ({ kind: 'route', to: [at], index: 0 });
+
+/**
+ * Time the sweep so that a THROW on the next step goes straight at `target`
+ * (it moves the snap back to when the line would be pointing there on its
+ * first pass), and return that input.
+ */
+export function throwAt(state: RunState, target: Vec): StepInput {
+  const qb = state.field.players.find((p) => p.role === 'qb');
+  if (!qb) throw new Error('no QB');
+  const h = (arcadeTuning.sweep.halfAngle * Math.PI) / 180;
+  const angle = Math.atan2(target.x - qb.pos.x, target.y - qb.pos.y);
+  const share = (angle + h) / (2 * h);
+  state.snappedAt = state.time + DT - share * scanTime(state);
+  return { throw: true };
+}
+
+/** In Break it!, step until the marker reaches `at`, then tap. */
+export function tapAt(state: RunState, at: number): { state: RunState; events: ArcadeEvent[] } {
+  let s = state;
+  const events: ArcadeEvent[] = [];
+  for (let i = 0; i < 200; i++) {
+    const next = structuredClone(s);
+    next.time += DT;
+    const m = breakMarker(next) ?? 0;
+    const r = step(s, m >= at ? { breakTap: true } : {});
+    s = r.state;
+    events.push(...r.events);
+    if (m >= at || s.phase !== 'breakit') break;
+  }
+  return { state: s, events };
+}
+
+/** Step until Break it! starts (or `seconds` pass). */
+export function untilGrabbed(
+  state: RunState,
+  seconds = 3,
+): { state: RunState; events: ArcadeEvent[] } {
+  let s = state;
+  const events: ArcadeEvent[] = [];
+  for (let i = 0; i < seconds * 60 && s.phase === 'play'; i++) {
+    const r = step(s);
+    s = r.state;
+    events.push(...r.events);
+  }
+  return { state: s, events };
+}

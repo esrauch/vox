@@ -81,7 +81,8 @@ export class ArcadeBodies {
     for (const b of bodies) if (!this.views.has(b.id)) this.views.set(b.id, this.create(b));
   }
 
-  update(state: RunState, origin: number, dt: number): void {
+  /** `lit`: the receivers the sweeping line is over right now (render/sweep.ts). */
+  update(state: RunState, origin: number, dt: number, lit: ReadonlySet<number> = new Set()): void {
     const carrierId = state.field.ball.at === 'carried' ? state.field.ball.by : null;
     const live = state.phase === 'play' || state.phase === 'setup';
     for (const b of [...state.field.players, ...state.field.defenders]) {
@@ -105,6 +106,7 @@ export class ArcadeBodies {
           : Math.abs(Math.sin(state.time * 14 + b.id)) * Math.min(0.12, speed * 0.03);
 
       view.ring.position.set(view.root.position.x, 0.02, view.root.position.z);
+      view.ring.scale.setScalar(1);
       if (view.reach && b.side === 'defense') {
         view.reach.visible = live && carrierId === null && b.down <= 0;
         view.reach.position.set(view.root.position.x, 0.015, view.root.position.z);
@@ -115,7 +117,10 @@ export class ArcadeBodies {
         view.ring.material = this.ringMat(CARRIER);
       } else if (b.side === 'team' && live && carrierId === null && b.job.kind === 'route') {
         view.ring.visible = true;
-        view.ring.material = this.ringMat(open(state, b) ? OPEN : COVERED);
+        // Lit up gold while the line is over it: that's the moment to throw.
+        const isLit = lit.has(b.id);
+        view.ring.material = this.ringMat(isLit ? CARRIER : open(state, b) ? OPEN : COVERED);
+        view.ring.scale.setScalar(isLit ? 1.35 : 1);
       } else {
         view.ring.visible = false;
       }

@@ -1,13 +1,11 @@
 /**
- * The ball: in the QB's hand, in flight along the real arc (sim/ball.ts)
- * with a ring where it'll land, held over the carrier's head, or lying where
- * the down ended.
+ * The ball: in the QB's hand, flying flat as a bullet (sim/ball.ts), held
+ * over the carrier's head, or lying where the down ended.
  */
 import * as THREE from 'three';
 import { getGeometry, voxelMaterial } from '../../voxel/models';
-import { ballHeight } from '../sim/ball';
 import type { RunState } from '../sim/types';
-import { dist, lerp } from '../sim/vec';
+import { lerp } from '../sim/vec';
 import type { ArcadeBodies } from './bodies';
 import { toWorld } from './world';
 
@@ -27,7 +25,7 @@ export class ArcadeBall {
 
   update(state: RunState, origin: number, bodies: ArcadeBodies): void {
     const ball = state.field.ball;
-    this.landing.visible = ball.at === 'flight';
+    this.landing.visible = false;
     this.ball.rotation.y = state.time * 6;
     switch (ball.at) {
       case 'qb': {
@@ -38,11 +36,9 @@ export class ArcadeBall {
       }
       case 'flight': {
         const u = Math.min(1, (state.time - ball.thrownAt) / (ball.landsAt - ball.thrownAt));
-        const ground = lerp(ball.from, ball.target, u);
-        const h = ballHeight(dist(ball.from, ball.target), u);
-        this.ball.position.copy(toWorld(ground, origin, h));
-        this.ball.rotation.x = u * Math.PI * 4;
-        this.landing.position.copy(toWorld(ball.target, origin, 0.02));
+        // A bullet: flat and fast, at chest height.
+        this.ball.position.copy(toWorld(lerp(ball.from, ball.target, u), origin, 1));
+        this.ball.rotation.x = state.time * 30;
         break;
       }
       case 'carried': {

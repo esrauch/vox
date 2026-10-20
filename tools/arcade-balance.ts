@@ -7,30 +7,30 @@
  *
  *   npm run balance:arcade [runs per scenario]
  *
- * The bot snaps at once. It runs 30% of the time (a handoff at the snap);
- * otherwise it throws 2 seconds after the snap to the receiver furthest from
- * any defender's reach where the ball will come down (reading the rings),
- * leading it, with some aim error. Carrying, it
- * swipes away from the defender in its lane and away from the sideline.
- * There are no upgrades yet: each scenario fixes the team's forms.
+ * The bot plays the timing game like a fair, not great, player: it calls a
+ * random card of the three (Flip half the time). On a pass it throws when a
+ * bullet fired right now would be caught, reacting only some of the time it
+ * could; with the pocket nearly gone it runs half the time and throws the
+ * other half. In Break it! it hits the sweet spot BREAK_SKILL of the time and
+ * taps at random otherwise. There are no upgrades yet: each scenario fixes
+ * the team's forms.
  */
-import { arcadeTuning } from '../src/arcade/content/tuning';
-import { carrierOf, qbOf } from '../src/arcade/sim/ai';
-import { flightTime } from '../src/arcade/sim/ball';
+import { qbOf } from '../src/arcade/sim/ai';
+import { bulletEnd, contact, pocketTime, sweepAngle } from '../src/arcade/sim/ball';
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
 import { rngFor } from '../src/arcade/sim/random';
-import { step, throwProblem } from '../src/arcade/sim/step';
+import { breakMarker, canThrow, step } from '../src/arcade/sim/step';
 import type { ArcadeEvent, Form, Role, RunState, Stats, StepInput } from '../src/arcade/sim/types';
-import { add, dist, scale, v } from '../src/arcade/sim/vec';
+import { lerp } from '../src/arcade/sim/vec';
 import type { Rng } from '../src/sim/rng';
 
 const RUNS = Number(process.argv[2]) || 200;
-/** How often the bot runs (hands off at the snap) instead of throwing. */
-const RUN_SHARE = 0.3;
-/** On a pass, it throws this long after the snap. */
-const THROW_AT = 2;
-const AIM_ERROR = 0.6;
-const SWIPE_COOLDOWN = 0.25;
+/** Of the steps where a throw would be caught, the share it reacts on (a person isn't instant). */
+const REACT = 0.25;
+/** With this share of the pocket left, it gives up waiting: half the time it runs, half it throws anyway. */
+const PANIC = 0.12;
+/** How often it hits Break it!'s sweet spot (otherwise it taps at a random moment). */
+const BREAK_SKILL = 0.6;
 
 interface Scenario {
   readonly name: string;
@@ -78,6 +78,8 @@ interface Tally {
   catches: number;
   contested: number;
   pancakes: number;
+  grabs: number;
+  drags: number;
   /** Passes batted down, by who did it. */
   battedBy: Map<string, number>;
   breaks: number;
@@ -87,73 +89,42 @@ const bump = (m: Map<string, number>, k: string, by = 1): void => {
   m.set(k, (m.get(k) ?? 0) + by);
 };
 
-/** What the bot does this step: a step input, or a handoff to a Runner. */
-type BotMove = StepInput & { readonly handoff?: number };
-
-/** Its plan for this down, decided at the snap: run, or throw. */
+/** Its plan for a Break it!: where on the meter it will tap. */
 interface Plan {
-  snappedAt: number;
-  run: boolean;
+  tackleAt: number;
+  tapAt: number;
 }
 
-function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }, plan: Plan): BotMove {
-  if (state.phase !== 'play') return {};
-  const { field } = state;
+/** Whether a bullet fired along the line right now would be caught (a quick look along its flight). */
+function wouldCatch(state: RunState): boolean {
   const qb = qbOf(state);
-  const since = state.time - state.snappedAt;
-
-  // A new down: run RUN_SHARE of the time, otherwise throw.
-  if (plan.snappedAt !== state.snappedAt) {
-    plan.snappedAt = state.snappedAt;
-    plan.run = rng.next() < RUN_SHARE;
+  if (!qb) return false;
+  const end = bulletEnd(state, qb.pos, sweepAngle(state));
+  for (let u = 0.02; u <= 1.0001; u += 0.02) {
+    const at = lerp(qb.pos, end, Math.min(1, u));
+    const outcome = contact(state, qb.pos, at, u >= 1, end);
+    if (outcome) return outcome.kind === 'caught';
   }
-
-  if (field.ball.at === 'qb' && qb) {
-    if (plan.run) {
-      // Hand off to the Runner the play sends upfield (or either, if it sends neither).
-      const runners = field.players.filter((p) => p.role === 'runner' && p.down <= 0);
-      const runner = runners.find((p) => p.job.kind === 'route') ?? runners[0];
-      return runner ? { handoff: runner.id } : {};
-    }
-    if (since < THROW_AT) return {};
-    // Throw to the receiver furthest from any defender, leading it, with some aim error.
-    const receivers = field.players.filter((p) => p.job.kind === 'route' && p.down <= 0);
-    const ranked = receivers
-      .map((p) => {
-        const ft = flightTime(qb.pos, add(p.pos, scale(p.vel, 0.6)));
-        const target = add(p.pos, scale(p.vel, ft));
-        // How far it is from the edge of any defender's reach (a Scarecrow's purple ring is wide).
-        const room = Math.min(
-          ...field.defenders.filter((d) => d.down <= 0).map((d) => dist(d.pos, target) - d.reach),
-          99,
-        );
-        return { target, room };
-      })
-      .filter((r) => throwProblem(state, r.target) === null)
-      .sort((a, b) => b.room - a.room);
-    const best = ranked[0];
-    if (!best) return {};
-    const err = (): number => (rng.next() * 2 - 1) * AIM_ERROR;
-    return { throwAt: v(best.target.x + err(), best.target.y + err()) };
-  }
-
-  const carrier = carrierOf(state);
-  if (carrier && state.time - lastSwipe.at > SWIPE_COOLDOWN) {
-    const hw = arcadeTuning.field.halfWidth;
-    if (field.lane > hw - 2) return swipe(-1, state, lastSwipe);
-    if (field.lane < -hw + 2) return swipe(1, state, lastSwipe);
-    const ahead = field.defenders
-      .filter((d) => d.down <= 0 && d.pos.y > carrier.pos.y - 1 && d.pos.y < carrier.pos.y + 6)
-      .filter((d) => Math.abs(d.pos.x - field.lane) < 1.8)
-      .sort((a, b) => dist(a.pos, carrier.pos) - dist(b.pos, carrier.pos))[0];
-    if (ahead) return swipe(ahead.pos.x > field.lane ? -1 : 1, state, lastSwipe);
-  }
-  return {};
+  return false;
 }
 
-function swipe(dir: -1 | 1, state: RunState, lastSwipe: { at: number }): BotMove {
-  lastSwipe.at = state.time;
-  return { steer: dir };
+function botInput(state: RunState, rng: Rng, plan: Plan): StepInput {
+  if (state.phase === 'breakit' && state.tackle) {
+    const t = state.tackle;
+    if (plan.tackleAt !== t.startedAt) {
+      plan.tackleAt = t.startedAt;
+      plan.tapAt =
+        rng.next() < BREAK_SKILL
+          ? t.sweet.from + rng.next() * (t.sweet.to - t.sweet.from)
+          : rng.next();
+    }
+    return (breakMarker(state) ?? 0) >= plan.tapAt ? { breakTap: true } : {};
+  }
+  if (!canThrow(state)) return {};
+  const left = 1 - (state.time - state.snappedAt) / pocketTime(state);
+  if (left < PANIC) return rng.next() < 0.5 ? { scramble: true } : { throw: true };
+  if (wouldCatch(state) && rng.next() < REACT) return { throw: true };
+  return {};
 }
 
 function count(
@@ -168,8 +139,15 @@ function count(
         t.passes++;
         break;
       case 'handoff':
+      case 'scrambled':
         t.handoffs++;
         ran.now = true;
+        break;
+      case 'grabbed':
+        t.grabs++;
+        break;
+      case 'dragged':
+        t.drags++;
         break;
       case 'caught':
         t.catches++;
@@ -218,8 +196,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
     },
   }));
   let state = createRun(seed, roster);
-  const lastSwipe = { at: -1 };
-  const plan: Plan = { snappedAt: -1, run: false };
+  const plan: Plan = { tackleAt: -1, tapAt: 1 };
   const ran = { now: false };
   let driveKey = '';
   for (let guard = 0; guard < 200000 && state.phase !== 'over' && state.phase !== 'won'; guard++) {
@@ -233,16 +210,13 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
       continue;
     }
     if (state.phase === 'setup') {
-      state = dispatch(state, { type: 'snap' }).state;
+      if (rng.next() < 0.5) state = dispatch(state, { type: 'flip' }).state;
+      const call = dispatch(state, { type: 'call', hand: rng.int(0, state.hand.length - 1) });
+      count(t, call.events, state, ran);
+      state = call.state;
       continue;
     }
-    const move = botInput(state, rng, lastSwipe, plan);
-    if (move.handoff !== undefined) {
-      const h = dispatch(state, { type: 'handoff', id: move.handoff });
-      count(t, h.events, state, ran);
-      state = h.state;
-    }
-    const r = step(state, move.handoff !== undefined ? {} : move);
+    const r = step(state, botInput(state, rng, plan));
     if (r.events.some((e) => e.type === 'driveWon')) bump(t.wins, key);
     count(t, r.events, state, ran);
     state = r.state;
@@ -270,7 +244,7 @@ function report(scenario: Scenario, t: Tally): void {
   if (batted) console.log(`  batted by: ${batted}`);
   console.log(
     `  yards a run ${(t.run.yards / Math.max(1, t.run.downs)).toFixed(1)} (${t.run.downs}) · yards a pass play ${(t.pass.yards / Math.max(1, t.pass.downs)).toFixed(1)} · completions ${pct(t.catches, t.passes)} (contested ${pct(t.contested, t.catches)}) · ` +
-      `pancakes ${(t.pancakes / t.runs).toFixed(1)}/run · broken tackles ${(t.breaks / t.runs).toFixed(1)}/run`,
+      `pancakes ${(t.pancakes / t.runs).toFixed(1)}/run · Break it! ${t.grabs}: broke ${pct(t.breaks, t.grabs)}, dragged ${pct(t.drags, t.grabs)}`,
   );
   [0, 1, 2].forEach((area) => {
     const row = DRIVE_KINDS.map((k) => {
@@ -300,6 +274,8 @@ for (const scenario of SCENARIOS) {
     catches: 0,
     contested: 0,
     pancakes: 0,
+    grabs: 0,
+    drags: 0,
     battedBy: new Map(),
     breaks: 0,
   };

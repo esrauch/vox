@@ -44,16 +44,7 @@ export const arcadeTuning = {
     pancakeRatio: 1.9,
     /** …for this long. */
     pancakeTime: 1.2,
-    /**
-     * A tackler that reaches the carrier hangs on, and the carrier drags it:
-     * slowed to carrier mass / (carrier mass + the weight hanging on). It's
-     * down once the weight on it, relative to its own, has added up to this
-     * many seconds (one tackler as heavy as the carrier takes this long).
-     */
-    wrapTime: 0.5,
-    /** A carrier this many times heavier than its tackler breaks the tackle (2 Heft heavier)… */
-    breakRatio: 1.55,
-    /** …and the tackler lies there this long. */
+    /** A tackler shaken off in Break it! lies there this long. */
     brokenTime: 1.0,
     /** Bodies this close (beyond touching) count as contact for a tackle or a sack. */
     slop: 0.1,
@@ -65,37 +56,50 @@ export const arcadeTuning = {
     slowed: 0.6,
   },
   throw: {
-    /** Ball speed along the ground (yards a second); flight time is distance over this… */
-    speed: 13,
-    /** …but never shorter than this. */
-    minFlight: 0.35,
-    /** The arc's peak above the straight line: this × distance² (capped at maxArc). */
-    arcPerYard2: 0.012,
-    maxArc: 4,
-    /** Height of the ball at the release… */
-    releaseHeight: 0.8,
-    /** …and where it comes down: at catching height, not the turf. */
-    catchHeight: 1.0,
-    /**
-     * A ball lower than this can be touched: caught, or batted down. With the
-     * arc, that's only near the two ends of a throw: at the line, and where it
-     * comes down. A defender left a step behind its Catcher can't reach it.
-     */
-    reachHeight: 1.2,
-    /** Throws land from this many yards behind the line of scrimmage… */
-    minAhead: -2,
-    /** …to this many past it. */
+    /** A bullet: straight and fast, along the sweeping line (yards a second). */
+    speed: 24,
+    /** It flies no further than this past the line of scrimmage. */
     maxAhead: 30,
-    /** Letting go closer to the QB than this cancels the throw. */
-    minDistance: 2,
-    /** You can hand off to a Runner up to this long after the snap (or tap one to snap and hand off at once). */
-    handoffWindow: 1,
+    /** Your players closer than this to the QB are skipped (it's going past them). */
+    minDistance: 3,
+  },
+  sweep: {
+    /** The aim line sweeps this far either side of straight upfield (degrees)… */
+    halfAngle: 62,
+    /** …at this speed (degrees a second)… */
+    degreesPerSecond: 75,
+    /** …this much faster each area after the first (a share of it)… */
+    perArea: 0.15,
+    /** …and again on the Boss drive. */
+    boss: 0.1,
+    /** The pocket holds while the line crosses this many times; then it's a sack. */
+    scans: 3,
+  },
+  breakit: {
+    /** The marker crosses the meter once, in this long. */
+    meterSeconds: 1.1,
+    /** The sweet spot's width (a share of the meter) at an even Heft match… */
+    sweet: 0.2,
+    /** …this much wider for every point of Heft the carrier has over the tackler… */
+    perHeft: 0.06,
+    /** …never narrower or wider than these… */
+    minSweet: 0.05,
+    maxSweet: 0.6,
+    /** …and this many times narrower for every extra tackler on it. */
+    perExtraTackler: 0.6,
+    /** "Close": this far either side of the sweet spot, a drag. */
+    near: 0.12,
+    /** A drag gets this many yards, plus this many for every point of Heft over the tackler (within the range). */
+    dragYards: 1.5,
+    dragPerHeft: 0.5,
+    minDrag: 0.5,
+    maxDrag: 4,
   },
   carrier: {
-    /** How far one swipe moves the carrier's lane. */
-    steerStep: 1.5,
-    /** The carrier aims this far ahead of itself, in its lane. */
+    /** The carrier aims this far ahead of itself, in its lane… */
     lookAhead: 3,
+    /** …and picks the emptiest lane again this often (seconds). */
+    laneEvery: 0.25,
   },
   defense: {
     /** Added to every defender's stats each area after the first… */

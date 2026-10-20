@@ -59,9 +59,12 @@ export function createRun(seed: number, roster: RosterPlayer[] = startingRoster(
     time: 0,
     phase: 'setup',
     drive: { area: 0, index: 0, kind: 'intro', name: '', start: 0, firstDown: 0, down: 1, los: 0 },
+    hand: [],
+    flipped: false,
     play: { index: 0, flipped: false },
+    tackle: null,
     roster,
-    field: { players: [], defenders: [], witches: [], ball: { at: 'qb' }, lane: 0, wrap: 0 },
+    field: { players: [], defenders: [], witches: [], ball: { at: 'qb' }, lane: 0, drag: null },
     snappedAt: 0,
     pause: 0,
     result: null,
@@ -115,14 +118,25 @@ function witches(state: RunState, spec: DefenseSpec): Witch[] {
   }));
 }
 
-/** Line up the next down: a random play (randomly mirrored), both teams in place, waiting for the snap. */
+/** How many play cards are dealt each down. */
+const HAND = 3;
+
+/**
+ * Line up the next down: three play cards dealt at random, both teams in
+ * place (the line-up is the same for every play), waiting for the call.
+ */
 export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
   const { drive } = state;
-  const rng = rngFor(state.seed, 'play', state.drivesWon, drive.down, state.nextId);
-  state.play = { index: rng.int(0, PLAYS.length - 1), flipped: rng.next() < 0.5 };
+  const rng = rngFor(state.seed, 'hand', state.drivesWon, drive.down, state.nextId);
+  const deck = PLAYS.map((_, i) => i);
+  state.hand = [];
+  while (state.hand.length < Math.min(HAND, PLAYS.length)) {
+    state.hand.push(deck.splice(rng.int(0, deck.length - 1), 1)[0] ?? 0);
+  }
+  state.play = { index: state.hand[0] ?? 0, flipped: state.flipped };
   const play = PLAYS[state.play.index] ?? PLAYS[0];
   if (!play) throw new Error('No plays defined');
-  const players = lineUpTeam(state.roster, play, state.play.flipped, drive.los, state.nextId);
+  const players = lineUpTeam(state.roster, play, state.flipped, drive.los, state.nextId);
   state.nextId += players.length;
   const spec = defenseFor(state.seed, drive.area, drive.index);
   const boost = defenseBoost(drive.area, drive.kind, spec);
@@ -134,16 +148,12 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     witches: state.field.witches,
     ball: { at: 'qb' },
     lane: 0,
-    wrap: 0,
+    drag: null,
   };
   state.phase = 'setup';
   state.result = null;
-  events.push({
-    type: 'downStarted',
-    down: drive.down,
-    toGo: drive.firstDown - drive.los,
-    play: play.name,
-  });
+  state.tackle = null;
+  events.push({ type: 'downStarted', down: drive.down, toGo: drive.firstDown - drive.los });
 }
 
 /** Apply an action between steps. Pure, like step(). Invalid actions change nothing. */
@@ -151,11 +161,11 @@ export function dispatch(prev: RunState, action: Action): ArcadeResult {
   const state = structuredClone(prev);
   const events: ArcadeEvent[] = [];
   switch (action.type) {
-    case 'snap':
-      snap(state, events);
+    case 'call':
+      call(state, action.hand, events);
       break;
-    case 'handoff':
-      handoff(state, action.id, events);
+    case 'flip':
+      if (state.phase === 'setup') state.flipped = !state.flipped;
       break;
     case 'skipDraft':
       if (state.phase === 'draft') state.phase = 'setup';
@@ -164,27 +174,32 @@ export function dispatch(prev: RunState, action: Action): ArcadeResult {
   return { state, events };
 }
 
-/** The snap: the play starts, and Covers pick their marks. */
-function snap(state: RunState, events: ArcadeEvent[]): void {
-  if (state.phase !== 'setup') return;
+/**
+ * Call a play card (mirrored if Flip is on) and snap: your players take the
+ * play's assignments where they stand, Covers pick their marks, and a
+ * handoff play gives its Runner the ball, heading for the hole.
+ */
+function call(state: RunState, hand: number, events: ArcadeEvent[]): void {
+  const index = state.hand[hand];
+  const play = index === undefined ? undefined : PLAYS[index];
+  if (state.phase !== 'setup' || index === undefined || !play) return;
+  state.play = { index, flipped: state.flipped };
+  const firstId = state.field.players[0]?.id ?? state.nextId;
+  state.field.players.splice(
+    0,
+    state.field.players.length,
+    ...lineUpTeam(state.roster, play, state.flipped, state.drive.los, firstId),
+  );
+  events.push({ type: 'called', play: play.name, flipped: state.flipped });
   state.phase = 'play';
   state.snappedAt = state.time;
   assignMarks(state);
   events.push({ type: 'snapped' });
-}
-
-/**
- * Hand the ball to a Runner instead of throwing (GAMEPLAY.md, A Down):
- * before the snap (it snaps first) or within the handoff window after it,
- * while the QB still has the ball. You're steering it from then on.
- */
-function handoff(state: RunState, id: number, events: ArcadeEvent[]): void {
-  const runner = state.field.players.find((p) => p.id === id && p.role === 'runner' && p.down <= 0);
+  const runner =
+    play.handoff === undefined
+      ? undefined
+      : state.field.players.find((p) => p.slot === play.handoff);
   if (!runner) return;
-  if (state.phase === 'setup') snap(state, events);
-  if (state.phase !== 'play' || state.field.ball.at !== 'qb') return;
-  if (state.time - state.snappedAt > arcadeTuning.throw.handoffWindow) return;
-  // It heads for the hole the play opens: where its route was going.
   const hole = runner.job.kind === 'route' ? runner.job.to[runner.job.to.length - 1] : undefined;
   runner.job = { kind: 'carry' };
   state.field.ball = { at: 'carried', by: runner.id };

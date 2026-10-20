@@ -1,0 +1,109 @@
+.arc-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.arc-buttons {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 12px;
+}
+
+.arc-buttons[hidden],
+.arc-meter[hidden] {
+  display: none;
+}
+
+.arc-btn {
+  height: 72px;
+  border: 0;
+  border-radius: 18px;
+  font: inherit;
+  font-size: 1.6rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  background: var(--bone);
+  box-shadow:
+    inset 0 -6px 0 rgb(0 0 0 / 0.15),
+    0 6px 0 var(--ink);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.arc-btn:active {
+  translate: 0 4px;
+  box-shadow:
+    inset 0 -2px 0 rgb(0 0 0 / 0.15),
+    0 2px 0 var(--ink);
+}
+
+.arc-throw {
+  color: white;
+  background: var(--pumpkin);
+}
+
+.arc-meter {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: min(86vw, 420px);
+  translate: -50% -50%;
+  padding: 14px 16px 12px;
+  border-radius: 18px;
+  text-align: center;
+  color: white;
+  background: rgb(20 14 36 / 0.82);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.arc-meter-title {
+  font-size: 1.8rem;
+  letter-spacing: 0.08em;
+  color: var(--pumpkin);
+}
+
+.arc-meter-bar {
+  position: relative;
+  height: 34px;
+  margin: 10px 0 6px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.14);
+  overflow: hidden;
+}
+
+.arc-near,
+.arc-sweet {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.arc-near {
+  background: rgb(255 210 63 / 0.35);
+}
+
+.arc-sweet {
+  background: var(--slime-green);
+}
+
+.arc-marker {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 6px;
+  margin-left: -3px;
+  border-radius: 3px;
+  background: white;
+  box-shadow: 0 0 8px white;
+}
+
+.arc-meter-hint {
+  font-size: 1rem;
+  opacity: 0.8;
+}

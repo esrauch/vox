@@ -257,3 +257,8 @@
 .hud-action:active {
   translate: 0 3px;
 }
+
+.hud-flip.on {
+  background: var(--pumpkin);
+  color: white;
+}

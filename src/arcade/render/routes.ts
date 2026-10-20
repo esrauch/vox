@@ -1,12 +1,11 @@
 /**
- * The play's routes, drawn on the turf before the snap (GAMEPLAY.md, A
- * Down): a dotted path from each receiver through its waypoints, with an
- * arrowhead where it's going. The Runner the play sends upfield gets one
- * too (tap it to run). Hidden from the snap on.
+ * A play card's routes, drawn on the turf while your finger is on it
+ * (GAMEPLAY.md, A Down): a dotted path from each receiver through its
+ * waypoints, with an arrowhead where it's going; gold for the Runners.
  */
 import * as THREE from 'three';
 import { hexToNumber, team } from '../../content/palettes';
-import type { RunState, Vec } from '../sim/types';
+import type { Player, RunState, Vec } from '../sim/types';
 import { dist, lerp } from '../sim/vec';
 import { toWorld } from './world';
 
@@ -33,16 +32,17 @@ export class ArcadeRoutes {
     scene.add(this.group);
   }
 
-  update(state: RunState, origin: number): void {
-    const show = state.phase === 'setup';
+  /** Before the snap, draw `players`' routes (a play card under your finger), or nothing. */
+  update(state: RunState, origin: number, players: readonly Player[] | null): void {
+    const show = state.phase === 'setup' && players !== null;
     this.group.visible = show;
     if (!show) return;
     // Every down lines up with new ids, so they (and where the field is) say when to redraw.
-    const key = `${origin}|${state.field.players.map((p) => p.id).join(',')}`;
+    const key = `${origin}|${state.drive.los}|${players.map((p) => `${p.slot}:${p.job.kind === 'route' ? p.job.to.map((w) => `${w.x},${w.y}`).join(';') : ''}`).join('|')}`;
     if (key === this.key) return;
     this.key = key;
     this.group.clear();
-    for (const p of state.field.players) {
+    for (const p of players) {
       if (p.job.kind !== 'route') continue;
       const material = p.role === 'runner' ? this.run : this.pass;
       const path: Vec[] = [p.pos, ...p.job.to];

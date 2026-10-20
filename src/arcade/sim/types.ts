@@ -102,13 +102,25 @@ export interface Field {
   readonly defenders: Defender[];
   readonly witches: readonly Witch[];
   ball: Ball;
-  /** The carrier's lane: the x it steers for (set at the catch, moved by swipes). */
+  /** The carrier's lane: the x it runs for (it picks the emptiest one itself, every moment). */
   lane: number;
-  /**
-   * How far the tacklers hanging on the carrier are to bringing it down
-   * (0 to tuning.contact.wrapTime): it builds faster the more weight is on it.
-   */
-  wrap: number;
+  /** A carrier dragging tacklers after a close Break it!: it goes down when it reaches this row. */
+  drag: { readonly to: number } | null;
+}
+
+/**
+ * Break it! (GAMEPLAY.md): a defender has grabbed the carrier. The play is
+ * frozen while a marker crosses the meter once, from 0 to 1; a tap inside
+ * `sweet` breaks the tackle, within `near` of it drags a few yards, anywhere
+ * else (or no tap) is a tackle.
+ */
+export interface Tackle {
+  readonly startedAt: number;
+  readonly tacklers: readonly number[];
+  readonly sweet: { readonly from: number; readonly to: number };
+  readonly near: number;
+  /** Yards a drag gets. */
+  readonly dragYards: number;
 }
 
 export type DriveKind = 'intro' | 'challenge' | 'gimmick' | 'boss';
@@ -137,7 +149,15 @@ export interface RosterPlayer {
   training: Stats;
 }
 
-export type Phase = 'setup' | 'play' | 'downOver' | 'draft' | 'over' | 'won';
+export type Phase =
+  | 'setup'
+  | 'play'
+  /** Break it!: the play is frozen while you time the tap. */
+  | 'breakit'
+  | 'downOver'
+  | 'draft'
+  | 'over'
+  | 'won';
 
 export interface RunState {
   readonly seed: number;
@@ -146,8 +166,13 @@ export interface RunState {
   time: number;
   phase: Phase;
   drive: Drive;
-  /** This down's play (an index into PLAYS) and whether it's mirrored. */
+  /** The three play cards on offer this down (indices into PLAYS), and whether Flip is on. */
+  hand: number[];
+  flipped: boolean;
+  /** The play called (or, before the call, the first card's), and whether it's mirrored. */
   play: { readonly index: number; readonly flipped: boolean };
+  /** Break it!, while it's on. */
+  tackle: Tackle | null;
   roster: RosterPlayer[];
   field: Field;
   /** When this down was snapped (sim time). */
@@ -161,43 +186,44 @@ export interface RunState {
   nextId: number;
 }
 
-/** What the player does on a step. */
+/** What the player does on a step: the two buttons, and the Break it! tap. */
 export interface StepInput {
-  /** Throw to this point, if the QB has the ball. */
-  readonly throwAt?: Vec;
-  /** A swipe: nudge the carrier's lane one step left (-1) or right (+1). */
-  readonly steer?: -1 | 1;
+  /** THROW: a bullet along the sweeping line. */
+  readonly throw?: boolean;
+  /** RUN: the QB keeps it. */
+  readonly scramble?: boolean;
+  /** The tap in Break it!. */
+  readonly breakTap?: boolean;
 }
 
 export type Action =
-  | { readonly type: 'snap' }
-  /** Tap a Runner: hand it the ball (snapping first, if it's before the snap). */
-  | { readonly type: 'handoff'; readonly id: number }
+  /** Tap a play card: call it, and snap. */
+  | { readonly type: 'call'; readonly hand: number }
+  /** Mirror the three cards. */
+  | { readonly type: 'flip' }
   | { readonly type: 'skipDraft' };
 
-export type ThrowProblem = 'notInPlay' | 'noBall' | 'offField' | 'tooFar' | 'tooClose';
-
 export type ArcadeEvent =
-  | {
-      readonly type: 'downStarted';
-      readonly down: number;
-      readonly toGo: number;
-      readonly play: string;
-    }
+  | { readonly type: 'downStarted'; readonly down: number; readonly toGo: number }
+  | { readonly type: 'called'; readonly play: string; readonly flipped: boolean }
   | { readonly type: 'snapped' }
   | { readonly type: 'handoff'; readonly id: number }
+  | { readonly type: 'scrambled'; readonly id: number }
   | { readonly type: 'thrown'; readonly target: Vec; readonly landsAt: number }
-  | { readonly type: 'throwRejected'; readonly reason: ThrowProblem }
   | { readonly type: 'caught'; readonly id: number; readonly contested: boolean }
   /** A pass knocked down: `contested` when your player had a hand to it too and lost it. */
   | { readonly type: 'batted'; readonly by: number; readonly at: Vec; readonly contested: boolean }
   | { readonly type: 'incomplete'; readonly at: Vec }
   | { readonly type: 'pancake'; readonly blocker: number; readonly defender: number }
+  /** A defender grabbed the carrier: Break it! starts. */
+  | { readonly type: 'grabbed'; readonly id: number; readonly by: readonly number[] }
+  /** A tap in the sweet spot: this tackler goes flying, the carrier keeps going. */
   | { readonly type: 'brokeTackle'; readonly id: number; readonly defender: number }
-  /** A tackler grabbed the carrier and hangs on (it isn't down yet). */
-  | { readonly type: 'wrapped'; readonly id: number; readonly defender: number }
+  /** A close tap: the carrier drags its tacklers this far before it goes down. */
+  | { readonly type: 'dragged'; readonly id: number; readonly yards: number }
   | { readonly type: 'tackled'; readonly id: number; readonly by: number }
-  | { readonly type: 'sacked'; readonly by: number }
+  /** The pocket collapsed (after its sweeps) with the QB still holding the ball. */
+  | { readonly type: 'sacked' }
   | { readonly type: 'outOfBounds'; readonly id: number }
   | { readonly type: 'downEnded'; readonly result: DownResult; readonly gained: number }
   | { readonly type: 'driveWon'; readonly drive: number }

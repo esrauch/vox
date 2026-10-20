@@ -1,31 +1,36 @@
 /**
  * The fixed step: advance a run by one step of 1/60 s. Pure: the input
  * state is never modified, and the same state plus the same input always
- * gives the same result.
+ * gives the same result. See GAMEPLAY.md, A Down and Break it!.
  *
  * Order within a step in play:
- *   1. A throw or a swipe from the player.
- *   2. Everyone moves toward their target (ai.ts, physics.ts).
- *   3. Overlaps are pushed apart by weight.
- *   4. Contact: a Blocker much heavier than a defender flattens it (a
- *      pancake); a defender reaching the carrier grabs on and the carrier
- *      drags it, slowed, until the weight on it brings it down (unless the
- *      carrier is much heavier and sheds it); a defender touching the QB
- *      while it holds the ball sacks it.
- *   5. The pass in the air (ball.ts).
- *   6. The carrier over the first-down line wins the drive; over the
+ *   1. The player's buttons: THROW fires a bullet along the sweeping line;
+ *      RUN gives the QB the ball to run.
+ *   2. The carrier picks its lane (the emptiest), every so often.
+ *   3. Everyone moves toward their target (ai.ts, physics.ts); overlaps are
+ *      pushed apart by weight.
+ *   4. Contact: a player blocking, much heavier than the defender it's on,
+ *      flattens it (a pancake); a defender grabbing the carrier starts
+ *      Break it! (running into a planted Scarecrow just stops it).
+ *   5. A carrier dragging tacklers goes down when the drag runs out.
+ *   6. The pocket: once its sweeps are done with the QB still holding the
+ *      ball, it's a sack.
+ *   7. The bullet in the air (ball.ts).
+ *   8. The carrier over the first-down line wins the drive; over the
  *      sideline, it's down there.
+ * In Break it! the play is frozen until the tap (or the marker runs out).
  * Before the snap and between drives only the Bats move.
  */
 import { arcadeTuning, DT } from '../content/tuning';
-import { carrierOf, qbOf } from './ai';
-import { flightTime, resolveFlight } from './ball';
+import { carrierOf, chooseLane, qbOf } from './ai';
+import { bulletEnd, flightTime, pocketTime, resolveFlight, sweepAngle } from './ball';
 import { moveBodies, separate, touching } from './physics';
+import { rngFor } from './random';
 import { endDown, nextDown } from './run';
-import type { ArcadeEvent, ArcadeResult, RunState, StepInput, ThrowProblem, Vec } from './types';
-import { dist, norm, scale, sub } from './vec';
+import type { ArcadeEvent, ArcadeResult, Player, RunState, StepInput } from './types';
+import { norm, scale, sub } from './vec';
 
-const { contact, field, throw: throwTuning } = arcadeTuning;
+const { contact, field, breakit } = arcadeTuning;
 
 export function step(prev: RunState, input: StepInput = {}): ArcadeResult {
   const state = structuredClone(prev);
@@ -39,58 +44,70 @@ export function step(prev: RunState, input: StepInput = {}): ArcadeResult {
     if (state.pause <= 0) nextDown(state, events);
     return { state, events };
   }
+  if (state.phase === 'breakit') {
+    breakIt(state, input, events);
+    return { state, events };
+  }
   if (state.phase !== 'play') {
     moveBodies(state);
     separate(state);
     return { state, events };
   }
 
-  if (input.throwAt) tryThrow(state, input.throwAt, events);
-  if (input.steer && carrierOf(state)) {
-    const lane = state.field.lane + input.steer * arcadeTuning.carrier.steerStep;
-    state.field.lane = Math.max(-field.halfWidth - 1, Math.min(field.halfWidth + 1, lane));
+  if (input.throw) throwBullet(state, events);
+  else if (input.scramble) scramble(state, events);
+  const carrier = carrierOf(state);
+  if (carrier && state.step % Math.max(1, Math.round(arcadeTuning.carrier.laneEvery / DT)) === 0) {
+    state.field.lane = chooseLane(state, carrier);
   }
   moveBodies(state);
   separate(state);
   if (resolveContact(state, events)) return { state, events };
+  if (dragDone(state, events)) return { state, events };
+  if (pocket(state, events)) return { state, events };
   if (flight(state, events)) return { state, events };
   checkCarrier(state, events);
   return { state, events };
 }
 
-// ── Throwing ────────────────────────────────────────────────────────────────
-
-/** Why a throw to `target` isn't allowed right now, or null if it is. */
-export function throwProblem(state: RunState, target: Vec): ThrowProblem | null {
-  if (state.phase !== 'play') return 'notInPlay';
-  const qb = qbOf(state);
-  if (state.field.ball.at !== 'qb' || !qb) return 'noBall';
-  if (Math.abs(target.x) > field.halfWidth) return 'offField';
-  const { los } = state.drive;
-  if (target.y > los + throwTuning.maxAhead) return 'tooFar';
-  if (target.y < los + throwTuning.minAhead || dist(qb.pos, target) < throwTuning.minDistance) {
-    return 'tooClose';
-  }
-  return null;
+/** Whether the QB can throw (or run) right now: in play, with the ball. */
+export function canThrow(state: RunState): boolean {
+  return state.phase === 'play' && state.field.ball.at === 'qb' && qbOf(state) !== null;
 }
 
-function tryThrow(state: RunState, target: Vec, events: ArcadeEvent[]): void {
-  const problem = throwProblem(state, target);
+// ── The buttons ─────────────────────────────────────────────────────────────
+
+/** THROW: a bullet along the line, as far as its range (or the sideline). */
+function throwBullet(state: RunState, events: ArcadeEvent[]): void {
   const qb = qbOf(state);
-  if (problem || !qb) {
-    events.push({ type: 'throwRejected', reason: problem ?? 'noBall' });
-    return;
-  }
+  if (!qb || !canThrow(state)) return;
+  const target = bulletEnd(state, qb.pos, sweepAngle(state));
   const landsAt = state.time + flightTime(qb.pos, target);
   state.field.ball = { at: 'flight', from: qb.pos, target, thrownAt: state.time, landsAt };
   events.push({ type: 'thrown', target, landsAt });
 }
 
-// ── Contact ─────────────────────────────────────────────────────────────────
+/** RUN: the QB tucks it and runs, drifting to the open side. */
+function scramble(state: RunState, events: ArcadeEvent[]): void {
+  const qb = qbOf(state);
+  if (!qb || !canThrow(state)) return;
+  giveBall(state, qb);
+  events.push({ type: 'scrambled', id: qb.id });
+}
 
-/** Pancakes, tackles and sacks. Returns whether the down ended. */
+/** Someone has the ball now: it runs, and picks its lane. */
+export function giveBall(state: RunState, p: Player): void {
+  p.job = { kind: 'carry' };
+  state.field.ball = { at: 'carried', by: p.id };
+  state.field.lane = chooseLane(state, p);
+  state.field.drag = null;
+}
+
+// ── Contact and Break it! ────────────────────────────────────────────────────
+
+/** Pancakes, and a defender grabbing the carrier. Returns whether play stopped. */
 function resolveContact(state: RunState, events: ArcadeEvent[]): boolean {
-  const { players, defenders, ball } = state.field;
+  const { players, defenders } = state.field;
   const upDefenders = defenders.filter((d) => d.down <= 0).sort((a, b) => a.id - b.id);
   const carrier = carrierOf(state);
 
@@ -108,68 +125,131 @@ function resolveContact(state: RunState, events: ArcadeEvent[]): boolean {
     }
   }
 
-  if (carrier) {
-    // A defender reaching the carrier grabs on, unless the carrier is much heavier and sheds it.
-    for (const d of upDefenders) {
-      if (d.down > 0 || d.latch || !touching(carrier, d)) continue;
-      if (carrier.mass >= contact.breakRatio * d.mass) {
-        d.down = contact.brokenTime;
-        d.vel = scale(norm(sub(d.pos, carrier.pos)), 4);
-        events.push({ type: 'brokeTackle', id: carrier.id, defender: d.id });
-        continue;
-      }
-      // Running into a planted Scarecrow stops you dead.
-      if (d.planted) {
-        events.push({ type: 'tackled', id: carrier.id, by: d.id });
-        carrier.down = 1;
-        state.field.ball = { at: 'dead', pos: carrier.pos, how: 'tackled' };
-        endDown(state, 'tackled', carrier.pos.y, events);
-        return true;
-      }
-      d.latch = scale(norm(sub(d.pos, carrier.pos)), carrier.radius + d.radius);
-      events.push({ type: 'wrapped', id: carrier.id, defender: d.id });
-    }
-    // The weight hanging on brings it down: faster the heavier it is.
-    const hanging = defenders.filter((d) => d.latch !== null).sort((a, b) => a.id - b.id);
-    const weight = hanging.reduce((m, d) => m + d.mass, 0);
-    state.field.wrap += (DT * weight) / carrier.mass;
-    const first = hanging[0];
-    if (first && state.field.wrap >= contact.wrapTime) {
-      events.push({ type: 'tackled', id: carrier.id, by: first.id });
-      carrier.down = 1;
-      for (const d of hanging) d.latch = null;
-      state.field.ball = { at: 'dead', pos: carrier.pos, how: 'tackled' };
-      endDown(state, 'tackled', carrier.pos.y, events);
-      return true;
-    }
+  // Already dragging tacklers: it's going down, nobody new needs to grab it.
+  if (!carrier || state.field.drag) return false;
+  const grabbing = upDefenders.filter((d) => d.down <= 0 && !d.latch && touching(carrier, d));
+  if (grabbing.length === 0) return false;
+  // Running into a planted Scarecrow stops you dead.
+  const scarecrow = grabbing.find((d) => d.planted);
+  if (scarecrow) {
+    tackle(state, carrier, scarecrow.id, events);
+    return true;
   }
-
-  const qb = qbOf(state);
-  if (qb && ball.at === 'qb') {
-    const rusher = upDefenders.find((d) => d.down <= 0 && touching(qb, d));
-    if (rusher) {
-      events.push({ type: 'sacked', by: rusher.id });
-      qb.down = 1;
-      state.field.ball = { at: 'dead', pos: qb.pos, how: 'sacked' };
-      endDown(state, 'sacked', state.drive.los - arcadeTuning.drive.sackLoss, events);
-      return true;
-    }
-  }
-  return false;
+  startBreakIt(
+    state,
+    carrier,
+    grabbing.map((d) => d.id),
+  );
+  events.push({ type: 'grabbed', id: carrier.id, by: grabbing.map((d) => d.id) });
+  return true;
 }
 
-// ── The pass, and the carrier ────────────────────────────────────────────────
+/** The sweet spot's width: wider the more Heft the carrier has over the heaviest tackler, narrower per extra tackler. */
+function startBreakIt(state: RunState, carrier: Player, tacklers: number[]): void {
+  const heft = Math.max(
+    ...state.field.defenders.filter((d) => tacklers.includes(d.id)).map((d) => d.stats.heft),
+  );
+  const gap = carrier.stats.heft - heft;
+  const width =
+    Math.min(breakit.maxSweet, Math.max(breakit.minSweet, breakit.sweet + breakit.perHeft * gap)) *
+    breakit.perExtraTackler ** (tacklers.length - 1);
+  // Where it sits on the meter is a fresh surprise every time.
+  const at = rngFor(state.seed, 'break', state.step).next() * (1 - width);
+  const drag = Math.min(
+    breakit.maxDrag,
+    Math.max(breakit.minDrag, breakit.dragYards + breakit.dragPerHeft * gap),
+  );
+  state.tackle = {
+    startedAt: state.time,
+    tacklers,
+    sweet: { from: at, to: at + width },
+    near: breakit.near,
+    dragYards: drag,
+  };
+  state.phase = 'breakit';
+}
+
+/** Where Break it!'s marker is on the meter (0 to 1), or null outside it. */
+export function breakMarker(state: RunState): number | null {
+  const t = state.tackle;
+  if (!t) return null;
+  return Math.min(1, (state.time - t.startedAt) / breakit.meterSeconds);
+}
+
+/** Break it!: the tap decides it, or the marker running out does. */
+function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void {
+  const t = state.tackle;
+  const carrier = carrierOf(state);
+  const m = breakMarker(state);
+  if (!t || !carrier || m === null) {
+    state.phase = 'play';
+    state.tackle = null;
+    return;
+  }
+  if (!input.breakTap && m < 1) return;
+  const tacklers = state.field.defenders.filter((d) => t.tacklers.includes(d.id));
+  const first = t.tacklers[0] ?? -1;
+  state.tackle = null;
+  state.phase = 'play';
+  if (input.breakTap && m >= t.sweet.from && m <= t.sweet.to) {
+    // BREAK: they go flying, and the carrier keeps going.
+    for (const d of tacklers) {
+      d.down = contact.brokenTime;
+      d.vel = scale(norm(sub(d.pos, carrier.pos)), 5);
+      events.push({ type: 'brokeTackle', id: carrier.id, defender: d.id });
+    }
+    return;
+  }
+  if (input.breakTap && m >= t.sweet.from - t.near && m <= t.sweet.to + t.near) {
+    // DRAG: it hauls them a few yards, then goes down.
+    for (const d of tacklers)
+      d.latch = scale(norm(sub(d.pos, carrier.pos)), carrier.radius + d.radius);
+    state.field.drag = { to: carrier.pos.y + t.dragYards };
+    events.push({ type: 'dragged', id: carrier.id, yards: t.dragYards });
+    return;
+  }
+  tackle(state, carrier, first, events);
+}
+
+/** A carrier dragging tacklers goes down once it reaches the end of the drag. */
+function dragDone(state: RunState, events: ArcadeEvent[]): boolean {
+  const carrier = carrierOf(state);
+  const drag = state.field.drag;
+  if (!carrier || !drag || carrier.pos.y < drag.to) return false;
+  const by = state.field.defenders.find((d) => d.latch)?.id ?? -1;
+  tackle(state, carrier, by, events);
+  return true;
+}
+
+function tackle(state: RunState, carrier: Player, by: number, events: ArcadeEvent[]): void {
+  events.push({ type: 'tackled', id: carrier.id, by });
+  carrier.down = 1;
+  for (const d of state.field.defenders) d.latch = null;
+  state.field.drag = null;
+  state.field.ball = { at: 'dead', pos: carrier.pos, how: 'tackled' };
+  endDown(state, 'tackled', carrier.pos.y, events);
+}
+
+// ── The pocket, the bullet, and the carrier ──────────────────────────────────
+
+/** The pocket holds for its sweeps; after that, with the QB still holding the ball, it's a sack. */
+function pocket(state: RunState, events: ArcadeEvent[]): boolean {
+  const qb = qbOf(state);
+  if (!qb || state.field.ball.at !== 'qb') return false;
+  if (state.time - state.snappedAt < pocketTime(state)) return false;
+  events.push({ type: 'sacked' });
+  qb.down = 1;
+  state.field.ball = { at: 'dead', pos: qb.pos, how: 'sacked' };
+  endDown(state, 'sacked', state.drive.los - arcadeTuning.drive.sackLoss, events);
+  return true;
+}
 
 function flight(state: RunState, events: ArcadeEvent[]): boolean {
   const outcome = resolveFlight(state);
   if (!outcome) return false;
   if (outcome.kind === 'caught') {
-    const p = outcome.by;
-    p.job = { kind: 'carry' };
-    state.field.ball = { at: 'carried', by: p.id };
-    state.field.lane = p.pos.x;
-    state.field.wrap = 0;
-    events.push({ type: 'caught', id: p.id, contested: outcome.contested });
+    giveBall(state, outcome.by);
+    events.push({ type: 'caught', id: outcome.by.id, contested: outcome.contested });
     return checkCarrier(state, events);
   }
   if (outcome.kind === 'batted') {
@@ -189,6 +269,8 @@ function checkCarrier(state: RunState, events: ArcadeEvent[]): boolean {
   const carrier = carrierOf(state);
   if (!carrier) return false;
   if (carrier.pos.y >= state.drive.firstDown) {
+    for (const d of state.field.defenders) d.latch = null;
+    state.field.drag = null;
     endDown(state, 'firstDown', carrier.pos.y, events);
     return true;
   }
