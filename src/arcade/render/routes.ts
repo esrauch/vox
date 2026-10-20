@@ -1,6 +1,6 @@
 /**
- * A play card's routes, drawn on the turf while your finger is on it
- * (GAMEPLAY.md, A Down): a dotted path from each receiver through its
+ * The called play's routes, drawn on the turf until the hike (GAMEPLAY.md,
+ * A Down): a dotted path from each receiver through its
  * waypoints, with an arrowhead where it's going; gold for the Runners.
  */
 import * as THREE from 'three';
@@ -32,7 +32,7 @@ export class ArcadeRoutes {
     scene.add(this.group);
   }
 
-  /** Before the snap, draw `players`' routes (a play card under your finger), or nothing. */
+  /** Before the hike, draw `players`' routes (the called play's), or nothing. */
   update(state: RunState, origin: number, players: readonly Player[] | null): void {
     const show = state.phase === 'setup' && players !== null;
     this.group.visible = show;

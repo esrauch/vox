@@ -4,14 +4,14 @@
  * behind and above the QB that follows the play, and takes the timing
  * game's inputs:
  *
- * - **Before the snap:** three play cards and Flip. A finger on a card shows
- *   its routes; letting go on it calls it and snaps.
+ * - **Before the snap:** three play cards and Flip. Tap a card to call it
+ *   (its routes show on the field; tap another to switch), then HIKE.
  * - **On a pass play:** THROW fires a bullet along the sweeping line; RUN
  *   lets the QB keep it.
  * - **In Break it!:** one tap, anywhere.
  *
- * Keys for a desktop: Space throws (and taps Break it!), R runs, F flips,
- * 1–3 call a card. The music is the soundtrack only: nothing waits for the beat.
+ * Keys for a desktop: 1–3 call a card, F flips, Space hikes (then throws,
+ * and taps Break it!), R runs. The music is the soundtrack only: nothing waits for the beat.
  */
 import * as THREE from 'three';
 import { Conductor } from '../game/conductor';
@@ -27,7 +27,6 @@ import { ArcadeRoutes } from './render/routes';
 import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
 import { carrierOf, qbOf } from './sim/ai';
-import { lineUpTeam } from './sim/bodies';
 import { createRun, dispatch, downAndDistance } from './sim/run';
 import { breakMarker, canThrow, step } from './sim/step';
 import type { Action, ArcadeEvent, DriveKind, Player, RunState, StepInput } from './sim/types';
@@ -77,8 +76,6 @@ export class ArcadeGame {
   private paused = false;
   /** What the player pressed since the last step, applied on the next one. */
   private pending: { throw?: boolean; scramble?: boolean; breakTap?: boolean } = {};
-  /** The card under the player's finger, if any: its routes are drawn. */
-  private previewCard: number | null = null;
   /** Where the camera looks (field yards, smoothed). */
   private focus = v(0, -4);
 
@@ -112,7 +109,6 @@ export class ArcadeGame {
     this.hud = new Hud(uiRoot, {
       onAction: () => void this.onAction(),
       onCard: (hand) => this.call(hand),
-      onCardPreview: (hand) => (this.previewCard = hand),
       onFlip: () => this.act({ type: 'flip' }),
       onDraft: () => undefined,
       onSkip: () => undefined,
@@ -168,7 +164,6 @@ export class ArcadeGame {
   }
 
   private call(hand: number): void {
-    this.previewCard = null;
     this.conductor.play('uiClick');
     this.act({ type: 'call', hand });
   }
@@ -208,13 +203,10 @@ export class ArcadeGame {
     this.view.render();
   }
 
-  /** The players of the card under the finger, lined up as they'd run it (for the route preview). */
+  /** Before the hike, the called play's players (their routes are drawn), or null. */
   private previewPlayers(): Player[] | null {
     const { state } = this;
-    if (state.phase !== 'setup' || this.previewCard === null) return null;
-    const play = PLAYS[state.hand[this.previewCard] ?? -1];
-    if (!play) return null;
-    return lineUpTeam(state.roster, play, state.flipped, state.drive.los, 0);
+    return state.phase === 'setup' && state.called !== null ? state.field.players : null;
   }
 
   /** The third-person camera: behind and above whatever matters (the QB, the ball, the carrier). */
@@ -263,8 +255,8 @@ export class ArcadeGame {
     const play = (id: Parameters<Conductor['play']>[0]): void => this.conductor.play(id);
     for (const e of events) {
       switch (e.type) {
-        case 'called':
-          this.hud.pop(`${e.play.toUpperCase()}!`, 'good');
+        case 'snapped':
+          this.hud.pop(`${(PLAYS[this.state.play.index]?.name ?? '').toUpperCase()}!`, 'good');
           break;
         case 'thrown':
           play('throw');
@@ -330,7 +322,7 @@ export class ArcadeGame {
   }
 
   private syncHud(): void {
-    const { phase, drive, drivesWon, hand, flipped } = this.state;
+    const { phase, drive, drivesWon, hand, flipped, called } = this.state;
     const banner =
       phase === 'over' || phase === 'won'
         ? `${drivesWon} ${drivesWon === 1 ? 'drive' : 'drives'} won`
@@ -345,9 +337,11 @@ export class ArcadeGame {
             return { name: p?.name ?? '?', blurb: p?.handoff !== undefined ? 'Run' : 'Pass' };
           })
         : null;
-    this.hud.setHand(cards, null, { always: true, flipped });
+    this.hud.setHand(cards, called, { always: true, flipped });
     if (!this.conductor.started) this.hud.setPrompt('Fourth & Ghoul', 'PLAY');
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
+    else if (phase === 'setup')
+      this.hud.setPrompt(called === null ? 'Pick a play' : null, called === null ? null : 'HIKE!');
     else if (phase === 'draft') this.hud.setPrompt('Drive won!', 'NEXT DRIVE');
     else if (phase === 'over') this.hud.setPrompt('Turnover on downs!', 'AGAIN');
     else if (phase === 'won') this.hud.setPrompt('The forest is cleared!', 'AGAIN');
@@ -363,6 +357,8 @@ export class ArcadeGame {
       this.paused = false;
       this.lastFrame = null;
       await this.conductor.resume();
+    } else if (phase === 'setup') {
+      this.act({ type: 'hike' });
     } else if (phase === 'draft') {
       this.act({ type: 'skipDraft' });
     } else if (phase === 'over' || phase === 'won') {
@@ -388,7 +384,8 @@ export class ArcadeGame {
     const { phase } = this.state;
     if (e.code === 'Space') {
       e.preventDefault();
-      this.press(phase === 'breakit' ? { breakTap: true } : { throw: true });
+      if (phase === 'setup') this.act({ type: 'hike' });
+      else this.press(phase === 'breakit' ? { breakTap: true } : { throw: true });
     } else if (e.code === 'KeyR') this.press({ scramble: true });
     else if (e.code === 'KeyF' && phase === 'setup') this.act({ type: 'flip' });
     else if (phase === 'setup' && ['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {

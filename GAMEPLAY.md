@@ -68,7 +68,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 **Every input is timing, never aiming.** Pick a play, then one tap at the right moment, then one more when you're grabbed.
 
-1. **Call a play: three cards, drawn at random** from the playbook. Each shows the play's name and routes; while your finger is on a card, its routes are drawn on the turf. **Flip** mirrors all three toward the other side (the defenses are lopsided). **Tapping a card snaps the ball** at once: one tap from choice to action.
+1. **Call a play: three cards, drawn at random** from the playbook. **Tap a card** and its routes are drawn on the field (tap another to switch); **Flip** mirrors it toward the other side (the defenses are lopsided). Then **HIKE!** starts the play.
 
    | Play | What happens |
    |---|---|
@@ -114,8 +114,9 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 | When | Gesture | What it does |
 |---|---|---|
-| **Before the snap** | **Tap Flip** | Mirror all three plays. |
-| **Before the snap** | **Touch a card** | Show its routes on the turf; **let go on it to snap** with that play (slide off to cancel). |
+| **Before the snap** | **Tap Flip** | Mirror the play. |
+| **Before the snap** | **Tap a card** | Call that play: its routes show on the field. Tap another to switch. |
+| **Before the snap** | **HIKE!** | Start the called play. |
 | **Pass play** | **THROW** | Fire a bullet along the sweeping line. |
 | **Pass play** | **RUN** | The QB runs it himself. |
 | **Grabbed** | **Tap** (anywhere) | Break it! |

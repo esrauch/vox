@@ -211,9 +211,13 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
     }
     if (state.phase === 'setup') {
       if (rng.next() < 0.5) state = dispatch(state, { type: 'flip' }).state;
-      const call = dispatch(state, { type: 'call', hand: rng.int(0, state.hand.length - 1) });
-      count(t, call.events, state, ran);
-      state = call.state;
+      const called = dispatch(state, {
+        type: 'call',
+        hand: rng.int(0, state.hand.length - 1),
+      }).state;
+      const hiked = dispatch(called, { type: 'hike' });
+      count(t, hiked.events, state, ran);
+      state = hiked.state;
       continue;
     }
     const r = step(state, botInput(state, rng, plan));

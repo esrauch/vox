@@ -166,8 +166,9 @@ export interface RunState {
   time: number;
   phase: Phase;
   drive: Drive;
-  /** The three play cards on offer this down (indices into PLAYS), and whether Flip is on. */
+  /** The three play cards on offer this down (indices into PLAYS), which one is called (null until one is), and whether Flip is on. */
   hand: number[];
+  called: number | null;
   flipped: boolean;
   /** The play called (or, before the call, the first card's), and whether it's mirrored. */
   play: { readonly index: number; readonly flipped: boolean };
@@ -197,10 +198,12 @@ export interface StepInput {
 }
 
 export type Action =
-  /** Tap a play card: call it, and snap. */
+  /** Tap a play card: call it (its routes show), or switch to it. */
   | { readonly type: 'call'; readonly hand: number }
-  /** Mirror the three cards. */
+  /** Mirror the cards (and the called play). */
   | { readonly type: 'flip' }
+  /** HIKE: start the called play. */
+  | { readonly type: 'hike' }
   | { readonly type: 'skipDraft' };
 
 export type ArcadeEvent =

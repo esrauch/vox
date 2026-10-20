@@ -14,8 +14,6 @@ export interface HudHandlers {
   onAction(): void;
   /** Tap a card in the hand: call that play. */
   onCard(hand: number): void;
-  /** A finger on a card in the hand (null when it lifts or leaves): preview that play. */
-  onCardPreview?(hand: number | null): void;
   onFlip(): void;
   /** In the draft: take an offer, or skip. */
   onDraft(offer: number): void;
@@ -142,11 +140,8 @@ export class Hud {
     this.hand.classList.toggle('show', !!cards);
     this.hand.replaceChildren(
       ...(cards ?? []).map((c, i) =>
-        cardButton(
-          c,
-          `hud-card interactive${i === called ? ' called' : ''}`,
-          () => this.handlers.onCard(i),
-          (on) => this.handlers.onCardPreview?.(on ? i : null),
+        cardButton(c, `hud-card interactive${i === called ? ' called' : ''}`, () =>
+          this.handlers.onCard(i),
         ),
       ),
     );
@@ -202,19 +197,8 @@ export class Hud {
   }
 }
 
-function cardButton(
-  face: CardFace,
-  className: string,
-  onClick: () => void,
-  onPreview?: (on: boolean) => void,
-): HTMLButtonElement {
+function cardButton(face: CardFace, className: string, onClick: () => void): HTMLButtonElement {
   const b = document.createElement('button');
-  if (onPreview) {
-    b.addEventListener('pointerdown', () => onPreview(true));
-    for (const ev of ['pointerleave', 'pointercancel', 'pointerup'] as const) {
-      b.addEventListener(ev, () => onPreview(false));
-    }
-  }
   b.className = className;
   const name = document.createElement('strong');
   name.textContent = face.name;

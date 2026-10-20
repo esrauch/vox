@@ -60,6 +60,7 @@ export function createRun(seed: number, roster: RosterPlayer[] = startingRoster(
     phase: 'setup',
     drive: { area: 0, index: 0, kind: 'intro', name: '', start: 0, firstDown: 0, down: 1, los: 0 },
     hand: [],
+    called: null,
     flipped: false,
     play: { index: 0, flipped: false },
     tackle: null,
@@ -133,6 +134,7 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
   while (state.hand.length < Math.min(HAND, PLAYS.length)) {
     state.hand.push(deck.splice(rng.int(0, deck.length - 1), 1)[0] ?? 0);
   }
+  state.called = null;
   state.play = { index: state.hand[0] ?? 0, flipped: state.flipped };
   const play = PLAYS[state.play.index] ?? PLAYS[0];
   if (!play) throw new Error('No plays defined');
@@ -165,7 +167,13 @@ export function dispatch(prev: RunState, action: Action): ArcadeResult {
       call(state, action.hand, events);
       break;
     case 'flip':
-      if (state.phase === 'setup') state.flipped = !state.flipped;
+      if (state.phase !== 'setup') break;
+      state.flipped = !state.flipped;
+      // A called play is mirrored where it stands.
+      if (state.called !== null) call(state, state.called, events);
+      break;
+    case 'hike':
+      hike(state, events);
       break;
     case 'skipDraft':
       if (state.phase === 'draft') state.phase = 'setup';
@@ -175,14 +183,15 @@ export function dispatch(prev: RunState, action: Action): ArcadeResult {
 }
 
 /**
- * Call a play card (mirrored if Flip is on) and snap: your players take the
- * play's assignments where they stand, Covers pick their marks, and a
- * handoff play gives its Runner the ball, heading for the hole.
+ * Call a play card (mirrored if Flip is on): your players take its
+ * assignments where they stand, so its routes show on the field. Another
+ * card can still be called instead, until the hike.
  */
 function call(state: RunState, hand: number, events: ArcadeEvent[]): void {
   const index = state.hand[hand];
   const play = index === undefined ? undefined : PLAYS[index];
   if (state.phase !== 'setup' || index === undefined || !play) return;
+  state.called = hand;
   state.play = { index, flipped: state.flipped };
   const firstId = state.field.players[0]?.id ?? state.nextId;
   state.field.players.splice(
@@ -191,6 +200,12 @@ function call(state: RunState, hand: number, events: ArcadeEvent[]): void {
     ...lineUpTeam(state.roster, play, state.flipped, state.drive.los, firstId),
   );
   events.push({ type: 'called', play: play.name, flipped: state.flipped });
+}
+
+/** The hike: the called play starts, Covers pick their marks, and a handoff play gives its Runner the ball. */
+function hike(state: RunState, events: ArcadeEvent[]): void {
+  const play = PLAYS[state.play.index];
+  if (state.phase !== 'setup' || state.called === null || !play) return;
   state.phase = 'play';
   state.snappedAt = state.time;
   assignMarks(state);

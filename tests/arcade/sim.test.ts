@@ -64,28 +64,40 @@ describe('a run', () => {
     expect(run(s, 1).state.field.players.map((p) => p.pos)).toEqual(before);
   });
 
-  it('calling a card snaps with that play; Flip mirrors it first', () => {
+  it('calling a card shows its play on the field; HIKE starts it', () => {
     const s = createRun(4);
-    const r = dispatch(s, { type: 'call', hand: 1 });
-    expect(r.state.phase).toBe('play');
-    expect(r.state.play).toEqual({ index: s.hand[1], flipped: false });
-    expect(r.events.map((e) => e.type).slice(0, 2)).toEqual(['called', 'snapped']);
-    const flipped = dispatch(dispatch(s, { type: 'flip' }).state, { type: 'call', hand: 1 });
-    expect(flipped.state.play.flipped).toBe(true);
+    expect(dispatch(s, { type: 'hike' }).state.phase).toBe('setup'); // nothing called yet
+    const called = dispatch(s, { type: 'call', hand: 1 });
+    expect(called.state.phase).toBe('setup');
+    expect(called.state.called).toBe(1);
+    expect(called.state.play).toEqual({ index: s.hand[1], flipped: false });
+    expect(called.state.field.players.some((p) => p.job.kind === 'route')).toBe(true);
+    // Another card can be called instead, until the hike.
+    expect(dispatch(called.state, { type: 'call', hand: 2 }).state.called).toBe(2);
+    const hiked = dispatch(called.state, { type: 'hike' });
+    expect(hiked.state.phase).toBe('play');
+    expect(ofType(hiked.events, 'snapped')).toHaveLength(1);
+    expect(dispatch(s, { type: 'call', hand: 5 }).state.called).toBeNull();
+  });
+
+  it('Flip mirrors the called play where it stands', () => {
+    const s = createRun(4);
+    const called = dispatch(s, { type: 'call', hand: 1 }).state;
+    const flipped = dispatch(called, { type: 'flip' }).state;
+    expect(flipped.play.flipped).toBe(true);
     const routeEnds = (st: RunState) =>
       st.field.players.flatMap((p) =>
         p.job.kind === 'route' ? [p.job.to[p.job.to.length - 1]!.x] : [],
       );
-    expect(routeEnds(flipped.state)).toEqual(routeEnds(r.state).map((x) => -x));
-    expect(dispatch(s, { type: 'call', hand: 5 }).state.phase).toBe('setup');
+    expect(routeEnds(flipped)).toEqual(routeEnds(called).map((x) => -x));
   });
 
-  it('a handoff card gives its Runner the ball at the snap', () => {
+  it('a handoff card gives its Runner the ball at the hike', () => {
     for (let seed = 1; seed <= 20; seed++) {
       const s = createRun(seed);
       const card = runCard(s);
       if (card < 0) continue;
-      const r = dispatch(s, { type: 'call', hand: card });
+      const r = dispatch(dispatch(s, { type: 'call', hand: card }).state, { type: 'hike' });
       expect(ofType(r.events, 'handoff')).toHaveLength(1);
       expect(r.state.field.ball.at).toBe('carried');
       return;
@@ -380,8 +392,10 @@ describe('determinism', () => {
   const playOut = (seed: number, steps = 3000): RunState => {
     let s = createRun(seed, startingRoster());
     for (let i = 0; i < steps && s.phase !== 'over' && s.phase !== 'won'; i++) {
-      if (s.phase === 'setup')
+      if (s.phase === 'setup') {
         s = dispatch(s, { type: 'call', hand: Math.max(0, passCard(s)) }).state;
+        s = dispatch(s, { type: 'hike' }).state;
+      }
       if (s.phase === 'draft') s = dispatch(s, { type: 'skipDraft' }).state;
       const input =
         s.phase === 'breakit'
@@ -410,7 +424,9 @@ describe('determinism', () => {
     for (let seed = 1; seed <= 8; seed++) {
       let s = createRun(seed);
       for (let i = 0; i < 2500 && s.phase !== 'over' && s.phase !== 'won'; i++) {
-        if (s.phase === 'setup') s = dispatch(s, { type: 'call', hand: i % 3 }).state;
+        if (s.phase === 'setup') {
+          s = dispatch(dispatch(s, { type: 'call', hand: i % 3 }).state, { type: 'hike' }).state;
+        }
         if (s.phase === 'draft') s = dispatch(s, { type: 'skipDraft' }).state;
         const input =
           s.phase === 'breakit'

@@ -124,6 +124,7 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-20:** **Pick, look, then hike.** Tapping a card now calls it: its routes are drawn on the field, another card can be tapped instead, and Flip mirrors it in place. HIKE! (or Space) starts the play. Keys: 1–3 call a card, F flips.
 - **2026-10-20:** **Built: the timing design.**
   - **Three cards a down,** with Flip. A finger on a card shows its routes; letting go calls and snaps. Handoffs are the Dive and a new Sweep.
   - **The aim line sweeps** sideline to sideline. Receivers it's over light up gold. THROW fires a bullet along it, and the first thing that reaches it decides it: a Scarecrow's ring blocks a whole lane.
