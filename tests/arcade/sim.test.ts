@@ -301,9 +301,31 @@ describe('the carrier, and Break it!', () => {
   it('a tap that misses, or no tap at all, is a tackle', () => {
     const g = grabbed().state;
     const t = g.tackle!;
-    const miss = t.sweet.from > 0.5 ? 0.02 : 0.98;
+    // The sweet spot (and its close band) never reaches back to the start of the trip.
+    expect(t.sweet.from - t.near).toBeGreaterThan(0.05);
+    const miss = 0.02;
     expect(ofType(tapAt(g, miss).events, 'tackled')).toHaveLength(1);
     expect(ofType(run(g, 2).events, 'tackled')).toHaveLength(1);
+  });
+
+  it('the sweet spot is never in the first third of the marker\u2019s trip, which runs either way', () => {
+    const dirs = new Set<number>();
+    for (let k = 0; k < 24; k++) {
+      // Different starting spots grab on different steps, so each meter is a fresh draw.
+      const s = carry(
+        playState(
+          [{ role: 'runner', pos: v(0, 2 - k * 0.07) }],
+          [{ kind: 'cover', pos: v(0, 4), stats: { heft: 0 } }],
+        ),
+        2,
+      );
+      s.field.lane = 0;
+      const t = untilGrabbed(s).state.tackle!;
+      expect(t.sweet.from).toBeGreaterThanOrEqual(arcadeTuning.breakit.earliest);
+      expect(t.sweet.to).toBeLessThanOrEqual(1);
+      dirs.add(t.dir);
+    }
+    expect([...dirs].sort()).toEqual([-1, 1]);
   });
 
   it('more Heft widens the sweet spot; an extra tackler narrows it', () => {

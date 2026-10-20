@@ -198,7 +198,9 @@ export class ArcadeGame {
     this.controls.setButtons(canThrow(state) && !this.paused);
     const t = state.tackle;
     const marker = breakMarker(state);
-    this.controls.setMeter(t && marker !== null ? { sweet: t.sweet, near: t.near, marker } : null);
+    this.controls.setMeter(
+      t && marker !== null ? { sweet: t.sweet, near: t.near, marker, dir: t.dir } : null,
+    );
     this.follow(dt);
     this.view.render();
   }

@@ -76,8 +76,10 @@ export const arcadeTuning = {
     scans: 3,
   },
   breakit: {
-    /** The marker crosses the meter once, in this long. */
+    /** The marker crosses the meter once, in this long… */
     meterSeconds: 1.1,
+    /** …and the sweet spot never starts before this share of its trip, so there's time to react. */
+    earliest: 0.34,
     /** The sweet spot's width (a share of the meter) at an even Heft match… */
     sweet: 0.2,
     /** …this much wider for every point of Heft the carrier has over the tackler… */

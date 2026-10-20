@@ -90,7 +90,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### Break it! *(the tackle mini-game)*
 
-**When a defender grabs the carrier, the play freezes for about a second and a break meter appears:** a marker sweeping across a bar with a **sweet spot**. Tap once:
+**When a defender grabs the carrier, the play freezes for about a second and a break meter appears:** a marker sweeping across a bar, left to right or right to left at random, with a **sweet spot** that's never in the first third of its trip (so there's always time to see it coming). Tap once:
 
 | Your tap | What happens |
 |---|---|

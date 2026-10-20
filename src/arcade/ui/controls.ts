@@ -69,18 +69,34 @@ export class ArcadeControls {
     this.buttons.hidden = !show;
   }
 
-  /** Show the Break it! meter (null hides it): the sweet spot, the close band, and the marker. */
+  /**
+   * Show the Break it! meter (null hides it): the sweet spot, the close band,
+   * and the marker. Everything comes measured along the marker's trip; `dir`
+   * -1 mirrors it, so the marker runs right to left.
+   */
   setMeter(
-    meter: { sweet: { from: number; to: number }; near: number; marker: number } | null,
+    meter: {
+      sweet: { from: number; to: number };
+      near: number;
+      marker: number;
+      dir: 1 | -1;
+    } | null,
   ): void {
     this.breaking = meter !== null;
     this.meter.hidden = !meter;
     if (!meter) return;
-    const pct = (x: number): string => `${Math.max(0, Math.min(1, x)) * 100}%`;
-    this.sweet.style.left = pct(meter.sweet.from);
-    this.sweet.style.width = pct(meter.sweet.to - meter.sweet.from);
-    this.near.style.left = pct(meter.sweet.from - meter.near);
-    this.near.style.width = pct(meter.sweet.to - meter.sweet.from + 2 * meter.near);
-    this.marker.style.left = pct(meter.marker);
+    const clamp = (x: number): number => Math.max(0, Math.min(1, x));
+    const pct = (x: number): string => `${clamp(x) * 100}%`;
+    // A span along the trip, as [left, width] on the bar.
+    const span = (from: number, to: number): [string, string] => {
+      const [a, b] = meter.dir === 1 ? [clamp(from), clamp(to)] : [clamp(1 - to), clamp(1 - from)];
+      return [pct(a), pct(b - a)];
+    };
+    [this.sweet.style.left, this.sweet.style.width] = span(meter.sweet.from, meter.sweet.to);
+    [this.near.style.left, this.near.style.width] = span(
+      meter.sweet.from - meter.near,
+      meter.sweet.to + meter.near,
+    );
+    this.marker.style.left = pct(meter.dir === 1 ? meter.marker : 1 - meter.marker);
   }
 }

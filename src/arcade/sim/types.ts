@@ -110,12 +110,15 @@ export interface Field {
 
 /**
  * Break it! (GAMEPLAY.md): a defender has grabbed the carrier. The play is
- * frozen while a marker crosses the meter once, from 0 to 1; a tap inside
- * `sweet` breaks the tackle, within `near` of it drags a few yards, anywhere
- * else (or no tap) is a tackle.
+ * frozen while a marker crosses the meter once; a tap inside `sweet` breaks
+ * the tackle, within `near` of it drags a few yards, anywhere else (or no
+ * tap) is a tackle. `sweet` is measured along the marker's trip (0 where it
+ * starts, 1 where it ends), so it's never in the first third of it; `dir`
+ * says which way the trip goes on screen (1 left to right, -1 right to left).
  */
 export interface Tackle {
   readonly startedAt: number;
+  readonly dir: 1 | -1;
   readonly tacklers: readonly number[];
   readonly sweet: { readonly from: number; readonly to: number };
   readonly near: number;

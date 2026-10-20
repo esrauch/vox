@@ -153,14 +153,18 @@ function startBreakIt(state: RunState, carrier: Player, tacklers: number[]): voi
   const width =
     Math.min(breakit.maxSweet, Math.max(breakit.minSweet, breakit.sweet + breakit.perHeft * gap)) *
     breakit.perExtraTackler ** (tacklers.length - 1);
-  // Where it sits on the meter is a fresh surprise every time.
-  const at = rngFor(state.seed, 'break', state.step).next() * (1 - width);
+  // Where it sits, and which way the marker runs, is a fresh surprise every time; but never in
+  // the first third of the marker's trip, so there's time to see it and react.
+  const rng = rngFor(state.seed, 'break', state.step);
+  const at = breakit.earliest + rng.next() * Math.max(0, 1 - breakit.earliest - width);
+  const dir = rng.next() < 0.5 ? 1 : -1;
   const drag = Math.min(
     breakit.maxDrag,
     Math.max(breakit.minDrag, breakit.dragYards + breakit.dragPerHeft * gap),
   );
   state.tackle = {
     startedAt: state.time,
+    dir,
     tacklers,
     sweet: { from: at, to: at + width },
     near: breakit.near,
