@@ -7,8 +7,8 @@ export const arcadeTuning = {
   /** The simulation's fixed step. */
   stepsPerSecond: 60,
   field: {
-    /** Half the field's width: x runs from -halfWidth to +halfWidth. */
-    halfWidth: 13,
+    /** Half the field's width: x runs from -halfWidth to +halfWidth (18 yards wide, for the camera's sake). */
+    halfWidth: 9.1,
   },
   drive: {
     /** Yards to gain for a first down. */
@@ -107,7 +107,7 @@ export const arcadeTuning = {
     /** How far ahead a chaser leads the carrier (seconds of its velocity). */
     chaseLead: 0.3,
     /** A Bat's loop: a square this wide. */
-    batLoop: 5,
+    batLoop: 3.5,
   },
   witch: {
     /** Her speed across the field. */

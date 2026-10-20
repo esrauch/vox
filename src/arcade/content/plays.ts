@@ -31,9 +31,9 @@ export const PLAYS: readonly Play[] = [
       block,
       block,
       block,
-      route([4, 1], [9, 2]),
-      route([0, 3], [6, 9]),
-      route([0, 3], [-6, 9]),
+      route([2.8, 1], [6.3, 2]),
+      route([0, 3], [4.2, 9]),
+      route([0, 3], [-4.2, 9]),
       route([0, 18]),
     ],
   },
@@ -41,7 +41,7 @@ export const PLAYS: readonly Play[] = [
     id: 'deepShot',
     name: 'Deep Shot',
     // All three Catchers go long; both Runners stay home to block.
-    slots: [block, block, block, block, route([0, 24]), route([0, 24]), route([-2, 20])],
+    slots: [block, block, block, block, route([0, 24]), route([0, 24]), route([-1.4, 20])],
   },
   {
     id: 'curlFlat',
@@ -50,11 +50,11 @@ export const PLAYS: readonly Play[] = [
     slots: [
       block,
       block,
-      route([-5, 1], [-9, 2]),
-      route([5, 1], [9, 2]),
-      route([0, 7], [0.5, 5.5]),
-      route([0, 7], [-0.5, 5.5]),
-      route([0, 6], [-0.5, 4.5]),
+      route([-3.5, 1], [-6.3, 2]),
+      route([3.5, 1], [6.3, 2]),
+      route([0, 7], [0.3, 5.5]),
+      route([0, 7], [-0.3, 5.5]),
+      route([0, 6], [-0.3, 4.5]),
     ],
   },
   {

@@ -184,7 +184,7 @@ The tension: every pick is either toward a bonus or a sure, small boost now.
 | **Bat** | Bat | Patrols a fixed loop and swats passes that fly through it. |
 
 - **Hazards** stay simple patterns, like *Crossy Road*'s cars: the **Witch on a Broom** sweeps across the field and knocks down any pass she meets.
-- **Scaling, the lever behind the whole run:** the first drive of area I is **three or four slow defenders**; every drive adds defenders or stats, and later areas bring more rushers and heavier, faster, grabbier versions of everyone. ▲ *Numbers to come from the balance runs: the target is that a team that never upgrades loses in area II, a decent build reaches the last Boss, and a strong one beats it.*
+- **Scaling, the lever behind the whole run:** the first drive of area I is **four slow defenders** (Intro 4, Challenge 5, Gimmicks 5 or 6, the Boss a full 8); every drive adds defenders or stats, and later areas bring more rushers and heavier, faster, grabbier versions of everyone. ▲ *Numbers to come from the balance runs: the target is that a team that never upgrades loses in area II, a decent build reaches the last Boss, and a strong one beats it.*
 - **The defense always shows its intent:** rushers lean toward the QB, Covers face their Catcher, the Owl tracks the ball.
 
 ---

@@ -124,6 +124,11 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-19:** **A narrower field, more defenders and a simpler bot.**
+  - **The field** is 30% narrower (18 yards), so the camera can fit both sidelines from closer. The line-ups, routes and defense spots shrank with it.
+  - **More defenders:** Intro 4, Challenge 5, Gimmicks 5–6, Boss 8.
+  - **The bot** now plays like a casual player: it runs 30% of the time, otherwise throws at 2 seconds to the receiver furthest from any defender.
+  - **Results** (100 runs a build): plain humans win about 6 drives of 12; one monster type 7–10 (Ghost Catchers beat the game 28%); all three 10.5, beating it 64%. Downs last about 3 seconds. Runs gain about 1 yard against about 6 for passes.
 - **2026-10-19:** **The arcade game renders.** The app now opens the arcade game (the grid game is at `?grid=1`): a third-person camera behind and above the QB, following the play; one long field; placeholder role silhouettes and monster badges; the ball's real arc; pull to throw, tap a Runner to hand off, swipe to steer. The view gained a follow-camera mode and the forest scenery a field layout, so both games share them. Not yet looked at in a browser.
 - **2026-10-19:** **The arcade sim is tuned** with the balance runs. Changes:
   - **Slower all round.**

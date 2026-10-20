@@ -17,13 +17,13 @@ export const ROSTER_ROLES: readonly Role[] = [
 
 /** Where each roster slot lines up, relative to the line of scrimmage (x across, y upfield). */
 export const LINEUP: readonly { readonly x: number; readonly y: number }[] = [
-  { x: -1.3, y: -0.7 },
-  { x: 1.3, y: -0.7 },
-  { x: -1.6, y: -4.5 },
-  { x: 1.6, y: -4.5 },
-  { x: -10, y: -0.7 },
-  { x: 10, y: -0.7 },
-  { x: 6, y: -1.2 },
+  { x: -0.9, y: -0.7 },
+  { x: 0.9, y: -0.7 },
+  { x: -1.1, y: -4.5 },
+  { x: 1.1, y: -4.5 },
+  { x: -7, y: -0.7 },
+  { x: 7, y: -0.7 },
+  { x: 4.2, y: -1.2 },
 ];
 
 /** The QB lines up this far behind the line of scrimmage. */

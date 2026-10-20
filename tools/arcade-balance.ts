@@ -7,37 +7,27 @@
  *
  *   npm run balance:arcade [runs per scenario]
  *
- * The bot snaps at once and hands off on the Dive; otherwise it throws to the receiver with the most room where
- * the ball will come down (leading it, with some aim error), as soon as one
- * is clear, when a rusher gets close, or after a few seconds. Carrying, it
+ * The bot snaps at once. It runs 30% of the time (a handoff at the snap);
+ * otherwise it throws 2 seconds after the snap to the receiver furthest from
+ * any defender, leading it, with some aim error. Carrying, it
  * swipes away from the defender in its lane and away from the sideline.
  * There are no upgrades yet: each scenario fixes the team's forms.
  */
-import { PLAYS } from '../src/arcade/content/plays';
 import { arcadeTuning } from '../src/arcade/content/tuning';
 import { carrierOf, qbOf } from '../src/arcade/sim/ai';
-import { ballHeight, flightTime } from '../src/arcade/sim/ball';
+import { flightTime } from '../src/arcade/sim/ball';
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
 import { rngFor } from '../src/arcade/sim/random';
 import { step, throwProblem } from '../src/arcade/sim/step';
-import type {
-  ArcadeEvent,
-  Form,
-  Role,
-  RunState,
-  Stats,
-  StepInput,
-  Vec,
-} from '../src/arcade/sim/types';
-import { add, dist, lerp, scale, v } from '../src/arcade/sim/vec';
+import type { ArcadeEvent, Form, Role, RunState, Stats, StepInput } from '../src/arcade/sim/types';
+import { add, dist, scale, v } from '../src/arcade/sim/vec';
 import type { Rng } from '../src/sim/rng';
 
 const RUNS = Number(process.argv[2]) || 200;
-/** Throw once the best receiver has this much room beyond any defender's reach (yards). */
-const CLEAR = 1.0;
-/** Throw anyway after this long, or with a rusher this close to the QB. */
-const HOLD = 3.5;
-const PRESSURE = 2.5;
+/** How often the bot runs (hands off at the snap) instead of throwing. */
+const RUN_SHARE = 0.3;
+/** On a pass, it throws this long after the snap. */
+const THROW_AT = 2;
 const AIM_ERROR = 0.6;
 const SWIPE_COOLDOWN = 0.25;
 
@@ -99,35 +89,50 @@ const bump = (m: Map<string, number>, k: string, by = 1): void => {
 /** What the bot does this step: a step input, or a handoff to a Runner. */
 type BotMove = StepInput & { readonly handoff?: number };
 
-function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }): BotMove {
+/** Its plan for this down, decided at the snap: run, or throw. */
+interface Plan {
+  snappedAt: number;
+  run: boolean;
+}
+
+function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }, plan: Plan): BotMove {
   if (state.phase !== 'play') return {};
   const { field } = state;
   const qb = qbOf(state);
   const since = state.time - state.snappedAt;
 
-  // On the Dive (the play built for it), hand off to the Runner charging up the middle.
-  if (field.ball.at === 'qb' && qb && since < 0.1 && PLAYS[state.play.index]?.id === 'dive') {
-    const runner = field.players.find((p) => p.role === 'runner' && p.job.kind === 'route');
-    if (runner) return { handoff: runner.id };
+  // A new down: run RUN_SHARE of the time, otherwise throw.
+  if (plan.snappedAt !== state.snappedAt) {
+    plan.snappedAt = state.snappedAt;
+    plan.run = rng.next() < RUN_SHARE;
   }
 
-  if (field.ball.at === 'qb' && qb && since > 0.4) {
+  if (field.ball.at === 'qb' && qb) {
+    if (plan.run) {
+      // Hand off to the Runner the play sends upfield (or either, if it sends neither).
+      const runners = field.players.filter((p) => p.role === 'runner' && p.down <= 0);
+      const runner = runners.find((p) => p.job.kind === 'route') ?? runners[0];
+      return runner ? { handoff: runner.id } : {};
+    }
+    if (since < THROW_AT) return {};
+    // Throw to the receiver furthest from any defender, leading it, with some aim error.
     const receivers = field.players.filter((p) => p.job.kind === 'route' && p.down <= 0);
-    let best: { target: Vec; room: number } | null = null;
-    for (const p of receivers) {
-      // Lead it: where it will be when the ball comes down.
-      const ft = flightTime(qb.pos, add(p.pos, scale(p.vel, 0.6)));
-      const target = add(p.pos, scale(p.vel, ft));
-      if (throwProblem(state, target)) continue;
-      const room = pathRoom(state, qb.pos, target, ft);
-      if (!best || room > best.room) best = { target, room };
-    }
-    const pressure = field.defenders.some((d) => d.down <= 0 && dist(d.pos, qb.pos) < PRESSURE);
-    if (best && (best.room > CLEAR || pressure || since > HOLD)) {
-      const err = (): number => (rng.next() * 2 - 1) * AIM_ERROR;
-      return { throwAt: v(best.target.x + err(), best.target.y + err()) };
-    }
-    return {};
+    const ranked = receivers
+      .map((p) => {
+        const ft = flightTime(qb.pos, add(p.pos, scale(p.vel, 0.6)));
+        const target = add(p.pos, scale(p.vel, ft));
+        const room = Math.min(
+          ...field.defenders.filter((d) => d.down <= 0).map((d) => dist(d.pos, p.pos)),
+          99,
+        );
+        return { target, room };
+      })
+      .filter((r) => throwProblem(state, r.target) === null)
+      .sort((a, b) => b.room - a.room);
+    const best = ranked[0];
+    if (!best) return {};
+    const err = (): number => (rng.next() * 2 - 1) * AIM_ERROR;
+    return { throwAt: v(best.target.x + err(), best.target.y + err()) };
   }
 
   const carrier = carrierOf(state);
@@ -142,26 +147,6 @@ function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }): BotMove
     if (ahead) return swipe(ahead.pos.x > field.lane ? -1 : 1, state, lastSwipe);
   }
   return {};
-}
-
-/**
- * How much room a throw has: the smallest gap between any defender (where
- * it will be) and the ball, over every stretch of the flight where the ball
- * is low enough to touch, beyond that defender's reach.
- */
-function pathRoom(state: RunState, from: Vec, target: Vec, ft: number): number {
-  const d = dist(from, target);
-  let room = 99;
-  for (let u = 0.05; u <= 1.0001; u += 0.05) {
-    if (ballHeight(d, Math.min(1, u)) >= arcadeTuning.throw.reachHeight) continue;
-    const ground = lerp(from, target, Math.min(1, u));
-    for (const def of state.field.defenders) {
-      if (def.down > 0) continue;
-      const at = add(def.pos, scale(def.vel, ft * u));
-      room = Math.min(room, dist(at, ground) - def.reach);
-    }
-  }
-  return room;
 }
 
 function swipe(dir: -1 | 1, state: RunState, lastSwipe: { at: number }): BotMove {
@@ -232,6 +217,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
   }));
   let state = createRun(seed, roster);
   const lastSwipe = { at: -1 };
+  const plan: Plan = { snappedAt: -1, run: false };
   const ran = { now: false };
   let driveKey = '';
   for (let guard = 0; guard < 200000 && state.phase !== 'over' && state.phase !== 'won'; guard++) {
@@ -248,7 +234,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
       state = dispatch(state, { type: 'snap' }).state;
       continue;
     }
-    const move = botInput(state, rng, lastSwipe);
+    const move = botInput(state, rng, lastSwipe, plan);
     if (move.handoff !== undefined) {
       const h = dispatch(state, { type: 'handoff', id: move.handoff });
       count(t, h.events, state, ran);
