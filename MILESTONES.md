@@ -124,6 +124,11 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-19:** **The plays reworked.**
+  - **Every route finishes going upfield.** Slants cut in, then go straight up. The flats turn up the sideline.
+  - **Curls come back at an angle** toward the middle, so they read as curls.
+  - **No route runs deeper than a throw can reach.**
+  - **A content test** keeps all of this true.
 - **2026-10-19:** **Scarecrows matter, and the routes show before the snap.**
   - **Scarecrows** reach a wide purple ring, drawn on the turf. Any low ball coming down inside it is contested, and their Hands (3) beat a plain Catcher's. Running into one stops you dead.
   - **Bats** get a small ring too.

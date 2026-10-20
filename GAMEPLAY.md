@@ -70,10 +70,12 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
    | Play | What happens |
    |---|---|
-   | **Slants** | The outside Catchers cut inside; the slot goes deep; a Runner leaks into the flat. |
+   | **Slants** | The outside Catchers cut inside, then go straight upfield; the slot goes deep; a Runner leaks out to the flat, then turns upfield along the sideline. |
    | **Deep Shot** | All three Catchers go long; both Runners stay home to block. |
-   | **Curl & Flat** | The Catchers run out and turn back; the Runners swing out to the flats. |
+   | **Curl & Flat** | The Catchers run out and curl back at an angle toward the middle, and wait there; the Runners swing out to the flats, then turn upfield. |
    | **Dive** | Built for a run: a Runner charges straight up the middle behind the Blockers; the Catchers run off, dragging their Covers away. Tap the Runner to give it the ball. |
+
+   Every route finishes going upfield (a curl's angled comeback is the one exception), and no route runs deeper than a throw can reach.
 2. **Pass or run, your call.** **Pull back anywhere** to snap and aim a throw, or **tap a Runner** to snap and hand it the ball. You can also hand off in the first second after the snap, while the QB still has it. Any play can be a run; the Dive is built for one.
 3. **The play happens at full speed, on its own.** Blockers lock up with the pass rush and shove; Catchers run their routes; Covers chase them; the Owl hangs deep.
 4. **Release to throw.** The ball flies to where you aimed; the arc rises the further you throw, so long passes sail over defenders underneath and short ones are quick but low.

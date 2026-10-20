@@ -1,7 +1,10 @@
 /**
  * The four plays (GAMEPLAY.md, A Down). Each down one is picked at random,
  * and randomly mirrored. A route is waypoints relative to the player's start
- * (yards: x across, y upfield); `block` stays home and blocks. On any play
+ * (yards: x across, y upfield); `block` stays home and blocks. Every route
+ * finishes going upfield (a curl's angled comeback is the one exception: the
+ * curl is where it stops), and none goes deeper than a throw can reach
+ * (tests/arcade/plays.test.ts). On any play
  * you can tap a Runner to hand it the ball instead of throwing (sim/run.ts);
  * the Dive is the play built for it.
  */
@@ -26,14 +29,15 @@ export const PLAYS: readonly Play[] = [
   {
     id: 'slants',
     name: 'Slants',
-    // The outside Catchers cut inside; the slot goes deep; a Runner leaks into the flat.
+    // The outside Catchers cut inside, then straight upfield; the slot goes deep;
+    // a Runner leaks out to the flat, then turns upfield along the sideline.
     slots: [
       block,
       block,
       block,
-      route([2.8, 1], [6.3, 2]),
-      route([0, 3], [4.2, 9]),
-      route([0, 3], [-4.2, 9]),
+      route([2.8, 1], [6.3, 2], [6.3, 12]),
+      route([0, 3], [4.2, 9], [4.2, 16]),
+      route([0, 3], [-4.2, 9], [-4.2, 16]),
       route([0, 18]),
     ],
   },
@@ -46,15 +50,16 @@ export const PLAYS: readonly Play[] = [
   {
     id: 'curlFlat',
     name: 'Curl & Flat',
-    // The Catchers run out and turn back; the Runners swing out to the flats.
+    // The Catchers run out and curl back at an angle, toward the middle (the
+    // curl is where they stop); the Runners swing out to the flats, then turn upfield.
     slots: [
       block,
       block,
-      route([-3.5, 1], [-6.3, 2]),
-      route([3.5, 1], [6.3, 2]),
-      route([0, 7], [0.3, 5.5]),
-      route([0, 7], [-0.3, 5.5]),
-      route([0, 6], [-0.3, 4.5]),
+      route([-3.5, 1], [-6.3, 2], [-6.3, 12]),
+      route([3.5, 1], [6.3, 2], [6.3, 12]),
+      route([0, 7], [1.5, 5.5]),
+      route([0, 7], [-1.5, 5.5]),
+      route([0, 6], [-1.5, 4.5]),
     ],
   },
   {
