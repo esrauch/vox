@@ -8,10 +8,12 @@
  *
  * Rings on the turf: gold under the carrier; under each receiver before the
  * catch, green when no defender could reach a ball landing on it, red when
- * one could.
+ * one could; and a purple ring around every Scarecrow (and Bat) showing how
+ * far its arms reach for the ball, until someone catches it.
  */
 import * as THREE from 'three';
 import { common, hexToNumber, team } from '../../content/palettes';
+import { DEFENDERS } from '../content/defense';
 import { getGeometry, modelHeight, voxelMaterial } from '../../voxel/models';
 import type { Body, DefenderKind, Form, Player, Role, RunState } from '../sim/types';
 import { dist } from '../sim/vec';
@@ -44,17 +46,22 @@ const WALK_ON_HEIGHT = modelHeight(WALK_ON);
 const OPEN = hexToNumber(common.slimeGreen);
 const COVERED = hexToNumber(common.danger);
 const CARRIER = hexToNumber(team.accent);
+const COVERAGE = hexToNumber(common.candyPurple);
 
 interface View {
   readonly root: THREE.Group;
   readonly body: THREE.Mesh;
   readonly ring: THREE.Mesh;
+  /** A Scarecrow's or Bat's reach for the ball, or null. */
+  readonly reach: THREE.Mesh | null;
   yaw: number;
 }
 
 export class ArcadeBodies {
   private readonly views = new Map<number, View>();
   private readonly ringGeo = new THREE.RingGeometry(0.55, 0.7, 28).rotateX(-Math.PI / 2);
+  /** A unit ring, scaled to each defender's reach. */
+  private readonly reachGeo = new THREE.RingGeometry(0.94, 1, 48).rotateX(-Math.PI / 2);
   private readonly badgeGeo = new THREE.BoxGeometry(0.3, 0.24, 0.3);
   private readonly ringMats = new Map<number, THREE.MeshBasicMaterial>();
   private readonly badgeMats = new Map<number, THREE.MeshLambertMaterial>();
@@ -68,6 +75,7 @@ export class ArcadeBodies {
     for (const [id, v] of this.views) {
       if (ids.has(id)) continue;
       this.scene.remove(v.root, v.ring);
+      if (v.reach) this.scene.remove(v.reach);
       this.views.delete(id);
     }
     for (const b of bodies) if (!this.views.has(b.id)) this.views.set(b.id, this.create(b));
@@ -97,6 +105,11 @@ export class ArcadeBodies {
           : Math.abs(Math.sin(state.time * 14 + b.id)) * Math.min(0.12, speed * 0.03);
 
       view.ring.position.set(view.root.position.x, 0.02, view.root.position.z);
+      if (view.reach && b.side === 'defense') {
+        view.reach.visible = live && carrierId === null && b.down <= 0;
+        view.reach.position.set(view.root.position.x, 0.015, view.root.position.z);
+        view.reach.scale.setScalar(b.reach);
+      }
       if (b.side === 'team' && b.id === carrierId) {
         view.ring.visible = true;
         view.ring.material = this.ringMat(CARRIER);
@@ -118,7 +131,7 @@ export class ArcadeBodies {
 
   /** Everything drawn (for the crossfade between drives, render/crossfade.ts). */
   objects(): THREE.Object3D[] {
-    return [...this.views.values()].flatMap((v) => [v.root, v.ring]);
+    return [...this.views.values()].flatMap((v) => [v.root, v.ring, ...(v.reach ? [v.reach] : [])]);
   }
 
   private create(b: Body): View {
@@ -141,8 +154,13 @@ export class ArcadeBodies {
     const ring = new THREE.Mesh(this.ringGeo, this.ringMat(OPEN));
     ring.visible = false;
     this.scene.add(root, ring);
+    const reach =
+      b.side === 'defense' && DEFENDERS[b.kind].reachBonus > 0
+        ? new THREE.Mesh(this.reachGeo, this.ringMat(COVERAGE))
+        : null;
+    if (reach) this.scene.add(reach);
     // Your team faces upfield, the defense faces you.
-    return { root, body, ring, yaw: b.side === 'team' ? Math.PI : 0 };
+    return { root, body, ring, reach, yaw: b.side === 'team' ? Math.PI : 0 };
   }
 
   private ringMat(color: number): THREE.MeshBasicMaterial {

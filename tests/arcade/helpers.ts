@@ -1,6 +1,6 @@
 import { DEFENDERS } from '../../src/arcade/content/defense';
 import { ROLE_RADIUS, ROLE_STATS } from '../../src/arcade/content/team';
-import { physicsOf } from '../../src/arcade/sim/bodies';
+import { defenderPhysics, physicsOf } from '../../src/arcade/sim/bodies';
 import { createRun } from '../../src/arcade/sim/run';
 import { step } from '../../src/arcade/sim/step';
 import type {
@@ -84,7 +84,7 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
       vel: v(0, 0),
       radius: def.radius,
       stats,
-      ...physicsOf(stats),
+      ...defenderPhysics(stats, def.reachBonus),
       down: 0,
       home: spec.pos,
       mark: spec.mark ?? null,

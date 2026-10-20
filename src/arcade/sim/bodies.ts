@@ -19,6 +19,12 @@ export function physicsOf(stats: Stats): { mass: number; speed: number; reach: n
   };
 }
 
+/** A defender's physics: like anyone's, plus its kind's extra reach for the ball. */
+export function defenderPhysics(stats: Stats, reachBonus: number): ReturnType<typeof physicsOf> {
+  const p = physicsOf(stats);
+  return { ...p, reach: p.reach + reachBonus };
+}
+
 const plus = (a: Stats, b: Stats, k = 1): Stats => ({
   hustle: a.hustle + b.hustle * k,
   hands: a.hands + b.hands * k,
@@ -123,7 +129,7 @@ export function lineUpDefense(
       vel: v(0, 0),
       radius: def.radius,
       stats,
-      ...physicsOf(stats),
+      ...defenderPhysics(stats, def.reachBonus),
       down: 0,
       home,
       mark: null,

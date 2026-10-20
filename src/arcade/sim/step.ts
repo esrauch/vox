@@ -118,6 +118,14 @@ function resolveContact(state: RunState, events: ArcadeEvent[]): boolean {
         events.push({ type: 'brokeTackle', id: carrier.id, defender: d.id });
         continue;
       }
+      // Running into a planted Scarecrow stops you dead.
+      if (d.planted) {
+        events.push({ type: 'tackled', id: carrier.id, by: d.id });
+        carrier.down = 1;
+        state.field.ball = { at: 'dead', pos: carrier.pos, how: 'tackled' };
+        endDown(state, 'tackled', carrier.pos.y, events);
+        return true;
+      }
       d.latch = scale(norm(sub(d.pos, carrier.pos)), carrier.radius + d.radius);
       events.push({ type: 'wrapped', id: carrier.id, defender: d.id });
     }

@@ -195,6 +195,17 @@ describe('passes', () => {
     expect(ofType(r.events, 'caught')[0]?.contested).toBe(true);
   });
 
+  it('a pass coming down inside a Scarecrow\u2019s ring is contested, and its Hands beat a plain Catcher', () => {
+    // The Scarecrow stands 2 yards off: its arms reach the ball, a gnome's wouldn't.
+    const r = pass([{ kind: 'zone', pos: v(6, 6) }]);
+    expect(ofType(r.events, 'batted')[0]).toMatchObject({ by: 100, contested: true });
+  });
+
+  it('a Catcher with better Hands beats the Scarecrow to it', () => {
+    const r = pass([{ kind: 'zone', pos: v(6, 6) }], { hands: 4 });
+    expect(ofType(r.events, 'caught')[0]).toMatchObject({ id: 2, contested: true });
+  });
+
   it('with nobody in reach it is incomplete', () => {
     const r = pass([], {}, v(-8, 8));
     expect(ofType(r.events, 'incomplete')).toHaveLength(1);
@@ -272,6 +283,16 @@ describe('the carrier', () => {
       return run(s, 4).state.drive.los;
     };
     expect(drag(1)).toBeGreaterThan(drag(-1));
+  });
+
+  it('running into a planted Scarecrow stops the carrier dead', () => {
+    const s = carry(
+      playState([{ role: 'runner', pos: v(0, 2) }], [{ kind: 'zone', pos: v(0, 4) }]),
+      2,
+    );
+    const r = run(s, 2);
+    expect(ofType(r.events, 'tackled')[0]?.by).toBe(100);
+    expect(ofType(r.events, 'wrapped')).toHaveLength(0);
   });
 
   it('a carrier 2 Heft heavier breaks the tackle and keeps going', () => {

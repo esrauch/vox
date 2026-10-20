@@ -66,7 +66,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## A Down
 
-1. **The play is picked for you.** One of **four plays**, at random (and randomly mirrored), lines your team up: where your Catchers will run and who stays home to block. Its name flashes up ("SLANTS!") and the routes show for a moment. You don't pick it: the only choice is pass or run (step 2).
+1. **The play is picked for you,** and **its routes are drawn on the turf before the snap**: a dotted path and an arrow for each receiver (gold for a Runner the play sends upfield). One of **four plays**, at random (and randomly mirrored), lines your team up: where your Catchers will run and who stays home to block. Its name flashes up ("SLANTS!") and the routes show for a moment. You don't pick it: the only choice is pass or run (step 2).
 
    | Play | What happens |
    |---|---|
@@ -179,7 +179,7 @@ The tension: every pick is either toward a bonus or a sure, small boost now.
 |---|---|---|
 | **Rusher** | Rhino Beetle | Charges the QB. Your Blockers have to out-shove it. |
 | **Cover** | Garden Gnome | Shadows a Catcher; after the catch, chases the carrier. Small, quick, light: easy to shove, hard to shake. |
-| **Zone** | Scarecrow | Planted: swats any low ball that comes near it. Heavy: running into one stops you. |
+| **Zone** | Scarecrow | Planted: its long arms reach a **wide purple ring** on the turf, and any low ball coming down inside it is contested: its Hands beat a plain Catcher's, so it's a patch of field to throw away from (a Catcher with great Hands, like a Ghost, can still win it). Running into one stops you dead. |
 | **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. |
 | **Bat** | Bat | Patrols a fixed loop and swats passes that fly through it. |
 
@@ -207,6 +207,7 @@ The tension: every pick is either toward a bonus or a sure, small boost now.
 |---|---|
 | **Your team** | Gold and orange, in helmets. Role by silhouette: big Blockers, lean Runners, tall Catchers. |
 | **Who's open** | A soft ring under each Catcher: green when it's clear of defenders, red when one is on it. |
+| **Where the Scarecrows (and Bats) reach** | A purple ring around each: a ball coming down inside it is contested. |
 | **Where the ball will land** | While aiming: a reticle and the arc; in flight, a landing ring. |
 | **The carrier** | Holds the ball high, with a gold ring underfoot. |
 | **What the defense will do** | Their facing and lean: rushers toward the QB, Covers toward their Catcher. |

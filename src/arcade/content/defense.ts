@@ -11,8 +11,14 @@ export interface DefenderDef {
   readonly creature: string;
   readonly stats: Stats;
   readonly radius: number;
-  /** Planted: never moves, and nothing can shove it. */
+  /** Planted: never moves, and nothing can shove it. Running into one is a tackle. */
   readonly planted: boolean;
+  /**
+   * Extra reach for the ball beyond what its Hands give it: a Scarecrow's
+   * arms cover a wide ring (drawn on the turf), so any low pass coming down
+   * inside it is contested.
+   */
+  readonly reachBonus: number;
 }
 
 export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
@@ -22,6 +28,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     stats: { hustle: -1, hands: -1, heft: 2 },
     radius: 0.6,
     planted: false,
+    reachBonus: 0,
   },
   cover: {
     name: 'Cover',
@@ -29,13 +36,15 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     stats: { hustle: 0, hands: 0, heft: -1 },
     radius: 0.4,
     planted: false,
+    reachBonus: 0,
   },
   zone: {
     name: 'Zone',
     creature: 'Scarecrow',
-    stats: { hustle: 0, hands: 1, heft: 3 },
+    stats: { hustle: 0, hands: 3, heft: 3 },
     radius: 0.55,
     planted: true,
+    reachBonus: 1.2,
   },
   safety: {
     name: 'Safety',
@@ -43,6 +52,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     stats: { hustle: 1, hands: 1, heft: 0 },
     radius: 0.5,
     planted: false,
+    reachBonus: 0,
   },
   bat: {
     name: 'Bat',
@@ -50,6 +60,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     stats: { hustle: -1, hands: 1, heft: -2 },
     radius: 0.4,
     planted: false,
+    reachBonus: 0.3,
   },
 };
 

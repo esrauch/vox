@@ -71,7 +71,7 @@ Every training pick helps. Two things are still off target: **downs last about 2
 **Done when** a whole run plays on a phone, from one tap to game over, and it's fun to play again.
 
 - [ ] **Instant start:** one tap from the title to the first snap.
-- [ ] **A random play each down:** its name flashes up, its routes show for a moment.
+- [x] **A random play each down:** its name flashes up, and its routes are drawn on the turf until the snap (dotted paths with arrows). *(2026-10-19)*
 - [~] **Throw, hand off and steer** with one thumb: pull back to snap and aim, release to throw; tap a Runner to hand off; swipe to nudge the carrier. *(Wired 2026-10-19, not yet played on a phone.)*
 - [~] **The three roles as placeholder silhouettes:** the walk-on stretched wide (Blockers), lean (Runners) and tall (Catchers), with a colored block on the head for a monster. *(2026-10-19; readability not yet checked from the camera.)*
 - [~] **Rendering the real-time sim** (`src/arcade/game.ts`, `src/arcade/render/`): the third-person camera behind and above the QB, following the ball and the carrier; one long turf strip with the scrimmage and first-down lines (and the Boss's end zone); everyone turning to face where they're going and tipping over when down; the ball along its real arc with a landing ring; the aim's dashed arc; gold ring under the carrier, green or red under receivers; pops for every result. *(2026-10-19: built, not yet looked at in a browser. The old grid game is still at `?grid=1`.)*
@@ -124,6 +124,11 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-19:** **Scarecrows matter, and the routes show before the snap.**
+  - **Scarecrows** reach a wide purple ring, drawn on the turf. Any low ball coming down inside it is contested, and their Hands (3) beat a plain Catcher's. Running into one stops you dead.
+  - **Bats** get a small ring too.
+  - **Each receiver's route** is drawn as dotted paths with an arrow until the snap.
+  - **The balance bot** now reads the rings, measuring room from the edge of each defender's reach. It throws away from Scarecrows; plain humans win about 7 drives of 12.
 - **2026-10-19:** **A narrower field, more defenders and a simpler bot.**
   - **The field** is 30% narrower (18 yards), so the camera can fit both sidelines from closer. The line-ups, routes and defense spots shrank with it.
   - **More defenders:** Intro 4, Challenge 5, Gimmicks 5–6, Boss 8.

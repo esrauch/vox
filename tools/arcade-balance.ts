@@ -9,7 +9,8 @@
  *
  * The bot snaps at once. It runs 30% of the time (a handoff at the snap);
  * otherwise it throws 2 seconds after the snap to the receiver furthest from
- * any defender, leading it, with some aim error. Carrying, it
+ * any defender's reach where the ball will come down (reading the rings),
+ * leading it, with some aim error. Carrying, it
  * swipes away from the defender in its lane and away from the sideline.
  * There are no upgrades yet: each scenario fixes the team's forms.
  */
@@ -121,8 +122,9 @@ function botInput(state: RunState, rng: Rng, lastSwipe: { at: number }, plan: Pl
       .map((p) => {
         const ft = flightTime(qb.pos, add(p.pos, scale(p.vel, 0.6)));
         const target = add(p.pos, scale(p.vel, ft));
+        // How far it is from the edge of any defender's reach (a Scarecrow's purple ring is wide).
         const room = Math.min(
-          ...field.defenders.filter((d) => d.down <= 0).map((d) => dist(d.pos, p.pos)),
+          ...field.defenders.filter((d) => d.down <= 0).map((d) => dist(d.pos, target) - d.reach),
           99,
         );
         return { target, room };

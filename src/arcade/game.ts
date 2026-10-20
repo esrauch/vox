@@ -21,6 +21,7 @@ import { ArcadeAim } from './render/aim';
 import { ArcadeBall } from './render/ball';
 import { ArcadeBodies } from './render/bodies';
 import { ArcadeLines, createArcadeTurf } from './render/field';
+import { ArcadeRoutes } from './render/routes';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
 import { carrierOf, qbOf } from './sim/ai';
 import { createRun, dispatch, downAndDistance } from './sim/run';
@@ -68,6 +69,7 @@ export class ArcadeGame {
   private readonly ball: ArcadeBall;
   private readonly aimView: ArcadeAim;
   private readonly lines: ArcadeLines;
+  private readonly routes: ArcadeRoutes;
   private readonly hud: Hud;
 
   /** Yards marched in the drives before this one: the field is one long strip. */
@@ -114,6 +116,7 @@ export class ArcadeGame {
     });
     scene.add(scenery.group);
     this.lines = new ArcadeLines(scene);
+    this.routes = new ArcadeRoutes(scene);
     this.bodies = new ArcadeBodies(scene);
     this.ball = new ArcadeBall(scene);
     this.aimView = new ArcadeAim(scene);
@@ -186,6 +189,7 @@ export class ArcadeGame {
   private draw(dt: number): void {
     const { state } = this;
     this.lines.update(state.drive, this.origin);
+    this.routes.update(state, this.origin);
     this.bodies.update(state, this.origin, dt);
     this.ball.update(state, this.origin, this.bodies);
     const qb = qbOf(state);
