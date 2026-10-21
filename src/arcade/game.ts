@@ -260,6 +260,8 @@ export class ArcadeGame {
     const { state } = this;
     this.lines.update(state.drive, this.origin);
     this.routes.update(state, this.origin, this.previewPlayers());
+    // Keep the views in step with the field: a recruit joining or a swap changes who's where.
+    this.bodies.sync(state);
     this.bodies.update(state, this.origin, dt, litPlayers(state));
     this.ball.update(state, this.origin, this.bodies, dt, performance.now() / 1000);
     this.sweep.update(state, this.origin);

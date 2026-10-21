@@ -63,8 +63,13 @@ interface View {
   readonly ring: THREE.Mesh;
   /** A defender's reach for the ball (null for your players). */
   readonly reach: THREE.Mesh | null;
+  /** What it was built to look like (kind and position): when either changes, it's rebuilt. */
+  readonly look: string;
   yaw: number;
 }
+
+/** What a body looks like: a player's kind and position, or a defender's kind. */
+const lookOf = (b: Body): string => (b.side === 'team' ? `${b.form}/${b.role}` : b.kind);
 
 export class ArcadeBodies {
   private readonly views = new Map<number, View>();
@@ -77,12 +82,13 @@ export class ArcadeBodies {
 
   constructor(private readonly scene: THREE.Scene) {}
 
-  /** Make the views match the bodies on the field (a new down lines everyone up afresh). */
+  /** Make the views match the bodies on the field: new ones, gone ones, and changed ones (called every frame). */
   sync(state: RunState): void {
     const bodies: Body[] = [...state.field.players, ...state.field.defenders];
-    const ids = new Set(bodies.map((b) => b.id));
+    const looks = new Map(bodies.map((b) => [b.id, lookOf(b)]));
+    // Gone, or now someone else in that spot (a recruit joined, two players swapped): rebuild.
     for (const [id, v] of this.views) {
-      if (ids.has(id)) continue;
+      if (looks.get(id) === v.look) continue;
       this.scene.remove(v.root, v.ring);
       if (v.reach) this.scene.remove(v.reach);
       this.views.delete(id);
@@ -182,7 +188,7 @@ export class ArcadeBodies {
       b.side === 'defense' ? new THREE.Mesh(this.reachGeo, this.ringMat(COVERAGE)) : null;
     if (reach) this.scene.add(reach);
     // Your team faces upfield, the defense faces you.
-    return { root, body, ring, reach, yaw: b.side === 'team' ? Math.PI : 0 };
+    return { root, body, ring, reach, look: lookOf(b), yaw: b.side === 'team' ? Math.PI : 0 };
   }
 
   private ringMat(color: number): THREE.MeshBasicMaterial {
