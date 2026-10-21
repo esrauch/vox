@@ -10,13 +10,14 @@
  * Rings on the turf: gold under the carrier; under each receiver before the
  * catch, its **catch range** (the ring's edge is its reach: a bullet coming
  * inside it is caught), green when no defender could reach a ball there, red
- * when one could, gold while the aim line is over it; and a purple ring around every Scarecrow (and Bat) showing how
- * far its arms reach for the ball, until someone catches it.
+ * when one could, gold while the aim line is over it; and a purple ring around every defender showing how far it
+ * reaches for the ball (a Scarecrow's arms reach furthest), until someone
+ * catches it.
  */
 import * as THREE from 'three';
 import { common, hexToNumber, team } from '../../content/palettes';
-import { DEFENDERS } from '../content/defense';
 import { getGeometry, modelHeight, voxelMaterial } from '../../voxel/models';
+import { engaged } from '../sim/ball';
 import type { Body, DefenderKind, Form, Player, Role, RunState } from '../sim/types';
 import { dist } from '../sim/vec';
 import { toWorld } from './world';
@@ -54,7 +55,7 @@ interface View {
   readonly root: THREE.Group;
   readonly body: THREE.Mesh;
   readonly ring: THREE.Mesh;
-  /** A Scarecrow's or Bat's reach for the ball, or null. */
+  /** A defender's reach for the ball (null for your players). */
   readonly reach: THREE.Mesh | null;
   yaw: number;
 }
@@ -117,7 +118,9 @@ export class ArcadeBodies {
       view.ring.scale.setScalar(1);
       view.ring.geometry = this.ringGeo;
       if (view.reach && b.side === 'defense') {
-        view.reach.visible = live && carrierId === null && b.down <= 0;
+        // It bats down a bullet coming inside its reach: unless it's down, the ball's been
+        // caught, or it's a Rhino Beetle locked up at the line (the ball goes past those).
+        view.reach.visible = live && carrierId === null && b.down <= 0 && !engaged(state, b);
         view.reach.position.set(view.root.position.x, 0.015, view.root.position.z);
         view.reach.scale.setScalar(b.reach);
       }
@@ -170,9 +173,7 @@ export class ArcadeBodies {
     ring.visible = false;
     this.scene.add(root, ring);
     const reach =
-      b.side === 'defense' && DEFENDERS[b.kind].reachBonus > 0
-        ? new THREE.Mesh(this.reachGeo, this.ringMat(COVERAGE))
-        : null;
+      b.side === 'defense' ? new THREE.Mesh(this.reachGeo, this.ringMat(COVERAGE)) : null;
     if (reach) this.scene.add(reach);
     // Your team faces upfield, the defense faces you.
     return { root, body, ring, reach, yaw: b.side === 'team' ? Math.PI : 0 };

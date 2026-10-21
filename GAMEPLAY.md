@@ -229,7 +229,7 @@ The tension: a recruit of a kind you already have feeds the "+20 to every Ghost"
 |---|---|
 | **Your team** | Gold and orange, in helmets. Role by silhouette: big Blockers, lean Runners, tall Catchers. |
 | **Who's open, and how far they can reach** | A ring under each receiver **as wide as its catch range**: a bullet coming inside the ring is caught. Green when no defender could reach a ball there, red when one could, gold while the aim line is over it. Better Hands, a bigger ring. |
-| **Where the Scarecrows (and Bats) reach** | A purple ring around each: a ball coming down inside it is contested. |
+| **How far each defender reaches** | A purple ring around every defender, as wide as its reach: a bullet coming inside it gets batted down (a Scarecrow's is widest). Gone once it's down, after the catch, and for a Rhino Beetle locked up at the line. |
 | **Where the ball will land** | While aiming: a reticle and the arc; in flight, a landing ring. |
 | **The carrier** | Holds the ball high, with a gold ring underfoot. |
 | **What the defense will do** | Their facing and lean: rushers toward the QB, Covers toward their Catcher. |

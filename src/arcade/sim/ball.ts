@@ -142,7 +142,7 @@ export function contact(
 }
 
 /** A rusher locked up with one of your players: it can't get a hand to the ball, which goes past it. */
-function engaged(state: RunState, d: Defender): boolean {
+export function engaged(state: RunState, d: Defender): boolean {
   return (
     d.kind === 'rusher' &&
     state.field.players.some(
