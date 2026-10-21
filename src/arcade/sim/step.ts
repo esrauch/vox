@@ -18,19 +18,28 @@
  *   7. The bullet in the air (ball.ts).
  *   8. The carrier over the first-down line wins the drive; over the
  *      sideline, it's down there.
- * In Break it! the play is frozen until the tap (or the marker runs out).
+ * In Break it! the play is frozen until it's decided (sim/breakit.ts).
  * Before the snap and between drives only the Bats move.
  */
 import { arcadeTuning, DT } from '../content/tuning';
 import { carrierOf, chooseLane, qbOf } from './ai';
 import { bulletEnd, flightTime, pocketTime, resolveFlight, sweepAngle } from './ball';
 import { moveBodies, separate, touching } from './physics';
-import { rngFor } from './random';
+import { judgeBreakIt, startBreakIt } from './breakit';
 import { endDown, nextDown } from './run';
-import type { ArcadeEvent, ArcadeResult, Player, RunState, StepInput } from './types';
+import type { ArcadeEvent, ArcadeResult, BreakKind, Player, RunState, StepInput } from './types';
 import { norm, scale, sub } from './vec';
 
-const { contact, field, breakit } = arcadeTuning;
+const { contact, field } = arcadeTuning;
+
+/**
+ * Tests can force which Break it! comes up (it's random otherwise). Not part
+ * of the game: set and cleared only around a test.
+ */
+let forcedBreak: BreakKind | undefined;
+export function forceBreakKind(kind: BreakKind | undefined): void {
+  forcedBreak = kind;
+}
 
 export function step(prev: RunState, input: StepInput = {}): ArcadeResult {
   const state = structuredClone(prev);
@@ -139,63 +148,27 @@ function resolveContact(state: RunState, events: ArcadeEvent[]): boolean {
     state,
     carrier,
     grabbing.map((d) => d.id),
+    forcedBreak,
   );
   events.push({ type: 'grabbed', id: carrier.id, by: grabbing.map((d) => d.id) });
   return true;
 }
 
-/** The sweet spot's width: wider the more Heft the carrier has over the heaviest tackler, narrower per extra tackler. */
-function startBreakIt(state: RunState, carrier: Player, tacklers: number[]): void {
-  const heft = Math.max(
-    ...state.field.defenders.filter((d) => tacklers.includes(d.id)).map((d) => d.stats.heft),
-  );
-  const gap = carrier.stats.heft - heft;
-  const width =
-    Math.min(breakit.maxSweet, Math.max(breakit.minSweet, breakit.sweet + breakit.perHeft * gap)) *
-    breakit.perExtraTackler ** (tacklers.length - 1);
-  // Where it sits, and which way the marker runs, is a fresh surprise every time; but never in
-  // the first third of the marker's trip, so there's time to see it and react.
-  const rng = rngFor(state.seed, 'break', state.step);
-  const at = breakit.earliest + rng.next() * Math.max(0, 1 - breakit.earliest - width);
-  const dir = rng.next() < 0.5 ? 1 : -1;
-  const drag = Math.min(
-    breakit.maxDrag,
-    Math.max(breakit.minDrag, breakit.dragYards + breakit.dragPerHeft * gap),
-  );
-  state.tackle = {
-    startedAt: state.time,
-    dir,
-    tacklers,
-    sweet: { from: at, to: at + width },
-    near: breakit.near,
-    dragYards: drag,
-  };
-  state.phase = 'breakit';
-}
-
-/** Where Break it!'s marker is on the meter (0 to 1), or null outside it. */
-export function breakMarker(state: RunState): number | null {
-  const t = state.tackle;
-  if (!t) return null;
-  return Math.min(1, (state.time - t.startedAt) / breakit.meterSeconds);
-}
-
-/** Break it!: the tap decides it, or the marker running out does. */
+/** Break it!: judge the input (sim/breakit.ts), and carry out a break, a drag or a tackle. */
 function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void {
   const t = state.tackle;
   const carrier = carrierOf(state);
-  const m = breakMarker(state);
-  if (!t || !carrier || m === null) {
+  if (!t || !carrier) {
     state.phase = 'play';
     state.tackle = null;
     return;
   }
-  if (!input.breakTap && m < 1) return;
+  const outcome = judgeBreakIt(state, input);
+  if (!outcome) return;
   const tacklers = state.field.defenders.filter((d) => t.tacklers.includes(d.id));
-  const first = t.tacklers[0] ?? -1;
   state.tackle = null;
   state.phase = 'play';
-  if (input.breakTap && m >= t.sweet.from && m <= t.sweet.to) {
+  if (outcome === 'break') {
     // BREAK: they go flying, and the carrier keeps going.
     for (const d of tacklers) {
       d.down = contact.brokenTime;
@@ -204,15 +177,16 @@ function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void
     }
     return;
   }
-  if (input.breakTap && m >= t.sweet.from - t.near && m <= t.sweet.to + t.near) {
+  if (outcome === 'drag') {
     // DRAG: it hauls them a few yards, then goes down.
-    for (const d of tacklers)
+    for (const d of tacklers) {
       d.latch = scale(norm(sub(d.pos, carrier.pos)), carrier.radius + d.radius);
+    }
     state.field.drag = { to: carrier.pos.y + t.dragYards };
     events.push({ type: 'dragged', id: carrier.id, yards: t.dragYards });
     return;
   }
-  tackle(state, carrier, first, events);
+  tackle(state, carrier, t.tacklers[0] ?? -1, events);
 }
 
 /** A carrier dragging tacklers goes down once it reaches the end of the drag. */

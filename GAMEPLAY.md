@@ -88,19 +88,18 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 6. **Break it!** (below) every time someone grabs the carrier.
 7. **The down ends with a tackle, a dead ball, a sack, or the line.**
 
-### Break it! *(the tackle mini-game)*
+### Break it! *(the tackle mini-games)*
 
-**When a defender grabs the carrier, the play freezes for about a second and a break meter appears:** a marker sweeping across a bar, left to right or right to left at random, with a **sweet spot** that's never in the first third of its trip (so there's always time to see it coming). Tap once:
+**When a defender grabs the carrier, the play freezes for about a second** for one of three quick tests, picked at random. Each ends the same three ways: **BREAK!** (the tackler goes flying and the carrier keeps running), **DRAG** (the carrier hauls the tackler a few more yards, then goes down), or **tackled**.
 
-| Your tap | What happens |
-|---|---|
-| **In the sweet spot** | **BREAK!** The tackler goes flying and the carrier keeps running |
-| **Close to it** | **DRAG:** the carrier drags the tackler a few more yards, then goes down |
-| **Off, or no tap** | Tackled on the spot |
+| Test | You see | You do | Sized by |
+|---|---|---|---|
+| **The bar** | A marker crossing a bar, left to right or right to left, with a green sweet spot (never in the first third of its trip) and a yellow "close" band | Tap in the green to break, in the yellow to drag | **Heft**: a wider sweet spot |
+| **MASH!** | A bar that fills as you tap | Tap as fast as you can for a second: fill it to break, half fill it to drag | **Heft**: more per tap |
+| **JUKE!** | After a short pause, a big arrow pointing left or right | Tap that side of the screen: quickly to break, a beat later to drag. A guess before the arrow, or the wrong side, is a tackle | **Hustle**: a longer window |
 
-- **The sweet spot is the stats:** the carrier's **Heft** against the tackler's. A Golem gets a wide spot; a Ghost against an Owl, a sliver. More Heft also means more yards on a drag.
-- **Every extra tackler already on it** shrinks the spot: a pile is hard to escape.
-- **It's the same skill as the throw**, a sweeping marker and one tap, so the whole game teaches one thing.
+- **Every extra tackler already on it** makes the test harder: a narrower sweet spot, less per tap, a shorter window. A pile is hard to escape.
+- **More Heft also means more yards on a drag.**
 
 ### Catching
 
@@ -119,7 +118,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Before the snap** | **HIKE!** | Start the called play. |
 | **Pass play** | **THROW** | Fire a bullet along the sweeping line. |
 | **Pass play** | **RUN** | The QB runs it himself. |
-| **Grabbed** | **Tap** (anywhere) | Break it! |
+| **Grabbed** | **Tap** (anywhere; for a juke, the arrow's side) | Break it! |
 | **Between drives** | **Tap a card** | Take that upgrade. |
 
 **One thumb, portrait, no aiming.** Everything is a tap at the right moment.

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PLAYS } from '../../src/arcade/content/plays';
 import { arcadeTuning } from '../../src/arcade/content/tuning';
 import { pocketTime, sweepAngle, sweepSpeed } from '../../src/arcade/sim/ball';
@@ -11,7 +11,8 @@ import {
   nextDown,
   startingRoster,
 } from '../../src/arcade/sim/run';
-import { breakMarker, canThrow, step } from '../../src/arcade/sim/step';
+import { breakMarker, jukeShowing } from '../../src/arcade/sim/breakit';
+import { canThrow, forceBreakKind, step } from '../../src/arcade/sim/step';
 import type { ArcadeEvent, RunState } from '../../src/arcade/sim/types';
 import { dist, v } from '../../src/arcade/sim/vec';
 import {
@@ -242,7 +243,16 @@ describe('throwing: a bullet along the line', () => {
   });
 });
 
-describe('the carrier, and Break it!', () => {
+describe('the carrier, and Break it! (the bar)', () => {
+  beforeEach(() => forceBreakKind('bar'));
+  afterEach(() => forceBreakKind(undefined));
+  /** The bar's tackle state (it's always a bar here). */
+  const bar = (st: RunState) => {
+    const t = st.tackle;
+    if (t?.kind !== 'bar') throw new Error('not a bar');
+    return t;
+  };
+
   /** A Runner carrying on (0, 2), a gnome dead ahead on (0, 4). */
   const grabbed = (runnerHeft = 0, extra = false) => {
     const s = carry(
@@ -279,7 +289,7 @@ describe('the carrier, and Break it!', () => {
 
   it('a tap in the sweet spot breaks it: the tackler goes flying, the carrier keeps going', () => {
     const g = grabbed().state;
-    const { from, to } = g.tackle!.sweet;
+    const { from, to } = bar(g).sweet;
     const r = tapAt(g, (from + to) / 2);
     expect(ofType(r.events, 'brokeTackle')).toHaveLength(1);
     expect(r.state.phase).toBe('play');
@@ -288,7 +298,7 @@ describe('the carrier, and Break it!', () => {
 
   it('a close tap drags the tackler a few yards before going down', () => {
     const g = grabbed().state;
-    const t = g.tackle!;
+    const t = bar(g);
     const close = t.sweet.from > t.near ? t.sweet.from - t.near / 2 : t.sweet.to + t.near / 2;
     const r = tapAt(g, close);
     const dragged = ofType(r.events, 'dragged')[0];
@@ -300,7 +310,7 @@ describe('the carrier, and Break it!', () => {
 
   it('a tap that misses, or no tap at all, is a tackle', () => {
     const g = grabbed().state;
-    const t = g.tackle!;
+    const t = bar(g);
     // The sweet spot (and its close band) never reaches back to the start of the trip.
     expect(t.sweet.from - t.near).toBeGreaterThan(0.05);
     const miss = 0.02;
@@ -320,7 +330,7 @@ describe('the carrier, and Break it!', () => {
         2,
       );
       s.field.lane = 0;
-      const t = untilGrabbed(s).state.tackle!;
+      const t = bar(untilGrabbed(s).state);
       expect(t.sweet.from).toBeGreaterThanOrEqual(arcadeTuning.breakit.earliest);
       expect(t.sweet.to).toBeLessThanOrEqual(1);
       dirs.add(t.dir);
@@ -330,7 +340,7 @@ describe('the carrier, and Break it!', () => {
 
   it('more Heft widens the sweet spot; an extra tackler narrows it', () => {
     const width = (heft: number, extra = false) => {
-      const t = grabbed(heft, extra).state.tackle!;
+      const t = bar(grabbed(heft, extra).state);
       return t.sweet.to - t.sweet.from;
     };
     expect(width(3)).toBeGreaterThan(width(0));
@@ -358,6 +368,122 @@ describe('the carrier, and Break it!', () => {
   it('over the first-down line wins the drive', () => {
     const s = carry(playState([{ pos: v(0, 8) }]), 2);
     expect(ofType(run(s, 1.5).events, 'downEnded')[0]?.result).toBe('firstDown');
+  });
+});
+
+describe('Break it!: the mash and the juke', () => {
+  afterEach(() => forceBreakKind(undefined));
+
+  /** A Runner carrying on (0, 2), grabbed by a gnome on (0, 4). */
+  const grabbed = (
+    kind: 'mash' | 'juke',
+    stats: { heft?: number; hustle?: number } = {},
+    extra = false,
+  ) => {
+    forceBreakKind(kind);
+    const s = carry(
+      playState(
+        [{ role: 'runner', pos: v(0, 2), stats }],
+        [
+          { kind: 'cover', pos: v(0, 4), stats: { heft: 0, hustle: 0 } },
+          ...(extra
+            ? [{ kind: 'cover' as const, pos: v(0.9, 3.6), stats: { heft: 0, hustle: 0 } }]
+            : []),
+        ],
+      ),
+      2,
+    );
+    s.field.lane = 0;
+    return untilGrabbed(s).state;
+  };
+  /** Tap on every `every`-th step until it's decided. */
+  const mash = (state: RunState, every: number) => {
+    let s = state;
+    const events: ArcadeEvent[] = [];
+    for (let i = 0; i < 200 && s.phase === 'breakit'; i++) {
+      const r = step(s, i % every === 0 ? { breakTap: true } : {});
+      s = r.state;
+      events.push(...r.events);
+    }
+    return { state: s, events };
+  };
+  /** Juke to `side`, `delay` seconds after the arrow shows (or right away, if `early`). */
+  const juke = (state: RunState, side: -1 | 1, delay: number, early = false) => {
+    let s = state;
+    const events: ArcadeEvent[] = [];
+    let shownAt: number | null = null;
+    for (let i = 0; i < 200 && s.phase === 'breakit'; i++) {
+      if (shownAt === null && jukeShowing(s)) shownAt = s.time;
+      const go = early || (shownAt !== null && s.time - shownAt >= delay);
+      const r = step(s, go ? { juke: side } : {});
+      s = r.state;
+      events.push(...r.events);
+    }
+    return { state: s, events };
+  };
+
+  it('each grab is one of the three, at random', () => {
+    const kinds = new Set<string>();
+    for (let k = 0; k < 30; k++) {
+      const s = carry(
+        playState([{ role: 'runner', pos: v(0, 2 - k * 0.07) }], [{ kind: 'cover', pos: v(0, 4) }]),
+        2,
+      );
+      s.field.lane = 0;
+      kinds.add(untilGrabbed(s).state.tackle!.kind);
+    }
+    expect([...kinds].sort()).toEqual(['bar', 'juke', 'mash']);
+  });
+
+  it('mash: tap fast enough to fill it and the tackle breaks', () => {
+    expect(ofType(mash(grabbed('mash'), 3).events, 'brokeTackle')).toHaveLength(1);
+  });
+
+  it('mash: half full by the end drags; barely tapping is a tackle', () => {
+    const g = grabbed('mash');
+    const t = g.tackle!;
+    if (t.kind !== 'mash') throw new Error('not a mash');
+    // Enough taps for between half and full by the end.
+    const taps = Math.ceil(arcadeTuning.breakit.mashDrag / t.perTap) + 1;
+    const every = Math.floor((arcadeTuning.breakit.mashSeconds * 60) / taps);
+    expect(ofType(mash(g, every).events, 'dragged')).toHaveLength(1);
+    expect(ofType(mash(grabbed('mash'), 60).events, 'tackled')).toHaveLength(1);
+  });
+
+  it('mash: more Heft fills it faster; an extra tackler, slower', () => {
+    const perTap = (heft: number, extra = false) => {
+      const t = grabbed('mash', { heft }, extra).tackle!;
+      return t.kind === 'mash' ? t.perTap : 0;
+    };
+    expect(perTap(3)).toBeGreaterThan(perTap(0));
+    expect(perTap(0, true)).toBeLessThan(perTap(0));
+  });
+
+  it('juke: the right side, quickly, breaks it; a beat later drags', () => {
+    const g = grabbed('juke');
+    const t = g.tackle!;
+    if (t.kind !== 'juke') throw new Error('not a juke');
+    expect(ofType(juke(g, t.side, 0.05).events, 'brokeTackle')).toHaveLength(1);
+    const late = (t.window * (arcadeTuning.breakit.jukeBreakShare + 1)) / 2;
+    expect(ofType(juke(g, t.side, late).events, 'dragged')).toHaveLength(1);
+  });
+
+  it('juke: the wrong side, a guess before the arrow, or nothing at all is a tackle', () => {
+    const g = grabbed('juke');
+    const t = g.tackle!;
+    if (t.kind !== 'juke') throw new Error('not a juke');
+    const wrong = t.side === 1 ? -1 : 1;
+    expect(ofType(juke(g, wrong, 0.05).events, 'tackled')).toHaveLength(1);
+    expect(ofType(juke(g, t.side, 0, true).events, 'tackled')).toHaveLength(1);
+    expect(ofType(run(g, 3).events, 'tackled')).toHaveLength(1);
+  });
+
+  it('juke: more Hustle gives a longer window', () => {
+    const window = (hustle: number) => {
+      const t = grabbed('juke', { hustle }).tackle!;
+      return t.kind === 'juke' ? t.window : 0;
+    };
+    expect(window(3)).toBeGreaterThan(window(0));
   });
 });
 
@@ -421,7 +547,11 @@ describe('determinism', () => {
       if (s.phase === 'draft') s = dispatch(s, { type: 'skipDraft' }).state;
       const input =
         s.phase === 'breakit'
-          ? { breakTap: (breakMarker(s) ?? 0) > 0.5 }
+          ? s.tackle?.kind === 'juke'
+            ? jukeShowing(s)
+              ? { juke: s.tackle.side }
+              : {}
+            : { breakTap: (breakMarker(s) ?? 0) > 0.5 || s.tackle?.kind === 'mash' }
           : canThrow(s) && s.time - s.snappedAt > 1
             ? { throw: true }
             : {};
@@ -452,7 +582,7 @@ describe('determinism', () => {
         if (s.phase === 'draft') s = dispatch(s, { type: 'skipDraft' }).state;
         const input =
           s.phase === 'breakit'
-            ? { breakTap: i % 7 === 0 }
+            ? { breakTap: i % 7 === 0, ...(i % 11 === 0 ? { juke: 1 as const } : {}) }
             : canThrow(s) && i % 50 === 0
               ? { throw: true }
               : {};

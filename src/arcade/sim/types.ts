@@ -109,22 +109,41 @@ export interface Field {
 }
 
 /**
- * Break it! (GAMEPLAY.md): a defender has grabbed the carrier. The play is
- * frozen while a marker crosses the meter once; a tap inside `sweet` breaks
- * the tackle, within `near` of it drags a few yards, anywhere else (or no
- * tap) is a tackle. `sweet` is measured along the marker's trip (0 where it
- * starts, 1 where it ends), so it's never in the first third of it; `dir`
- * says which way the trip goes on screen (1 left to right, -1 right to left).
+ * Break it! (GAMEPLAY.md): a defender has grabbed the carrier and the play
+ * is frozen for one of three quick tests, picked at random. Each ends in a
+ * break, a drag (`dragYards`), or a tackle (sim/breakit.ts).
+ *
+ * - **bar:** a marker crosses a meter once; tap in `sweet` (never in the
+ *   first third of its trip) to break, within `near` of it to drag. `sweet`
+ *   is measured along the trip; `dir` is which way it runs on screen.
+ * - **mash:** tap as fast as you can: every tap adds `perTap` to `fill`;
+ *   full breaks it, half full by the end drags.
+ * - **juke:** at `showAt` an arrow points to `side`; tap that side within
+ *   `window` (the first half breaks, the rest drags). Too early, the wrong
+ *   side or too late is a tackle.
  */
-export interface Tackle {
+export type Tackle = {
   readonly startedAt: number;
-  readonly dir: 1 | -1;
   readonly tacklers: readonly number[];
-  readonly sweet: { readonly from: number; readonly to: number };
-  readonly near: number;
   /** Yards a drag gets. */
   readonly dragYards: number;
-}
+} & (
+  | {
+      readonly kind: 'bar';
+      readonly dir: 1 | -1;
+      readonly sweet: { readonly from: number; readonly to: number };
+      readonly near: number;
+    }
+  | { readonly kind: 'mash'; fill: number; readonly perTap: number }
+  | {
+      readonly kind: 'juke';
+      readonly showAt: number;
+      readonly side: 1 | -1;
+      readonly window: number;
+    }
+);
+
+export type BreakKind = Tackle['kind'];
 
 export type DriveKind = 'intro' | 'challenge' | 'gimmick' | 'boss';
 
@@ -196,8 +215,10 @@ export interface StepInput {
   readonly throw?: boolean;
   /** RUN: the QB keeps it. */
   readonly scramble?: boolean;
-  /** The tap in Break it!. */
+  /** A tap in Break it! (the bar, and each tap of a mash). */
   readonly breakTap?: boolean;
+  /** A juke: a tap on the left (-1) or right (+1) side of the screen. */
+  readonly juke?: -1 | 1;
 }
 
 export type Action =

@@ -4,7 +4,8 @@ import { ROLE_RADIUS, ROLE_STATS } from '../../src/arcade/content/team';
 import { defenderPhysics, physicsOf } from '../../src/arcade/sim/bodies';
 import { scanTime } from '../../src/arcade/sim/ball';
 import { createRun } from '../../src/arcade/sim/run';
-import { breakMarker, step } from '../../src/arcade/sim/step';
+import { breakMarker } from '../../src/arcade/sim/breakit';
+import { step } from '../../src/arcade/sim/step';
 import type {
   ArcadeEvent,
   Defender,

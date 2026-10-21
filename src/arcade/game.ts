@@ -8,10 +8,10 @@
  *   (its routes show on the field; tap another to switch), then HIKE.
  * - **On a pass play:** THROW fires a bullet along the sweeping line; RUN
  *   lets the QB keep it.
- * - **In Break it!:** one tap, anywhere.
+ * - **In Break it!:** taps, anywhere (for a juke, on the arrow's side).
  *
  * Keys for a desktop: 1–3 call a card, F flips, Space hikes (then throws,
- * and taps Break it!), R runs. The music is the soundtrack only: nothing waits for the beat.
+ * and taps the bar and the mash), R runs, ← and → juke. The music is the soundtrack only: nothing waits for the beat.
  */
 import * as THREE from 'three';
 import { Conductor } from '../game/conductor';
@@ -28,10 +28,11 @@ import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
 import { carrierOf, qbOf } from './sim/ai';
 import { createRun, dispatch, downAndDistance } from './sim/run';
-import { breakMarker, canThrow, step } from './sim/step';
+import { breakMarker, jukeShowing, mashLeft } from './sim/breakit';
+import { canThrow, step } from './sim/step';
 import type { Action, ArcadeEvent, DriveKind, Player, RunState, StepInput } from './sim/types';
 import { v } from './sim/vec';
-import { ArcadeControls } from './ui/controls';
+import { ArcadeControls, type BreakView } from './ui/controls';
 
 export interface ArcadeOptions {
   seed: number;
@@ -44,6 +45,12 @@ export interface ArcadeOptions {
  * the row it follows, whatever the screen's shape.
  */
 const CAMERA_PITCH = 32;
+/**
+ * How fast sim time runs against real time: the whole game a little slower
+ * than the sim's own numbers, everything together (so balance runs, which
+ * count sim time, are unchanged).
+ */
+const TIME_SCALE = 0.8;
 const LOOK_AHEAD = 7;
 const WIDTH_MARGIN = 1.06;
 
@@ -75,7 +82,7 @@ export class ArcadeGame {
   private lastFrame: number | null = null;
   private paused = false;
   /** What the player pressed since the last step, applied on the next one. */
-  private pending: { throw?: boolean; scramble?: boolean; breakTap?: boolean } = {};
+  private pending: { throw?: boolean; scramble?: boolean; breakTap?: boolean; juke?: -1 | 1 } = {};
   /** Where the camera looks (field yards, smoothed). */
   private focus = v(0, -4);
 
@@ -117,7 +124,7 @@ export class ArcadeGame {
     this.controls = new ArcadeControls(uiRoot, {
       onThrow: () => this.press({ throw: true }),
       onRun: () => this.press({ scramble: true }),
-      onBreakTap: () => this.press({ breakTap: true }),
+      onBreakTap: (side) => this.breakTap(side),
     });
 
     document.addEventListener('keydown', (e) => this.onKey(e));
@@ -136,7 +143,7 @@ export class ArcadeGame {
     const dt = this.lastFrame === null ? 0 : Math.min(0.1, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
     if (this.conductor.started && !this.paused) {
-      this.accumulator += dt;
+      this.accumulator += dt * TIME_SCALE;
       while (this.accumulator >= DT) {
         this.stepOnce();
         this.accumulator -= DT;
@@ -169,7 +176,12 @@ export class ArcadeGame {
   }
 
   /** A button press, applied on the next step (if it means anything right now). */
-  private press(input: { throw?: boolean; scramble?: boolean; breakTap?: boolean }): void {
+  private press(input: {
+    throw?: boolean;
+    scramble?: boolean;
+    breakTap?: boolean;
+    juke?: -1 | 1;
+  }): void {
     if (!this.conductor.started || this.paused) return;
     this.pending = { ...this.pending, ...input };
   }
@@ -196,13 +208,36 @@ export class ArcadeGame {
     this.ball.update(state, this.origin, this.bodies);
     this.sweep.update(state, this.origin);
     this.controls.setButtons(canThrow(state) && !this.paused);
-    const t = state.tackle;
-    const marker = breakMarker(state);
-    this.controls.setMeter(
-      t && marker !== null ? { sweet: t.sweet, near: t.near, marker, dir: t.dir } : null,
-    );
+    this.controls.setBreak(this.breakView());
     this.follow(dt);
     this.view.render();
+  }
+
+  /** What the Break it! panel shows right now, or null. */
+  private breakView(): BreakView | null {
+    const { state } = this;
+    const t = state.tackle;
+    if (!t || state.phase !== 'breakit') return null;
+    switch (t.kind) {
+      case 'bar':
+        return {
+          kind: 'bar',
+          sweet: t.sweet,
+          near: t.near,
+          marker: breakMarker(state) ?? 0,
+          dir: t.dir,
+        };
+      case 'mash':
+        return { kind: 'mash', fill: t.fill, left: mashLeft(state) ?? 0 };
+      case 'juke':
+        return { kind: 'juke', side: jukeShowing(state) ? t.side : null };
+    }
+  }
+
+  /** A tap in Break it!: for a juke, the side counts; otherwise it's a tap. */
+  private breakTap(side: -1 | 1): void {
+    if (this.state.tackle?.kind === 'juke') this.press({ juke: side });
+    else this.press({ breakTap: true });
   }
 
   /** Before the hike, the called play's players (their routes are drawn), or null. */
@@ -387,7 +422,10 @@ export class ArcadeGame {
     if (e.code === 'Space') {
       e.preventDefault();
       if (phase === 'setup') this.act({ type: 'hike' });
-      else this.press(phase === 'breakit' ? { breakTap: true } : { throw: true });
+      else if (phase === 'breakit') this.press({ breakTap: true });
+      else this.press({ throw: true });
+    } else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+      if (phase === 'breakit') this.breakTap(e.code === 'ArrowLeft' ? -1 : 1);
     } else if (e.code === 'KeyR') this.press({ scramble: true });
     else if (e.code === 'KeyF' && phase === 'setup') this.act({ type: 'flip' });
     else if (phase === 'setup' && ['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {

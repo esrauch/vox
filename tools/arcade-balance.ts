@@ -11,15 +11,17 @@
  * random card of the three (Flip half the time). On a pass it throws when a
  * bullet fired right now would be caught, reacting only some of the time it
  * could; with the pocket nearly gone it runs half the time and throws the
- * other half. In Break it! it hits the sweet spot BREAK_SKILL of the time and
- * taps at random otherwise. There are no upgrades yet: each scenario fixes
+ * other half. In Break it! it hits the bar's sweet spot BREAK_SKILL of the
+ * time (tapping at random otherwise), mashes at about 8 taps a second, and
+ * jukes the right way 90% of the time, 0.3 s after the arrow shows. There are no upgrades yet: each scenario fixes
  * the team's forms.
  */
 import { qbOf } from '../src/arcade/sim/ai';
 import { bulletEnd, contact, pocketTime, sweepAngle } from '../src/arcade/sim/ball';
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
 import { rngFor } from '../src/arcade/sim/random';
-import { breakMarker, canThrow, step } from '../src/arcade/sim/step';
+import { breakMarker, jukeShowing } from '../src/arcade/sim/breakit';
+import { canThrow, step } from '../src/arcade/sim/step';
 import type { ArcadeEvent, Form, Role, RunState, Stats, StepInput } from '../src/arcade/sim/types';
 import { lerp } from '../src/arcade/sim/vec';
 import type { Rng } from '../src/sim/rng';
@@ -31,6 +33,11 @@ const REACT = 0.25;
 const PANIC = 0.12;
 /** How often it hits Break it!'s sweet spot (otherwise it taps at a random moment). */
 const BREAK_SKILL = 0.6;
+/** Mash: its chance of a tap each step (about 8 taps a second). */
+const MASH_RATE = 8 / 60;
+/** Juke: how long it takes to react to the arrow (seconds), and how often it picks the right side. */
+const JUKE_REACTION = 0.3;
+const JUKE_RIGHT = 0.9;
 
 interface Scenario {
   readonly name: string;
@@ -93,6 +100,9 @@ const bump = (m: Map<string, number>, k: string, by = 1): void => {
 interface Plan {
   tackleAt: number;
   tapAt: number;
+  /** Juke: when it saw the arrow, and which side it'll tap. */
+  sawAt: number | null;
+  side: -1 | 1;
 }
 
 /** Whether a bullet fired along the line right now would be caught (a quick look along its flight). */
@@ -111,14 +121,30 @@ function wouldCatch(state: RunState): boolean {
 function botInput(state: RunState, rng: Rng, plan: Plan): StepInput {
   if (state.phase === 'breakit' && state.tackle) {
     const t = state.tackle;
-    if (plan.tackleAt !== t.startedAt) {
+    const fresh = plan.tackleAt !== t.startedAt;
+    if (fresh) {
       plan.tackleAt = t.startedAt;
-      plan.tapAt =
-        rng.next() < BREAK_SKILL
-          ? t.sweet.from + rng.next() * (t.sweet.to - t.sweet.from)
-          : rng.next();
+      plan.sawAt = null;
     }
-    return (breakMarker(state) ?? 0) >= plan.tapAt ? { breakTap: true } : {};
+    switch (t.kind) {
+      case 'bar':
+        if (fresh) {
+          plan.tapAt =
+            rng.next() < BREAK_SKILL
+              ? t.sweet.from + rng.next() * (t.sweet.to - t.sweet.from)
+              : rng.next();
+        }
+        return (breakMarker(state) ?? 0) >= plan.tapAt ? { breakTap: true } : {};
+      case 'mash':
+        return rng.next() < MASH_RATE ? { breakTap: true } : {};
+      case 'juke':
+        if (!jukeShowing(state)) return {};
+        if (plan.sawAt === null) {
+          plan.sawAt = state.time;
+          plan.side = rng.next() < JUKE_RIGHT ? t.side : t.side === 1 ? -1 : 1;
+        }
+        return state.time - plan.sawAt >= JUKE_REACTION ? { juke: plan.side } : {};
+    }
   }
   if (!canThrow(state)) return {};
   const left = 1 - (state.time - state.snappedAt) / pocketTime(state);
@@ -196,7 +222,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
     },
   }));
   let state = createRun(seed, roster);
-  const plan: Plan = { tackleAt: -1, tapAt: 1 };
+  const plan: Plan = { tackleAt: -1, tapAt: 1, sawAt: null, side: 1 };
   const ran = { now: false };
   let driveKey = '';
   for (let guard = 0; guard < 200000 && state.phase !== 'over' && state.phase !== 'won'; guard++) {

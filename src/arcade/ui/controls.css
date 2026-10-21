@@ -107,3 +107,22 @@
   font-size: 1rem;
   opacity: 0.8;
 }
+
+.arc-meter [hidden] {
+  display: none;
+}
+
+.arc-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--pumpkin);
+}
+
+.arc-arrow {
+  font-size: 4.5rem;
+  line-height: 1;
+  margin: 6px 0;
+  color: var(--slime-green);
+}

@@ -124,6 +124,10 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-20:** **Break it! has three tests, and the game runs 20% slower.**
+  - **Each grab picks one test at random:** the bar, **MASH!** (tap fast; Heft fills it faster), or **JUKE!** (tap the side the arrow shows, quickly; Hustle gives a longer window). A guess before the arrow is a tackle.
+  - **The sim runs at 0.8× real time,** so everything slows together and the balance numbers are unchanged.
+  - **Balance** (the bot mashes about 8 taps a second, and jukes the right way 90% of the time after 0.3 s): plain humans win about 3 drives of 12, all three monster types about 8.
 - **2026-10-20:** **Pick, look, then hike.** Tapping a card now calls it: its routes are drawn on the field, another card can be tapped instead, and Flip mirrors it in place. HIKE! (or Space) starts the play. Keys: 1–3 call a card, F flips.
 - **2026-10-20:** **Built: the timing design.**
   - **Three cards a down,** with Flip. A finger on a card shows its routes; letting go calls and snaps. Handoffs are the Dive and a new Sweep.

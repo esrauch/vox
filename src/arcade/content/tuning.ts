@@ -91,6 +91,24 @@ export const arcadeTuning = {
     perExtraTackler: 0.6,
     /** "Close": this far either side of the sweet spot, a drag. */
     near: 0.12,
+    /** Mash: this long to tap; each tap fills this share, plus this per point of Heft over the tackler (within the range). */
+    mashSeconds: 1.2,
+    mashPerTap: 0.12,
+    mashPerHeft: 0.025,
+    mashMinPerTap: 0.05,
+    mashMaxPerTap: 0.3,
+    /** …full breaks it at once; this full by the end drags. */
+    mashDrag: 0.5,
+    /** Juke: the arrow shows after a pause between these (seconds)… */
+    jukeMinDelay: 0.3,
+    jukeMaxDelay: 0.7,
+    /** …then there's this long to tap its side, plus this per point of Hustle over the tackler (within the range)… */
+    jukeWindow: 0.55,
+    jukePerHustle: 0.06,
+    jukeMinWindow: 0.25,
+    jukeMaxWindow: 0.9,
+    /** …and a tap in this first share of the window breaks it (later, a drag). */
+    jukeBreakShare: 0.5,
     /** A drag gets this many yards, plus this many for every point of Heft over the tackler (within the range). */
     dragYards: 1.5,
     dragPerHeft: 0.5,
