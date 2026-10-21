@@ -54,7 +54,8 @@ export class ArcadeBall {
   update(state: RunState, origin: number, bodies: ArcadeBodies): void {
     const ball = state.field.ball;
     this.landing.visible = false;
-    this.ball.rotation.y = state.time * 3;
+    // It never spins: the carved face always looks back at the camera (models face +z, toward it).
+    this.ball.rotation.set(0, 0, 0);
     switch (ball.at) {
       case 'qb': {
         const qb = state.field.players.find((p) => p.role === 'qb');
@@ -66,7 +67,6 @@ export class ArcadeBall {
         const u = Math.min(1, (state.time - ball.thrownAt) / (ball.landsAt - ball.thrownAt));
         // A bullet: flat and fast, at chest height.
         this.ball.position.copy(toWorld(lerp(ball.from, ball.target, u), origin, 1));
-        this.ball.rotation.x = state.time * 15;
         break;
       }
       case 'carried': {
