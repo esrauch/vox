@@ -124,6 +124,9 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-20:** **The pumpkin throws itself.**
+  - **No QB model:** the sim still has the QB (where throws start, and who's sacked), but the pumpkin floats there, bobbing, face to the camera. On a QB run it bounds upfield on its own.
+  - **Embers:** glowing cubes drift off it, a trail of sparks follows it in flight, and bursts go off when it's thrown, caught, batted down or run.
 - **2026-10-20:** **Break it! gets a countdown; the pumpkin gets bigger.**
   - **Every test opens with a two-second "GET READY TO …"** (taps don't count during it), then the call.
   - **JUKE! has ◀ and ▶ buttons** on screen through the countdown; the one to press lights up when it ends.

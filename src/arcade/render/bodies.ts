@@ -1,5 +1,6 @@
 /**
- * Everyone on the arcade field as voxel models. Placeholders until the role
+ * Everyone on the arcade field as voxel models, except the QB: there's
+ * none to draw, the pumpkin ball throws itself. Placeholders until the role
  * and monster models exist (MILESTONES, A4): your players are the walk-on,
  * stretched into the three role silhouettes (wide Blockers, lean Runners,
  * tall Catchers), with a colored block on the head for a monster form.
@@ -78,7 +79,11 @@ export class ArcadeBodies {
       if (v.reach) this.scene.remove(v.reach);
       this.views.delete(id);
     }
-    for (const b of bodies) if (!this.views.has(b.id)) this.views.set(b.id, this.create(b));
+    for (const b of bodies) {
+      // There's no QB to draw: the pumpkin throws itself (render/ball.ts).
+      if (b.side === 'team' && b.role === 'qb') continue;
+      if (!this.views.has(b.id)) this.views.set(b.id, this.create(b));
+    }
   }
 
   /** `lit`: the receivers the sweeping line is over right now (render/sweep.ts). */
@@ -97,8 +102,6 @@ export class ArcadeBodies {
         view.yaw += d * Math.min(1, dt * 12);
       }
       view.root.rotation.y = view.yaw;
-      // The pumpkin in the QB's hand is the light: the QB mustn't block it.
-      if (b.side === 'team' && b.role === 'qb') view.body.castShadow = state.field.ball.at !== 'qb';
       view.body.rotation.z = b.down > 0 ? Math.PI / 2 : 0;
       // A little bob while running.
       const speed = Math.hypot(b.vel.x, b.vel.y);
@@ -142,8 +145,7 @@ export class ArcadeBodies {
   }
 
   private create(b: Body): View {
-    const model =
-      b.side === 'defense' ? DEFENDER_MODEL[b.kind] : b.role === 'qb' ? 'team/qb' : WALK_ON;
+    const model = b.side === 'defense' ? DEFENDER_MODEL[b.kind] : WALK_ON;
     const body = new THREE.Mesh(getGeometry(model), voxelMaterial);
     body.castShadow = true;
     if (b.side === 'team') {

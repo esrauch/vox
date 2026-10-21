@@ -12,7 +12,7 @@ Items marked **▲** are recommendations or details still open to change. Every 
 - **Area:** a themed place (the Haunted Forest first). Each area is four drives.
 - **Drive:** four downs to gain 10 yards. **Down:** one play, a few seconds long.
 - **Line of scrimmage:** where the current down starts. **First-down line:** 10 yards past where the drive started.
-- **Your team:** **eight on the field**: the QB plus seven players, each a **Blocker**, a **Runner** or a **Catcher**.
+- **Your team:** **eight on the field**: the QB plus seven players, each a **Blocker**, a **Runner** or a **Catcher**. *The QB is the pumpkin ball itself: there's no QB player on the field, the pumpkin throws itself (THEME.md, The ball).*
 - **Carrier:** whoever has the ball after a catch or a handoff. **You steer the carrier.**
 - **Heft, Hustle, Hands:** your players' (and defenders') three stats. They're physics, not dice: weight, speed and reach.
 

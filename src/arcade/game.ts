@@ -204,7 +204,7 @@ export class ArcadeGame {
     this.lines.update(state.drive, this.origin);
     this.routes.update(state, this.origin, this.previewPlayers());
     this.bodies.update(state, this.origin, dt, litPlayers(state));
-    this.ball.update(state, this.origin, this.bodies);
+    this.ball.update(state, this.origin, this.bodies, dt);
     this.sweep.update(state, this.origin);
     this.controls.setButtons(canThrow(state) && !this.paused);
     this.controls.setBreak(this.breakView());
@@ -294,19 +294,23 @@ export class ArcadeGame {
           break;
         case 'thrown':
           play('throw');
+          this.ball.burst(40, 5);
           break;
         case 'handoff':
           play('catch');
           break;
         case 'scrambled':
+          this.ball.burst(30, 3);
           play('hop');
           this.hud.pop('QB RUN!', 'good');
           break;
         case 'caught':
+          this.ball.burst(30, 3);
           play(e.contested ? 'cleanCatch' : 'catch');
           this.hud.pop(e.contested ? 'CAUGHT IT!' : 'GOT IT!', 'good');
           break;
         case 'batted':
+          this.ball.burst(50, 6);
           play('fumble');
           play('chant');
           this.hud.pop(e.contested ? 'DROPPED!' : 'SWATTED!', 'bad');

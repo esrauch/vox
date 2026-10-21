@@ -71,7 +71,7 @@ Later candidates: the Skeleton (falls apart forward when tackled), the Mummy (ne
 
 ### The ball
 
-**A jack-o'-lantern.** A round pumpkin with a glowing carved face: the team's ball and the game's icon. **It's also the field's light:** a warm lamp burns inside it, lighting everyone around it and throwing their shadows, so the shadows swing as it flies and pool around whoever is carrying it. The moon is only a dim fill. *(A football-shaped pumpkin was tried and set aside, 2026-10-20.)*
+**A jack-o'-lantern.** A round pumpkin with a glowing carved face: the team's ball and the game's icon. **There's no quarterback: the pumpkin throws itself.** It floats behind the line, bobbing, its face always turned to you; it fires itself off as a bullet, and on a QB run it bounds upfield on its own. Embers drift off it, trail behind it in flight, and burst out when it's thrown, caught or knocked down. **It's also the field's light:** a warm lamp burns inside it, lighting everyone around it and throwing their shadows, so the shadows swing as it flies and pool around whoever is carrying it. The moon is only a dim fill. *(A football-shaped pumpkin was tried and set aside, 2026-10-20.)*
 
 ---
 
