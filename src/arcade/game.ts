@@ -319,7 +319,7 @@ export class ArcadeGame {
           this.ball.burst(50, 6);
           play('fumble');
           play('chant');
-          this.hud.pop(e.contested ? 'DROPPED!' : 'SWATTED!', 'bad');
+          this.hud.pop(e.contested ? 'DROPPED!' : 'BLOCKED!', 'bad');
           break;
         case 'incomplete':
           play('fumble');

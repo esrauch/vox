@@ -105,6 +105,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 - **A catch is reach.** The bullet is caught by the first of your players whose reach it passes through, and **Hands is reach**: better Hands catch a bullet that would have gone by.
 - **A contested ball:** if a defender can reach it at the same moment, the one with **more Hands** wins it; if it's the defender, it's batted down (no interceptions). Ties go to you.
+- **It goes past the scrum:** your Blockers never touch the ball (linemen aren't eligible), and a Rhino Beetle locked up with one of your players can't get a hand to it.
 - **Throwing lanes matter:** a bullet passes every defender between the QB and the receiver, and any of them that can reach it bats it down. **A Scarecrow's wide ring blocks a whole lane.** So the timing is: when the line is over an open receiver *and* the lane to it is clear.
 
 ---

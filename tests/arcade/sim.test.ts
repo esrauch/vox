@@ -195,7 +195,26 @@ describe('throwing: a bullet along the line', () => {
     expect(ofType(r.events, 'batted')[0]).toMatchObject({ by: 100, contested: false });
   });
 
-  it('a Scarecrow\\u2019s wide ring blocks a whole lane', () => {
+  it('it goes past the scrum: a Blocker never catches it, an engaged rusher can’t bat it', () => {
+    // A Blocker locked up with a rusher, right in the lane to a Catcher on (4, 6).
+    const s = playState(
+      [
+        { role: 'blocker', pos: v(1.2, -1), job: stand(v(1.2, -1)) },
+        { pos: v(4, 6), job: stand(v(4, 6)) },
+      ],
+      [{ kind: 'rusher', pos: v(1.2, 0.1) }],
+    );
+    const r = run(s, 2, throwAt(s, v(4, 6)));
+    expect(ofType(r.events, 'caught')[0]?.id).toBe(3);
+    // A rusher that's free, in the same lane, knocks it down.
+    const free = playState(
+      [{ pos: v(4, 6), job: stand(v(4, 6)) }],
+      [{ kind: 'rusher', pos: v(1.2, 0.1) }],
+    );
+    expect(ofType(run(free, 2, throwAt(free, v(4, 6))).events, 'batted')[0]?.by).toBe(100);
+  });
+
+  it('a Scarecrow’s wide ring blocks a whole lane', () => {
     const r = shot([{ kind: 'zone', pos: v(3.5, 1) }]);
     expect(ofType(r.events, 'batted')[0]?.by).toBe(100);
   });

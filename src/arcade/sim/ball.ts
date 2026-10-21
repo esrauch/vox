@@ -4,10 +4,11 @@
  * On a pass play an aim line sweeps from the QB, sideline to sideline and
  * back; THROW fires a bullet along it, straight and fast. As it flies, the
  * first thing that can reach it decides it:
- *   - your player nearest to it (within its reach, and not right by the QB)
- *     catches it, unless a defender reaching it too has more Hands (ties go
+ *   - your player nearest to it (within its reach, not right by the QB, and
+ *     not a Blocker: linemen aren't eligible) catches it, unless a defender reaching it too has more Hands (ties go
  *     to you): then it's batted;
- *   - with only a defender reaching it, it's batted down;
+ *   - with only a defender reaching it, it's batted down (a Rhino Beetle
+ *     locked up with one of your players can't: the ball goes past the scrum);
  *   - a Witch it passes near knocks it down;
  *   - at the end of its range with nobody there, it's incomplete.
  */
@@ -100,14 +101,16 @@ export function contact(
   const catcher = state.field.players
     .filter(
       (p) =>
+        // Linemen aren't eligible: the ball goes past the Blockers (and the QB).
         p.role !== 'qb' &&
+        p.role !== 'blocker' &&
         p.down <= 0 &&
         dist(p.pos, from) >= t.minDistance &&
         dist(p.pos, at) <= p.reach,
     )
     .sort((a, b) => dist(a.pos, at) - dist(b.pos, at) || a.id - b.id)[0];
   const defender = state.field.defenders
-    .filter((d) => d.down <= 0 && dist(d.pos, at) <= d.reach)
+    .filter((d) => d.down <= 0 && !engaged(state, d) && dist(d.pos, at) <= d.reach)
     .sort(byHands(at))[0];
   if (catcher && defender && defender.stats.hands > catcher.stats.hands) {
     return { kind: 'batted', by: defender.id, at: defender.pos, contested: true };
@@ -116,6 +119,16 @@ export function contact(
   if (defender) return { kind: 'batted', by: defender.id, at: defender.pos, contested: false };
   if (last) return { kind: 'incomplete', at: end };
   return null;
+}
+
+/** A rusher locked up with one of your players: it can't get a hand to the ball, which goes past it. */
+function engaged(state: RunState, d: Defender): boolean {
+  return (
+    d.kind === 'rusher' &&
+    state.field.players.some(
+      (p) => p.role !== 'qb' && p.down <= 0 && dist(p.pos, d.pos) <= p.radius + d.radius + 0.15,
+    )
+  );
 }
 
 /** The best hands first; then the nearest. */
