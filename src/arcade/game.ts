@@ -28,7 +28,7 @@ import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
 import { carrierOf, qbOf } from './sim/ai';
 import { createRun, dispatch, downAndDistance } from './sim/run';
-import { breakMarker, jukeShowing, mashLeft } from './sim/breakit';
+import { breakMarker, countdown, jukeShowing, mashLeft } from './sim/breakit';
 import { canThrow, step } from './sim/step';
 import type { Action, ArcadeEvent, DriveKind, Player, RunState, StepInput } from './sim/types';
 import { v } from './sim/vec';
@@ -122,7 +122,8 @@ export class ArcadeGame {
     this.controls = new ArcadeControls(uiRoot, {
       onThrow: () => this.press({ throw: true }),
       onRun: () => this.press({ scramble: true }),
-      onBreakTap: (side) => this.breakTap(side),
+      onBreakTap: () => this.press({ breakTap: true }),
+      onJuke: (side) => this.press({ juke: side }),
     });
 
     document.addEventListener('keydown', (e) => this.onKey(e));
@@ -216,26 +217,24 @@ export class ArcadeGame {
     const { state } = this;
     const t = state.tackle;
     if (!t || state.phase !== 'breakit') return null;
+    // The countdown's seconds left, on screen (sim time runs slower than real time).
+    const cd = countdown(state);
+    const ready = cd === null ? null : ((1 - cd) * arcadeTuning.breakit.ready) / TIME_SCALE;
     switch (t.kind) {
       case 'bar':
         return {
           kind: 'bar',
+          ready,
           sweet: t.sweet,
           near: t.near,
           marker: breakMarker(state) ?? 0,
           dir: t.dir,
         };
       case 'mash':
-        return { kind: 'mash', fill: t.fill, left: mashLeft(state) ?? 0 };
+        return { kind: 'mash', ready, fill: t.fill, left: mashLeft(state) ?? 0 };
       case 'juke':
-        return { kind: 'juke', side: jukeShowing(state) ? t.side : null };
+        return { kind: 'juke', ready, side: jukeShowing(state) ? t.side : null };
     }
-  }
-
-  /** A tap in Break it!: for a juke, the side counts; otherwise it's a tap. */
-  private breakTap(side: -1 | 1): void {
-    if (this.state.tackle?.kind === 'juke') this.press({ juke: side });
-    else this.press({ breakTap: true });
   }
 
   /** Before the hike, the called play's players (their routes are drawn), or null. */
@@ -423,7 +422,7 @@ export class ArcadeGame {
       else if (phase === 'breakit') this.press({ breakTap: true });
       else this.press({ throw: true });
     } else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-      if (phase === 'breakit') this.breakTap(e.code === 'ArrowLeft' ? -1 : 1);
+      if (phase === 'breakit') this.press({ juke: e.code === 'ArrowLeft' ? -1 : 1 });
     } else if (e.code === 'KeyR') this.press({ scramble: true });
     else if (e.code === 'KeyF' && phase === 'setup') this.act({ type: 'flip' });
     else if (phase === 'setup' && ['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {

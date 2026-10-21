@@ -124,6 +124,11 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-20:** **Break it! gets a countdown; the pumpkin gets bigger.**
+  - **Every test opens with a two-second "GET READY TO …"** (taps don't count during it), then the call.
+  - **JUKE! has ◀ and ▶ buttons** on screen through the countdown; the one to press lights up when it ends.
+  - **The pumpkin ball is twice the size** and spins half as fast.
+  - **The QB casts no shadow** while the pumpkin's in his hand, so he doesn't block its light.
 - **2026-10-20:** **The ball is a jack-o'-lantern again, and it's the light.**
   - **The model:** the round pumpkin with the glowing face, a bit bigger so it reads from the arcade camera, drawn unlit so it glows.
   - **The light:** a warm, slightly flickering lamp inside it lights the field and casts the shadows: they swing as it flies and pool around the carrier.

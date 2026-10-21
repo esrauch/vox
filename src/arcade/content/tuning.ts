@@ -76,6 +76,12 @@ export const arcadeTuning = {
     scans: 3,
   },
   breakit: {
+    /**
+     * Every test opens with a countdown ("Get ready to mash…") this long in
+     * sim time (2 seconds on screen, at the game's 0.8 time scale); taps
+     * during it don't count.
+     */
+    ready: 1.6,
     /** The marker crosses the meter once, in this long… */
     meterSeconds: 1.1,
     /** …and the sweet spot never starts before this share of its trip, so there's time to react. */
@@ -99,10 +105,7 @@ export const arcadeTuning = {
     mashMaxPerTap: 0.3,
     /** …full breaks it at once; this full by the end drags. */
     mashDrag: 0.5,
-    /** Juke: the arrow shows after a pause between these (seconds)… */
-    jukeMinDelay: 0.3,
-    jukeMaxDelay: 0.7,
-    /** …then there's this long to tap its side, plus this per point of Hustle over the tackler (within the range)… */
+    /** Juke: when the countdown ends the arrow shows; then there's this long to tap its side, plus this per point of Hustle over the tackler (within the range)… */
     jukeWindow: 0.55,
     jukePerHustle: 0.06,
     jukeMinWindow: 0.25,

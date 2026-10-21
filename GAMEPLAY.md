@@ -90,13 +90,13 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### Break it! *(the tackle mini-games)*
 
-**When a defender grabs the carrier, the play freezes for about a second** for one of three quick tests, picked at random. Each ends the same three ways: **BREAK!** (the tackler goes flying and the carrier keeps running), **DRAG** (the carrier hauls the tackler a few more yards, then goes down), or **tackled**.
+**When a defender grabs the carrier, the play freezes** for one of three quick tests, picked at random. **Each opens with a two-second countdown** ("GET READY TO MASH! 2… 1…"), when taps don't count, then the call ("MASH!"). Each ends the same three ways: **BREAK!** (the tackler goes flying and the carrier keeps running), **DRAG** (the carrier hauls the tackler a few more yards, then goes down), or **tackled**.
 
 | Test | You see | You do | Sized by |
 |---|---|---|---|
 | **The bar** | A marker crossing a bar, left to right or right to left, with a green sweet spot (never in the first third of its trip) and a yellow "close" band | Tap in the green to break, in the yellow to drag | **Heft**: a wider sweet spot |
 | **MASH!** | A bar that fills as you tap | Tap as fast as you can for a second: fill it to break, half fill it to drag | **Heft**: more per tap |
-| **JUKE!** | After a short pause, a big arrow pointing left or right | Tap that side of the screen: quickly to break, a beat later to drag. A guess before the arrow, or the wrong side, is a tackle | **Hustle**: a longer window |
+| **JUKE!** | Two big buttons, ◀ and ▶, from the start of the countdown; when it ends, the one to press lights up | Press it: quickly to break, a beat later to drag. The wrong one is a tackle | **Hustle**: a longer window |
 
 - **Every extra tackler already on it** makes the test harder: a narrower sweet spot, less per tap, a shorter window. A pile is hard to escape.
 - **More Heft also means more yards on a drag.**
@@ -118,7 +118,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Before the snap** | **HIKE!** | Start the called play. |
 | **Pass play** | **THROW** | Fire a bullet along the sweeping line. |
 | **Pass play** | **RUN** | The QB runs it himself. |
-| **Grabbed** | **Tap** (anywhere; for a juke, the arrow's side) | Break it! |
+| **Grabbed** | **Tap** anywhere (a juke: its ◀ or ▶ button) | Break it! |
 | **Between drives** | **Tap a card** | Take that upgrade. |
 
 **One thumb, portrait, no aiming.** Everything is a tap at the right moment.

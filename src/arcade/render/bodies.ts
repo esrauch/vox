@@ -97,6 +97,8 @@ export class ArcadeBodies {
         view.yaw += d * Math.min(1, dt * 12);
       }
       view.root.rotation.y = view.yaw;
+      // The pumpkin in the QB's hand is the light: the QB mustn't block it.
+      if (b.side === 'team' && b.role === 'qb') view.body.castShadow = state.field.ball.at !== 'qb';
       view.body.rotation.z = b.down > 0 ? Math.PI / 2 : 0;
       // A little bob while running.
       const speed = Math.hypot(b.vel.x, b.vel.y);

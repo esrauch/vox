@@ -118,9 +118,11 @@ export interface Field {
  *   is measured along the trip; `dir` is which way it runs on screen.
  * - **mash:** tap as fast as you can: every tap adds `perTap` to `fill`;
  *   full breaks it, half full by the end drags.
- * - **juke:** at `showAt` an arrow points to `side`; tap that side within
- *   `window` (the first half breaks, the rest drags). Too early, the wrong
- *   side or too late is a tackle.
+ * - **juke:** at `showAt` (the end of the countdown) an arrow points to
+ *   `side`; tap that side within `window` (the first half breaks, the rest
+ *   drags). The wrong side, or too late, is a tackle.
+ *
+ * Each opens with a countdown (tuning.breakit.ready), when taps don't count.
  */
 export type Tackle = {
   readonly startedAt: number;

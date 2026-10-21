@@ -54,19 +54,19 @@ export class ArcadeBall {
   update(state: RunState, origin: number, bodies: ArcadeBodies): void {
     const ball = state.field.ball;
     this.landing.visible = false;
-    this.ball.rotation.y = state.time * 6;
+    this.ball.rotation.y = state.time * 3;
     switch (ball.at) {
       case 'qb': {
         const qb = state.field.players.find((p) => p.role === 'qb');
         if (qb)
-          this.ball.position.copy(toWorld(qb.pos, origin, 1.0)).add(new THREE.Vector3(0.3, 0, 0));
+          this.ball.position.copy(toWorld(qb.pos, origin, 1.0)).add(new THREE.Vector3(0.75, 0, 0));
         break;
       }
       case 'flight': {
         const u = Math.min(1, (state.time - ball.thrownAt) / (ball.landsAt - ball.thrownAt));
         // A bullet: flat and fast, at chest height.
         this.ball.position.copy(toWorld(lerp(ball.from, ball.target, u), origin, 1));
-        this.ball.rotation.x = state.time * 30;
+        this.ball.rotation.x = state.time * 15;
         break;
       }
       case 'carried': {

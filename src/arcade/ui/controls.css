@@ -120,9 +120,34 @@
   background: var(--pumpkin);
 }
 
-.arc-arrow {
-  font-size: 4.5rem;
-  line-height: 1;
-  margin: 6px 0;
-  color: var(--slime-green);
+.arc-juke {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 10px 0 6px;
+}
+
+.arc-juke-btn {
+  height: 96px;
+  border: 0;
+  border-radius: 18px;
+  font: inherit;
+  font-size: 3rem;
+  color: var(--ink);
+  background: var(--bone);
+  box-shadow:
+    inset 0 -6px 0 rgb(0 0 0 / 0.15),
+    0 6px 0 var(--ink);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.arc-juke-btn.go {
+  color: var(--ink);
+  background: var(--slime-green);
+  scale: 1.08;
+}
+
+.arc-juke-btn.dim {
+  opacity: 0.35;
 }

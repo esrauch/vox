@@ -11,7 +11,7 @@ import {
   nextDown,
   startingRoster,
 } from '../../src/arcade/sim/run';
-import { breakMarker, jukeShowing } from '../../src/arcade/sim/breakit';
+import { breakMarker, countdown, jukeShowing } from '../../src/arcade/sim/breakit';
 import { canThrow, forceBreakKind, step } from '../../src/arcade/sim/step';
 import type { ArcadeEvent, RunState } from '../../src/arcade/sim/types';
 import { dist, v } from '../../src/arcade/sim/vec';
@@ -284,7 +284,18 @@ describe('the carrier, and Break it! (the bar)', () => {
     expect(ofType(r.events, 'grabbed')[0]).toMatchObject({ id: 2, by: [100] });
     const frozen = run(r.state, 0.3).state;
     expect(body(frozen, 2).pos).toEqual(body(r.state, 2).pos);
-    expect(breakMarker(frozen)).toBeGreaterThan(0);
+  });
+
+  it('it opens with a countdown, when taps don\u2019t count; then the marker runs', () => {
+    const g = grabbed().state;
+    const ready = arcadeTuning.breakit.ready;
+    const during = run(g, ready / 2, { breakTap: true }).state;
+    expect(during.phase).toBe('breakit');
+    expect(countdown(during)).toBeGreaterThan(0.4);
+    expect(breakMarker(during)).toBe(0);
+    const after = run(g, ready + 0.3).state;
+    expect(countdown(after)).toBeNull();
+    expect(breakMarker(after)).toBeGreaterThan(0);
   });
 
   it('a tap in the sweet spot breaks it: the tackler goes flying, the carrier keeps going', () => {
@@ -315,7 +326,7 @@ describe('the carrier, and Break it! (the bar)', () => {
     expect(t.sweet.from - t.near).toBeGreaterThan(0.05);
     const miss = 0.02;
     expect(ofType(tapAt(g, miss).events, 'tackled')).toHaveLength(1);
-    expect(ofType(run(g, 2).events, 'tackled')).toHaveLength(1);
+    expect(ofType(run(g, 4).events, 'tackled')).toHaveLength(1);
   });
 
   it('the sweet spot is never in the first third of the marker\u2019s trip, which runs either way', () => {
@@ -468,14 +479,22 @@ describe('Break it!: the mash and the juke', () => {
     expect(ofType(juke(g, t.side, late).events, 'dragged')).toHaveLength(1);
   });
 
-  it('juke: the wrong side, a guess before the arrow, or nothing at all is a tackle', () => {
+  it('juke: the wrong side, or nothing at all, is a tackle', () => {
     const g = grabbed('juke');
     const t = g.tackle!;
     if (t.kind !== 'juke') throw new Error('not a juke');
     const wrong = t.side === 1 ? -1 : 1;
     expect(ofType(juke(g, wrong, 0.05).events, 'tackled')).toHaveLength(1);
-    expect(ofType(juke(g, t.side, 0, true).events, 'tackled')).toHaveLength(1);
-    expect(ofType(run(g, 3).events, 'tackled')).toHaveLength(1);
+    expect(ofType(run(g, 4).events, 'tackled')).toHaveLength(1);
+  });
+
+  it('juke: presses during the countdown don\u2019t count', () => {
+    const g = grabbed('juke');
+    const t = g.tackle!;
+    if (t.kind !== 'juke') throw new Error('not a juke');
+    const wrong = t.side === 1 ? -1 : 1;
+    const during = run(g, arcadeTuning.breakit.ready / 2, { juke: wrong }).state;
+    expect(during.phase).toBe('breakit');
   });
 
   it('juke: more Hustle gives a longer window', () => {

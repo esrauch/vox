@@ -1,7 +1,8 @@
 /**
  * Break it! (GAMEPLAY.md): when a defender grabs the carrier, the play
- * freezes for a one-second test, picked at random: the bar (a timed tap),
- * a mash (tap fast), or a juke (react to an arrow). Each is sized by the
+ * freezes for a quick test, picked at random: the bar (a timed tap), a mash
+ * (tap fast), or a juke (react to an arrow). Each opens with a countdown
+ * ("Get ready to mash…"), when taps don't count; then the test runs. Each is sized by the
  * stats: Heft for the bar and the mash, Hustle for the juke; every extra
  * tackler on it makes it harder. Each ends in a break, a drag or a tackle;
  * step.ts carries that out.
@@ -51,7 +52,7 @@ export function startBreakIt(
       tackle = {
         ...base,
         kind: 'juke',
-        showAt: state.time + b.jukeMinDelay + rng.next() * (b.jukeMaxDelay - b.jukeMinDelay),
+        showAt: state.time + b.ready,
         side: rng.next() < 0.5 ? -1 : 1,
         window:
           clamp(b.jukeWindow + b.jukePerHustle * hustleGap, b.jukeMinWindow, b.jukeMaxWindow) *
@@ -76,18 +77,30 @@ export function startBreakIt(
   state.phase = 'breakit';
 }
 
-/** The bar's marker along its trip (0 to 1), or null when it isn't a bar. */
+/** Seconds since the countdown ended (negative during it), or null outside Break it!. */
+export function sinceGo(state: RunState): number | null {
+  const t = state.tackle;
+  return t ? state.time - (t.startedAt + b.ready) : null;
+}
+
+/** How far through the countdown it is (0 to 1), or null once it's over (or outside Break it!). */
+export function countdown(state: RunState): number | null {
+  const since = sinceGo(state);
+  return since === null || since >= 0 ? null : 1 + since / b.ready;
+}
+
+/** The bar's marker along its trip (0 to 1; 0 through the countdown), or null when it isn't a bar. */
 export function breakMarker(state: RunState): number | null {
   const t = state.tackle;
   if (!t || t.kind !== 'bar') return null;
-  return Math.min(1, (state.time - t.startedAt) / b.meterSeconds);
+  return Math.max(0, Math.min(1, (sinceGo(state) ?? 0) / b.meterSeconds));
 }
 
-/** How much of a mash's time is left (1 to 0), or null when it isn't a mash. */
+/** How much of a mash's time is left (1 to 0; 1 through the countdown), or null when it isn't a mash. */
 export function mashLeft(state: RunState): number | null {
   const t = state.tackle;
   if (!t || t.kind !== 'mash') return null;
-  return Math.max(0, 1 - (state.time - t.startedAt) / b.mashSeconds);
+  return Math.max(0, Math.min(1, 1 - (sinceGo(state) ?? 0) / b.mashSeconds));
 }
 
 /** Whether a juke's arrow is showing. */
@@ -100,7 +113,9 @@ export function jukeShowing(state: RunState): boolean {
 export function judgeBreakIt(state: RunState, input: StepInput): BreakOutcome | null {
   const t = state.tackle;
   if (!t) return 'tackle';
-  const elapsed = state.time - t.startedAt;
+  const elapsed = sinceGo(state) ?? 0;
+  // The countdown: nothing counts yet.
+  if (elapsed < 0) return null;
   switch (t.kind) {
     case 'bar': {
       const m = Math.min(1, elapsed / b.meterSeconds);
@@ -117,8 +132,6 @@ export function judgeBreakIt(state: RunState, input: StepInput): BreakOutcome | 
     }
     case 'juke': {
       const shown = state.time - t.showAt;
-      // Guessing before the arrow shows is a tackle: it's a reaction, not a guess.
-      if (input.juke !== undefined && shown < 0) return 'tackle';
       if (input.juke !== undefined) {
         if (input.juke !== t.side) return 'tackle';
         return shown <= t.window * b.jukeBreakShare

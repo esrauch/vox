@@ -2,7 +2,7 @@
 # pumpkin with a glowing carved face on the front. In the arcade game it's
 # also the light: a warm lamp inside it lights the field and casts the shadows.
 size 7 8 7
-voxel 0.075
+voxel 0.15
 colors
   p pumpkin
   P pumpkinDark
