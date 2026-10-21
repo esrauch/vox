@@ -200,6 +200,11 @@ export class ArcadeGame {
       this.bodies.sync(this.state);
     }
     this.react(events, prev);
+    // No stop between drives (there are no upgrades to pick yet): straight into the next one.
+    if (this.state.phase === 'draft') {
+      const next = dispatch(this.state, { type: 'skipDraft' });
+      this.state = next.state;
+    }
     if (events.length > 0 || this.state.phase !== prev.phase) this.syncHud();
   }
 
@@ -385,7 +390,6 @@ export class ArcadeGame {
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
     else if (phase === 'setup')
       this.hud.setPrompt(called === null ? 'Pick a play' : null, called === null ? null : 'HIKE!');
-    else if (phase === 'draft') this.hud.setPrompt('First down!', 'NEXT DRIVE');
     else if (phase === 'over') this.hud.setPrompt('Turnover on downs!', 'AGAIN');
     else if (phase === 'won') this.hud.setPrompt('The forest is cleared!', 'AGAIN');
     else this.hud.setPrompt(null, null);
@@ -402,8 +406,6 @@ export class ArcadeGame {
       await this.conductor.resume();
     } else if (phase === 'setup') {
       this.act({ type: 'hike' });
-    } else if (phase === 'draft') {
-      this.act({ type: 'skipDraft' });
     } else if (phase === 'over' || phase === 'won') {
       this.seed++;
       this.state = createRun(this.seed);
