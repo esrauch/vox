@@ -1,6 +1,6 @@
-# Ghost player: a white sheet floating under the team's gold helmet, with two
-# dark eye holes, an orange jersey stripe across the chest, arms trailing out
-# to the sides and a ragged hem with nothing under it.
+# Ghost player: a plain white sheet floating under the team's gold helmet,
+# with two dark eye holes, arms trailing out to the sides and a ragged hem
+# with nothing under it. Drawn unlit, so it reads the same in any light.
 size 9 14 5
 voxel 0.08
 mirror x
@@ -9,9 +9,7 @@ colors
   n white
   m woodGrey
   w white
-  b bone
   k ink
-  j pumpkin
 slice 0
   ..hhn
   .hhhh
@@ -19,12 +17,12 @@ slice 0
   .hmmm
   ..www
   .wwww
-  bwwww
-  bwwjj
-  bwwjj
+  wwwww
+  wwwww
+  wwwww
   .wwww
   .wwww
-  .bwww
+  .wwww
   .w.ww
   .w.w.
 slice 1-3
@@ -34,12 +32,12 @@ slice 1-3
   .hhhh
   ..www
   .wwww
-  bwwww
-  bwwww
-  bwwww
+  wwwww
+  wwwww
+  wwwww
   .wwww
   .wwww
-  .bwww
+  .wwww
   .w.ww
   .w.w.
 slice 4
@@ -47,13 +45,13 @@ slice 4
   .hhhn
   .hhhh
   .hhhh
-  ..bbb
-  .bbbb
-  bbbbb
-  bbbbb
-  bbbbb
-  .bbbb
-  .bbbb
-  .bbbb
-  .b.bb
-  .b.b.
+  ..www
+  .wwww
+  wwwww
+  wwwww
+  wwwww
+  .wwww
+  .wwww
+  .wwww
+  .w.ww
+  .w.w.
