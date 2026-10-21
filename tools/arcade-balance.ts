@@ -148,7 +148,7 @@ function botInput(state: RunState, rng: Rng, plan: Plan): StepInput {
   }
   if (!canThrow(state)) return {};
   const left = 1 - (state.time - state.snappedAt) / pocketTime(state);
-  if (left < PANIC) return rng.next() < 0.5 ? { scramble: true } : { throw: true };
+  if (left < PANIC) return { throw: true };
   if (wouldCatch(state) && rng.next() < REACT) return { throw: true };
   return {};
 }

@@ -6,12 +6,11 @@
  *
  * - **Before the snap:** three play cards and Flip. Tap a card to call it
  *   (its routes show on the field; tap another to switch), then HIKE.
- * - **On a pass play:** THROW fires a bullet along the sweeping line; RUN
- *   lets the QB keep it.
+ * - **On a pass play:** THROW fires a bullet along the sweeping line.
  * - **In Break it!:** taps, anywhere (for a juke, on the arrow's side).
  *
  * Keys for a desktop: 1–3 call a card, F flips, Space hikes (then throws,
- * and taps the bar and the mash), R runs, ← and → juke. The music is the soundtrack only: nothing waits for the beat.
+ * and taps the bar and the mash), ← and → juke. The music is the soundtrack only: nothing waits for the beat.
  */
 import * as THREE from 'three';
 import { Conductor } from '../game/conductor';
@@ -127,7 +126,6 @@ export class ArcadeGame {
     this.hud.setDraft(null);
     this.controls = new ArcadeControls(uiRoot, {
       onThrow: () => this.press({ throw: true }),
-      onRun: () => this.press({ scramble: true }),
       onBreakTap: () => this.press({ breakTap: true }),
       onJuke: (side) => this.press({ juke: side }),
     });
@@ -382,7 +380,7 @@ export class ArcadeGame {
             return { name: p?.name ?? '?', blurb: p?.handoff !== undefined ? 'Run' : 'Pass' };
           })
         : null;
-    this.hud.setHand(cards, called, { always: true, flipped });
+    this.hud.setHand(cards, called, { always: false, flipped });
     if (!this.conductor.started) this.hud.setPrompt('Fourth & Ghoul', 'PLAY');
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
     else if (phase === 'setup')
@@ -434,8 +432,7 @@ export class ArcadeGame {
       else this.press({ throw: true });
     } else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
       if (phase === 'breakit') this.press({ juke: e.code === 'ArrowLeft' ? -1 : 1 });
-    } else if (e.code === 'KeyR') this.press({ scramble: true });
-    else if (e.code === 'KeyF' && phase === 'setup') this.act({ type: 'flip' });
+    } else if (e.code === 'KeyF' && phase === 'setup') this.act({ type: 'flip' });
     else if (phase === 'setup' && ['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {
       this.call(Number(e.code.slice(-1)) - 1);
     }

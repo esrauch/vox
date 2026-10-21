@@ -1,6 +1,6 @@
 /**
  * The arcade game's own controls over the canvas (GAMEPLAY.md, Controls):
- * the THROW and RUN buttons on a pass play, and the Break it! panel, one of
+ * the THROW button on a pass play, and the Break it! panel, one of
  * three: the bar (a sweet spot and "close" band, and a marker crossing it),
  * MASH! (a filling bar), or JUKE! (two buttons, one lighting up). Each
  * opens with a countdown ("GET READY TO MASH! 2"). For the bar and the mash
@@ -11,7 +11,6 @@ import './controls.css';
 
 export interface ControlHandlers {
   onThrow(): void;
-  onRun(): void;
   /** A tap in Break it! (the bar, or a mash). */
   onBreakTap(): void;
   /** A juke button: left (-1) or right (+1). */
@@ -57,7 +56,6 @@ export class ArcadeControls {
     this.root.className = 'arc-controls';
     this.root.innerHTML = `
       <div class="arc-buttons" hidden>
-        <button class="arc-btn arc-run interactive">RUN</button>
         <button class="arc-btn arc-throw interactive">THROW</button>
       </div>
       <div class="arc-meter interactive" hidden>
@@ -98,7 +96,6 @@ export class ArcadeControls {
         fn();
       });
     press(q('.arc-throw'), () => handlers.onThrow());
-    press(q('.arc-run'), () => handlers.onRun());
     press(this.jukeLeft, () => handlers.onJuke(-1));
     press(this.jukeRight, () => handlers.onJuke(1));
     // For the bar and the mash, a tap anywhere on the screen counts.
@@ -107,7 +104,7 @@ export class ArcadeControls {
     });
   }
 
-  /** Show THROW and RUN (on a pass play, while the QB has the ball). */
+  /** Show THROW (on a pass play, while the QB has the ball). */
   setButtons(show: boolean): void {
     this.buttons.hidden = !show;
   }

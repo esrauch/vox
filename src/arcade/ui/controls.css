@@ -10,7 +10,7 @@
   right: 16px;
   bottom: calc(24px + env(safe-area-inset-bottom));
   display: grid;
-  grid-template-columns: 1fr 1.6fr;
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 

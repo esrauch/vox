@@ -80,9 +80,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
    **Every Runner gets out past the line of scrimmage** (only the Blockers stay home), and no route runs deeper than a throw can reach. A curl can end coming back. **Choosing a handoff card is choosing to run.**
 2. **The sweep.** On a pass play an **aim line sweeps from the QB**, sideline to sideline and back, like a lighthouse beam. **A receiver the line is passing over lights up.** It sweeps faster in later areas.
-3. **Two buttons:**
+3. **One button:**
    - **THROW** fires a **bullet** along the line: fast and flat. The **first one of your players it reaches** catches it (anyone within a few yards of the QB is skipped). If a defender gets to it first, it's **batted down**. If nobody's in the way, it's **incomplete**.
-   - **RUN:** the QB tucks it and runs, drifting toward the open side. For when everyone's covered.
 4. **The pocket holds for three sweeps.** If the QB still has the ball when the line finishes its third pass across, the pocket collapses: **SACKED!** A faster sweep means a quicker pocket.
 5. **After the catch, the carrier runs on its own:** it charges upfield and drifts toward the emptiest lane by itself. There's no steering: your skill goes into the tackles.
 6. **Break it!** (below) every time someone grabs the carrier.
@@ -114,11 +113,10 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 | When | Gesture | What it does |
 |---|---|---|
-| **Before the snap** | **Tap Flip** | Mirror the play. |
+| **Before the snap** | **Tap Flip** (once a play is called) | Mirror the play. |
 | **Before the snap** | **Tap a card** | Call that play: its routes show on the field. Tap another to switch. |
 | **Before the snap** | **HIKE!** | Start the called play. |
 | **Pass play** | **THROW** | Fire a bullet along the sweeping line. |
-| **Pass play** | **RUN** | The QB runs it himself. |
 | **Grabbed** | **Tap** anywhere (a juke: its ◀ or ▶ button) | Break it! |
 | **Between drives** | **Tap a card** | Take that upgrade. |
 
