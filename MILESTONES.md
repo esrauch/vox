@@ -124,6 +124,11 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-20:** **Stats on a 50 scale; TRICK OR TREAT! designed.**
+  - **Stats:** an ordinary player is 50 / 50 / 50, and every 10 points is one step (the physics and Break it! read steps from 50), so there's room for small tuned bonuses. It plays the same as before.
+  - **TRICK OR TREAT!** (design only): after each won drive, pick one of three perks with rarity. The baseline is +10 to a stat for everyone; others include kind bonuses, sweep and pocket perks, a faster ball, Second Wind, and new players with bio cards.
+  - **Monster Mash:** +10 to every stat for each player whose kind is unique on the team.
+  - **Any player can play any position.**
 - **2026-10-20:** **The bullet goes past the scrum.** Blockers are never eligible to catch, and a Rhino Beetle engaged with one of your players can't bat it down (a free one still can). SWATTED! is now BLOCKED!.
 - **2026-10-20:** **After every Break it!, a big GREAT! / OK / BAD** in the middle of the screen (green, orange, red), with the yards still popping below it. The PANCAKE! pop is gone (the hit still sounds). The pumpkin's embers now stream in every phase, play selection included, and a dead ball hovers above the pile instead of sinking into it.
 - **2026-10-20:** **The pumpkin throws itself.**

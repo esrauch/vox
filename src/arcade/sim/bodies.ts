@@ -9,13 +9,18 @@ import type { Play } from '../content/plays';
 import type { Defender, Drive, Player, RosterPlayer, Stats } from './types';
 import { add, v } from './vec';
 
+/** A stat in steps away from ordinary (50 is 0, 60 is 1, 30 is -2). */
+export function steps(stat: number): number {
+  return (stat - arcadeTuning.body.statBase) / arcadeTuning.body.statStep;
+}
+
 /** The physics a set of stats gives a body. */
 export function physicsOf(stats: Stats): { mass: number; speed: number; reach: number } {
   const b = arcadeTuning.body;
   return {
-    mass: b.mass.perHeft ** stats.heft,
-    speed: Math.max(b.speed.min, b.speed.base + b.speed.perHustle * stats.hustle),
-    reach: Math.max(b.reach.min, b.reach.base + b.reach.perHands * stats.hands),
+    mass: b.mass.perHeft ** steps(stats.heft),
+    speed: Math.max(b.speed.min, b.speed.base + b.speed.perHustle * steps(stats.hustle)),
+    reach: Math.max(b.reach.min, b.reach.base + b.reach.perHands * steps(stats.hands)),
   };
 }
 

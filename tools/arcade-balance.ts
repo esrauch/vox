@@ -55,9 +55,9 @@ const SCENARIOS: readonly Scenario[] = custom
   ? [JSON.parse(custom) as Scenario]
   : [
       { name: 'All human (never upgrade)' },
-      { name: 'Trained: +1 Hustle', training: { hustle: 1 } },
-      { name: 'Trained: +1 Hands', training: { hands: 1 } },
-      { name: 'Trained: +1 Heft', training: { heft: 1 } },
+      { name: 'Trained: +10 Hustle', training: { hustle: 10 } },
+      { name: 'Trained: +10 Hands', training: { hands: 10 } },
+      { name: 'Trained: +10 Heft', training: { heft: 10 } },
       { name: 'Golem Blockers', forms: { blocker: 'golem' } },
       { name: 'Werewolf Runners', forms: { runner: 'werewolf' } },
       { name: 'Ghost Catchers', forms: { catcher: 'ghost' } },

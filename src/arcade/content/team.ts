@@ -29,12 +29,16 @@ export const LINEUP: readonly { readonly x: number; readonly y: number }[] = [
 /** The QB lines up this far behind the line of scrimmage. */
 export const QB_DEPTH = 4;
 
-/** Every role's base stats: a plain human in that role. */
+/**
+ * Every role's base stats: a plain human in that role. Stats are on a
+ * 0-100-ish scale where 50 is ordinary and every 10 points is one step
+ * (tuning.body), so there's room to tune small bonuses.
+ */
 export const ROLE_STATS: Readonly<Record<Role, Stats>> = {
-  qb: { hustle: 0, hands: 0, heft: 0 },
-  blocker: { hustle: -1, hands: -1, heft: 2 },
-  runner: { hustle: 1, hands: -1, heft: 0 },
-  catcher: { hustle: 0, hands: 1, heft: -1 },
+  qb: { hustle: 50, hands: 50, heft: 50 },
+  blocker: { hustle: 40, hands: 40, heft: 70 },
+  runner: { hustle: 60, hands: 40, heft: 50 },
+  catcher: { hustle: 50, hands: 60, heft: 40 },
 };
 
 /** Body size by role (yards). */
@@ -48,7 +52,7 @@ export const ROLE_RADIUS: Readonly<Record<Role, number>> = {
 /** What each form adds to a player's stats. Each monster suits one role (GAMEPLAY.md, Building Up). */
 export const FORM_STATS: Readonly<Record<Form, Stats>> = {
   human: { hustle: 0, hands: 0, heft: 0 },
-  golem: { hustle: -1, hands: 0, heft: 4 },
-  werewolf: { hustle: 3, hands: 0, heft: 1 },
-  ghost: { hustle: 2, hands: 2, heft: -1 },
+  golem: { hustle: -10, hands: 0, heft: 40 },
+  werewolf: { hustle: 30, hands: 0, heft: 10 },
+  ghost: { hustle: 20, hands: 20, heft: -10 },
 };

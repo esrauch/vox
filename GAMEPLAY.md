@@ -146,38 +146,50 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Hustle** | **Speed.** | A Runner pulls away from the pack; a Catcher gets a step on its Cover. |
 | **Hands** | **Reach.** A bullet passing near snaps into the hands from further away, and a contested ball goes to the better Hands. | A Catcher plucks a bullet that was going by. |
 
+- **The scale: 50 is ordinary.** An ordinary player is **50 / 50 / 50**, and **every 10 points is one step** (one step more Heft is a quarter heavier; one step more Hustle is a little faster). The fine scale is there so small bonuses can be tuned. Roles shift it: a starting Blocker is about 40 / 40 / 70.
 - **Everyone starts human and plain.** A fresh team is a bit slow, a bit light, a bit clumsy: good enough for the sleepy first drive, not for the Boss.
-- **The numbers live on the roster screen** (between drives), as simple pips. On the field, the stats only show through what happens.
+- **Any player can play any position** (2 Blocker slots, 2 Runner slots, 3 Catcher slots). The plays only ever talk to the slots, so the team always lines up 2 / 2 / 3; who you put where is up to you, and their stats decide how well it works. A Golem in a Catcher slot is a slow Catcher nobody can tackle.
+- **The numbers live on the roster screen** (between drives). On the field, the stats only show through what happens.
 
 ---
 
-## Building Up: Upgrades
+## Building Up: TRICK OR TREAT! *(designed 2026-10-20)*
 
-**After every won drive, pick one of three upgrades, or skip.** It takes a few seconds and the next drive is already lined up behind it. **There's no draft before the first drive**: you start with what you've got.
+**After every won drive: TRICK OR TREAT!** Three perks are offered, each with a **rarity**; pick one (or ▲ *skip*), and you're straight into the next drive. **There's no draft before the first drive**: you start with what you've got.
 
-**The offers:**
-- **Transforms:** a player becomes a monster, for the rest of the run. **Each monster suits a role**, so a transform says which role it lands on:
-  - **Golem Clay:** a Blocker becomes a **Golem**. Much heavier: the line holds, and a Golem carrier is almost impossible to bring down.
-  - **Werewolf Bite:** a Runner becomes a **Werewolf**. Much faster, and gets faster the longer it runs.
-  - **Ghostly Touch:** a Catcher becomes a **Ghost**. Huge reach, and it drifts through Covers (they can't stick to it).
-- **Training:** *+1 Heft to your Blockers*, *+1 Hustle to your Runners*, *+1 Hands to your Catchers*. ▲ *Or to one random player, for more swing.*
-- ▲ *Later: trick plays (one-use, like a Pumpkin Bomb that clears a patch of defenders), and new plays for the random pool.*
+### The perks
 
-**Only humans can be transformed**, which player is random within the role, and there's no way back.
+| Rarity | Perk | What it does |
+|---|---|---|
+| Common | **+10 (stat) to everyone** | The baseline: a sure, small step for the whole team |
+| Common | **Extra Sweep** | The pocket holds for one more sweep before the sack |
+| Rare | **+20 (stat) to every Ghost** *(or Golem, Werewolf…)* | Rewards having several of one kind |
+| Rare | **Slow-Mo Sweep** | The aim line sweeps 25% slower: easier timing, but fewer chances before the pocket collapses |
+| Rare | **Second Wind** | Once per drive, a BAD Break it! counts as OK |
+| Rare | **Candy Corn Magnet** | A ball that would fall incomplete gets twice the reach from your Catchers |
+| Rare | **Hot Arm** | The ball flies twice as fast |
+| Epic | **Haunted Line** | Defenders your Blockers pancake come back as your ghosts for the rest of the down, and block for you |
+| Varies | **New player** | A recruit joins your team (below) |
+
+▲ *Rarity sets how often a perk turns up, and later areas offer rarer ones more often.*
+
+### New players
+
+**A recruit arrives with a little bio card:** a **name**, its **Heft / Hands / Hustle**, its **kind** (Human, Ghost, Golem, Werewolf, Skeleton…), and a **preferred position**. You pick who it replaces; it can go in any slot, but it plays best in its preferred one.
+
+> **Bonesy Malone** · Skeleton · *prefers Runner*
+> Heft 45 · Hands 50 · Hustle 75
 
 ### Team bonuses
 
-**How your monsters add up matters**, *Balatro*-style: a few bonuses reward building toward something. ▲ *First ideas, to prove out with the balance runs:*
+**How your kinds add up matters**, *Balatro*-style:
 
 | Bonus | Your team | Effect |
 |---|---|---|
-| **The Wall** | All three Blockers are Golems | The pocket never collapses |
-| **The Pack** | Both Runners are Werewolves | Every carrier gets the Werewolf's speed |
-| **The Haunting** | All three Catchers are Ghosts | Every pass is out of the defense's reach until it lands |
-| **Monster Mash** | At least one of each monster | Every player gets +1 to every stat |
-| **Final Girls** | No monsters at all, and at least two training picks | Every player gets +1 to every stat, and the last tackle on 4th down always misses |
+| **Monster Mash** | Players of different kinds | **+10 to every stat for each player whose kind is unique on your team** (the only one of its kind) |
+| ▲ *More to come* | *e.g. three of one kind* | *e.g. that kind's perk bonuses doubled* |
 
-The tension: every pick is either toward a bonus or a sure, small boost now.
+The tension: a recruit of a kind you already have feeds the "+20 to every Ghost" perks; a recruit of a new kind feeds Monster Mash.
 
 ---
 

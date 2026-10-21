@@ -25,7 +25,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
   rusher: {
     name: 'Rusher',
     creature: 'Rhino Beetle',
-    stats: { hustle: -1, hands: -1, heft: 2 },
+    stats: { hustle: 40, hands: 40, heft: 70 },
     radius: 0.6,
     planted: false,
     reachBonus: 0,
@@ -33,7 +33,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
   cover: {
     name: 'Cover',
     creature: 'Garden Gnome',
-    stats: { hustle: 0, hands: 0, heft: -1 },
+    stats: { hustle: 50, hands: 50, heft: 40 },
     radius: 0.4,
     planted: false,
     reachBonus: 0,
@@ -41,7 +41,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
   zone: {
     name: 'Zone',
     creature: 'Scarecrow',
-    stats: { hustle: 0, hands: 3, heft: 3 },
+    stats: { hustle: 50, hands: 80, heft: 80 },
     radius: 0.55,
     planted: true,
     reachBonus: 1.2,
@@ -49,7 +49,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
   safety: {
     name: 'Safety',
     creature: 'Owl',
-    stats: { hustle: 1, hands: 1, heft: 0 },
+    stats: { hustle: 60, hands: 60, heft: 50 },
     radius: 0.5,
     planted: false,
     reachBonus: 0,
@@ -57,7 +57,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
   bat: {
     name: 'Bat',
     creature: 'Bat',
-    stats: { hustle: -1, hands: 1, heft: -2 },
+    stats: { hustle: 40, hands: 60, heft: 30 },
     radius: 0.4,
     planted: false,
     reachBonus: 0.3,
@@ -96,7 +96,7 @@ export const FOREST: ArcadeArea = {
   intro: {
     name: 'A Quiet Clearing',
     witches: 0,
-    boost: -1,
+    boost: -10,
     defenders: [d('rusher', -1.8, 1), d('cover', -6.3, 4), d('cover', 4.2, 5), owl],
   },
   challenge: {

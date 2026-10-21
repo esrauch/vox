@@ -25,6 +25,10 @@ export const arcadeTuning = {
   },
   /** How the three stats become physics (GAMEPLAY.md, Your Team). */
   body: {
+    /** Stats are measured from this (ordinary)… */
+    statBase: 50,
+    /** …in steps of this: every number below that says "per Heft" or "per Hustle" means per step. */
+    statStep: 10,
     /**
      * Heft is weight: mass = perHeft ^ Heft, so every point of Heft is the
      * same step at any level, and the contact ratios below read as Heft gaps.
@@ -126,7 +130,7 @@ export const arcadeTuning = {
   },
   defense: {
     /** Added to every defender's stats each area after the first… */
-    perArea: 1,
+    perArea: 10,
     /** …and again on the Boss drive (its bigger line-up is most of its step up). */
     boss: 0,
     /** How far behind its Catcher a Cover trails. */

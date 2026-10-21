@@ -109,8 +109,8 @@ describe('a run', () => {
 
 describe('stats are physics', () => {
   it('Heft is weight, Hustle is speed, Hands is reach: each point the same step', () => {
-    const base = physicsOf({ hustle: 0, hands: 0, heft: 0 });
-    const more = physicsOf({ hustle: 1, hands: 1, heft: 1 });
+    const base = physicsOf({ hustle: 50, hands: 50, heft: 50 });
+    const more = physicsOf({ hustle: 60, hands: 60, heft: 60 });
     expect(more.mass / base.mass).toBeCloseTo(arcadeTuning.body.mass.perHeft);
     expect(more.speed).toBeGreaterThan(base.speed);
     expect(more.reach).toBeGreaterThan(base.reach);
@@ -118,8 +118,8 @@ describe('stats are physics', () => {
 
   it('a faster player outruns a slower one', () => {
     const s = playState([
-      { pos: v(-5, 0), stats: { hustle: 2 } },
-      { pos: v(5, 0), stats: { hustle: -1 } },
+      { pos: v(-5, 0), stats: { hustle: 70 } },
+      { pos: v(5, 0), stats: { hustle: 40 } },
     ]);
     const r = run(s, 1.5).state;
     expect(body(r, 2).pos.y).toBeGreaterThan(body(r, 3).pos.y + 1);
@@ -129,9 +129,9 @@ describe('stats are physics', () => {
     const rush = (blocked: boolean) => {
       const s = playState(
         blocked
-          ? [{ role: 'blocker', pos: v(0, -1.2), stats: { heft: 1 }, job: { kind: 'block' } }]
+          ? [{ role: 'blocker', pos: v(0, -1.2), stats: { heft: 60 }, job: { kind: 'block' } }]
           : [],
-        [{ kind: 'rusher', pos: v(0, 0), stats: { heft: 1 } }],
+        [{ kind: 'rusher', pos: v(0, 0), stats: { heft: 60 } }],
       );
       return body(run(s, 1.5).state, blocked ? 100 : 100).pos.y;
     };
@@ -141,8 +141,8 @@ describe('stats are physics', () => {
 
   it('a Blocker 3 Heft heavier pancakes the defender it hits', () => {
     const s = playState(
-      [{ role: 'blocker', pos: v(0, -2), stats: { heft: 3 }, job: { kind: 'block' } }],
-      [{ kind: 'rusher', pos: v(0, -0.8), stats: { heft: 0 } }],
+      [{ role: 'blocker', pos: v(0, -2), stats: { heft: 80 }, job: { kind: 'block' } }],
+      [{ kind: 'rusher', pos: v(0, -0.8), stats: { heft: 50 } }],
     );
     const r = run(s, 1);
     expect(ofType(r.events, 'pancake')[0]).toEqual({ type: 'pancake', blocker: 2, defender: 100 });
@@ -229,9 +229,9 @@ describe('throwing: a bullet along the line', () => {
       );
       return run(s, 2, throwAt(s, v(4, 6)));
     };
-    expect(ofType(contest(1, 1).events, 'caught')[0]).toMatchObject({ id: 2, contested: true });
+    expect(ofType(contest(60, 60).events, 'caught')[0]).toMatchObject({ id: 2, contested: true });
     // Better Hands reach further, so the Cover gets to it first.
-    expect(ofType(contest(0, 3).events, 'batted')[0]?.by).toBe(100);
+    expect(ofType(contest(50, 80).events, 'batted')[0]?.by).toBe(100);
   });
 
   it('it goes past your players right by the QB', () => {
@@ -273,13 +273,13 @@ describe('the carrier, and Break it! (the bar)', () => {
   };
 
   /** A Runner carrying on (0, 2), a gnome dead ahead on (0, 4). */
-  const grabbed = (runnerHeft = 0, extra = false) => {
+  const grabbed = (runnerHeft = 50, extra = false) => {
     const s = carry(
       playState(
         [{ role: 'runner', pos: v(0, 2), stats: { heft: runnerHeft } }],
         [
-          { kind: 'cover', pos: v(0, 4), stats: { heft: 0 } },
-          ...(extra ? [{ kind: 'cover' as const, pos: v(0.9, 3.6), stats: { heft: 0 } }] : []),
+          { kind: 'cover', pos: v(0, 4), stats: { heft: 50 } },
+          ...(extra ? [{ kind: 'cover' as const, pos: v(0.9, 3.6), stats: { heft: 50 } }] : []),
         ],
       ),
       2,
@@ -355,7 +355,7 @@ describe('the carrier, and Break it! (the bar)', () => {
       const s = carry(
         playState(
           [{ role: 'runner', pos: v(0, 2 - k * 0.07) }],
-          [{ kind: 'cover', pos: v(0, 4), stats: { heft: 0 } }],
+          [{ kind: 'cover', pos: v(0, 4), stats: { heft: 50 } }],
         ),
         2,
       );
@@ -373,8 +373,8 @@ describe('the carrier, and Break it! (the bar)', () => {
       const t = bar(grabbed(heft, extra).state);
       return t.sweet.to - t.sweet.from;
     };
-    expect(width(3)).toBeGreaterThan(width(0));
-    expect(width(0, true)).toBeLessThan(width(0));
+    expect(width(80)).toBeGreaterThan(width(50));
+    expect(width(50, true)).toBeLessThan(width(50));
   });
 
   it('running into a planted Scarecrow stops it dead', () => {
@@ -415,9 +415,9 @@ describe('Break it!: the mash and the juke', () => {
       playState(
         [{ role: 'runner', pos: v(0, 2), stats }],
         [
-          { kind: 'cover', pos: v(0, 4), stats: { heft: 0, hustle: 0 } },
+          { kind: 'cover', pos: v(0, 4), stats: { heft: 50, hustle: 50 } },
           ...(extra
-            ? [{ kind: 'cover' as const, pos: v(0.9, 3.6), stats: { heft: 0, hustle: 0 } }]
+            ? [{ kind: 'cover' as const, pos: v(0.9, 3.6), stats: { heft: 50, hustle: 50 } }]
             : []),
         ],
       ),
@@ -485,8 +485,8 @@ describe('Break it!: the mash and the juke', () => {
       const t = grabbed('mash', { heft }, extra).tackle!;
       return t.kind === 'mash' ? t.perTap : 0;
     };
-    expect(perTap(3)).toBeGreaterThan(perTap(0));
-    expect(perTap(0, true)).toBeLessThan(perTap(0));
+    expect(perTap(80)).toBeGreaterThan(perTap(50));
+    expect(perTap(50, true)).toBeLessThan(perTap(50));
   });
 
   it('juke: the right side, quickly, breaks it; a beat later drags', () => {
@@ -521,7 +521,7 @@ describe('Break it!: the mash and the juke', () => {
       const t = grabbed('juke', { hustle }).tackle!;
       return t.kind === 'juke' ? t.window : 0;
     };
-    expect(window(3)).toBeGreaterThan(window(0));
+    expect(window(80)).toBeGreaterThan(window(50));
   });
 });
 
@@ -563,7 +563,7 @@ describe('drives and the run', () => {
     const area = (a: number) => ['intro', 'challenge', 'gimmick', 'boss'].map((k) => `${a}:${k}`);
     expect(drives).toEqual([...area(0), ...area(1), ...area(2)]);
     expect(s.phase).toBe('won');
-    expect(coverHeft).toEqual([-2, -1, 0]);
+    expect(coverHeft).toEqual([30, 40, 50]);
   });
 
   it('the Boss drive goes for the end zone: "& Goal"', () => {

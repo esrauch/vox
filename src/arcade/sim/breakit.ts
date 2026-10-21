@@ -27,8 +27,11 @@ export function startBreakIt(
   kind?: BreakKind,
 ): void {
   const grabbers = state.field.defenders.filter((d) => tacklers.includes(d.id));
-  const heftGap = carrier.stats.heft - Math.max(...grabbers.map((d) => d.stats.heft));
-  const hustleGap = carrier.stats.hustle - Math.max(...grabbers.map((d) => d.stats.hustle));
+  // How many steps (10 points) the carrier has over its heaviest and its quickest tackler.
+  const step = arcadeTuning.body.statStep;
+  const heftGap = (carrier.stats.heft - Math.max(...grabbers.map((d) => d.stats.heft))) / step;
+  const hustleGap =
+    (carrier.stats.hustle - Math.max(...grabbers.map((d) => d.stats.hustle))) / step;
   const pile = b.perExtraTackler ** (tacklers.length - 1);
   const rng = rngFor(state.seed, 'break', state.step);
   const base = {
