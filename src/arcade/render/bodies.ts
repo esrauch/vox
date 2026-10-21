@@ -1,18 +1,18 @@
 /**
- * Everyone on the arcade field as voxel models, except the QB: there's
- * none to draw, the pumpkin ball throws itself. Placeholders until the role
- * and monster models exist (MILESTONES, A4): your players are the walk-on,
- * stretched into the three role silhouettes (wide Blockers, lean Runners,
- * tall Catchers), with a colored block on the head for a monster form.
- * Defenders are the forest set. Everyone turns to face where they're going,
- * and tips over when they're down.
+ * Everyone on the arcade field as voxel models, except the QB: there's none
+ * to draw, the pumpkin ball throws itself. Each of your players is its
+ * kind's model (a Human walk-on, a Ghost's sheet, a Golem's stones, a
+ * Werewolf's fur), all in the team helmet, stretched to the position it's
+ * playing (wide Blockers, lean Runners, tall Catchers). Ghosts float a
+ * little. Defenders are the forest set. Everyone turns to face where
+ * they're going, and tips over when they're down.
  *
  * Rings on the turf: gold under the carrier; under each receiver before the
- * catch, its **catch range** (the ring's edge is its reach: a bullet coming
- * inside it is caught), green when no defender could reach a ball there, red
- * when one could, gold while the aim line is over it; and a purple ring around every defender showing how far it
- * reaches for the ball (a Scarecrow's arms reach furthest), until someone
- * catches it.
+ * catch, its catch range (the ring's edge is its reach: a bullet coming
+ * inside it is caught), green when no defender could reach a ball there,
+ * red when one could, gold while the aim line is over it; and a purple ring
+ * around every defender showing how far it reaches for the ball (a
+ * Scarecrow's arms reach furthest), until someone catches it.
  */
 import * as THREE from 'three';
 import { common, hexToNumber, team } from '../../content/palettes';
@@ -38,11 +38,15 @@ const ROLE_SHAPE: Readonly<Record<Role, { readonly wide: number; readonly tall: 
   catcher: { wide: 0.85, tall: 1.25 },
 };
 
-const FORM_COLOR: Readonly<Record<Exclude<Form, 'human'>, number>> = {
-  ghost: 0xf2f0ff,
-  werewolf: 0x8a5a33,
-  golem: 0x8c8f99,
+/** Each kind of player's model, all in the team helmet. */
+const KIND_MODEL: Readonly<Record<Form, string>> = {
+  human: 'team/walkOn',
+  ghost: 'team/ghost',
+  golem: 'team/golem',
+  werewolf: 'team/werewolf',
 };
+/** Ghosts float a little off the turf. */
+const GHOST_HOVER = 0.18;
 
 const WALK_ON = 'team/walkOn';
 const WALK_ON_HEIGHT = modelHeight(WALK_ON);
@@ -67,9 +71,7 @@ export class ArcadeBodies {
   private readonly catchGeo = new THREE.RingGeometry(0.86, 1, 40).rotateX(-Math.PI / 2);
   /** A unit ring, scaled to each defender's reach. */
   private readonly reachGeo = new THREE.RingGeometry(0.94, 1, 48).rotateX(-Math.PI / 2);
-  private readonly badgeGeo = new THREE.BoxGeometry(0.3, 0.24, 0.3);
   private readonly ringMats = new Map<number, THREE.MeshBasicMaterial>();
-  private readonly badgeMats = new Map<number, THREE.MeshLambertMaterial>();
 
   constructor(private readonly scene: THREE.Scene) {}
 
@@ -109,10 +111,14 @@ export class ArcadeBodies {
       view.body.rotation.z = b.down > 0 ? Math.PI / 2 : 0;
       // A little bob while running.
       const speed = Math.hypot(b.vel.x, b.vel.y);
+      const hover =
+        b.side === 'team' && b.form === 'ghost'
+          ? GHOST_HOVER + 0.05 * Math.sin(state.time * 4 + b.id)
+          : 0;
       view.body.position.y =
         b.down > 0
           ? 0.2
-          : Math.abs(Math.sin(state.time * 14 + b.id)) * Math.min(0.12, speed * 0.03);
+          : hover + Math.abs(Math.sin(state.time * 14 + b.id)) * Math.min(0.12, speed * 0.03);
 
       view.ring.position.set(view.root.position.x, 0.02, view.root.position.z);
       view.ring.scale.setScalar(1);
@@ -154,18 +160,14 @@ export class ArcadeBodies {
   }
 
   private create(b: Body): View {
-    const model = b.side === 'defense' ? DEFENDER_MODEL[b.kind] : WALK_ON;
+    const model = b.side === 'defense' ? DEFENDER_MODEL[b.kind] : KIND_MODEL[b.form];
     const body = new THREE.Mesh(getGeometry(model), voxelMaterial);
     body.castShadow = true;
     if (b.side === 'team') {
+      // The position it's playing shows in its build (wide Blockers, lean Runners, tall
+      // Catchers); its kind shows in its model.
       const shape = ROLE_SHAPE[b.role];
-      const golem = b.form === 'golem' ? 1.2 : 1;
-      body.scale.set(shape.wide * golem, shape.tall * golem, shape.wide * golem);
-      if (b.form !== 'human') {
-        const badge = new THREE.Mesh(this.badgeGeo, this.badgeMat(FORM_COLOR[b.form]));
-        badge.position.y = WALK_ON_HEIGHT + 0.12;
-        body.add(badge);
-      }
+      body.scale.set(shape.wide, shape.tall, shape.wide);
     }
     const root = new THREE.Group();
     root.add(body);
@@ -184,15 +186,6 @@ export class ArcadeBodies {
     if (!m) {
       m = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.85 });
       this.ringMats.set(color, m);
-    }
-    return m;
-  }
-
-  private badgeMat(color: number): THREE.MeshLambertMaterial {
-    let m = this.badgeMats.get(color);
-    if (!m) {
-      m = new THREE.MeshLambertMaterial({ color });
-      this.badgeMats.set(color, m);
     }
     return m;
   }

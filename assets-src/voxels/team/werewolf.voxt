@@ -1,0 +1,63 @@
+# Werewolf player: a big, hairy rookie bursting out of the team kit. Pointed
+# ears poke out of the gold helmet, a dark snout and white fangs stick out of
+# the face mask, fur bristles at the shoulders, and the legs end in clawed feet.
+size 9 15 5
+voxel 0.08
+mirror x
+colors
+  h leafGold
+  n white
+  f fur
+  F furDark
+  k ink
+  w bone
+  j pumpkin
+  p pumpkinDark
+slice 0
+  .f...
+  .fhhn
+  .hhhh
+  fhfkf
+  .hFFF
+  ..wFF
+  ppppp
+  fjjjj
+  fjjjn
+  fjjjn
+  Fjjjj
+  ..FFF
+  ..FF.
+  ..ff.
+  ..kk.
+slice 1-3
+  .f...
+  .fhhn
+  .hhhn
+  fhhhh
+  .hhhh
+  ..fff
+  ppppp
+  fjjjj
+  fjjjj
+  fjjjj
+  Fjjjj
+  ..FFF
+  ..FF.
+  ..ff.
+  ..kk.
+slice 4
+  .f...
+  .fhhn
+  .hhhn
+  fhhhh
+  .hhhh
+  ..fff
+  ppppp
+  fffff
+  fjjjj
+  fjjjj
+  Fjjjj
+  ..FFF
+  ..FF.
+  ..ff.
+  ..kk.

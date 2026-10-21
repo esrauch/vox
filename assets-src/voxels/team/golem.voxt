@@ -1,0 +1,59 @@
+# Golem player: a stack of mossy stones, broad and heavy, with two glowing eyes
+# and the team's gold helmet jammed on top, too small for it. An orange jersey
+# scrap is stretched over its chest; its legs are two stone pillars.
+size 9 14 5
+voxel 0.09
+mirror x
+colors
+  h leafGold
+  n white
+  g stone
+  G stoneDark
+  q moss
+  y glow
+  j pumpkin
+slice 0
+  ...hn
+  ..hhh
+  ..gyg
+  ..GGG
+  ggggg
+  gGgqg
+  ggjjj
+  Ggjjj
+  gggGg
+  ggqgg
+  .ggg.
+  .gg..
+  .gg..
+  .GG..
+slice 1-3
+  ...hn
+  ..hhh
+  ..ggg
+  ..GGG
+  ggggg
+  gGggg
+  ggjjj
+  Ggjjj
+  gggGg
+  ggggg
+  .ggg.
+  .gg..
+  .gg..
+  .GG..
+slice 4
+  ...hn
+  ..hhh
+  ..gqg
+  ..GGG
+  ggggg
+  gGqgg
+  ggggg
+  Gggqg
+  gggGg
+  ggggg
+  .ggg.
+  .gg..
+  .gg..
+  .GG..

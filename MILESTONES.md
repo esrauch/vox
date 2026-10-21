@@ -93,7 +93,7 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## A4. Monsters and the Build
 
-- [ ] **Voxel models for the three roles** (Blocker, Runner, Catcher) and **the three monsters** (Golem, Werewolf, Ghost), all in the team helmet. Check each from the game camera at phone size.
+- [~] **Voxel models for the three roles** (Blocker, Runner, Catcher) and **the three monsters** (Golem, Werewolf, Ghost), all in the team helmet. Check each from the game camera at phone size. *(2026-10-21: the Ghost, Golem and Werewolf are modelled (`team/ghost`, `team/golem`, `team/werewolf`) and in the game; the roles are still the walk-on stretched. Not yet checked from the camera.)*
 - [ ] **Team bonuses:** The Wall, The Pack, The Haunting, Monster Mash, Final Girls, tuned with the balance runs.
 - [ ] **Three areas** (the forest three times, stiffer each time, until there are more).
 
@@ -124,6 +124,7 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-21:** **Models for the other kinds of player:** Ghost (a floating sheet with eye holes, a jersey stripe and a ragged hem), Golem (mossy stones, glowing eyes, a too-small helmet, a jersey scrap) and Werewolf (fur, ears through the helmet, snout and fangs, clawed feet), all in team colours. They replace the coloured head blocks; Ghosts hover. New palette colours: `fur`, `furDark`.
 - **2026-10-21:** **TRICK OR TREAT! built.**
   - **The offer:** after each won drive, three perks, drawn by rarity: common 60%, rare 32%, epic 8%. Never the same perk twice in one offer, and a one-off perk isn't offered again once you have it.
   - **The perks:** +10 to a stat for everyone, +20 to a stat for one kind, Extra Sweep, Slow-Mo Sweep, Second Wind, Candy Corn Magnet, Hot Arm, and new players.

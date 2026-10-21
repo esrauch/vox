@@ -80,6 +80,24 @@
       "license": "original"
     },
     {
+      "path": "assets-src/voxels/team/ghost.voxt",
+      "source": "Original voxel model (Ghost player: a sheet in the team helmet), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/team/golem.voxt",
+      "source": "Original voxel model (Golem player: mossy stones in the team helmet), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/team/werewolf.voxt",
+      "source": "Original voxel model (Werewolf player in the team kit), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
       "path": "assets-src/voxels/team/qb.voxt",
       "source": "Original voxel model (quarterback), written by Claude",
       "author": "Claude",

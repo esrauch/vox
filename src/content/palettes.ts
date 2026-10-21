@@ -62,6 +62,9 @@ export const voxel = {
   pineDark: '#1e4638',
   wood: '#b88a5e',
   woodGrey: '#7d7364',
+  // Monster players: the Werewolf's fur.
+  fur: '#8a5a33',
+  furDark: '#5e3b20',
   // Hazards.
   stone: '#8d93a3',
   stoneDark: '#646a79',
