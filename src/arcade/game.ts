@@ -26,16 +26,47 @@ import { ArcadeRoutes } from './render/routes';
 import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
 import { carrierOf, qbOf } from './sim/ai';
-import { createRun, dispatch, downAndDistance } from './sim/run';
+import { createRun, dispatch, downAndDistance, startingRoster } from './sim/run';
+import { FORM_STATS } from './content/team';
 import { breakMarker, countdown, jukeShowing, mashLeft } from './sim/breakit';
 import { canThrow, step } from './sim/step';
-import type { Action, ArcadeEvent, DriveKind, Player, RunState, StepInput } from './sim/types';
+import type {
+  Action,
+  ArcadeEvent,
+  DriveKind,
+  Player,
+  RosterPlayer,
+  RunState,
+  StepInput,
+} from './sim/types';
 import { v } from './sim/vec';
 import { ArcadeControls, type BreakView } from './ui/controls';
 import { trickOrTreatView } from './ui/trickOrTreat';
 
 export interface ArcadeOptions {
   seed: number;
+  /** Start with a monster team (Golem Blockers, Werewolf Runners, Ghost Catchers): ?monsters=1, for a look at them. */
+  monsters?: boolean;
+}
+
+/** The starting team, or (with `monsters`) the same players turned into each position's monster. */
+function firstRoster(monsters: boolean): RosterPlayer[] {
+  const roster = startingRoster();
+  if (!monsters) return roster;
+  const kindFor = { blocker: 'golem', runner: 'werewolf', catcher: 'ghost' } as const;
+  return roster.map((p) => {
+    const kind = kindFor[p.preferred];
+    const form = FORM_STATS[kind];
+    return {
+      ...p,
+      kind,
+      stats: {
+        hustle: p.stats.hustle + form.hustle,
+        hands: p.stats.hands + form.hands,
+        heft: p.stats.heft + form.heft,
+      },
+    };
+  });
 }
 
 /**
@@ -74,6 +105,7 @@ const BREAK_WORD: Readonly<Record<'break' | 'drag' | 'tackle', string>> = {
 export class ArcadeGame {
   private state: RunState;
   private seed: number;
+  private readonly monsters: boolean;
   private readonly conductor = new Conductor();
   private readonly view: View;
   private readonly bodies: ArcadeBodies;
@@ -99,7 +131,8 @@ export class ArcadeGame {
 
   constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement, options: ArcadeOptions) {
     this.seed = options.seed;
-    this.state = createRun(this.seed);
+    this.monsters = options.monsters ?? false;
+    this.state = createRun(this.seed, firstRoster(this.monsters));
     this.view = new View(canvas, { follow: true, fov: 50 });
     const { scene } = this.view;
     scene.add(createArcadeTurf());
@@ -430,7 +463,7 @@ export class ArcadeGame {
       this.act({ type: 'hike' });
     } else if (phase === 'over' || phase === 'won') {
       this.seed++;
-      this.state = createRun(this.seed);
+      this.state = createRun(this.seed, firstRoster(this.monsters));
       this.origin = 0;
       this.focus = v(0, -4);
       this.bodies.sync(this.state);
