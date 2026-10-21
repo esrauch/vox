@@ -45,6 +45,8 @@ const KIND_MODEL: Readonly<Record<Form, string>> = {
   golem: 'team/golem',
   werewolf: 'team/werewolf',
 };
+/** A Ghost's look: plain white, unlit. */
+const GHOST_MATERIAL = new THREE.MeshBasicMaterial({ color: 0xffffff });
 /** Ghosts float a little off the turf. */
 const GHOST_HOVER = 0.18;
 
@@ -161,7 +163,9 @@ export class ArcadeBodies {
 
   private create(b: Body): View {
     const model = b.side === 'defense' ? DEFENDER_MODEL[b.kind] : KIND_MODEL[b.form];
-    const body = new THREE.Mesh(getGeometry(model), voxelMaterial);
+    // A Ghost is solid white and unlit: it glows the same whatever the light, so it reads at a glance.
+    const ghost = b.side === 'team' && b.form === 'ghost';
+    const body = new THREE.Mesh(getGeometry(model), ghost ? GHOST_MATERIAL : voxelMaterial);
     body.castShadow = true;
     if (b.side === 'team') {
       // The position it's playing shows in its build (wide Blockers, lean Runners, tall
