@@ -71,7 +71,7 @@ Later candidates: the Skeleton (falls apart forward when tackled), the Mummy (ne
 
 ### The ball
 
-**A jack-o'-lantern football.** It's the team's ball and the game's icon. *(The current model is the cube Jack-o'-Lantern; a football-shaped pumpkin is worth trying.)*
+**A jack-o'-lantern.** A round pumpkin with a glowing carved face: the team's ball and the game's icon. **It's also the field's light:** a warm lamp burns inside it, lighting everyone around it and throwing their shadows, so the shadows swing as it flies and pool around whoever is carrying it. The moon is only a dim fill. *(A football-shaped pumpkin was tried and set aside, 2026-10-20.)*
 
 ---
 

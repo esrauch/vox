@@ -51,6 +51,9 @@ const CAMERA_PITCH = 32;
  * count sim time, are unchanged).
  */
 const TIME_SCALE = 0.8;
+/** With the pumpkin ball as the light, the moon and the sky are only a dim fill, so the field stays readable. */
+const MOON_FILL = 0.45;
+const SKY_FILL = 0.75;
 const LOOK_AHEAD = 7;
 const WIDTH_MARGIN = 1.06;
 
@@ -91,15 +94,6 @@ export class ArcadeGame {
     this.state = createRun(this.seed);
     this.view = new View(canvas, { follow: true, fov: 50 });
     const { scene } = this.view;
-    // The moonlight's shadows have to cover the whole width, and well up the field.
-    Object.assign(this.view.sun.shadow.camera, {
-      left: -18,
-      right: 18,
-      top: 30,
-      bottom: -24,
-      far: 90,
-    });
-    this.view.sun.shadow.camera.updateProjectionMatrix();
     scene.add(createArcadeTurf());
     const scenery = new ForestScenery(scene, this.view, {
       halfWidth: arcadeTuning.field.halfWidth,
@@ -108,6 +102,10 @@ export class ArcadeGame {
       endZ: -FIELD_AHEAD,
     });
     scene.add(scenery.group);
+    // The pumpkin ball is the light (render/ball.ts): the moon is only a dim fill, with no shadows.
+    this.view.sun.castShadow = false;
+    this.view.sun.intensity = MOON_FILL;
+    this.view.hemi.intensity = SKY_FILL;
     this.lines = new ArcadeLines(scene);
     this.routes = new ArcadeRoutes(scene);
     this.bodies = new ArcadeBodies(scene);
@@ -276,7 +274,7 @@ export class ArcadeGame {
     cam.position.set(look.x, back * Math.sin(pitch), look.z + back * Math.cos(pitch));
     cam.lookAt(look);
     cam.updateMatrixWorld();
-    // Keep the moonlight's shadows around the play, and the fog ahead of the camera.
+    // Keep the moonlight (a dim fill) around the play, and the fog ahead of the camera.
     const { sun } = this.view;
     sun.target.position.copy(look).add(new THREE.Vector3(0, 0, -6));
     sun.position.copy(sun.target.position).add(new THREE.Vector3(-12, 26, 8));

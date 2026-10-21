@@ -124,6 +124,10 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-20:** **The ball is a jack-o'-lantern again, and it's the light.**
+  - **The model:** the round pumpkin with the glowing face, a bit bigger so it reads from the arcade camera, drawn unlit so it glows.
+  - **The light:** a warm, slightly flickering lamp inside it lights the field and casts the shadows: they swing as it flies and pool around the carrier.
+  - **The moon** is now a dim fill with no shadows.
 - **2026-10-20:** **Break it! has three tests, and the game runs 20% slower.**
   - **Each grab picks one test at random:** the bar, **MASH!** (tap fast; Heft fills it faster), or **JUKE!** (tap the side the arrow shows, quickly; Hustle gives a longer window). A guess before the arrow is a tackle.
   - **The sim runs at 0.8× real time,** so everything slows together and the balance numbers are unchanged.

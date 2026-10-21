@@ -1,20 +1,48 @@
 /**
- * The ball: in the QB's hand, flying flat as a bullet (sim/ball.ts), held
- * over the carrier's head, or lying where the down ended.
+ * The ball: a jack-o'-lantern, in the QB's hand, flying flat as a bullet
+ * (sim/ball.ts), held over the carrier's head, or lying where the down
+ * ended. It's the field's light: a warm lamp inside it lights everyone
+ * around it and casts the shadows, so they swing as the ball flies. The
+ * pumpkin itself is unlit, so it glows rather than going dark around the
+ * lamp inside it.
  */
 import * as THREE from 'three';
-import { getGeometry, voxelMaterial } from '../../voxel/models';
+import { getGeometry } from '../../voxel/models';
 import type { RunState } from '../sim/types';
 import { lerp } from '../sim/vec';
 import type { ArcadeBodies } from './bodies';
 import { toWorld } from './world';
 
+/** The lamp inside the pumpkin. */
+const LIGHT_COLOR = 0xffa64d;
+const LIGHT_INTENSITY = 60;
+/** How far its light reaches (yards), and how it falls off. */
+const LIGHT_RANGE = 22;
+const LIGHT_DECAY = 1.6;
+/** The lamp sits this far above the ball, so the ball never shadows its own light. */
+const LIGHT_LIFT = 0.6;
+
 export class ArcadeBall {
-  private readonly ball = new THREE.Mesh(getGeometry('team/ball'), voxelMaterial);
+  private readonly ball = new THREE.Mesh(
+    getGeometry('team/ball'),
+    new THREE.MeshBasicMaterial({ vertexColors: true }),
+  );
+  private readonly light = new THREE.PointLight(
+    LIGHT_COLOR,
+    LIGHT_INTENSITY,
+    LIGHT_RANGE,
+    LIGHT_DECAY,
+  );
   private readonly landing: THREE.Mesh;
 
   constructor(scene: THREE.Scene) {
-    this.ball.castShadow = true;
+    // It glows and lights the field; it doesn't block its own lamp.
+    this.ball.castShadow = false;
+    this.light.castShadow = true;
+    this.light.shadow.mapSize.set(512, 512);
+    this.light.shadow.bias = -0.002;
+    Object.assign(this.light.shadow.camera, { near: 0.2, far: LIGHT_RANGE });
+    scene.add(this.light);
     this.landing = new THREE.Mesh(
       new THREE.RingGeometry(0.5, 0.65, 28).rotateX(-Math.PI / 2),
       new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }),
@@ -50,5 +78,9 @@ export class ArcadeBall {
         this.ball.position.copy(toWorld(ball.pos, origin, 0.12));
         break;
     }
+    this.light.position.copy(this.ball.position).add(new THREE.Vector3(0, LIGHT_LIFT, 0));
+    // A little flicker, like a candle.
+    this.light.intensity =
+      LIGHT_INTENSITY * (0.92 + 0.08 * Math.sin(state.time * 23) * Math.sin(state.time * 7));
   }
 }
