@@ -21,7 +21,10 @@ const { sweep, throw: t, field } = arcadeTuning;
 /** How fast the line sweeps this drive (degrees a second): faster each area, and on the Boss. */
 export function sweepSpeed(state: RunState): number {
   const { area, kind } = state.drive;
-  return sweep.degreesPerSecond * (1 + sweep.perArea * area + (kind === 'boss' ? sweep.boss : 0));
+  const base =
+    sweep.degreesPerSecond * (1 + sweep.perArea * area + (kind === 'boss' ? sweep.boss : 0));
+  // Slow-Mo Sweep (a perk) slows it.
+  return base * state.perks.sweepScale;
 }
 
 /** How long one pass of the line across the field takes. */
@@ -31,7 +34,8 @@ export function scanTime(state: RunState): number {
 
 /** How long the pocket holds this drive: its sweeps. */
 export function pocketTime(state: RunState): number {
-  return sweep.scans * scanTime(state);
+  // Extra Sweep (a perk) holds it longer.
+  return (sweep.scans + state.perks.extraScans) * scanTime(state);
 }
 
 /**
@@ -55,9 +59,9 @@ export function bulletEnd(state: RunState, from: Vec, angle: number): Vec {
   return v(from.x + dx * length, from.y + dy * length);
 }
 
-/** How long a bullet takes to get from `from` to `to`. */
-export function flightTime(from: Vec, to: Vec): number {
-  return Math.max(0.1, dist(from, to) / t.speed);
+/** How long a bullet takes to get from `from` to `to` (`scale` is Hot Arm's, a perk). */
+export function flightTime(from: Vec, to: Vec, scale = 1): number {
+  return Math.max(0.1, dist(from, to) / (t.speed * scale));
 }
 
 /** Where a Witch is at a moment: she sweeps across her row and wraps at the sidelines. */
@@ -117,7 +121,23 @@ export function contact(
   }
   if (catcher) return { kind: 'caught', by: catcher, contested: defender !== undefined };
   if (defender) return { kind: 'batted', by: defender.id, at: defender.pos, contested: false };
-  if (last) return { kind: 'incomplete', at: end };
+  if (last) {
+    // Candy Corn Magnet (a perk): a ball about to fall incomplete gets twice the reach.
+    const magnet = state.perks.magnet
+      ? state.field.players
+          .filter(
+            (p) =>
+              p.role !== 'qb' &&
+              p.role !== 'blocker' &&
+              p.down <= 0 &&
+              dist(p.pos, from) >= t.minDistance &&
+              dist(p.pos, at) <= 2 * p.reach,
+          )
+          .sort((a, b) => dist(a.pos, at) - dist(b.pos, at) || a.id - b.id)[0]
+      : undefined;
+    if (magnet) return { kind: 'caught', by: magnet, contested: false };
+    return { kind: 'incomplete', at: end };
+  }
   return null;
 }
 

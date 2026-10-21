@@ -19,6 +19,7 @@
 import { qbOf } from '../src/arcade/sim/ai';
 import { bulletEnd, contact, pocketTime, sweepAngle } from '../src/arcade/sim/ball';
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
+import { FORM_STATS, ROSTER_ROLES } from '../src/arcade/content/team';
 import { rngFor } from '../src/arcade/sim/random';
 import { breakMarker, jukeShowing } from '../src/arcade/sim/breakit';
 import { canThrow, step } from '../src/arcade/sim/step';
@@ -47,6 +48,8 @@ interface Scenario {
   readonly training?: Partial<Stats>;
   /** …or only to one role's. */
   readonly roleTraining?: Partial<Record<Role, Partial<Stats>>>;
+  /** Take a random TRICK OR TREAT! perk after each won drive (otherwise skip). */
+  readonly perks?: boolean;
 }
 
 /** BALANCE_SCENARIO='{"name": "...", ...}' runs just that one scenario instead. */
@@ -55,6 +58,7 @@ const SCENARIOS: readonly Scenario[] = custom
   ? [JSON.parse(custom) as Scenario]
   : [
       { name: 'All human (never upgrade)' },
+      { name: 'Random TRICK OR TREAT! perks', perks: true },
       { name: 'Trained: +10 Hustle', training: { hustle: 10 } },
       { name: 'Trained: +10 Hands', training: { hands: 10 } },
       { name: 'Trained: +10 Heft', training: { heft: 10 } },
@@ -208,19 +212,47 @@ function count(
   }
 }
 
+/**
+ * TRICK OR TREAT! for the bot: with `perks` on, a random perk; a recruit
+ * takes the weakest slot of the position it prefers. With it off, it skips.
+ */
+function draftPick(state: RunState, rng: Rng, perks: boolean): RunState {
+  if (!perks || state.offer.length === 0) return dispatch(state, { type: 'skipDraft' }).state;
+  const picked = dispatch(state, { type: 'pick', offer: rng.int(0, state.offer.length - 1) }).state;
+  const recruit = picked.recruit;
+  if (!recruit) return picked;
+  const total = (st: { hustle: number; hands: number; heft: number }): number =>
+    st.hustle + st.hands + st.heft;
+  const slots = picked.roster
+    .map((p, slot) => ({ p, slot }))
+    .filter(({ slot }) => ROSTER_ROLES[slot] === recruit.preferred)
+    .sort((a, b) => total(a.p.stats) - total(b.p.stats));
+  return dispatch(picked, { type: 'place', slot: slots[0]?.slot ?? 0 }).state;
+}
+
 function playRun(seed: number, scenario: Scenario, t: Tally): void {
   const rng = rngFor(seed, 'bot');
-  const roster = startingRoster().map((p) => ({
-    ...p,
-    form: scenario.forms?.[p.role] ?? p.form,
-    training: {
+  // Each scenario's team: the starting humans, turned into its kinds and given its training.
+  const roster = startingRoster().map((p) => {
+    const kind = scenario.forms?.[p.preferred] ?? p.kind;
+    const extra = {
       hustle: 0,
       hands: 0,
       heft: 0,
       ...scenario.training,
-      ...scenario.roleTraining?.[p.role],
-    },
-  }));
+      ...scenario.roleTraining?.[p.preferred],
+    };
+    const form = FORM_STATS[kind];
+    return {
+      ...p,
+      kind,
+      stats: {
+        hustle: p.stats.hustle + form.hustle + extra.hustle,
+        hands: p.stats.hands + form.hands + extra.hands,
+        heft: p.stats.heft + form.heft + extra.heft,
+      },
+    };
+  });
   let state = createRun(seed, roster);
   const plan: Plan = { tackleAt: -1, tapAt: 1, sawAt: null, side: 1 };
   const ran = { now: false };
@@ -232,7 +264,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
       bump(t.attempts, key);
     }
     if (state.phase === 'draft') {
-      state = dispatch(state, { type: 'skipDraft' }).state;
+      state = draftPick(state, rng, scenario.perks ?? false);
       continue;
     }
     if (state.phase === 'setup') {

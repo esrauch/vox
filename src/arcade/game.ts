@@ -32,6 +32,7 @@ import { canThrow, step } from './sim/step';
 import type { Action, ArcadeEvent, DriveKind, Player, RunState, StepInput } from './sim/types';
 import { v } from './sim/vec';
 import { ArcadeControls, type BreakView } from './ui/controls';
+import { trickOrTreatView } from './ui/trickOrTreat';
 
 export interface ArcadeOptions {
   seed: number;
@@ -91,6 +92,8 @@ export class ArcadeGame {
   private paused = false;
   /** What the player pressed since the last step, applied on the next one. */
   private pending: { throw?: boolean; scramble?: boolean; breakTap?: boolean; juke?: -1 | 1 } = {};
+  /** TRICK OR TREAT!: the first player tapped for a swap. */
+  private swapFrom: number | null = null;
   /** Where the camera looks (field yards, smoothed). */
   private focus = v(0, -4);
 
@@ -120,10 +123,10 @@ export class ArcadeGame {
       onAction: () => void this.onAction(),
       onCard: (hand) => this.call(hand),
       onFlip: () => this.act({ type: 'flip' }),
-      onDraft: () => undefined,
-      onSkip: () => undefined,
+      onDraft: (offer) => this.act({ type: 'pick', offer }),
+      onSkip: () => this.act({ type: 'skipDraft' }),
+      onRoster: (slot) => this.onRoster(slot),
     });
-    this.hud.setDraft(null);
     this.controls = new ArcadeControls(uiRoot, {
       onThrow: () => this.press({ throw: true }),
       onBreakTap: () => this.press({ breakTap: true }),
@@ -173,6 +176,23 @@ export class ArcadeGame {
     this.syncHud();
   }
 
+  /** TRICK OR TREAT!: tap a roster player to place a recruit there, or two in turn to swap them. */
+  private onRoster(slot: number): void {
+    this.conductor.play('uiClick');
+    if (this.state.recruit) {
+      this.act({ type: 'place', slot });
+      return;
+    }
+    if (this.swapFrom === null) {
+      this.swapFrom = slot;
+    } else {
+      const from = this.swapFrom;
+      this.swapFrom = null;
+      if (from !== slot) this.act({ type: 'swap', a: from, b: slot });
+    }
+    this.syncHud();
+  }
+
   private call(hand: number): void {
     this.conductor.play('uiClick');
     this.act({ type: 'call', hand });
@@ -200,11 +220,6 @@ export class ArcadeGame {
       this.bodies.sync(this.state);
     }
     this.react(events, prev);
-    // No stop between drives (there are no upgrades to pick yet): straight into the next one.
-    if (this.state.phase === 'draft') {
-      const next = dispatch(this.state, { type: 'skipDraft' });
-      this.state = next.state;
-    }
     if (events.length > 0 || this.state.phase !== prev.phase) this.syncHud();
   }
 
@@ -332,6 +347,9 @@ export class ArcadeGame {
           play('sack');
           this.hud.pop('SACKED!', 'bad');
           break;
+        case 'joined':
+          this.hud.pop(`${e.name.toUpperCase()} JOINS!`, 'good');
+          break;
         case 'pancake':
           play('burst');
           break;
@@ -386,6 +404,10 @@ export class ArcadeGame {
           })
         : null;
     this.hud.setHand(cards, called, { always: false, flipped });
+    if (phase !== 'draft') this.swapFrom = null;
+    this.hud.setDraft(
+      ready && phase === 'draft' ? trickOrTreatView(this.state, this.swapFrom) : null,
+    );
     if (!this.conductor.started) this.hud.setPrompt('Fourth & Ghoul', 'PLAY');
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
     else if (phase === 'setup')

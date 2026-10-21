@@ -298,3 +298,34 @@
 .hud-big.bad {
   color: var(--danger);
 }
+
+button.hud-roster-row {
+  border: 0;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+}
+
+.hud-roster-row small {
+  font-size: 0.65rem;
+  opacity: 0.7;
+  letter-spacing: 0.08em;
+}
+
+.hud-roster-row.selected {
+  outline: 3px solid var(--pumpkin);
+  background: rgb(255 138 31 / 0.25);
+}
+
+.hud-card.rarity-rare {
+  box-shadow:
+    inset 0 -4px 0 rgb(0 0 0 / 0.12),
+    0 0 0 3px #4aa3ff;
+}
+
+.hud-card.rarity-epic {
+  box-shadow:
+    inset 0 -4px 0 rgb(0 0 0 / 0.12),
+    0 0 0 3px var(--candy-purple),
+    0 0 18px var(--candy-purple);
+}

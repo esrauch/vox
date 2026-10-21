@@ -153,9 +153,9 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ---
 
-## Building Up: TRICK OR TREAT! *(designed 2026-10-20)*
+## Building Up: TRICK OR TREAT! *(built 2026-10-21, except Haunted Line)*
 
-**After every won drive: TRICK OR TREAT!** Three perks are offered, each with a **rarity**; pick one (or ▲ *skip*), and you're straight into the next drive. **There's no draft before the first drive**: you start with what you've got.
+**After every won drive: TRICK OR TREAT!** Three perks are offered, each with a **rarity**; pick one (or skip), and you're straight into the next drive. **On the same screen you can tap two players to swap their positions.** **There's no draft before the first drive**: you start with what you've got.
 
 ### The perks
 
@@ -168,8 +168,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | Rare | **Second Wind** | Once per drive, a BAD Break it! counts as OK |
 | Rare | **Candy Corn Magnet** | A ball that would fall incomplete gets twice the reach from your Catchers |
 | Rare | **Hot Arm** | The ball flies twice as fast |
-| Epic | **Haunted Line** | Defenders your Blockers pancake come back as your ghosts for the rest of the down, and block for you |
-| Varies | **New player** | A recruit joins your team (below) |
+| Epic | **Haunted Line** *(not built yet)* | Defenders your Blockers pancake come back as your ghosts for the rest of the down, and block for you |
+| Varies | **New player** | A recruit joins your team (below): a plain human is common, a monster rare, a star (+15 to everything) epic |
 
 ▲ *Rarity sets how often a perk turns up, and later areas offer rarer ones more often.*
 

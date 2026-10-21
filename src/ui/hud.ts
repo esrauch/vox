@@ -18,10 +18,16 @@ export interface HudHandlers {
   /** In the draft: take an offer, or skip. */
   onDraft(offer: number): void;
   onSkip(): void;
+  /** In the draft: tap a roster player (to place a recruit there, or to swap two). */
+  onRoster?(slot: number): void;
 }
 
 /** One of your players on the roster panel. */
 export interface RosterRow {
+  /** The position it's playing, e.g. "Runner" (shown first, when given). */
+  readonly position?: string;
+  /** Highlighted (picked for a swap). */
+  readonly selected?: boolean;
   readonly name: string;
   /** Its form, e.g. "Werewolf". */
   readonly form: string;
@@ -33,6 +39,8 @@ export interface RosterRow {
 
 /** What the draft shows: the offers, your roster, and your team's hand. */
 export interface DraftView {
+  /** The heading over the offer (default "Pick one"). */
+  readonly title?: string;
   readonly offer: readonly CardFace[];
   readonly roster: readonly RosterRow[];
   /** The team hand you hold, e.g. "Monster Mash: every player has every skill", or null. */
@@ -43,6 +51,8 @@ export interface DraftView {
 export interface CardFace {
   readonly name: string;
   readonly blurb: string;
+  /** A rarity, e.g. "rare": styles the card. */
+  readonly rarity?: string;
 }
 
 export class Hud {
@@ -169,11 +179,20 @@ export class Hud {
     const offer = document.createElement('div');
     offer.className = 'hud-draft-row';
     offer.append(
-      ...draft.offer.map((c, i) => cardButton(c, 'hud-card', () => this.handlers.onDraft(i))),
+      ...draft.offer.map((c, i) =>
+        cardButton(c, `hud-card${c.rarity ? ` rarity-${c.rarity}` : ''}`, () =>
+          this.handlers.onDraft(i),
+        ),
+      ),
     );
     const roster = document.createElement('div');
     roster.className = 'hud-roster';
-    roster.append(...draft.roster.map(rosterRow));
+    roster.append(
+      ...draft.roster.map((row, i) => {
+        const onRoster = this.handlers.onRoster;
+        return rosterRow(row, onRoster ? () => onRoster(i) : undefined);
+      }),
+    );
     const hand = document.createElement('p');
     hand.className = 'hud-roster-hand';
     hand.textContent =
@@ -183,7 +202,7 @@ export class Hud {
     skip.textContent = 'Skip';
     skip.addEventListener('click', () => this.handlers.onSkip());
     this.draft.replaceChildren(
-      heading('Pick one'),
+      heading(draft.title ?? 'Pick one'),
       offer,
       skip,
       heading('Your team'),
@@ -221,9 +240,15 @@ function cardButton(face: CardFace, className: string, onClick: () => void): HTM
   return b;
 }
 
-function rosterRow(row: RosterRow): HTMLElement {
-  const el = document.createElement('div');
-  el.className = 'hud-roster-row';
+function rosterRow(row: RosterRow, onTap?: () => void): HTMLElement {
+  const el = document.createElement(onTap ? 'button' : 'div');
+  el.className = `hud-roster-row${onTap ? ' interactive' : ''}${row.selected ? ' selected' : ''}`;
+  if (onTap) el.addEventListener('click', onTap);
+  if (row.position) {
+    const pos = document.createElement('small');
+    pos.textContent = row.position.toUpperCase();
+    el.append(pos);
+  }
   const name = document.createElement('strong');
   name.textContent = `${row.name} · ${row.form}`;
   const stats = document.createElement('span');

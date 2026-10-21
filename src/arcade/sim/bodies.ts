@@ -4,9 +4,10 @@
  */
 import { DEFENDERS, type DefenseSpec } from '../content/defense';
 import { arcadeTuning } from '../content/tuning';
-import { FORM_STATS, LINEUP, QB_DEPTH, ROLE_RADIUS, ROLE_STATS } from '../content/team';
+import { LINEUP, QB_DEPTH, ROLE_RADIUS, ROLE_STATS, ROSTER_ROLES } from '../content/team';
+import { playerStats } from './team';
 import type { Play } from '../content/plays';
-import type { Defender, Drive, Player, RosterPlayer, Stats } from './types';
+import type { Defender, Drive, Player, RunState, Stats } from './types';
 import { add, v } from './vec';
 
 /** A stat in steps away from ordinary (50 is 0, 60 is 1, 30 is -2). */
@@ -36,11 +37,6 @@ const plus = (a: Stats, b: Stats, k = 1): Stats => ({
   heft: a.heft + b.heft * k,
 });
 
-/** A roster player's stats: its role's, its form's, and its training. */
-export function rosterStats(p: RosterPlayer): Stats {
-  return plus(plus(ROLE_STATS[p.role], FORM_STATS[p.form]), p.training);
-}
-
 const even = (n: number): Stats => ({ hustle: n, hands: n, heft: n });
 
 /**
@@ -49,7 +45,7 @@ const even = (n: number): Stats => ({ hustle: n, hands: n, heft: n });
  * waypoints become field positions.
  */
 export function lineUpTeam(
-  roster: readonly RosterPlayer[],
+  state: RunState,
   play: Play,
   flipped: boolean,
   los: number,
@@ -71,20 +67,22 @@ export function lineUpTeam(
     down: 0,
     job: { kind: 'qb' },
   };
-  const seven = roster.map((p, slot): Player => {
+  const seven = state.roster.map((p, slot): Player => {
+    // The slot decides the position it plays; its stats come with it (and the perks).
+    const role = ROSTER_ROLES[slot] ?? p.preferred;
     const spot = LINEUP[slot] ?? v(0, 0);
     const start = v(spot.x * mirror, los + spot.y);
     const a = play.slots[slot] ?? { kind: 'block' };
-    const stats = rosterStats(p);
+    const stats = playerStats(state, slot);
     return {
       id: firstId + 1 + slot,
       side: 'team',
-      role: p.role,
+      role,
       slot,
-      form: p.form,
+      form: p.kind,
       pos: start,
       vel: v(0, 0),
-      radius: ROLE_RADIUS[p.role],
+      radius: ROLE_RADIUS[role],
       stats,
       ...physicsOf(stats),
       down: 0,

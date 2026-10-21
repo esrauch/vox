@@ -76,7 +76,7 @@ Every training pick helps. Two things are still off target: **downs last about 2
 - [~] **The three roles as placeholder silhouettes:** the walk-on stretched wide (Blockers), lean (Runners) and tall (Catchers), with a colored block on the head for a monster. *(2026-10-19; readability not yet checked from the camera.)*
 - [~] **Rendering the real-time sim** (`src/arcade/game.ts`, `src/arcade/render/`): the third-person camera behind and above the QB, following the ball and the carrier; one long turf strip with the scrimmage and first-down lines (and the Boss's end zone); everyone turning to face where they're going and tipping over when down; the ball along its real arc with a landing ring; the aim's dashed arc; gold ring under the carrier, green or red under receivers; pops for every result. *(2026-10-19: built, not yet looked at in a browser. The old grid game is still at `?grid=1`.)*
 - [ ] **A defense that scales:** three or four sleepy defenders on the first drive, up to the full forest by the area III Boss.
-- [ ] **Upgrades after each won drive:** the three transforms (Golem, Werewolf, Ghost) and training, with a roster screen of simple pips.
+- [x] **TRICK OR TREAT! after each won drive:** three perks with rarity, new players with bio cards, swapping positions on the roster, Monster Mash. *(2026-10-21; Haunted Line still to build.)*
 - [ ] **Balance from the headless runs:** a team that never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
 
 ## A3. Impact and Feel
@@ -124,6 +124,14 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-21:** **TRICK OR TREAT! built.**
+  - **The offer:** after each won drive, three perks, drawn by rarity: common 60%, rare 32%, epic 8%. Never the same perk twice in one offer, and a one-off perk isn't offered again once you have it.
+  - **The perks:** +10 to a stat for everyone, +20 to a stat for one kind, Extra Sweep, Slow-Mo Sweep, Second Wind, Candy Corn Magnet, Hot Arm, and new players.
+  - **New players** come with a bio (name, kind, preferred position, stats), and you tap the player they replace.
+  - **Swapping:** tap two players on the roster to swap their positions.
+  - **Monster Mash:** +10 to every stat for each player whose kind is unique on the team.
+  - **Under the hood:** the roster is now players with their own stats, in slot order (`sim/team.ts`, `content/perks.ts`, `ui/trickOrTreat.ts`).
+  - **Balance:** with random perks the bot wins about 5.7 drives of 12 (13% beat the game), against 3.8 taking none.
 - **2026-10-20:** **Stats on a 50 scale; TRICK OR TREAT! designed.**
   - **Stats:** an ordinary player is 50 / 50 / 50, and every 10 points is one step (the physics and Break it! read steps from 50), so there's room for small tuned bonuses. It plays the same as before.
   - **TRICK OR TREAT!** (design only): after each won drive, pick one of three perks with rarity. The baseline is +10 to a stat for everyone; others include kind bonuses, sweep and pocket perks, a faster ball, Second Wind, and new players with bio cards.

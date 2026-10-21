@@ -40,7 +40,7 @@ describe('a run', () => {
     expect(s.field.players).toHaveLength(8);
     expect(s.hand).toHaveLength(3);
     expect(new Set(s.hand).size).toBe(3);
-    expect(s.roster.map((p) => p.role)).toEqual([
+    expect(s.roster.map((p) => p.preferred)).toEqual([
       'blocker',
       'blocker',
       'runner',

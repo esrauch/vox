@@ -91,7 +91,7 @@ function throwBullet(state: RunState, events: ArcadeEvent[]): void {
   const qb = qbOf(state);
   if (!qb || !canThrow(state)) return;
   const target = bulletEnd(state, qb.pos, sweepAngle(state));
-  const landsAt = state.time + flightTime(qb.pos, target);
+  const landsAt = state.time + flightTime(qb.pos, target, state.perks.throwScale);
   state.field.ball = { at: 'flight', from: qb.pos, target, thrownAt: state.time, landsAt };
   events.push({ type: 'thrown', target, landsAt });
 }
@@ -163,8 +163,13 @@ function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void
     state.tackle = null;
     return;
   }
-  const outcome = judgeBreakIt(state, input);
+  let outcome = judgeBreakIt(state, input);
   if (!outcome) return;
+  // Second Wind (a perk): once a drive, a BAD one counts as OK.
+  if (outcome === 'tackle' && state.perks.secondWind && !state.perks.secondWindUsed) {
+    state.perks.secondWindUsed = true;
+    outcome = 'drag';
+  }
   events.push({ type: 'breakResult', outcome });
   const tacklers = state.field.defenders.filter((d) => t.tacklers.includes(d.id));
   state.tackle = null;

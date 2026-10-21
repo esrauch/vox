@@ -167,10 +167,60 @@ export type DownResult =
   'tackled' | 'incomplete' | 'batted' | 'sacked' | 'outOfBounds' | 'firstDown';
 
 /** One of your seven players, for the whole run. */
+/** A position on the field: a slot in the line-up (2 Blockers, 2 Runners, 3 Catchers). */
+export type Position = 'blocker' | 'runner' | 'catcher';
+
+/**
+ * One of your seven players, for the whole run (GAMEPLAY.md, Your Team): a
+ * name, a kind, the position it prefers, and its own stats (50 is
+ * ordinary). Where it plays is its slot in the roster, not its preference:
+ * any player can play any position.
+ */
 export interface RosterPlayer {
-  readonly role: Role;
-  form: Form;
-  training: Stats;
+  readonly name: string;
+  readonly kind: Form;
+  readonly preferred: Position;
+  readonly stats: Stats;
+}
+
+/** How rare a perk is: how often it turns up. */
+export type Rarity = 'common' | 'rare' | 'epic';
+
+/** A TRICK OR TREAT! perk (GAMEPLAY.md, Building Up). */
+export type Perk = { readonly rarity: Rarity } & (
+  | { readonly kind: 'allStat'; readonly stat: keyof Stats; readonly amount: number }
+  | {
+      readonly kind: 'kindStat';
+      readonly form: Form;
+      readonly stat: keyof Stats;
+      readonly amount: number;
+    }
+  | { readonly kind: 'extraSweep' }
+  | { readonly kind: 'slowSweep' }
+  | { readonly kind: 'secondWind' }
+  | { readonly kind: 'magnet' }
+  | { readonly kind: 'hotArm' }
+  | { readonly kind: 'recruit'; readonly player: RosterPlayer }
+);
+
+/** Everything the perks taken so far add up to. */
+export interface Perks {
+  /** Added to every player's stats. */
+  all: Stats;
+  /** Added to the stats of every player of a kind. */
+  byKind: Partial<Record<Form, Stats>>;
+  /** More sweeps before the pocket collapses. */
+  extraScans: number;
+  /** The sweep's speed is multiplied by this (Slow-Mo Sweep: ×0.75 each). */
+  sweepScale: number;
+  /** Second Wind: once a drive, a BAD Break it! counts as OK… */
+  secondWind: boolean;
+  /** …and whether it's been used this drive. */
+  secondWindUsed: boolean;
+  /** Candy Corn Magnet: a ball that would fall incomplete gets twice the reach. */
+  magnet: boolean;
+  /** The bullet's speed is multiplied by this (Hot Arm: ×2). */
+  throwScale: number;
 }
 
 export type Phase =
@@ -199,6 +249,12 @@ export interface RunState {
   /** Break it!, while it's on. */
   tackle: Tackle | null;
   roster: RosterPlayer[];
+  /** What the perks taken so far add up to. */
+  perks: Perks;
+  /** TRICK OR TREAT!: the three perks on offer… */
+  offer: Perk[];
+  /** …and a recruit picked, waiting for you to choose the slot it takes. */
+  recruit: RosterPlayer | null;
   field: Field;
   /** When this down was snapped (sim time). */
   snappedAt: number;
@@ -230,7 +286,13 @@ export type Action =
   | { readonly type: 'flip' }
   /** HIKE: start the called play. */
   | { readonly type: 'hike' }
-  | { readonly type: 'skipDraft' };
+  | { readonly type: 'skipDraft' }
+  /** TRICK OR TREAT!: take one of the perks on offer. */
+  | { readonly type: 'pick'; readonly offer: number }
+  /** Put the recruit just picked into this roster slot (whoever was there leaves). */
+  | { readonly type: 'place'; readonly slot: number }
+  /** Swap two players' slots (between drives). */
+  | { readonly type: 'swap'; readonly a: number; readonly b: number };
 
 export type ArcadeEvent =
   | { readonly type: 'downStarted'; readonly down: number; readonly toGo: number }
@@ -258,6 +320,13 @@ export type ArcadeEvent =
   | { readonly type: 'outOfBounds'; readonly id: number }
   | { readonly type: 'downEnded'; readonly result: DownResult; readonly gained: number }
   | { readonly type: 'driveWon'; readonly drive: number }
+  | { readonly type: 'perk'; readonly perk: Perk }
+  | {
+      readonly type: 'joined';
+      readonly name: string;
+      readonly slot: number;
+      readonly replaced: string;
+    }
   | { readonly type: 'driveStarted'; readonly drive: number; readonly name: string }
   | { readonly type: 'areaCleared'; readonly area: number }
   | { readonly type: 'gameOver'; readonly drivesWon: number; readonly yards: number };

@@ -5,11 +5,11 @@
  */
 import { FOREST, type DefenseSpec } from '../content/defense';
 import { PLAYS } from '../content/plays';
-import { ROSTER_ROLES } from '../content/team';
 import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
 import { assignMarks } from './ai';
 import { lineUpDefense, lineUpTeam } from './bodies';
+import { applyPerk, noPerks, rollOffer, startingRoster } from './team';
 import type {
   Action,
   ArcadeEvent,
@@ -23,14 +23,8 @@ import type {
 
 export const DRIVE_KINDS: readonly DriveKind[] = ['intro', 'challenge', 'gimmick', 'boss'];
 
-/** Seven plain humans: 2 Blockers, 2 Runners, 3 Catchers. */
-export function startingRoster(): RosterPlayer[] {
-  return ROSTER_ROLES.map((role) => ({
-    role,
-    form: 'human',
-    training: { hustle: 0, hands: 0, heft: 0 },
-  }));
-}
+/** Seven plain humans (sim/team.ts). */
+export { startingRoster };
 
 /** The defense for a drive: the area's Intro, Challenge, a seeded Gimmick, or its Boss. */
 export function defenseFor(seed: number, area: number, index: number): DefenseSpec {
@@ -65,6 +59,9 @@ export function createRun(seed: number, roster: RosterPlayer[] = startingRoster(
     play: { index: 0, flipped: false },
     tackle: null,
     roster,
+    perks: noPerks(),
+    offer: [],
+    recruit: null,
     field: { players: [], defenders: [], witches: [], ball: { at: 'qb' }, lane: 0, drag: null },
     snappedAt: 0,
     pause: 0,
@@ -91,6 +88,7 @@ export function setUpDrive(
 ): void {
   const spec = defenseFor(state.seed, area, index);
   const start = 0;
+  state.perks.secondWindUsed = false;
   state.drive = {
     area,
     index,
@@ -138,7 +136,7 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
   state.play = { index: state.hand[0] ?? 0, flipped: state.flipped };
   const play = PLAYS[state.play.index] ?? PLAYS[0];
   if (!play) throw new Error('No plays defined');
-  const players = lineUpTeam(state.roster, play, state.flipped, drive.los, state.nextId);
+  const players = lineUpTeam(state, play, state.flipped, drive.los, state.nextId);
   state.nextId += players.length;
   const spec = defenseFor(state.seed, drive.area, drive.index);
   const boost = defenseBoost(drive.area, drive.kind, spec);
@@ -176,7 +174,16 @@ export function dispatch(prev: RunState, action: Action): ArcadeResult {
       hike(state, events);
       break;
     case 'skipDraft':
-      if (state.phase === 'draft') state.phase = 'setup';
+      if (state.phase === 'draft') leaveDraft(state);
+      break;
+    case 'pick':
+      pick(state, action.offer, events);
+      break;
+    case 'place':
+      place(state, action.slot, events);
+      break;
+    case 'swap':
+      swap(state, action.a, action.b);
       break;
   }
   return { state, events };
@@ -197,7 +204,7 @@ function call(state: RunState, hand: number, events: ArcadeEvent[]): void {
   state.field.players.splice(
     0,
     state.field.players.length,
-    ...lineUpTeam(state.roster, play, state.flipped, state.drive.los, firstId),
+    ...lineUpTeam(state, play, state.flipped, state.drive.los, firstId),
   );
   events.push({ type: 'called', play: play.name, flipped: state.flipped });
 }
@@ -220,6 +227,62 @@ function hike(state: RunState, events: ArcadeEvent[]): void {
   state.field.ball = { at: 'carried', by: runner.id };
   state.field.lane = hole?.x ?? runner.pos.x;
   events.push({ type: 'handoff', id: runner.id });
+}
+
+// ── TRICK OR TREAT! ─────────────────────────────────────────────────────────
+
+/** Take a perk on offer. A recruit then waits for you to choose its slot. */
+function pick(state: RunState, index: number, events: ArcadeEvent[]): void {
+  const perk = state.offer[index];
+  if (state.phase !== 'draft' || state.recruit || !perk) return;
+  events.push({ type: 'perk', perk });
+  if (perk.kind === 'recruit') {
+    state.recruit = perk.player;
+    return;
+  }
+  applyPerk(state.perks, perk);
+  leaveDraft(state);
+}
+
+/** Put the recruit into a slot; whoever was there leaves. */
+function place(state: RunState, slot: number, events: ArcadeEvent[]): void {
+  const recruit = state.recruit;
+  const replaced = state.roster[slot];
+  if (state.phase !== 'draft' || !recruit || !replaced) return;
+  state.roster[slot] = recruit;
+  state.recruit = null;
+  events.push({ type: 'joined', name: recruit.name, slot, replaced: replaced.name });
+  leaveDraft(state);
+}
+
+/** Swap two players' slots (any player can play any position). */
+function swap(state: RunState, a: number, b: number): void {
+  const pa = state.roster[a];
+  const pb = state.roster[b];
+  if (state.phase !== 'draft' || !pa || !pb || a === b) return;
+  state.roster[a] = pb;
+  state.roster[b] = pa;
+  relineTeam(state);
+}
+
+/** On to the next drive (its defense is already lined up): your team, as it now is, lines up too. */
+function leaveDraft(state: RunState): void {
+  state.offer = [];
+  state.recruit = null;
+  state.phase = 'setup';
+  relineTeam(state);
+}
+
+/** Line your players up again where they stand, with the roster and perks as they now are. */
+function relineTeam(state: RunState): void {
+  const play = PLAYS[state.play.index];
+  const firstId = state.field.players[0]?.id;
+  if (!play || firstId === undefined) return;
+  state.field.players.splice(
+    0,
+    state.field.players.length,
+    ...lineUpTeam(state, play, state.flipped, state.drive.los, firstId),
+  );
 }
 
 /** End the down: move the line of scrimmage, and show what happened for a moment. */
@@ -254,6 +317,8 @@ export function nextDown(state: RunState, events: ArcadeEvent[]): void {
       state.phase = 'won';
       return;
     }
+    // TRICK OR TREAT! happens in front of the next drive, already lined up.
+    state.offer = rollOffer(state);
     if (lastDrive) setUpDrive(state, drive.area + 1, 0, events, false);
     else setUpDrive(state, drive.area, drive.index + 1, events, false);
     return;
