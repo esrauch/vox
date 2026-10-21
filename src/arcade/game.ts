@@ -64,6 +64,12 @@ const KIND_NAME: Readonly<Record<DriveKind, string>> = {
   boss: 'Boss',
 };
 const AREA_NUMERAL: readonly string[] = ['I', 'II', 'III'];
+/** How a Break it! went, in one big word. */
+const BREAK_WORD: Readonly<Record<'break' | 'drag' | 'tackle', string>> = {
+  break: 'GREAT!',
+  drag: 'OK',
+  tackle: 'BAD',
+};
 
 export class ArcadeGame {
   private state: RunState;
@@ -325,18 +331,19 @@ export class ArcadeGame {
           break;
         case 'pancake':
           play('burst');
-          this.hud.pop('PANCAKE!', 'good');
+          break;
+        case 'breakResult':
+          this.hud.big(
+            BREAK_WORD[e.outcome],
+            e.outcome === 'break' ? 'good' : e.outcome === 'drag' ? 'ok' : 'bad',
+          );
           break;
         case 'grabbed':
           play('burst');
           break;
         case 'brokeTackle':
-          play('burst');
-          this.hud.pop('BROKE IT!', 'good');
-          break;
         case 'dragged':
           play('burst');
-          this.hud.pop('DRAG!', 'good');
           break;
         case 'outOfBounds':
           this.hud.pop('OUT OF BOUNDS', 'bad');

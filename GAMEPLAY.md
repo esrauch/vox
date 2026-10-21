@@ -90,7 +90,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### Break it! *(the tackle mini-games)*
 
-**When a defender grabs the carrier, the play freezes** for one of three quick tests, picked at random. **Each opens with a two-second countdown** ("GET READY TO MASH! 2… 1…"), when taps don't count, then the call ("MASH!"). Each ends the same three ways: **BREAK!** (the tackler goes flying and the carrier keeps running), **DRAG** (the carrier hauls the tackler a few more yards, then goes down), or **tackled**.
+**When a defender grabs the carrier, the play freezes** for one of three quick tests, picked at random. **Each opens with a two-second countdown** ("GET READY TO MASH! 2… 1…"), when taps don't count, then the call ("MASH!"). Each ends the same three ways, called out big in the middle of the screen: **GREAT!** (a break: the tackler goes flying and the carrier keeps running), **OK** (a drag: the carrier hauls the tackler a few more yards, then goes down), or **BAD** (tackled).
 
 | Test | You see | You do | Sized by |
 |---|---|---|---|

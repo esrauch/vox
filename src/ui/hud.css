@@ -262,3 +262,39 @@
   background: var(--pumpkin);
   color: white;
 }
+
+.hud-big {
+  position: absolute;
+  top: 36%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 4.5rem;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  scale: 0.6;
+  pointer-events: none;
+  text-shadow:
+    0 5px 0 var(--ink),
+    0 0 24px rgb(0 0 0 / 0.5);
+}
+
+.hud-big.show {
+  opacity: 1;
+  scale: 1;
+  transition:
+    opacity 0.08s,
+    scale 0.18s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.hud-big.good {
+  color: var(--slime-green);
+}
+
+.hud-big.ok {
+  color: var(--pumpkin);
+}
+
+.hud-big.bad {
+  color: var(--danger);
+}

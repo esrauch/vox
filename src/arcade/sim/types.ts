@@ -246,6 +246,8 @@ export type ArcadeEvent =
   | { readonly type: 'pancake'; readonly blocker: number; readonly defender: number }
   /** A defender grabbed the carrier: Break it! starts. */
   | { readonly type: 'grabbed'; readonly id: number; readonly by: readonly number[] }
+  /** How a Break it! went: a break, a drag, or a tackle. */
+  | { readonly type: 'breakResult'; readonly outcome: 'break' | 'drag' | 'tackle' }
   /** A tap in the sweet spot: this tackler goes flying, the carrier keeps going. */
   | { readonly type: 'brokeTackle'; readonly id: number; readonly defender: number }
   /** A close tap: the carrier drags its tacklers this far before it goes down. */

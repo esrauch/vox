@@ -124,6 +124,7 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## Changelog
 
+- **2026-10-20:** **After every Break it!, a big GREAT! / OK / BAD** in the middle of the screen (green, orange, red), with the yards still popping below it. The PANCAKE! pop is gone (the hit still sounds). The pumpkin's embers now stream in every phase, play selection included, and a dead ball hovers above the pile instead of sinking into it.
 - **2026-10-20:** **The pumpkin throws itself.**
   - **No QB model:** the sim still has the QB (where throws start, and who's sacked), but the pumpkin floats there, bobbing, face to the camera. On a QB run it bounds upfield on its own.
   - **Embers:** glowing cubes drift off it, a trail of sparks follows it in flight, and bursts go off when it's thrown, caught, batted down or run.

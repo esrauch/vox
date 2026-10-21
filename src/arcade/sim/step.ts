@@ -165,6 +165,7 @@ function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void
   }
   const outcome = judgeBreakIt(state, input);
   if (!outcome) return;
+  events.push({ type: 'breakResult', outcome });
   const tacklers = state.field.defenders.filter((d) => t.tacklers.includes(d.id));
   state.tackle = null;
   state.phase = 'play';

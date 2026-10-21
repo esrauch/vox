@@ -57,6 +57,8 @@ export class Hud {
   private readonly popEl: HTMLElement;
   private readonly draft: HTMLElement;
   private popTimer: ReturnType<typeof setTimeout> | undefined;
+  private readonly bigEl: HTMLElement;
+  private bigTimer: ReturnType<typeof setTimeout> | undefined;
   private handKey = '';
   private draftKey = '';
 
@@ -71,6 +73,7 @@ export class Hud {
       </div>
       <div class="hud-message"></div>
       <div class="hud-pop"></div>
+      <div class="hud-big"></div>
       <div class="hud-bottom">
         <div class="hud-hand"></div>
         <div class="hud-controls">
@@ -93,6 +96,7 @@ export class Hud {
     this.flipButton = q<HTMLButtonElement>('.hud-flip');
     this.actionButton = q<HTMLButtonElement>('.hud-action');
     this.popEl = q('.hud-pop');
+    this.bigEl = q('.hud-big');
     this.draft = q('.hud-draft');
 
     this.actionButton.addEventListener('click', () => handlers.onAction());
@@ -186,6 +190,14 @@ export class Hud {
       roster,
       hand,
     );
+  }
+
+  /** A big word in the middle of the screen, for a moment: how a Break it! went. */
+  big(text: string, tone: 'good' | 'ok' | 'bad'): void {
+    this.bigEl.textContent = text;
+    this.bigEl.className = `hud-big show ${tone}`;
+    clearTimeout(this.bigTimer);
+    this.bigTimer = setTimeout(() => (this.bigEl.className = 'hud-big'), 1000);
   }
 
   /** A short pop above the controls: a catch rating, a block, a tackle. */
