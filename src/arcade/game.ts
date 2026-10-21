@@ -204,7 +204,7 @@ export class ArcadeGame {
     this.lines.update(state.drive, this.origin);
     this.routes.update(state, this.origin, this.previewPlayers());
     this.bodies.update(state, this.origin, dt, litPlayers(state));
-    this.ball.update(state, this.origin, this.bodies, dt);
+    this.ball.update(state, this.origin, this.bodies, dt, performance.now() / 1000);
     this.sweep.update(state, this.origin);
     this.controls.setButtons(canThrow(state) && !this.paused);
     this.controls.setBreak(this.breakView());

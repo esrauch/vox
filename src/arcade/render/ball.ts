@@ -23,7 +23,9 @@ const LIGHT_INTENSITY = 60;
 /** How far its light reaches (yards), and how it falls off. */
 const LIGHT_RANGE = 22;
 const LIGHT_DECAY = 1.6;
-/** The lamp sits this far above the ball, so the ball never shadows its own light. */
+/** Where a dead ball hovers (the bottom of the pumpkin, above the turf): clear of a pile. */
+const DEAD_HEIGHT = 1.6;
+/** The lamp sits this far above the ball's bottom, inside it. */
 const LIGHT_LIFT = 0.6;
 
 export class ArcadeBall {
@@ -62,7 +64,12 @@ export class ArcadeBall {
     this.embers.burst(this.ball.position.clone().add(new THREE.Vector3(0, 0.5, 0)), count, speed);
   }
 
-  update(state: RunState, origin: number, bodies: ArcadeBodies, dt: number): void {
+  /**
+   * `dt` and `clock` are the screen's (real seconds), not the sim's, so the
+   * bob, the flicker and the embers never freeze while the sim waits (play
+   * selection, the title, a pause).
+   */
+  update(state: RunState, origin: number, bodies: ArcadeBodies, dt: number, clock: number): void {
     const ball = state.field.ball;
     this.landing.visible = false;
     // It never spins: the carved face always looks back at the camera (models face +z, toward it).
@@ -71,8 +78,7 @@ export class ArcadeBall {
       case 'qb': {
         // Floating where the QB would stand, bobbing, waiting to throw itself.
         const qb = state.field.players.find((p) => p.role === 'qb');
-        if (qb)
-          this.ball.position.copy(toWorld(qb.pos, origin, 0.7 + 0.15 * Math.sin(state.time * 3)));
+        if (qb) this.ball.position.copy(toWorld(qb.pos, origin, 0.7 + 0.15 * Math.sin(clock * 3)));
         break;
       }
       case 'flight': {
@@ -87,23 +93,25 @@ export class ArcadeBall {
         if (head) this.ball.position.copy(head);
         // The QB running it: the pumpkin goes itself, bounding upfield.
         else if (runner) {
-          const hop = Math.abs(Math.sin(state.time * 9)) * 0.5;
+          const hop = Math.abs(Math.sin(clock * 9)) * 0.5;
           this.ball.position.copy(toWorld(runner.pos, origin, 0.3 + hop));
         }
         break;
       }
       case 'dead':
-        this.ball.position.copy(toWorld(ball.pos, origin, 0.12));
+        // It hovers above where the down ended, clear of the pile: its lamp low among the
+        // bodies would sink it into them and throw huge, smeared shadows.
+        this.ball.position.copy(toWorld(ball.pos, origin, DEAD_HEIGHT + 0.1 * Math.sin(clock * 3)));
         break;
     }
     this.light.position.copy(this.ball.position).add(new THREE.Vector3(0, LIGHT_LIFT, 0));
-    // Embers: a gentle drift off it, and a trail of sparks while it flies.
+    // Embers all the time: a steady drift off it, and a trail of sparks while it flies.
     const glow = this.ball.position.clone().add(new THREE.Vector3(0, 0.6, 0));
     if (ball.at === 'flight') this.embers.stream(glow, 160, dt, 1.2, 0.3);
-    else if (ball.at !== 'dead') this.embers.stream(glow, 18, dt);
+    else this.embers.stream(glow, 40, dt);
     this.embers.update(dt);
     // A little flicker, like a candle.
     this.light.intensity =
-      LIGHT_INTENSITY * (0.92 + 0.08 * Math.sin(state.time * 23) * Math.sin(state.time * 7));
+      LIGHT_INTENSITY * (0.92 + 0.08 * Math.sin(clock * 23) * Math.sin(clock * 7));
   }
 }
