@@ -8,8 +8,9 @@
  * and tips over when they're down.
  *
  * Rings on the turf: gold under the carrier; under each receiver before the
- * catch, green when no defender could reach a ball landing on it, red when
- * one could; and a purple ring around every Scarecrow (and Bat) showing how
+ * catch, its **catch range** (the ring's edge is its reach: a bullet coming
+ * inside it is caught), green when no defender could reach a ball there, red
+ * when one could, gold while the aim line is over it; and a purple ring around every Scarecrow (and Bat) showing how
  * far its arms reach for the ball, until someone catches it.
  */
 import * as THREE from 'three';
@@ -61,6 +62,8 @@ interface View {
 export class ArcadeBodies {
   private readonly views = new Map<number, View>();
   private readonly ringGeo = new THREE.RingGeometry(0.55, 0.7, 28).rotateX(-Math.PI / 2);
+  /** A receiver's catch range: a unit ring (its outer edge at 1), scaled to the player's reach. */
+  private readonly catchGeo = new THREE.RingGeometry(0.86, 1, 40).rotateX(-Math.PI / 2);
   /** A unit ring, scaled to each defender's reach. */
   private readonly reachGeo = new THREE.RingGeometry(0.94, 1, 48).rotateX(-Math.PI / 2);
   private readonly badgeGeo = new THREE.BoxGeometry(0.3, 0.24, 0.3);
@@ -112,6 +115,7 @@ export class ArcadeBodies {
 
       view.ring.position.set(view.root.position.x, 0.02, view.root.position.z);
       view.ring.scale.setScalar(1);
+      view.ring.geometry = this.ringGeo;
       if (view.reach && b.side === 'defense') {
         view.reach.visible = live && carrierId === null && b.down <= 0;
         view.reach.position.set(view.root.position.x, 0.015, view.root.position.z);
@@ -125,7 +129,9 @@ export class ArcadeBodies {
         // Lit up gold while the line is over it: that's the moment to throw.
         const isLit = lit.has(b.id);
         view.ring.material = this.ringMat(isLit ? CARRIER : open(state, b) ? OPEN : COVERED);
-        view.ring.scale.setScalar(isLit ? 1.35 : 1);
+        // Its catch range: a bullet coming inside this ring is caught (Hands is reach).
+        view.ring.geometry = this.catchGeo;
+        view.ring.scale.setScalar(b.reach);
       } else {
         view.ring.visible = false;
       }

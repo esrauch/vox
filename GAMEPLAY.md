@@ -228,7 +228,7 @@ The tension: a recruit of a kind you already have feeds the "+20 to every Ghost"
 | What | How it's shown |
 |---|---|
 | **Your team** | Gold and orange, in helmets. Role by silhouette: big Blockers, lean Runners, tall Catchers. |
-| **Who's open** | A soft ring under each Catcher: green when it's clear of defenders, red when one is on it. |
+| **Who's open, and how far they can reach** | A ring under each receiver **as wide as its catch range**: a bullet coming inside the ring is caught. Green when no defender could reach a ball there, red when one could, gold while the aim line is over it. Better Hands, a bigger ring. |
 | **Where the Scarecrows (and Bats) reach** | A purple ring around each: a ball coming down inside it is contested. |
 | **Where the ball will land** | While aiming: a reticle and the arc; in flight, a landing ring. |
 | **The carrier** | Holds the ball high, with a gold ring underfoot. |
