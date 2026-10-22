@@ -146,7 +146,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Hustle** | **Speed.** | A Runner pulls away from the pack; a Catcher gets a step on its Cover. |
 | **Hands** | **Reach.** A bullet passing near snaps into the hands from further away, and a contested ball goes to the better Hands. | A Catcher plucks a bullet that was going by. |
 
-- **The scale: 50 is ordinary.** An ordinary player is **50 / 50 / 50**, and **every 10 points is one step** (one step more Heft is a quarter heavier; one step more Hustle is a little faster). The fine scale is there so small bonuses can be tuned. Roles shift it: a starting Blocker is about 40 / 40 / 70.
+- **The scale: 50 is ordinary.** An ordinary player is **50 / 50 / 50**, and **every 10 points is one step** (one step more Heft is a quarter heavier; one step more Hustle is a little faster). The fine scale is there so small bonuses can be tuned. Every human is 50 / 50 / 50 whatever position it plays: only its kind and perks move the numbers.
 - **Everyone starts human and plain.** A fresh team is a bit slow, a bit light, a bit clumsy: good enough for the sleepy first drive, not for the Boss.
 - **Any player can play any position** (2 Blocker slots, 2 Runner slots, 3 Catcher slots). The plays only ever talk to the slots, so the team always lines up 2 / 2 / 3; who you put where is up to you, and their stats decide how well it works. A Golem in a Catcher slot is a slow Catcher nobody can tackle.
 - **The numbers live on the roster screen** (between drives). On the field, the stats only show through what happens.
@@ -227,7 +227,7 @@ The tension: a recruit of a kind you already have feeds the "+20 to every Ghost"
 
 | What | How it's shown |
 |---|---|
-| **Your team** | Gold and orange, in helmets. Role by silhouette: big Blockers, lean Runners, tall Catchers. |
+| **Your team** | Gold and orange, in helmets. One build for every position; only Golems are built like linebackers (wide and low), so a broad body is always a Golem. |
 | **Who's open, and how far they can reach** | A ring under each receiver **as wide as its catch range**: a bullet coming inside the ring is caught. Green when no defender could reach a ball there, red when one could, gold while the aim line is over it. Better Hands, a bigger ring. |
 | **How far each defender reaches** | A purple ring around every defender, as wide as its reach: a bullet coming inside it gets batted down (a Scarecrow's is widest). Gone once it's down, after the catch, and for a Rhino Beetle locked up at the line. |
 | **Where the ball will land** | While aiming: a reticle and the arc; in flight, a landing ring. |

@@ -276,7 +276,8 @@ describe('the carrier, and Break it! (the bar)', () => {
   const grabbed = (runnerHeft = 50, extra = false) => {
     const s = carry(
       playState(
-        [{ role: 'runner', pos: v(0, 2), stats: { heft: runnerHeft } }],
+        // A quick runner, so both tacklers get there together.
+        [{ role: 'runner', pos: v(0, 2), stats: { hustle: 60, heft: runnerHeft } }],
         [
           { kind: 'cover', pos: v(0, 4), stats: { heft: 50 } },
           ...(extra ? [{ kind: 'cover' as const, pos: v(0.9, 3.6), stats: { heft: 50 } }] : []),
@@ -413,7 +414,7 @@ describe('Break it!: the mash and the juke', () => {
     forceBreakKind(kind);
     const s = carry(
       playState(
-        [{ role: 'runner', pos: v(0, 2), stats }],
+        [{ role: 'runner', pos: v(0, 2), stats: { hustle: 60, ...stats } }],
         [
           { kind: 'cover', pos: v(0, 4), stats: { heft: 50, hustle: 50 } },
           ...(extra

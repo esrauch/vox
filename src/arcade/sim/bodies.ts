@@ -4,7 +4,7 @@
  */
 import { DEFENDERS, type DefenseSpec } from '../content/defense';
 import { arcadeTuning } from '../content/tuning';
-import { LINEUP, QB_DEPTH, ROLE_RADIUS, ROLE_STATS, ROSTER_ROLES } from '../content/team';
+import { BASE_STATS, LINEUP, QB_DEPTH, ROLE_RADIUS, ROSTER_ROLES } from '../content/team';
 import { playerStats } from './team';
 import type { Play } from '../content/plays';
 import type { Defender, Drive, Player, RunState, Stats } from './types';
@@ -52,7 +52,7 @@ export function lineUpTeam(
   firstId: number,
 ): Player[] {
   const mirror = flipped ? -1 : 1;
-  const qbStats = ROLE_STATS.qb;
+  const qbStats = BASE_STATS;
   const qb: Player = {
     id: firstId,
     side: 'team',

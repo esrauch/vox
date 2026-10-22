@@ -1,6 +1,6 @@
 import { DEFENDERS } from '../../src/arcade/content/defense';
 import { DT, arcadeTuning } from '../../src/arcade/content/tuning';
-import { ROLE_RADIUS, ROLE_STATS } from '../../src/arcade/content/team';
+import { BASE_STATS, ROLE_RADIUS } from '../../src/arcade/content/team';
 import { defenderPhysics, physicsOf } from '../../src/arcade/sim/bodies';
 import { scanTime } from '../../src/arcade/sim/ball';
 import { createRun } from '../../src/arcade/sim/run';
@@ -37,12 +37,12 @@ export interface DefenderSpec {
 /**
  * A down already snapped, with exactly these bodies: the QB on (0, -4) with
  * the ball, then the given players (ids 2 up) and defenders (ids 100 up).
- * Line of scrimmage 0, first-down line 10, no Witches. Stats default to the
- * role's or kind's base.
+ * Line of scrimmage 0, first-down line 10, no Witches. Players' stats default to
+ * 50 / 50 / 50, defenders' to their kind's.
  */
 export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = []): RunState {
   const state = createRun(1);
-  const qbStats = ROLE_STATS.qb;
+  const qbStats = BASE_STATS;
   const qb: Player = {
     id: 1,
     side: 'team',
@@ -59,7 +59,7 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
   };
   const team = players.map((spec, i): Player => {
     const role = spec.role ?? 'catcher';
-    const stats = { ...ROLE_STATS[role], ...spec.stats };
+    const stats = { ...BASE_STATS, ...spec.stats };
     return {
       id: 2 + i,
       side: 'team',

@@ -93,7 +93,7 @@ Every training pick helps. Two things are still off target: **downs last about 2
 
 ## A4. Monsters and the Build
 
-- [~] **Voxel models for the three roles** (Blocker, Runner, Catcher) and **the three monsters** (Golem, Werewolf, Ghost), all in the team helmet. Check each from the game camera at phone size. *(2026-10-21: the Ghost, Golem and Werewolf are modelled (`team/ghost`, `team/golem`, `team/werewolf`) and in the game; the roles are still the walk-on stretched. Not yet checked from the camera.)*
+- [~] **Voxel models for the three roles** (Blocker, Runner, Catcher) and **the three monsters** (Golem, Werewolf, Ghost), all in the team helmet. Check each from the game camera at phone size. *(2026-10-21: the Ghost, Golem and Werewolf are modelled (`team/ghost`, `team/golem`, `team/werewolf`) and in the game; every position now shares one build and only Golems are stretched wide and low, the linebacker shape. Not yet checked from the camera.)*
 - [ ] **Team bonuses:** The Wall, The Pack, The Haunting, Monster Mash, Final Girls, tuned with the balance runs.
 - [ ] **Three areas** (the forest three times, stiffer each time, until there are more).
 

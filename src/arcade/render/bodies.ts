@@ -2,9 +2,10 @@
  * Everyone on the arcade field as voxel models, except the QB: there's none
  * to draw, the pumpkin ball throws itself. Each of your players is its
  * kind's model (a Human walk-on, a Ghost's sheet, a Golem's stones, a
- * Werewolf's fur), all in the team helmet, stretched to the position it's
- * playing (wide Blockers, lean Runners, tall Catchers). Ghosts float a
- * little. Defenders are the forest set. Everyone turns to face where
+ * Werewolf's fur), all in the team helmet, and the same build whatever
+ * position it plays, except Golems: they're the only ones built like
+ * linebackers (wide and low), so a broad body is always a Golem. Ghosts
+ * float a little. Defenders are the forest set. Everyone turns to face where
  * they're going, and tips over when they're down.
  *
  * Rings on the turf: gold under the carrier; under each receiver before the
@@ -18,7 +19,7 @@ import * as THREE from 'three';
 import { common, hexToNumber, team } from '../../content/palettes';
 import { getGeometry, modelHeight, voxelMaterial } from '../../voxel/models';
 import { engaged } from '../sim/ball';
-import type { Body, DefenderKind, Form, Player, Role, RunState } from '../sim/types';
+import type { Body, DefenderKind, Form, Player, RunState } from '../sim/types';
 import { dist } from '../sim/vec';
 import { toWorld } from './world';
 
@@ -30,13 +31,8 @@ const DEFENDER_MODEL: Readonly<Record<DefenderKind, string>> = {
   bat: 'forest/picker',
 };
 
-/** Placeholder role silhouettes: the walk-on, stretched (x/z wide, y tall). */
-const ROLE_SHAPE: Readonly<Record<Role, { readonly wide: number; readonly tall: number }>> = {
-  qb: { wide: 1, tall: 1 },
-  blocker: { wide: 1.45, tall: 0.95 },
-  runner: { wide: 0.9, tall: 0.95 },
-  catcher: { wide: 0.85, tall: 1.25 },
-};
+/** A Golem's linebacker build: its model stretched (x/z wide, y tall). Everyone else is drawn as modelled. */
+const GOLEM_SHAPE = { wide: 1.45, tall: 0.95 };
 
 /** Each kind of player's model, all in the team helmet. */
 const KIND_MODEL: Readonly<Record<Form, string>> = {
@@ -173,11 +169,8 @@ export class ArcadeBodies {
     const ghost = b.side === 'team' && b.form === 'ghost';
     const body = new THREE.Mesh(getGeometry(model), ghost ? GHOST_MATERIAL : voxelMaterial);
     body.castShadow = true;
-    if (b.side === 'team') {
-      // The position it's playing shows in its build (wide Blockers, lean Runners, tall
-      // Catchers); its kind shows in its model.
-      const shape = ROLE_SHAPE[b.role];
-      body.scale.set(shape.wide, shape.tall, shape.wide);
+    if (b.side === 'team' && b.form === 'golem') {
+      body.scale.set(GOLEM_SHAPE.wide, GOLEM_SHAPE.tall, GOLEM_SHAPE.wide);
     }
     const root = new THREE.Group();
     root.add(body);

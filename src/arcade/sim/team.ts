@@ -14,7 +14,7 @@ import {
   RECRUIT_STAR_BONUS,
   STARTING_NAMES,
 } from '../content/perks';
-import { FORM_STATS, ROLE_STATS, ROSTER_ROLES } from '../content/team';
+import { BASE_STATS, FORM_STATS, ROSTER_ROLES } from '../content/team';
 import type { Rng } from '../../sim/rng';
 import { rngFor } from './random';
 import type { Form, Perk, Perks, Position, Rarity, RosterPlayer, RunState, Stats } from './types';
@@ -38,7 +38,7 @@ export function startingRoster(): RosterPlayer[] {
       name: STARTING_NAMES[i] ?? `Player ${i + 1}`,
       kind: 'human',
       preferred,
-      stats: ROLE_STATS[preferred],
+      stats: BASE_STATS,
     };
   });
 }
@@ -139,7 +139,7 @@ function makeRecruit(rng: Rng, rarity: Rarity): RosterPlayer {
   const star = rarity === 'epic' ? RECRUIT_STAR_BONUS : 0;
   // Each stat a little either way (in fives), so no two are quite alike.
   const jitter = (): number => 5 * rng.int(-1, 2);
-  const base = plus(ROLE_STATS[preferred], FORM_STATS[kind]);
+  const base = plus(BASE_STATS, FORM_STATS[kind]);
   return {
     name: rng.pick(RECRUIT_NAMES[kind]),
     kind,

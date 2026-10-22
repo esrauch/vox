@@ -30,16 +30,11 @@ export const LINEUP: readonly { readonly x: number; readonly y: number }[] = [
 export const QB_DEPTH = 4;
 
 /**
- * Every role's base stats: a plain human in that role. Stats are on a
- * 0-100-ish scale where 50 is ordinary and every 10 points is one step
- * (tuning.body), so there's room to tune small bonuses.
+ * A plain human's stats, whatever position it plays: 50 is ordinary and
+ * every 10 points is one step (tuning.body), so there's room to tune small
+ * bonuses. Only kinds (FORM_STATS) and perks move them.
  */
-export const ROLE_STATS: Readonly<Record<Role, Stats>> = {
-  qb: { hustle: 50, hands: 50, heft: 50 },
-  blocker: { hustle: 40, hands: 40, heft: 70 },
-  runner: { hustle: 60, hands: 40, heft: 50 },
-  catcher: { hustle: 50, hands: 60, heft: 40 },
-};
+export const BASE_STATS: Stats = { hustle: 50, hands: 50, heft: 50 };
 
 /** Body size by role (yards). */
 export const ROLE_RADIUS: Readonly<Record<Role, number>> = {
