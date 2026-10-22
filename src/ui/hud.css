@@ -13,9 +13,10 @@
 .hud-banner {
   font-size: 0.85rem;
   color: var(--ink);
-  background: rgb(255 255 255 / 0.75);
+  background: var(--bone);
   padding: 4px 10px;
-  border-radius: 999px;
+  border: 3px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
   max-width: 60%;
   white-space: nowrap;
   overflow: hidden;
@@ -28,7 +29,8 @@
   color: white;
   background: var(--ink);
   padding: 4px 12px;
-  border-radius: 12px;
+  border: 3px solid var(--bone);
+  box-shadow: 3px 3px 0 var(--ink);
 }
 
 .hud-message {
@@ -40,9 +42,7 @@
   font-size: clamp(1.8rem, 9vw, 3rem);
   font-weight: 900;
   color: white;
-  text-shadow:
-    0 4px 0 var(--ink),
-    0 0 18px rgb(0 0 0 / 0.25);
+  text-shadow: var(--text-edge);
   opacity: 0;
   transform: scale(0.8);
   transition:
@@ -65,7 +65,7 @@
   font-weight: 900;
   opacity: 0;
   transform: translateY(8px);
-  text-shadow: 0 3px 0 var(--ink);
+  text-shadow: var(--text-edge);
 }
 
 .hud-pop.show {
@@ -115,15 +115,16 @@
   flex-direction: column;
   gap: 2px;
   padding: 6px 8px;
-  border: 0;
-  border-radius: 12px;
+  border: var(--edge) solid var(--ink);
+  border-radius: 0;
   font: inherit;
   text-align: left;
   color: var(--ink);
   background: var(--bone);
   box-shadow:
-    inset 0 -4px 0 rgb(0 0 0 / 0.12),
-    0 3px 0 var(--ink);
+    inset 0 4px 0 rgb(255 255 255 / 0.55),
+    inset 0 -4px 0 rgb(0 0 0 / 0.15),
+    4px 4px 0 var(--ink);
 }
 
 .hud-card strong {
@@ -154,13 +155,16 @@
 .hud-flip {
   height: 52px;
   padding: 0 16px;
-  border: 0;
-  border-radius: 14px;
+  border: var(--edge) solid var(--ink);
+  border-radius: 0;
   font: inherit;
   font-weight: 900;
   color: var(--ink);
   background: var(--bone);
-  box-shadow: 0 4px 0 var(--ink);
+  box-shadow:
+    inset 0 4px 0 rgb(255 255 255 / 0.55),
+    inset 0 -4px 0 rgb(0 0 0 / 0.15),
+    4px 4px 0 var(--ink);
 }
 
 .hud-draft {
@@ -172,7 +176,7 @@
   justify-content: center;
   gap: 10px;
   padding: 24px 16px;
-  background: rgb(20 14 36 / 0.82);
+  background: var(--scanlines), rgb(20 14 36 / 0.88);
   color: white;
 }
 
@@ -210,9 +214,9 @@
   flex-direction: column;
   gap: 2px;
   padding: 6px 8px;
-  border-radius: 10px;
+  border: 3px solid rgb(255 255 255 / 0.3);
   font-size: 0.75rem;
-  background: rgb(255 255 255 / 0.12);
+  background: rgb(255 255 255 / 0.1);
 }
 
 .hud-roster-row em {
@@ -230,32 +234,41 @@
 .hud-skip {
   margin-top: 6px;
   padding: 8px 18px;
-  border: 0;
-  border-radius: 12px;
+  border: var(--edge) solid var(--ink);
   font: inherit;
   font-weight: 800;
   color: var(--ink);
   background: var(--bone);
+  box-shadow:
+    inset 0 4px 0 rgb(255 255 255 / 0.55),
+    inset 0 -4px 0 rgb(0 0 0 / 0.15),
+    4px 4px 0 var(--ink);
 }
 
 .hud-action {
   min-width: 180px;
   height: 64px;
-  border: 0;
-  border-radius: 18px;
+  border: var(--edge) solid var(--ink);
+  border-radius: 0;
   font: inherit;
   font-size: 1.6rem;
   font-weight: 900;
   letter-spacing: 0.04em;
   color: white;
   background: var(--candy-purple);
+  text-shadow: 2px 2px 0 var(--ink);
   box-shadow:
-    inset 0 -6px 0 rgb(0 0 0 / 0.18),
-    0 5px 0 var(--ink);
+    inset 0 4px 0 rgb(255 255 255 / 0.35),
+    inset 0 -6px 0 rgb(0 0 0 / 0.25),
+    5px 5px 0 var(--ink);
 }
 
 .hud-action:active {
-  translate: 0 3px;
+  translate: 3px 3px;
+  box-shadow:
+    inset 0 4px 0 rgb(255 255 255 / 0.35),
+    inset 0 -6px 0 rgb(0 0 0 / 0.25),
+    2px 2px 0 var(--ink);
 }
 
 .hud-flip.on {
@@ -274,9 +287,7 @@
   opacity: 0;
   scale: 0.6;
   pointer-events: none;
-  text-shadow:
-    0 5px 0 var(--ink),
-    0 0 24px rgb(0 0 0 / 0.5);
+  text-shadow: var(--text-edge);
 }
 
 .hud-big.show {
@@ -300,7 +311,6 @@
 }
 
 button.hud-roster-row {
-  border: 0;
   font: inherit;
   text-align: left;
   color: inherit;
@@ -313,19 +323,23 @@ button.hud-roster-row {
 }
 
 .hud-roster-row.selected {
-  outline: 3px solid var(--pumpkin);
-  background: rgb(255 138 31 / 0.25);
+  border-color: var(--pumpkin);
+  background: rgb(255 138 31 / 0.3);
 }
 
 .hud-card.rarity-rare {
   box-shadow:
-    inset 0 -4px 0 rgb(0 0 0 / 0.12),
-    0 0 0 3px #4aa3ff;
+    inset 0 4px 0 rgb(255 255 255 / 0.55),
+    inset 0 -4px 0 rgb(0 0 0 / 0.15),
+    0 0 0 4px #4aa3ff,
+    4px 4px 0 4px var(--ink);
 }
 
 .hud-card.rarity-epic {
   box-shadow:
-    inset 0 -4px 0 rgb(0 0 0 / 0.12),
-    0 0 0 3px var(--candy-purple),
-    0 0 18px var(--candy-purple);
+    inset 0 4px 0 rgb(255 255 255 / 0.55),
+    inset 0 -4px 0 rgb(0 0 0 / 0.15),
+    0 0 0 4px var(--candy-purple),
+    0 0 0 8px var(--ink),
+    4px 4px 0 8px var(--ink);
 }
