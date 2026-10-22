@@ -39,7 +39,15 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 ## The Run: Areas of Four Drives
 
 - **A run is a series of themed areas** (the Haunted Forest first). **Each area is four drives**, *Balatro*-style: **Intro**, **Challenge**, **Gimmick** (a twist: Witches overhead, Bats everywhere) and **Boss**.
-- **The main game is three areas: 12 drives and three Bosses**, and they tell the story (THEME.md): **the first Boss gives back Jack's first baby, the second Boss the second, and beating the third gets the family home to their patch.** ▲ *Until there are more areas, the forest is played three times, stiffer each time.*
+- **The main game is three areas: 12 drives and three Bosses**, and they tell the story (THEME.md). **Each Boss has one gimmick that attacks one thing you do:**
+
+  | Area | Boss | Gimmick | Attacks |
+  |---|---|---|---|
+  | **The Forest** | **Mister Frog** (top hat) *(gives back baby #1)* | **Frog Rain:** before the snap a lane lights up on the turf; during the down, frogs fall in it one by one (each shows a shadow first) and flatten whoever is under them. You see the lane while choosing a card, so you pick a play, or **Flip** it, to keep your routes out. | Where your routes go |
+  | **The Swamp** | **The King** (a scarecrow in a crown) *(gives back baby #2)* | **The Two-Part Grab:** when he grabs the carrier it's two Break it! tests back to back, and the second comes only if you pass the first. | The team you've built |
+  | **The Farm** | **The Queen** (a witch, double size, in a crown) *(beating her gets the family home to the patch)* | **The Hex:** the aim line shrinks to a short stub by the pumpkin, and receivers stop lighting up. The sweep still runs at full speed: you extrapolate. | Your timing |
+
+  ▲ *Until the Swamp and the Farm are built, the forest is played three times, stiffer each time.*
 - **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!**, and a baby rescued (or, the third time, home).
 - **There are no lives. Losing a drive is game over.** Four downs, and every one counts.
 - **The forest scales up as you do:** the first drive is a handful of sleepy defenders, the area III Boss is the whole forest at full strength (see *The Defense*).
@@ -213,9 +221,14 @@ The tension: a recruit of a kind you already have feeds the "+20 to every Ghost"
 | **Rusher** | Rhino Beetle | Charges the QB. Your Blockers have to out-shove it. |
 | **Cover** | Garden Gnome | Shadows a Catcher; after the catch, chases the carrier. Small, quick, light: easy to shove, hard to shake. |
 | **Zone** | Scarecrow | Planted: its long arms reach a **wide purple ring** on the turf, and any low ball coming down inside it is contested: its Hands beat a plain Catcher's, so it's a patch of field to throw away from (a Catcher with great Hands, like a Ghost, can still win it). Running into one stops you dead. |
-| **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. |
+| **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. *(In the Swamp the Safety is a Witch.)* |
 | **Bat** | Bat | Patrols a fixed loop and swats passes that fly through it. |
+| **Frog** *(new)* | Frog | Covers like a Gnome until the carrier gets close, then crouches (the telegraph) and leaps onto it. |
+| **Bog Hand** *(new, Swamp)* | Hand in the mud | Planted: grabs anyone who passes close. |
+| **Crow** *(new, Farm)* | Crow | A Bat that swoops down a lane instead of looping. |
 
+- **Each area has its own set:** the Forest adds Frogs; the Swamp swaps the Owl for Witches and adds Bog Hands and mud (everyone moves slower in it, defenders too); the Farm adds Crows and rows of Scarecrows. Older kinds keep their rules wherever they appear.
+- **The Queen is a Witch twice the size,** with the stats to match; the King is a Scarecrow in a crown; Mister Frog is a Frog in a top hat.
 - **Hazards** stay simple patterns, like *Crossy Road*'s cars: the **Witch on a Broom** sweeps across the field and knocks down any pass she meets.
 - **Scaling, the lever behind the whole run:** the first drive of area I is **four slow defenders** (Intro 4, Challenge 5, Gimmicks 5 or 6, the Boss a full 8); every drive adds defenders or stats, and later areas bring more rushers and heavier, faster, grabbier versions of everyone. ▲ *Numbers to come from the balance runs: the target is that a team that never upgrades loses in area II, a decent build reaches the last Boss, and a strong one beats it.*
 - **The defense always shows its intent:** rushers lean toward the QB, Covers face their Catcher, the Owl tracks the ball.

@@ -18,9 +18,12 @@ Inspirations: *Retro Bowl* (pocket-sized arcade football), *Crossy Road* (feel, 
 
 **Jack is the pumpkin ball.** He and his two babies were carried off from their pumpkin patch, and now he's trying to get them all back home. The forest won't let him through, so his team plays its way across, one drive at a time.
 
-- **The first Boss** is holding Jack's first baby: beat it and the baby is back with him.
-- **The second Boss** has the second baby.
-- **The third Boss** stands between the family and their patch: beat it and they're home.
+The way home crosses three places, each with a Boss, each in a hat of its own:
+
+- **The Forest: Mister Frog,** in a top hat, holds Jack's first baby. Beat him and the baby is back with Jack.
+- **The Swamp: the King,** a scarecrow in a crown (the Swamp's scarecrow on his post in the bog), holds the second baby.
+- **The Farm: the Queen,** a witch twice the size of any other, in a crown, rules the pumpkin patch. Beat her and the family is home.
+
 
 The babies are little jack-o'-lanterns: small, round, glowing, and as readable as Jack himself.
 
@@ -79,9 +82,11 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 
 ---
 
-## The Opposition: the Haunted Forest
+## The Opposition
 
-**The forest's locals don't want a football team tramping through their woods.** They're the defenders: wild creatures, never in helmets, always in candy purple.
+**The locals don't want a football team tramping through their land.** They're the defenders: wild creatures, never in helmets, always in candy purple. The Bosses are the one exception to "no hats": a top hat, a crown, a bigger crown.
+
+### The Haunted Forest
 
 | Defender job | Forest local | Look |
 |---|---|---|
@@ -91,9 +96,15 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 | **Safety** (the deep guard) | **Owl** | Wide-eyed, hanging deep, seeing everything. |
 | **Bat** (patrols a box of sky) | **Bat** | Hovering with its wings spread, to knock passes out of the air. |
 
-**Hazards** belong to the forest too, each one a single simple shape: the **Witch on a Broom** swooping over the passing lanes, and later **rolling pumpkins**, **tombstones** and **drifting ghosts**.
+Plus the **Frog** (a Cover that crouches, then leaps) and the **Witch on a Broom** as a hazard swooping over the passing lanes. **Boss: Mister Frog,** who rains frogs down a lane.
 
-**Later, more haunted places:** a graveyard, a witch's swamp, a haunted manor. Each area has its own locals, hazards and look, and a Boss defense at the end of its four drives. It's always the same team, growing as it goes.
+### The Swamp
+The Forest's locals, drowned. **Witches take the Safety's place,** hanging deep on their brooms; the **Bog Hand** (planted in the mud, grabs whoever passes close) and **mud patches** that slow everyone are new. **Boss: the King,** a scarecrow in a crown.
+
+### The Farm
+Rows of scarecrows, and **Crows**, bats that swoop down a lane instead of looping. The pumpkin patch is the end zone. **Boss: the Queen,** a witch twice the size of any other, in a crown, whose Hex hides the aim line.
+
+Each area has its own locals, hazards and look, and a Boss defense at the end of its four drives. It's always the same team, growing as it goes.
 
 ---
 
@@ -118,5 +129,5 @@ Runners-up, kept for reuse inside the game (perks, achievements, area names): *F
 ## Open Questions
 
 - **What makes runs different from each other** beyond the perks and recruits? Perhaps a starting coach or team, or the team's colors and name.
-- **Who took the babies,** and why? (A Boss per baby suggests an answer per Boss.)
+- **Why did they take the babies?** Mister Frog and the King took one each; the Queen just rules the patch. Is there a reason, or is it a tournament of hats?
 - **What does the patch look like** when Jack gets home, and is there a joke at the end that nobody ever reaches?

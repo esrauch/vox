@@ -28,11 +28,12 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 **Done when** each drive of an area plays differently, each Boss is an event, and the balance runs hit the targets below.
 
-- [ ] **Design pass first** (concepts in chat, then GAMEPLAY.md): what makes an Intro, a Challenge, a Gimmick and a Boss feel different; new defender kinds with one clear rule each; how the three areas climb.
-- [ ] **New defenders** for the forest, each readable from its shape.
-- [ ] **A real Boss:** the Treant (or its guard), with its own rule.
-- [ ] **The story's beats:** beating the first and second Boss rescues a baby pumpkin (it joins Jack); beating the third gets them home to the patch, the game's ending.
-- [ ] **Gimmick drives** that change how you play (Witches, Bats, more).
+- [x] **Design pass** (GAMEPLAY.md, *The Run* and *The Defense*): three areas (Forest, Swamp, Farm), each Boss with one gimmick that attacks one thing you do.
+- [ ] **Forest:** the **Frog** defender; **Mister Frog** (top hat) and **Frog Rain**: a telegraphed lane before the snap, frogs falling in it with shadows first, flattening whoever is under them.
+- [ ] **Swamp:** the Safety becomes a **Witch**; the **Bog Hand** (planted grabber) and **mud patches**; **the King** (a crowned scarecrow) and the **Two-Part Grab** (two Break it! tests in a row).
+- [ ] **Farm:** the **Crow**; rows of Scarecrows; **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers).
+- [ ] **Models** for the new defenders and the three Bosses (top hat, crown, bigger crown), readable from the game camera; the baby pumpkins.
+- [ ] **The story's beats:** beating Mister Frog and the King returns a baby pumpkin (it joins Jack); beating the Queen gets the family home to the patch, the game's ending.
 - [ ] **Difficulty targets:** a practised player who never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
 
 ## B2. Impact and Feel
@@ -81,6 +82,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-22:** **The progression is designed:** Forest (Mister Frog, Frog Rain), Swamp (the King, the Two-Part Grab; Witches as Safeties) and the Farm (the Queen, the Hex), ending at the pumpkin patch. Not built yet.
 - **2026-10-22:** **The game is now Get Jack Back.** Jack the pumpkin ball is the hero: each of the first two Bosses gives back one of his baby pumpkins, and beating the third gets them home to their patch (story in the docs; not built yet). The title screen, page titles and package are renamed, and winning says "Jack is home!".
 - **2026-10-22:** **Docs rewritten** for the game as it is; the screenshot tool and the model contact sheet follow the arcade camera. A **local cleanup pass** (dead code, comments, shared stat helpers), with the bigger refactors noted in TECHNICAL.md.
 - **2026-10-22:** **No more clipping.** After a catch or handoff each helper blocks its own defender instead of all piling onto one; teammates collide and give way to the carrier; bodies lying down get nudged aside; Golems' bodies are as wide as their model. With working blocks, runs got long and swingy, so on a handoff the Catchers now run decoy routes.
