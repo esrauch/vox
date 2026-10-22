@@ -416,12 +416,12 @@ export class ArcadeGame {
     this.hud.setDraft(
       ready && phase === 'draft' ? trickOrTreatView(this.state, this.swapFrom) : null,
     );
-    if (!this.conductor.started) this.hud.setPrompt('Fourth & Ghoul', 'PLAY');
+    if (!this.conductor.started) this.hud.setPrompt('Get Jack Back', 'PLAY');
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
     else if (phase === 'setup')
       this.hud.setPrompt(called === null ? 'Pick a play' : null, called === null ? null : 'HIKE!');
     else if (phase === 'over') this.hud.setPrompt('Game Over!', 'AGAIN');
-    else if (phase === 'won') this.hud.setPrompt('The forest is cleared!', 'AGAIN');
+    else if (phase === 'won') this.hud.setPrompt('Jack is home!', 'AGAIN');
     else this.hud.setPrompt(null, null);
   }
 

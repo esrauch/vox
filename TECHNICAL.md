@@ -1,4 +1,4 @@
-# Fourth & Ghoul: Technical
+# Get Jack Back: Technical
 
 This doc covers how we build it: the stack, the architecture, the simulation, rendering, UI, audio, and how assets get made and sourced. It builds on [THEME.md](THEME.md) and [GAMEPLAY.md](GAMEPLAY.md); progress lives in [MILESTONES.md](MILESTONES.md).
 

@@ -1,4 +1,4 @@
-# Fourth & Ghoul: Milestones
+# Get Jack Back: Milestones
 
 This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work through it top to bottom and update it as we go: check items off, add what we discover, and move things around when priorities change. The theme is in [THEME.md](THEME.md) and the build in [TECHNICAL.md](TECHNICAL.md). This file tracks *what's next* and *what "done" means*.
 
@@ -31,6 +31,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [ ] **Design pass first** (concepts in chat, then GAMEPLAY.md): what makes an Intro, a Challenge, a Gimmick and a Boss feel different; new defender kinds with one clear rule each; how the three areas climb.
 - [ ] **New defenders** for the forest, each readable from its shape.
 - [ ] **A real Boss:** the Treant (or its guard), with its own rule.
+- [ ] **The story's beats:** beating the first and second Boss rescues a baby pumpkin (it joins Jack); beating the third gets them home to the patch, the game's ending.
 - [ ] **Gimmick drives** that change how you play (Witches, Bats, more).
 - [ ] **Difficulty targets:** a practised player who never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
 
@@ -80,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-22:** **The game is now Get Jack Back.** Jack the pumpkin ball is the hero: each of the first two Bosses gives back one of his baby pumpkins, and beating the third gets them home to their patch (story in the docs; not built yet). The title screen, page titles and package are renamed, and winning says "Jack is home!".
 - **2026-10-22:** **Docs rewritten** for the game as it is; the screenshot tool and the model contact sheet follow the arcade camera. A **local cleanup pass** (dead code, comments, shared stat helpers), with the bigger refactors noted in TECHNICAL.md.
 - **2026-10-22:** **No more clipping.** After a catch or handoff each helper blocks its own defender instead of all piling onto one; teammates collide and give way to the carrier; bodies lying down get nudged aside; Golems' bodies are as wide as their model. With working blocks, runs got long and swingy, so on a handoff the Catchers now run decoy routes.
 - **2026-10-22:** **Runs are the safe call, passes the gamble.** The play fake: for about a second after a handoff the defense keeps playing the pass. Runs average about 4 yards and gain nothing about 5% of the time; a good passer averages about 5½, with a quarter gaining nothing.

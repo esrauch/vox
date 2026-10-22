@@ -1,6 +1,6 @@
-# Fourth & Ghoul: Theme
+# Get Jack Back: Theme
 
-*A football team, a haunted forest, and the longest fourth down of their lives.*
+*A pumpkin, a football team, and a long way home.*
 
 This document is about who, where and what it feels like. It does not cover rules or numbers; those live in [GAMEPLAY.md](GAMEPLAY.md).
 
@@ -8,15 +8,26 @@ This document is about who, where and what it feels like. It does not cover rule
 
 ## The Pitch in One Breath
 
-**Arcade Halloween Football.** A football team playing through a haunted forest, one drive at a time, past gnomes, scarecrows, owls and bats that don't want them there. You call the play, time the throw and break the tackles; everything else crashes together on its own. You start as seven plain, keen humans; drive by drive, the forest sends you recruits: a Golem built like a linebacker, a Werewolf that won't stop running, a Ghost that plucks passes out of the air. Keep going until a 4th down goes wrong.
+**Arcade Halloween Football.** **Jack**, a jack-o'-lantern, has lost his two baby pumpkins and his way home to the patch, and he's got a football team to help. They play through a haunted forest, one drive at a time, past gnomes, scarecrows, owls and bats that don't want them there. You call the play, time the throw and break the tackles; everything else crashes together on its own. You start as seven plain, keen humans; drive by drive, the forest sends you recruits: a Golem built like a linebacker, a Werewolf that won't stop running, a Ghost that plucks passes out of the air. Keep going until a 4th down goes wrong.
 
 **The feel:** snappy, fast, silly, and above all *physical*: every play ends in a pile-up. It's closer to *Crossy Road* and *Retro Bowl* than to *Blood Bowl*: pick it up in seconds, laugh every few seconds, one more go. **It's a portrait, one-thumb phone game in voxels**, to a cheerful Halloween soundtrack.
 
 Inspirations: *Retro Bowl* (pocket-sized arcade football), *Crossy Road* (feel, readability, the chunky toy-like look), *Blood Bowl* (fantasy teams with clear roles), *Slay the Spire*, *Balatro* and *Dungeon Clawler* (start weak, build a run that snowballs), and the joy of a team of misfits that somehow works.
 
+## The Story
+
+**Jack is the pumpkin ball.** He and his two babies were carried off from their pumpkin patch, and now he's trying to get them all back home. The forest won't let him through, so his team plays its way across, one drive at a time.
+
+- **The first Boss** is holding Jack's first baby: beat it and the baby is back with him.
+- **The second Boss** has the second baby.
+- **The third Boss** stands between the family and their patch: beat it and they're home.
+
+The babies are little jack-o'-lanterns: small, round, glowing, and as readable as Jack himself.
+
 ## Core Fantasy
 
-- **You call the play and make the throw.** You're the quarterback (well, the pumpkin): the one who reads the defense, picks the play, and lets the ball fly at the right moment.
+- **You call the play and make the throw.** You're Jack, the pumpkin who's also the quarterback: you read the defense, pick the play, and let yourself fly at the right moment.
+- **You're bringing your family home.** Every Boss beaten is a baby back, or the last step to the patch.
 - **A plain team becomes a monster team.** You start with seven ordinary humans. By the end of a good run your lineup is a pack of misfits, each a trade-off: the Golem nobody can move, the Werewolf nobody can catch, the Ghost who catches everything.
 - **Every recruit is a little story.** The Werewolf you picked up after the second drive, who broke three tackles against the Treant's Guard, is *your* Werewolf.
 - **Chaos you can read.** The defense is all on show, but four downs go fast. You call the play and adapt as it falls apart.
@@ -64,7 +75,7 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 
 ### The ball
 
-**A jack-o'-lantern.** A round pumpkin with a glowing carved face: the team's ball and the game's icon. **There's no quarterback: the pumpkin throws itself.** It floats behind the line, bobbing, its face always turned to you, and fires itself off as a bullet. Embers drift off it, trail behind it in flight, and burst out when it's thrown, caught or knocked down. **It's also the field's light:** a warm lamp burns inside it, lighting everyone around it and throwing their shadows, so the shadows swing as it flies and pool around whoever is carrying it. The moon is only a dim fill.
+**Jack, a jack-o'-lantern.** A round pumpkin with a glowing carved face: the team's ball, the game's hero and its icon. **There's no quarterback: the pumpkin throws itself.** It floats behind the line, bobbing, its face always turned to you, and fires itself off as a bullet. Embers drift off it, trail behind it in flight, and burst out when it's thrown, caught or knocked down. **It's also the field's light:** a warm lamp burns inside it, lighting everyone around it and throwing their shadows, so the shadows swing as it flies and pool around whoever is carrying it. The moon is only a dim fill.
 
 ---
 
@@ -100,11 +111,12 @@ Every player and every defender is described by **three attributes**, the **Thre
 
 ## Title
 
-**Fourth & Ghoul**: fourth and goal, the last-chance down, with a ghoul in it. It's the game's name; *Arcade Halloween Football* is the pitch.
+**Get Jack Back**: Jack the jack-o'-lantern getting his babies back, and getting back to the patch. It's the game's name; *Arcade Halloween Football* is the pitch.
 
-Runners-up, kept for reuse inside the game (perks, achievements, area names): *Field of Screams*, *Hike & Shriek*, *Trick Play*, *Ghoul Line*, *Boo-tball*, *The Boo Zone*, *Haunted Huddle*, *Hail Mary Shelley*, *Fright Night Football*, *Touchdown Town*. *Fee Fi Fo Fumble* lives on as a crowd chant.
+Runners-up, kept for reuse inside the game (perks, achievements, area names): *Fourth & Ghoul* (the old title), *Field of Screams*, *Hike & Shriek*, *Trick Play*, *Ghoul Line*, *Boo-tball*, *The Boo Zone*, *Haunted Huddle*, *Hail Mary Shelley*, *Fright Night Football*, *Touchdown Town*. *Fee Fi Fo Fumble* lives on as a crowd chant.
 
 ## Open Questions
 
 - **What makes runs different from each other** beyond the perks and recruits? Perhaps a starting coach or team, or the team's colors and name.
-- **What is the run toward?** The far side of the forest? A haunted stadium? Is there a joke at the end that nobody ever reaches?
+- **Who took the babies,** and why? (A Boss per baby suggests an answer per Boss.)
+- **What does the patch look like** when Jack gets home, and is there a joke at the end that nobody ever reaches?

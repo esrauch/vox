@@ -1,4 +1,4 @@
-# Fourth & Ghoul: Gameplay
+# Get Jack Back: Gameplay
 
 **Arcade Halloween Football.** Simple arcade mechanics, a clear monster theme, and a game that lives or dies by its UX and a hundred tiny optimizations.
 
@@ -10,7 +10,7 @@ Items marked **▲** are recommendations or details still open to change. Every 
 - **Area:** a themed place (the Haunted Forest first). Each area is four drives.
 - **Drive:** four downs to gain 10 yards. **Down:** one play, a few seconds long.
 - **Line of scrimmage:** where the current down starts. **First-down line:** 10 yards past where the drive started.
-- **Your team:** **eight on the field**: the QB plus seven players, each a **Blocker**, a **Runner** or a **Catcher**. *The QB is the pumpkin ball itself: there's no QB player on the field, the pumpkin throws itself (THEME.md, The ball).*
+- **Your team:** **eight on the field**: the QB plus seven players, each a **Blocker**, a **Runner** or a **Catcher**. *The QB is the pumpkin ball itself, **Jack**: there's no QB player on the field, Jack throws himself (THEME.md, The ball).*
 - **Carrier:** whoever has the ball after a catch or a handoff. It runs on its own.
 - **Heft, Hustle, Hands:** your players' (and defenders') three stats. They're physics, not dice: weight, speed and reach.
 
@@ -39,8 +39,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 ## The Run: Areas of Four Drives
 
 - **A run is a series of themed areas** (the Haunted Forest first). **Each area is four drives**, *Balatro*-style: **Intro**, **Challenge**, **Gimmick** (a twist: Witches overhead, Bats everywhere) and **Boss**.
-- **The main game is three areas: 12 drives and three Bosses.** ▲ *Until there are more areas, the forest is played three times, stiffer each time.*
-- **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!**
+- **The main game is three areas: 12 drives and three Bosses**, and they tell the story (THEME.md): **the first Boss gives back Jack's first baby, the second Boss the second, and beating the third gets the family home to their patch.** ▲ *Until there are more areas, the forest is played three times, stiffer each time.*
+- **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!**, and a baby rescued (or, the third time, home).
 - **There are no lives. Losing a drive is game over.** Four downs, and every one counts.
 - **The forest scales up as you do:** the first drive is a handful of sleepy defenders, the area III Boss is the whole forest at full strength (see *The Defense*).
 

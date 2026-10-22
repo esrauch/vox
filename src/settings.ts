@@ -4,7 +4,7 @@
  * and the game works with the defaults.
  */
 
-const KEY = 'ffff.settings';
+const KEY = 'getJackBack.settings';
 const VERSION = 1;
 
 export interface Settings {
