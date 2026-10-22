@@ -642,6 +642,30 @@ it('dist is Euclidean', () => {
   expect(dist(v(0, 0), v(3, 4))).toBe(5);
 });
 
+describe('crowding', () => {
+  it('teammates spread out instead of piling up: no two standing players overlap', () => {
+    for (const card of [runCard, passCard]) {
+      for (let seed = 1; seed <= 12; seed++) {
+        let s = createRun(seed);
+        const i = card(s);
+        if (i < 0) continue;
+        s = dispatch(dispatch(s, { type: 'call', hand: i }).state, { type: 'hike' }).state;
+        for (let k = 0; k < 400 && s.phase === 'play'; k++) {
+          s = step(s).state;
+          const team = s.field.players.filter((p) => p.role !== 'qb' && p.down <= 0);
+          for (const a of team) {
+            for (const b of team) {
+              if (a.id < b.id) {
+                expect(dist(a.pos, b.pos)).toBeGreaterThan(0.75 * (a.radius + b.radius));
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+});
+
 describe('the play fake', () => {
   /** A Runner with the ball at the snap, and a Cover out wide on a Catcher. */
   const coverX = (handoff: boolean) => {

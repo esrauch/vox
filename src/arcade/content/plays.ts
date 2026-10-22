@@ -93,7 +93,7 @@ export const PLAYS: readonly Play[] = [
     id: 'sweep',
     name: 'Sweep',
     // A handoff wide: a Runner takes it out toward the sideline and turns upfield behind the
-    // other Runner; the Catchers run short and block downfield.
+    // other Runner; the Catchers run short routes as decoys (on a handoff they don't block).
     handoff: 2,
     slots: [
       block,

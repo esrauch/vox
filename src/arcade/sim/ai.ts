@@ -44,7 +44,11 @@ export function playerTarget(state: RunState, p: Player): Vec | null {
     case 'block':
       return blockTarget(state, p, carrier);
     case 'route': {
-      if (carrier) return blockTarget(state, p, carrier);
+      // After a catch everyone blocks for the carrier; on a handoff the Catchers keep running
+      // their routes as decoys, pulling their Covers away (only the Runners and Blockers block).
+      if (carrier && (p.role !== 'catcher' || !handedOff(state))) {
+        return blockTarget(state, p, carrier);
+      }
       const job = p.job;
       const to = job.to[job.index];
       if (!to) return null;
@@ -59,9 +63,7 @@ function blockTarget(state: RunState, p: Player, carrier: Player | null): Vec | 
   const defenders = state.field.defenders.filter((d) => up(d) && !d.planted);
   if (carrier) {
     if (carrier.id === p.id) return null;
-    const threat = defenders.sort(
-      (a, b) => dist(a.pos, carrier.pos) - dist(b.pos, carrier.pos) || a.id - b.id,
-    )[0];
+    const threat = carryBlocks(state, carrier, defenders).get(p.id);
     return threat ? between(threat, carrier.pos, p) : null;
   }
   const qb = qbOf(state);
@@ -77,6 +79,45 @@ function blockTarget(state: RunState, p: Player, carrier: Player | null): Vec | 
   if (!rusher) return add(qb.pos, v(p.pos.x > qb.pos.x ? 1.2 : -1.2, 2.5));
   return between(rusher, qb.pos, p);
 }
+
+/**
+ * After a catch or handoff, who blocks whom: the defenders nearest the
+ * carrier are the threats, and each of your players takes its own, the
+ * closest pairs first, so they spread out instead of piling onto one. Spare
+ * players double up on the nearest threat to them. Worked out once a step.
+ */
+function carryBlocks(
+  state: RunState,
+  carrier: Player,
+  defenders: readonly Defender[],
+): Map<number, Defender> {
+  if (blockCache.state === state && blockCache.step === state.step) return blockCache.blocks;
+  const run = handedOff(state);
+  const helpers = state.field.players.filter(
+    (q) => up(q) && q.role !== 'qb' && q.id !== carrier.id && !(run && q.role === 'catcher'),
+  );
+  const threats = [...defenders]
+    .sort((a, b) => dist(a.pos, carrier.pos) - dist(b.pos, carrier.pos) || a.id - b.id)
+    .slice(0, helpers.length);
+  const pairs = helpers
+    .flatMap((q) => threats.map((d) => ({ q, d, at: dist(q.pos, d.pos) })))
+    .sort((a, b) => a.at - b.at || a.q.id - b.q.id || a.d.id - b.d.id);
+  const blocks = new Map<number, Defender>();
+  const taken = new Set<number>();
+  for (const { q, d } of pairs) {
+    if (blocks.has(q.id) || taken.has(d.id)) continue;
+    blocks.set(q.id, d);
+    taken.add(d.id);
+  }
+  for (const { q, d } of pairs) if (!blocks.has(q.id)) blocks.set(q.id, d);
+  blockCache = { state, step: state.step, blocks };
+  return blocks;
+}
+let blockCache: { state: RunState | null; step: number; blocks: Map<number, Defender> } = {
+  state: null,
+  step: -1,
+  blocks: new Map(),
+};
 
 /** The point touching `d` on the side facing `guard`: stepping there shoves `d` away from it. */
 function between(d: Defender, guard: Vec, p: Player): Vec {
@@ -124,10 +165,14 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
  * pass (Rushers go for the pumpkin, Covers stay on their Catchers), except
  * a defender right next to the carrier, who sees it.
  */
+/** The ball was handed off (not thrown) this down. */
+function handedOff(state: RunState): boolean {
+  return PLAYS[state.play.index]?.handoff !== undefined;
+}
+
 function fooled(state: RunState, d: Defender, carrier: Player): boolean {
-  const play = PLAYS[state.play.index];
   return (
-    play?.handoff !== undefined &&
+    handedOff(state) &&
     state.time - state.snappedAt < defense.playFake &&
     dist(d.pos, carrier.pos) > defense.fakeSees
   );

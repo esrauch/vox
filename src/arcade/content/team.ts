@@ -47,6 +47,9 @@ export const ROLE_RADIUS: Readonly<Record<Role, number>> = {
   catcher: 0.45,
 };
 
+/** A Golem is built wide (render/bodies.ts, GOLEM_SHAPE): its body is at least this big, whatever its position. */
+export const GOLEM_RADIUS = 0.6;
+
 /** One notch up (++) or down (--) in a kind's build: a big enough swing to read, and to tune. */
 const UP = 20;
 const DOWN = -20;

@@ -4,7 +4,14 @@
  */
 import { DEFENDERS, type DefenseSpec } from '../content/defense';
 import { arcadeTuning } from '../content/tuning';
-import { BASE_STATS, LINEUP, QB_DEPTH, ROLE_RADIUS, ROSTER_ROLES } from '../content/team';
+import {
+  BASE_STATS,
+  GOLEM_RADIUS,
+  LINEUP,
+  QB_DEPTH,
+  ROLE_RADIUS,
+  ROSTER_ROLES,
+} from '../content/team';
 import { playerStats } from './team';
 import type { Play } from '../content/plays';
 import type { Defender, Drive, Player, RunState, Stats } from './types';
@@ -82,7 +89,7 @@ export function lineUpTeam(
       form: p.kind,
       pos: start,
       vel: v(0, 0),
-      radius: ROLE_RADIUS[role],
+      radius: p.kind === 'golem' ? Math.max(GOLEM_RADIUS, ROLE_RADIUS[role]) : ROLE_RADIUS[role],
       stats,
       ...physicsOf(stats),
       down: 0,

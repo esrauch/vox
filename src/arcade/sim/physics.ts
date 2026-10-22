@@ -2,8 +2,10 @@
  * Moving and colliding (GAMEPLAY.md, Your Team: stats are physics). Every
  * body accelerates toward its target at its own top speed; overlapping
  * bodies are pushed apart in proportion to their weight, so the heavier one
- * moves the lighter one. Your players pass through each other; bodies lying
- * on the turf collide with nothing; Scarecrows can't be moved at all.
+ * moves the lighter one. Bodies lying on the turf get nudged aside by anyone
+ * standing; Scarecrows can't be moved at all. Your
+ * players bump each other too; they always give way to the carrier, so
+ * nobody slows its run (the QB, the pumpkin, isn't a body on the turf).
  */
 import { arcadeTuning, DT } from '../content/tuning';
 import { defenderTarget, playerTarget } from './ai';
@@ -78,13 +80,26 @@ function blockedShare(state: RunState, d: Body, carrierId: number | null): numbe
 }
 
 /** Whether two bodies collide with each other at all. */
-function collides(a: Body, b: Body): boolean {
-  if (a.down > 0 || b.down > 0) return false;
+function collides(state: RunState, a: Body, b: Body): boolean {
   if ((a.side === 'defense' && a.latch) || (b.side === 'defense' && b.latch)) return false;
-  return !(a.side === 'team' && b.side === 'team');
+  if (a.side === 'team' && b.side === 'team') {
+    return a.role !== 'qb' && b.role !== 'qb';
+  }
+  return true;
 }
 
-const weight = (b: Body): number => (b.side === 'defense' && b.planted ? Infinity : b.mass);
+/**
+ * How hard a body is to move: a planted Scarecrow, or the carrier against
+ * its own team, not at all; one lying on the turf, by anyone standing, easily
+ * (it's nudged aside and never slows them).
+ */
+function weight(state: RunState, b: Body, other: Body): number {
+  if (b.side === 'defense' && b.planted) return Infinity;
+  if (b.down > 0 && other.down <= 0) return 0;
+  const carrier = state.field.ball.at === 'carried' ? state.field.ball.by : null;
+  if (b.id === carrier && other.side === 'team') return Infinity;
+  return b.mass;
+}
 
 /** Push every overlapping pair apart, the lighter one further. A few passes settle crowds. */
 export function separate(state: RunState): void {
@@ -94,19 +109,25 @@ export function separate(state: RunState): void {
       for (let j = i + 1; j < bodies.length; j++) {
         const a = bodies[i];
         const b = bodies[j];
-        if (!a || !b || !collides(a, b)) continue;
+        if (!a || !b || !collides(state, a, b)) continue;
         const d = dist(a.pos, b.pos);
         const overlap = a.radius + b.radius - d;
         if (overlap <= 0) continue;
         const n = d === 0 ? v(a.id < b.id ? -1 : 1, 0) : norm(sub(b.pos, a.pos));
-        const wa = weight(a);
-        const wb = weight(b);
+        const wa = weight(state, a, b);
+        const wb = weight(state, b, a);
         // How much of the overlap each one gives: in proportion to the other's weight.
         const shareA = wa === Infinity ? 0 : wb === Infinity ? 1 : wb / (wa + wb);
         a.pos = sub(a.pos, scale(n, overlap * shareA));
         b.pos = add(b.pos, scale(n, overlap * (1 - shareA)));
       }
     }
+  }
+  // A shove never pushes anyone but the carrier out of bounds.
+  const carrier = state.field.ball.at === 'carried' ? state.field.ball.by : null;
+  for (const b of bodies) {
+    if (b.id === carrier) continue;
+    b.pos = v(Math.max(-field.halfWidth, Math.min(field.halfWidth, b.pos.x)), b.pos.y);
   }
 }
 
