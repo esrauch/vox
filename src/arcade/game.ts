@@ -447,7 +447,7 @@ export class ArcadeGame {
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
     else if (phase === 'setup')
       this.hud.setPrompt(called === null ? 'Pick a play' : null, called === null ? null : 'HIKE!');
-    else if (phase === 'over') this.hud.setPrompt('Turnover on downs!', 'AGAIN');
+    else if (phase === 'over') this.hud.setPrompt('Game Over!', 'AGAIN');
     else if (phase === 'won') this.hud.setPrompt('The forest is cleared!', 'AGAIN');
     else this.hud.setPrompt(null, null);
   }
