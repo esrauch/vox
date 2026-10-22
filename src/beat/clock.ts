@@ -30,11 +30,11 @@ export interface TapResult {
 type BeatListener = (index: number, time: number) => void;
 
 /**
- * The game's master clock (TECHNICAL.md §4). Beats are defined on the
+ * The music's beat clock (TECHNICAL.md §8). Beats are defined on the
  * AudioContext clock and handed to listeners slightly ahead of time, so audio
- * can be scheduled sample-accurately. Visuals and input are mapped onto the
- * *audible* time via getOutputTimestamp, so what you see and judge matches
- * what you hear.
+ * can be scheduled sample-accurately; positions are mapped onto the
+ * *audible* time via getOutputTimestamp, so what you see matches what you
+ * hear.
  */
 export class BeatClock {
   private grid: BeatGrid | null = null;

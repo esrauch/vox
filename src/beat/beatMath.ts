@@ -1,6 +1,6 @@
 /**
  * Pure beat maths: no Web Audio, no DOM, so it can be unit-tested.
- * All times are in seconds on the AudioContext clock (TECHNICAL.md §4).
+ * All times are in seconds on the AudioContext clock (TECHNICAL.md §8).
  */
 
 /** A regular beat grid: beat 0 lands at `origin`, then every 60/bpm seconds. */

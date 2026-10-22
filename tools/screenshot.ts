@@ -44,10 +44,7 @@ try {
     await page.waitForTimeout(400);
   }
   if (when === 'play') {
-    // Snap: press and let go without pulling (a pull too short to throw just cancels the aim).
-    await page.mouse.move(190, 400);
-    await page.mouse.down();
-    await page.mouse.up();
+    await page.click('.hud-action'); // HIKE!
     await page.waitForTimeout(2600);
   }
   mkdirSync(join(ROOT, 'previews'), { recursive: true });

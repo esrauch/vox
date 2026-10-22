@@ -105,7 +105,7 @@ function renderSheet(group: string): void {
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   // The game's camera pitch, so the sheet shows models as they'll look in play.
-  aim(new THREE.Vector3(0, 0.5, 0), 0, 64, Math.max(6, ids.length * 1.9));
+  aim(new THREE.Vector3(0, 0.5, 0), 0, 32, Math.max(6, ids.length * 1.9));
   renderer.render(scene, camera);
   markReady();
 }

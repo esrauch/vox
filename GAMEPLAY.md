@@ -2,25 +2,23 @@
 
 **Arcade Halloween Football.** Simple arcade mechanics, a clear monster theme, and a game that lives or dies by its UX and a hundred tiny optimizations.
 
-This doc covers what the player *does*: the pillars, the run, a down, the controls, your team and the defense, and how a run builds up. It builds on [THEME.md](THEME.md). Exact numbers will live in `src/content/tuning.ts`.
+This doc covers what the player *does*: the pillars, the run, a down, the controls, your team and the defense, and how a run builds up. It builds on [THEME.md](THEME.md). Exact numbers live in `src/arcade/content/` (`tuning.ts` and friends).
 
 Items marked **▲** are recommendations or details still open to change. Every number is a starting value, to tune by playtesting and by the headless balance runs (TECHNICAL.md).
-
-> **Rewritten from first principles on 2026-10-19** (branch `design/arcade`). The code still plays the earlier design: a grid, moves on the beat, play cards and hidden dice checks (see *History*). This doc is the target.
 
 **Words used here:**
 - **Area:** a themed place (the Haunted Forest first). Each area is four drives.
 - **Drive:** four downs to gain 10 yards. **Down:** one play, a few seconds long.
 - **Line of scrimmage:** where the current down starts. **First-down line:** 10 yards past where the drive started.
 - **Your team:** **eight on the field**: the QB plus seven players, each a **Blocker**, a **Runner** or a **Catcher**. *The QB is the pumpkin ball itself: there's no QB player on the field, the pumpkin throws itself (THEME.md, The ball).*
-- **Carrier:** whoever has the ball after a catch or a handoff. **You steer the carrier.**
+- **Carrier:** whoever has the ball after a catch or a handoff. It runs on its own.
 - **Heft, Hustle, Hands:** your players' (and defenders') three stats. They're physics, not dice: weight, speed and reach.
 
 ---
 
 ## The Game in One Breath
 
-Tap PLAY and you're on the field. **Pick one of three play cards** and the ball is snapped: your Blockers shove the pass rush, your Catchers break for open grass, and an **aim line sweeps** back and forth from the QB. **Tap THROW** as it crosses an open receiver and a bullet zips out. Once someone has the ball it charges upfield on its own, and every time a gnome or an owl grabs it, **Break it!**: one well-timed tap shakes them off. See how far you get before they bury you. Four downs to make 10 yards. Make it and you **pick an upgrade**: a Catcher becomes a Ghost, a Blocker becomes a Golem, someone gets faster. Miss on 4th down and the run is over. You start as a team of plain, weak humans against a sleepy defense; by the third area you're a pack of monsters against the whole forest.
+Tap PLAY and you're on the field. **Pick one of three play cards** and the ball is snapped: your Blockers shove the pass rush, your Catchers break for open grass, and an **aim line sweeps** back and forth from the QB. **Tap THROW** as it crosses an open receiver and a bullet zips out. Once someone has the ball it charges upfield on its own, and every time a gnome or an owl grabs it, **Break it!**: one well-timed tap shakes them off. See how far you get before they bury you. Four downs to make 10 yards. Make it and it's **TRICK OR TREAT!**: pick a perk (a stat boost, a slower sweep, a Ghost or a Golem to recruit) and shuffle your lineup. Miss on 4th down and the run is over. You start as a team of plain, weak humans against a sleepy defense; by the third area you're a pack of monsters against the whole forest.
 
 ---
 
@@ -29,7 +27,7 @@ Tap PLAY and you're on the field. **Pick one of three play cards** and the ball 
 1. **Playing in five seconds.** From opening the game to the first snap is one tap. No draft, no team setup, no tutorial wall. Everything you need to know, you learn by doing it once.
 2. **Arcade, not simulation.** One skill: **timing**. Pick a play, tap THROW as the sweeping line crosses an open receiver, tap again to break a tackle. No aiming, no steering. Everything else (blocking, routes, running, the defense) happens on its own, at speed.
 3. **Impact.** Every play ends in something physical: a crunching tackle, a pancake block, a bounced pass, a carrier dragging a gnome for five yards. If a moment doesn't *hit*, it's not done.
-4. **Readable at a glance.** Who's on your team, what role each player has, who's open and who's about to hit you, in under a second, on a phone. The roles are three silhouettes; the stats are things you *see* happen, never numbers you have to read.
+4. **Readable at a glance.** Who's on your team, what role each player has, who's open and who's about to hit you, in under a second, on a phone. Kinds read from their shapes; the stats are things you *see* happen, never numbers you have to read on the field.
 5. **Start weak, build up.** Like *Slay the Spire*, *Dungeon Clawler* or *Balatro*: limited resources and very easy opponents at first, then your team grows and the forest fights back harder.
 6. **The UX is the game.** Snappy restarts, instant feedback, no dead time between downs, and the tiny details (how the ball leaves the hand, how a tackle lands, how fast the next down lines up) get as much care as the rules.
 7. **Every run tells a story.** "My Golem dragged three gnomes into the end zone." Losing is funny, and the next run is one tap away.
@@ -42,7 +40,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 - **A run is a series of themed areas** (the Haunted Forest first). **Each area is four drives**, *Balatro*-style: **Intro**, **Challenge**, **Gimmick** (a twist: Witches overhead, Bats everywhere) and **Boss**.
 - **The main game is three areas: 12 drives and three Bosses.** ▲ *Until there are more areas, the forest is played three times, stiffer each time.*
-- **The four drives are one continuous march up the field**, with no break between them: the camera glides up to the next defense, you pick an upgrade, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!**
+- **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!**
 - **There are no lives. Losing a drive is game over.** Four downs, and every one counts.
 - **The forest scales up as you do:** the first drive is a handful of sleepy defenders, the area III Boss is the whole forest at full strength (see *The Defense*).
 
@@ -64,7 +62,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ---
 
-## A Down *(the timing design, 2026-10-20)*
+## A Down
 
 **Every input is timing, never aiming.** Pick a play, then one tap at the right moment, then one more when you're grabbed.
 
@@ -120,7 +118,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Before the snap** | **HIKE!** | Start the called play. |
 | **Pass play** | **THROW** | Fire a bullet along the sweeping line. |
 | **Grabbed** | **Tap** anywhere (a juke: its ◀ or ▶ button) | Break it! |
-| **Between drives** | **Tap a card** | Take that upgrade. |
+| **Between drives** | **Tap a card** | Take that perk (or skip). |
+| **Between drives** | **Tap two players** | Swap them, field or bench. |
 
 **One thumb, portrait, no aiming.** Everything is a tap at the right moment.
 
@@ -128,17 +127,17 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Your Team
 
-**Eight on the field: the QB plus seven players**, every one on the field every down. Each has one of three roles, and **the role is the silhouette**: you know what a player does by looking at it.
+**Eight on the field: the QB plus seven players**, every one on the field every down, each playing one of three positions:
 
-| Role | How many | Looks | Does | Main stat |
-|---|---|---|---|---|
-| **Blocker** | 2 | Big, wide, low | Holds off the rush, shoves defenders out of the carrier's way | **Heft** |
-| **Runner** | 2 | Lean, leaning forward | Takes handoffs and breaks away; on a pass, runs a short route past the line | **Hustle** |
-| **Catcher** | 3 | Tall, long arms | Gets open, catches | **Hands** |
+| Position | How many | Does | Main stat |
+|---|---|---|---|
+| **Blocker** | 2 | Holds off the rush, shoves defenders out of the carrier's way | **Heft** |
+| **Runner** | 2 | Takes handoffs; on a pass, runs a short route past the line | **Hustle** |
+| **Catcher** | 3 | Gets open, catches | **Hands** |
 
 ▲ *Up to eight defenders against them.*
 
-**The camera sits behind and above the QB**, lower than a top-down view: a third-person look down the field, like standing just behind your own line. It follows the play upfield. The three silhouettes have to read from there at phone size.
+**The camera sits behind and above the QB**, lower than a top-down view: a third-person look down the field, like standing just behind your own line, always wide enough for both sidelines. It follows the play upfield. Every kind has to read from there at phone size.
 
 **The stats are physics, never dice.** Everything that matters, you can see happen:
 
@@ -165,9 +164,9 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ---
 
-## Building Up: TRICK OR TREAT! *(built 2026-10-21, except Haunted Line)*
+## Building Up: TRICK OR TREAT!
 
-**After every won drive: TRICK OR TREAT!** Three perks are offered, each with a **rarity**; pick one (or skip), and you're straight into the next drive. **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
+**After every won drive: TRICK OR TREAT!** Three perks are offered, each with a **rarity**; pick one (or skip) and play on; a new player keeps the screen open until you tap **Done**. **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
 
 ### The perks
 
@@ -242,9 +241,9 @@ The tension: a recruit of a kind you already have feeds the "+20 to every Ghost"
 | **Your team** | Gold and orange, in helmets. One build for every position; only Golems are built like linebackers (wide and low), so a broad body is always a Golem. |
 | **Who's open, and how far they can reach** | A ring under each receiver **as wide as its catch range**: a bullet coming inside the ring is caught. Green when no defender could reach a ball there, red when one could, gold while the aim line is over it. Better Hands, a bigger ring. |
 | **How far each defender reaches** | A purple ring around every defender, as wide as its reach: a bullet coming inside it gets batted down (a Scarecrow's is widest). Gone once it's down, after the catch, and for a Rhino Beetle locked up at the line. |
-| **Where the ball will land** | While aiming: a reticle and the arc; in flight, a landing ring. |
+| **Where the ball will go** | The sweeping aim line, with gold dashes; the receivers it's over light up gold. |
 | **The carrier** | Holds the ball high, with a gold ring underfoot. |
-| **What the defense will do** | Their facing and lean: rushers toward the QB, Covers toward their Catcher. |
+| **What the defense will do** | Their facing: rushers toward the QB, Covers toward their Catcher. |
 | **Down and distance** | "3rd & 4" and the gold first-down line. |
 
 **Indicators stay small:** the voxel field and the bodies flying around it are the show.
@@ -261,33 +260,28 @@ The tension: a recruit of a kind you already have feeds the "+20 to every Ghost"
 
 ## Scope: First Playable
 
-The smallest version that proves the fun:
+The smallest version that proves the fun, most of it built:
 - **One area of four drives**, played three times with the defense scaling up.
-- **The QB and seven players** in three roles, all human, with **throw** and **steer**.
-- **A real-time play:** blocking as shoving, routes, a real pass rush, catching by reach, tackles as collisions, swipes to steer.
-- **A random play each down** from the four.
+- **The QB (the pumpkin) and seven players** in three positions, starting all human.
+- **A down:** three random play cards with Flip and HIKE!, the sweep and THROW, handoffs with the play fake, Break it!.
 - **The third-person camera** behind and above the QB, following the play.
 - **The defense:** Rushers, Covers, a Safety, Scarecrows and Bats, scaling by drive and area. The Witch.
-- **Upgrades** after each won drive: the three transforms and training.
+- **TRICK OR TREAT!** after each won drive: perks, recruits, the roster and bench, Monster Mash.
 - **Impact:** hit-pause, shake, flying bodies, the catch slow-mo, sound on every contact.
 
-**Then:** team bonuses, trick plays, a real Boss, a second area.
+**Then:** real levels, defenders and Bosses; more team bonuses; a second area.
 
 ---
 
-## History: Ideas Tried and Set Aside
+## Ideas Set Aside
 
-- **Slingshot aiming, swipe steering and the auto-picked play** *(the arcade design of 2026-10-19, replaced 2026-10-20):* each down's play was picked at random; you pulled back to aim a throw anywhere (the arc rising with distance) or tapped a Runner to hand off, and swiped to nudge the carrier's lane; tackles were a grab and a drag. **Why it was replaced:** it functioned, but it didn't click: aiming and steering were fiddly on a phone and the decisions felt thin. The timing design keeps the play cards' choice, turns the throw into one timed tap, and puts the skill after the catch into Break it!
-- **The grid, the beat, play cards and dice checks** *(built 2026-10-17 to 2026-10-19, replaced 2026-10-19):* everyone hopped one half-yard tile per beat of the music; each down you drew three play cards and called one; your four players' Hustle, Hands and Heft were rolled as hidden checks against the defenders' on a friendly curve, and a roster of four was transformed into monsters with poker-style team hands. **Why it was replaced:** it lacked impact. A balance bot that picked a random play, waited, threw at the first green ring and took random upgrades did about as well as playing it: the decisions didn't matter, the dice hid why things happened, and nothing on the grid ever collided. Kept from it: drives, downs and areas, the continuous march between drives, the defenders and the Witch, the throw arc, the transforms, and the headless balance runs.
-- **Screens to the end zone, balls as lives** *(until 2026-10-18):* you placed your squad, threw once and ran to the top of the screen; balls were lives. Replaced because placement barely mattered and waiting was free.
-- **Steering the carrier on the grid** *(tried 2026-10-17):* swipe to sidestep or wait after the catch. It didn't work on a hopping grid with no pressure, where waiting was free. **It's back in real time**, where defenders close from every side and the lane you pick is the whole skill.
-- **The Giant Quarterback** *(the original premise):* you were a hulking monster QB with a team of tiny creatures. The comedy of scale might return as a Boss.
+- **Slingshot aiming and swipe steering:** pulling back to aim a throw anywhere and swiping to nudge the carrier. Fiddly on a phone, and the decisions felt thin; the timing design replaced it.
+- **The Giant Quarterback** *(the original premise):* a hulking monster QB with a team of tiny creatures. The comedy of scale might return as a Boss.
 
 ---
 
 ## Open Questions
 
-- **Who the upgrades land on:** a random player in the role, or you choose?
 - **Field width** and how far the camera sees ahead (to tune in the first playable).
 - **The forest's Boss:** the Treant is still to design.
 - **Sound off:** with no rhythm gameplay, it should play fine muted. Check it.

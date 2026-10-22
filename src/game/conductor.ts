@@ -1,10 +1,8 @@
 /**
- * The music, the effects and the global tick (TECHNICAL.md §4, §8).
- *
- * The tick is the music: `start()` (inside the PLAY tap, since browsers only
- * start audio from a gesture) begins the song looping and its beat clock with
- * it, and neither ever stops. Pausing suspends the AudioContext, and the beat
- * clock, which never runs past the context's own time, freezes with it.
+ * The music and the effects (TECHNICAL.md §8). The music is the soundtrack,
+ * never a clock for play: `start()` (inside the PLAY tap, since browsers only
+ * start audio from a gesture) begins the song looping, with its beat clock.
+ * Pausing suspends the AudioContext, and the music freezes with it.
  */
 import { suspendAudio, unlockAudio } from '../audio/context';
 import { getMixer } from '../audio/mixer';
