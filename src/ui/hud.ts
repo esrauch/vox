@@ -50,7 +50,7 @@ export interface RosterRow {
   readonly stats: readonly StatBar[];
   /** A short note, e.g. "prefers Catcher · Monster Mash +10", or "". */
   readonly note: string;
-  /** Its position is the one the recruit prefers: starred on the position's heading. */
+  /** Its position is the one the player in question prefers: starred on the position's heading. */
   readonly fits?: boolean;
 }
 

@@ -91,6 +91,8 @@ const withDelta = (shown: StatBar[], before: Stats, after: Stats): StatBar[] =>
  */
 export function trickOrTreatView(state: RunState, selected: number | null): DraftView {
   const recruit = state.recruit;
+  // ★ on the position heading the player in question prefers: the recruit waiting, or the player tapped.
+  const starred = (recruit ?? (selected === null ? undefined : atSpot(state, selected)))?.preferred;
   const roster: RosterRow[] = state.roster.map((p, slot) => {
     const role = ROSTER_ROLES[slot];
     const position: Position = role && role !== 'qb' ? role : 'catcher';
@@ -114,7 +116,7 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
       icon: kindIcon(p.kind),
       stats: shown,
       note: notes.filter(Boolean).join(' · '),
-      fits: recruit?.preferred === position,
+      fits: starred === position,
     };
   });
   const bench = Array.from({ length: BENCH_SIZE }, (_, seat): RosterRow | null => {
