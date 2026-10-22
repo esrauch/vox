@@ -2,7 +2,7 @@
  * Your team (GAMEPLAY.md, Your Team): the QB plus seven players in three
  * roles, where they line up, their base stats, and the monster forms.
  */
-import type { Form, Role, Stats } from '../sim/types';
+import type { Form, Position, Role, Stats } from '../sim/types';
 
 /** The seven players, in roster order: 2 Blockers, 2 Runners, 3 Catchers. */
 export const ROSTER_ROLES: readonly Role[] = [
@@ -44,10 +44,25 @@ export const ROLE_RADIUS: Readonly<Record<Role, number>> = {
   catcher: 0.45,
 };
 
-/** What each form adds to a player's stats. Each monster suits one role (GAMEPLAY.md, Building Up). */
+/** One notch up (++) or down (--) in a kind's build: a big enough swing to read, and to tune. */
+const UP = 20;
+const DOWN = -20;
+
+/**
+ * What each form adds to a player's stats. Every kind is a trade: one stat
+ * up, one down, one left alone, so no kind is simply better (GAMEPLAY.md,
+ * Your Team). A new kind should follow the same rule. Humans are all-rounders.
+ */
 export const FORM_STATS: Readonly<Record<Form, Stats>> = {
   human: { hustle: 0, hands: 0, heft: 0 },
-  golem: { hustle: -10, hands: 0, heft: 40 },
-  werewolf: { hustle: 30, hands: 0, heft: 10 },
-  ghost: { hustle: 20, hands: 20, heft: -10 },
+  ghost: { hustle: 0, hands: UP, heft: DOWN },
+  golem: { hustle: DOWN, hands: 0, heft: UP },
+  werewolf: { hustle: UP, hands: DOWN, heft: 0 },
+};
+
+/** The position a monster suits (its strong stat); a human has no favorite. */
+export const KIND_POSITION: Readonly<Partial<Record<Form, Position>>> = {
+  ghost: 'catcher',
+  golem: 'blocker',
+  werewolf: 'runner',
 };

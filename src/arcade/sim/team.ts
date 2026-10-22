@@ -14,7 +14,7 @@ import {
   RECRUIT_STAR_BONUS,
   STARTING_NAMES,
 } from '../content/perks';
-import { BASE_STATS, FORM_STATS, ROSTER_ROLES } from '../content/team';
+import { BASE_STATS, FORM_STATS, KIND_POSITION, ROSTER_ROLES } from '../content/team';
 import type { Rng } from '../../sim/rng';
 import { rngFor } from './random';
 import type { Form, Perk, Perks, Position, Rarity, RosterPlayer, RunState, Stats } from './types';
@@ -135,10 +135,10 @@ function sameAs(a: Perk, b: Perk): boolean {
 /** A recruit: a name, a kind (monsters are rarer), a position it prefers, and stats to match. */
 function makeRecruit(rng: Rng, rarity: Rarity): RosterPlayer {
   const kind: Form = rarity === 'common' ? 'human' : rng.pick(KINDS.filter((k) => k !== 'human'));
-  const preferred: Position = rng.pick(POSITIONS);
+  const preferred: Position = KIND_POSITION[kind] ?? rng.pick(POSITIONS);
   const star = rarity === 'epic' ? RECRUIT_STAR_BONUS : 0;
-  // Each stat a little either way (in fives), so no two are quite alike.
-  const jitter = (): number => 5 * rng.int(-1, 2);
+  // Each stat a little either way (in fives), so no two of a kind are quite alike.
+  const jitter = (): number => 5 * rng.int(-2, 2);
   const base = plus(BASE_STATS, FORM_STATS[kind]);
   return {
     name: rng.pick(RECRUIT_NAMES[kind]),

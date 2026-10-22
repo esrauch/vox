@@ -147,6 +147,16 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Hands** | **Reach.** A bullet passing near snaps into the hands from further away, and a contested ball goes to the better Hands. | A Catcher plucks a bullet that was going by. |
 
 - **The scale: 50 is ordinary.** An ordinary player is **50 / 50 / 50**, and **every 10 points is one step** (one step more Heft is a quarter heavier; one step more Hustle is a little faster). The fine scale is there so small bonuses can be tuned. Every human is 50 / 50 / 50 whatever position it plays: only its kind and perks move the numbers.
+- **Every kind is a trade, and humans are all-rounders.** A kind pushes one stat up two steps (++, +20), pulls one down two steps (--, −20) and leaves one alone, so every kind has the same total and none is simply better:
+
+  | Kind | Hands | Hustle | Heft | Suits |
+  | --- | --- | --- | --- | --- |
+  | **Human** | = | = | = | anywhere |
+  | **Ghost** | ++ | = | -- | Catcher |
+  | **Golem** | = | -- | ++ | Blocker |
+  | **Werewolf** | -- | ++ | = | Runner |
+
+  Individuals vary: a recruit's stats land within ±10 of its kind's, so no two are alike (your starting seven are the plain 50s). **A new kind should follow the same rule:** one stat up, one down, a total of 150, and a position it suits.
 - **Everyone starts human and plain.** A fresh team is a bit slow, a bit light, a bit clumsy: good enough for the sleepy first drive, not for the Boss.
 - **Any player can play any position** (2 Blocker slots, 2 Runner slots, 3 Catcher slots). The plays only ever talk to the slots, so the team always lines up 2 / 2 / 3; who you put where is up to you, and their stats decide how well it works. A Golem in a Catcher slot is a slow Catcher nobody can tackle.
 - **The numbers live on the roster screen** (between drives). On the field, the stats only show through what happens.
