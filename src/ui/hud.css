@@ -173,9 +173,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
   gap: 10px;
-  padding: 24px 16px;
+  padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  touch-action: pan-y;
   background: var(--scanlines), rgb(20 14 36 / 0.88);
   color: white;
 }
@@ -199,36 +201,6 @@
 
 .hud-draft-row .hud-card {
   min-height: 96px;
-}
-
-.hud-roster {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-  width: 100%;
-  max-width: 460px;
-}
-
-.hud-roster-row {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 6px 8px;
-  border: 3px solid rgb(255 255 255 / 0.3);
-  font-size: 0.75rem;
-  background: rgb(255 255 255 / 0.1);
-}
-
-.hud-roster-row em {
-  font-style: normal;
-  opacity: 0.75;
-}
-
-.hud-roster-hand {
-  margin: 0;
-  font-size: 0.85rem;
-  text-align: center;
-  color: var(--bone);
 }
 
 .hud-skip {
@@ -310,23 +282,6 @@
   color: var(--danger);
 }
 
-button.hud-roster-row {
-  font: inherit;
-  text-align: left;
-  color: inherit;
-}
-
-.hud-roster-row small {
-  font-size: 0.65rem;
-  opacity: 0.7;
-  letter-spacing: 0.08em;
-}
-
-.hud-roster-row.selected {
-  border-color: var(--pumpkin);
-  background: rgb(255 138 31 / 0.3);
-}
-
 .hud-card.rarity-rare {
   box-shadow:
     inset 0 4px 0 rgb(255 255 255 / 0.55),
@@ -342,4 +297,219 @@ button.hud-roster-row {
     0 0 0 4px var(--candy-purple),
     0 0 0 8px var(--ink),
     4px 4px 0 8px var(--ink);
+}
+
+/* ── The roster (TRICK OR TREAT!) ─────────────────────────────────────── */
+
+.hud-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.hud-roster-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.hud-roster-group h3 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pumpkin);
+  border-bottom: 3px solid rgb(255 138 31 / 0.35);
+}
+
+.hud-roster-row,
+.hud-recruit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px 7px;
+  border: 3px solid rgb(255 255 255 / 0.3);
+  font: inherit;
+  font-size: 0.75rem;
+  text-align: left;
+  color: inherit;
+  background: rgb(255 255 255 / 0.08);
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 0.45);
+  transition:
+    translate 0.08s,
+    border-color 0.12s,
+    background 0.12s;
+}
+
+button.hud-roster-row:active {
+  translate: 2px 2px;
+}
+
+.hud-roster-row.selected {
+  border-color: var(--pumpkin);
+  background: rgb(255 138 31 / 0.3);
+  translate: 0 -3px;
+}
+
+.hud-roster-row.fits {
+  border-color: var(--slime-green);
+}
+
+.hud-roster-row em,
+.hud-recruit em {
+  font-style: normal;
+  font-size: 0.68rem;
+  opacity: 0.7;
+}
+
+.hud-roster-hand {
+  margin: 0;
+  max-width: 460px;
+  font-size: 0.8rem;
+  text-align: center;
+  color: var(--bone);
+  opacity: 0.85;
+}
+
+/* The recruit you're placing, over the roster. */
+.hud-recruit {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  border: var(--edge) solid var(--candy-purple);
+  background: rgb(162 89 255 / 0.18);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.hud-recruit small {
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  color: var(--candy-purple);
+}
+
+.hud-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.hud-name strong {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 400;
+  font-size: 0.95em;
+}
+
+/* The kind, as a little colored chip. */
+.hud-kind {
+  flex: none;
+  padding: 0 4px;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--bone);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.5);
+}
+
+.hud-kind.kind-human {
+  background: #ffb627;
+}
+
+.hud-kind.kind-ghost {
+  background: #ffffff;
+}
+
+.hud-kind.kind-golem {
+  background: #9aa0a8;
+}
+
+.hud-kind.kind-werewolf {
+  color: white;
+  background: #8b5a2b;
+}
+
+.hud-fits {
+  flex: none;
+  margin-left: auto;
+  color: var(--slime-green);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+/* Stat bars: chunky segmented blocks, the slot's key stat in pumpkin. */
+.hud-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hud-stat {
+  display: grid;
+  grid-template-columns: 3.6em 1fr 1.8em 2.2em;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.66rem;
+}
+
+.hud-recruit .hud-stat {
+  font-size: 0.8rem;
+}
+
+.hud-stat-label {
+  opacity: 0.75;
+}
+
+.hud-stat-bar {
+  position: relative;
+  height: 9px;
+  border: 2px solid var(--ink);
+  background: rgb(0 0 0 / 0.35);
+  overflow: hidden;
+}
+
+.hud-stat-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--bone);
+  transition: width 0.25s ease-out;
+}
+
+/* Segments: one block per step (10 points) of a 0–100 bar. */
+.hud-stat-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 calc(10% - 2px),
+    rgb(20 14 36 / 0.7) calc(10% - 2px) 10%
+  );
+}
+
+.hud-stat.key .hud-stat-label {
+  color: var(--pumpkin);
+  opacity: 1;
+}
+
+.hud-stat.key .hud-stat-bar i {
+  background: var(--pumpkin);
+}
+
+.hud-stat-value {
+  text-align: right;
+}
+
+.hud-stat-delta.up {
+  color: var(--slime-green);
+}
+
+.hud-stat-delta.down {
+  color: var(--danger);
 }

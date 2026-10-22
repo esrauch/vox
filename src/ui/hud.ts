@@ -23,18 +23,41 @@ export interface HudHandlers {
 }
 
 /** One of your players on the roster panel. */
+/** One stat as a bar: its value (50 is ordinary), whether the slot leans on it, and a change to preview. */
+export interface StatBar {
+  /** "Heft". */
+  readonly label: string;
+  readonly value: number;
+  /** The stat this position leans on (Heft for a Blocker, Hustle for a Runner, Hands for a Catcher). */
+  readonly key?: boolean;
+  /** What it would change by (placing a recruit here), when non-zero. */
+  readonly delta?: number;
+}
+
 export interface RosterRow {
-  /** The position it's playing, e.g. "Runner" (shown first, when given). */
-  readonly position?: string;
+  /** The position it's playing, e.g. "Runner": rows are grouped under it, in order. */
+  readonly position: string;
   /** Highlighted (picked for a swap). */
   readonly selected?: boolean;
   readonly name: string;
   /** Its form, e.g. "Werewolf". */
   readonly form: string;
-  /** "Hustle +1 · Hands 0 · Heft −2". */
-  readonly stats: string;
-  /** Its skill, or "". */
-  readonly skill: string;
+  /** A class-safe kind, e.g. "werewolf": colors the kind chip. */
+  readonly kind: string;
+  readonly stats: readonly StatBar[];
+  /** A short note, e.g. "prefers Catcher · Monster Mash +10", or "". */
+  readonly note: string;
+  /** Marked as a good fit (a recruit preferring this position). */
+  readonly fits?: boolean;
+}
+
+/** The player you're placing, shown as a card over the roster. */
+export interface RecruitView {
+  readonly name: string;
+  readonly form: string;
+  readonly kind: string;
+  readonly stats: readonly StatBar[];
+  readonly note: string;
 }
 
 /** What the draft shows: the offers, your roster, and your team's hand. */
@@ -42,9 +65,13 @@ export interface DraftView {
   /** The heading over the offer (default "Pick one"). */
   readonly title?: string;
   readonly offer: readonly CardFace[];
+  /** A recruit waiting for a slot: shown instead of the offer. */
+  readonly recruit?: RecruitView;
   readonly roster: readonly RosterRow[];
-  /** The team hand you hold, e.g. "Monster Mash: every player has every skill", or null. */
+  /** What to do now, under the roster heading. */
   readonly hand: string | null;
+  /** The Skip button's words (default "Skip"). */
+  readonly skip?: string;
 }
 
 /** What a card face shows. */
@@ -187,27 +214,37 @@ export class Hud {
     );
     const roster = document.createElement('div');
     roster.className = 'hud-roster';
-    roster.append(
-      ...draft.roster.map((row, i) => {
-        const onRoster = this.handlers.onRoster;
-        return rosterRow(row, onRoster ? () => onRoster(i) : undefined);
-      }),
-    );
+    // One group per position, in lineup order: Blockers, Runners, Catchers.
+    let group: HTMLElement | null = null;
+    let groupName = '';
+    draft.roster.forEach((row, i) => {
+      if (!group || row.position !== groupName) {
+        groupName = row.position;
+        group = document.createElement('section');
+        group.className = 'hud-roster-group';
+        const label = document.createElement('h3');
+        label.textContent = `${row.position}s`;
+        group.append(label);
+        roster.append(group);
+      }
+      const onRoster = this.handlers.onRoster;
+      group.append(rosterRow(row, onRoster ? () => onRoster(i) : undefined));
+    });
     const hand = document.createElement('p');
     hand.className = 'hud-roster-hand';
-    hand.textContent =
-      draft.hand ?? 'No team hand yet: all different, four of a kind, or all human and trained';
+    hand.textContent = draft.hand ?? '';
     const skip = document.createElement('button');
     skip.className = 'hud-skip';
-    skip.textContent = 'Skip';
+    skip.textContent = draft.skip ?? 'Skip';
     skip.addEventListener('click', () => this.handlers.onSkip());
+    const top: HTMLElement[] = draft.recruit ? [recruitCard(draft.recruit)] : [offer];
     this.draft.replaceChildren(
       heading(draft.title ?? 'Pick one'),
-      offer,
+      ...top,
       skip,
       heading('Your team'),
-      roster,
       hand,
+      roster,
     );
   }
 
@@ -242,22 +279,81 @@ function cardButton(face: CardFace, className: string, onClick: () => void): HTM
 
 function rosterRow(row: RosterRow, onTap?: () => void): HTMLElement {
   const el = document.createElement(onTap ? 'button' : 'div');
-  el.className = `hud-roster-row${onTap ? ' interactive' : ''}${row.selected ? ' selected' : ''}`;
+  el.className =
+    `hud-roster-row${onTap ? ' interactive' : ''}` +
+    `${row.selected ? ' selected' : ''}${row.fits ? ' fits' : ''}`;
   if (onTap) el.addEventListener('click', onTap);
-  if (row.position) {
-    const pos = document.createElement('small');
-    pos.textContent = row.position.toUpperCase();
-    el.append(pos);
+  el.append(nameLine(row.name, row.form, row.kind, row.fits), statBars(row.stats));
+  if (row.note) {
+    const note = document.createElement('em');
+    note.textContent = row.note;
+    el.append(note);
   }
-  const name = document.createElement('strong');
-  name.textContent = `${row.name} · ${row.form}`;
-  const stats = document.createElement('span');
-  stats.textContent = row.stats;
-  el.append(name, stats);
-  if (row.skill) {
-    const skill = document.createElement('em');
-    skill.textContent = row.skill;
-    el.append(skill);
+  return el;
+}
+
+function recruitCard(r: RecruitView): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'hud-recruit';
+  const tag = document.createElement('small');
+  tag.textContent = 'NEW PLAYER';
+  el.append(tag, nameLine(r.name, r.form, r.kind), statBars(r.stats));
+  if (r.note) {
+    const note = document.createElement('em');
+    note.textContent = r.note;
+    el.append(note);
+  }
+  return el;
+}
+
+/** "Boo Radish [GHOST] ★". */
+function nameLine(name: string, form: string, kind: string, fits = false): HTMLElement {
+  const line = document.createElement('div');
+  line.className = 'hud-name';
+  const n = document.createElement('strong');
+  n.textContent = name;
+  const chip = document.createElement('span');
+  chip.className = `hud-kind kind-${kind}`;
+  chip.textContent = form;
+  line.append(n, chip);
+  if (fits) {
+    const star = document.createElement('span');
+    star.className = 'hud-fits';
+    star.textContent = '★';
+    star.title = 'Its preferred position';
+    line.append(star);
+  }
+  return line;
+}
+
+/** The highest stat a bar shows full (50, ordinary, fills half). */
+const BAR_MAX = 100;
+
+function statBars(stats: readonly StatBar[]): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'hud-stats';
+  for (const s of stats) {
+    const row = document.createElement('div');
+    row.className = `hud-stat${s.key ? ' key' : ''}`;
+    const label = document.createElement('span');
+    label.className = 'hud-stat-label';
+    label.textContent = s.label;
+    const bar = document.createElement('span');
+    bar.className = 'hud-stat-bar';
+    const fill = document.createElement('i');
+    fill.style.width = `${Math.max(0, Math.min(1, s.value / BAR_MAX)) * 100}%`;
+    bar.append(fill);
+    const value = document.createElement('span');
+    value.className = 'hud-stat-value';
+    value.textContent = String(s.value);
+    row.append(label, bar, value);
+    if (s.delta) {
+      const delta = document.createElement('span');
+      delta.className = `hud-stat-delta ${s.delta > 0 ? 'up' : 'down'}`;
+      delta.textContent = `${s.delta > 0 ? '+' : '−'}${Math.abs(s.delta)}`;
+      row.append(delta);
+    }
+    el.append(row);
   }
   return el;
 }

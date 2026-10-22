@@ -6,7 +6,7 @@
 import { ROSTER_ROLES } from '../content/team';
 import { playerStats, uniqueKind } from '../sim/team';
 import type { Form, Perk, Position, RosterPlayer, RunState, Stats } from '../sim/types';
-import type { CardFace, DraftView, RosterRow } from '../../ui/hud';
+import type { CardFace, DraftView, RosterRow, StatBar } from '../../ui/hud';
 
 const STAT: Readonly<Record<keyof Stats, string>> = {
   hustle: 'Hustle',
@@ -62,34 +62,79 @@ export function perkFace(perk: Perk): CardFace {
   }
 }
 
+/** The stat each position leans on. */
+const KEY_STAT: Readonly<Record<Position, keyof Stats>> = {
+  blocker: 'heft',
+  runner: 'hustle',
+  catcher: 'hands',
+};
+const STAT_ORDER: readonly (keyof Stats)[] = ['heft', 'hustle', 'hands'];
+
+const bars = (s: Stats, key?: keyof Stats): StatBar[] =>
+  STAT_ORDER.map((k) => ({ label: STAT[k], value: s[k], key: k === key }));
+
+/** Monster Mash applies: the only one of its kind, on a team that isn't all one kind. */
+const mashed = (roster: readonly RosterPlayer[], slot: number): boolean =>
+  uniqueKind(roster, slot) && roster.some((q) => q.kind !== roster[slot]?.kind);
+
 /** The TRICK OR TREAT! screen: the offer, or (with a recruit picked) the question of who it replaces. */
 export function trickOrTreatView(state: RunState, selected: number | null): DraftView {
   const recruit = state.recruit;
   const roster: RosterRow[] = state.roster.map((p, slot) => {
     const role = ROSTER_ROLES[slot];
-    const position = role && role !== 'qb' ? POSITION[role] : '';
-    const mash = uniqueKind(state.roster, slot) && state.roster.some((q) => q.kind !== p.kind);
+    const position: Position = role && role !== 'qb' ? role : 'catcher';
+    const stats = playerStats(state, slot);
+    const notes = [
+      p.preferred !== position ? `prefers ${POSITION[p.preferred]}` : '',
+      mashed(state.roster, slot) ? 'Monster Mash +10' : '',
+    ];
+    // Placing a recruit: what this slot would have with it there instead (its perks and Monster Mash included).
+    let shown = bars(stats, KEY_STAT[position]);
+    let fits = false;
+    if (recruit) {
+      const after = { ...state, roster: state.roster.map((q, i) => (i === slot ? recruit : q)) };
+      const gain = playerStats(after, slot);
+      shown = shown.map((bar, i) => {
+        const k = STAT_ORDER[i] ?? 'heft';
+        return { ...bar, delta: gain[k] - stats[k] };
+      });
+      fits = recruit.preferred === position;
+    }
     return {
-      position,
+      position: POSITION[position],
       selected: selected === slot,
       name: p.name,
       form: KIND[p.kind],
-      stats: statLine(playerStats(state, slot)),
-      skill: `prefers ${POSITION[p.preferred]}${mash ? ' · Monster Mash +10' : ''}`,
+      kind: p.kind,
+      stats: shown,
+      note: notes.filter(Boolean).join(' · '),
+      fits,
     };
   });
   if (recruit) {
+    const after = { ...state, roster: [...state.roster, recruit] };
     return {
       title: `Who does ${recruit.name} replace?`,
       offer: [],
+      recruit: {
+        name: recruit.name,
+        form: KIND[recruit.kind],
+        kind: recruit.kind,
+        stats: bars(playerStats(after, after.roster.length - 1), KEY_STAT[recruit.preferred]),
+        note: `prefers ${POSITION[recruit.preferred]}`,
+      },
       roster,
-      hand: `${recruit.name}: ${bio(recruit)}. Tap the player to let go.`,
+      hand: 'Tap the player to let go. The numbers show what that spot gains or loses; ★ is the spot it prefers.',
+      skip: `Pass on ${recruit.name}`,
     };
   }
+  const from = selected === null ? null : state.roster[selected];
   return {
     title: 'TRICK OR TREAT!',
     offer: state.offer.map(perkFace),
     roster,
-    hand: 'Tap two players to swap their positions.',
+    hand: from
+      ? `Now tap who ${from.name} swaps places with (or ${from.name} again to cancel).`
+      : 'Tap two players to swap their positions.',
   };
 }
