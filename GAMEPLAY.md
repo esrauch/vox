@@ -167,7 +167,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Building Up: TRICK OR TREAT! *(built 2026-10-21, except Haunted Line)*
 
-**After every won drive: TRICK OR TREAT!** Three perks are offered, each with a **rarity**; pick one (or skip), and you're straight into the next drive. **On the same screen you can tap two players to swap their positions.** **There's no draft before the first drive**: you start with what you've got.
+**After every won drive: TRICK OR TREAT!** Three perks are offered, each with a **rarity**; pick one (or skip), and you're straight into the next drive. **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
 
 ### The perks
 
@@ -187,7 +187,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### New players
 
-**A recruit arrives with a little bio card:** a **name**, its **Heft / Hands / Hustle**, its **kind** (Human, Ghost, Golem, Werewolf, Skeleton…), and a **preferred position**. You pick who it replaces; it can go in any slot, but it plays best in its preferred one.
+**A recruit arrives with a little bio card:** a **name**, its **Heft / Hands / Hustle**, its **kind** (Human, Ghost, Golem, Werewolf, Skeleton…), and a **preferred position**. It takes a seat on the bench, and the roster stays open so you can swap it in (then **Done**). With the bench full, you pick who it replaces, on the field or the bench. It can go in any slot, but it plays best in its preferred one. Only the seven on the field play, and only they count for team bonuses like Monster Mash.
 
 > **Bonesy Malone** · Skeleton · *prefers Runner*
 > Heft 45 · Hands 50 · Hustle 75

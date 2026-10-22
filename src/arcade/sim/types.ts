@@ -248,12 +248,15 @@ export interface RunState {
   play: { readonly index: number; readonly flipped: boolean };
   /** Break it!, while it's on. */
   tackle: Tackle | null;
+  /** The seven on the field, in slot order (the slot decides the position played)… */
   roster: RosterPlayer[];
+  /** …and the bench: kept, but not playing (up to BENCH_SIZE). */
+  bench: RosterPlayer[];
   /** What the perks taken so far add up to. */
   perks: Perks;
   /** TRICK OR TREAT!: the three perks on offer… */
   offer: Perk[];
-  /** …and a recruit picked, waiting for you to choose the slot it takes. */
+  /** …and a recruit picked, waiting (the bench is full) for you to choose who it replaces. */
   recruit: RosterPlayer | null;
   field: Field;
   /** When this down was snapped (sim time). */
@@ -289,9 +292,12 @@ export type Action =
   | { readonly type: 'skipDraft' }
   /** TRICK OR TREAT!: take one of the perks on offer. */
   | { readonly type: 'pick'; readonly offer: number }
-  /** Put the recruit just picked into this roster slot (whoever was there leaves). */
+  /**
+   * The bench is full: put the recruit just picked in this spot (whoever was
+   * there leaves). Spots: 0-6 are the field slots, 7 up the bench seats.
+   */
   | { readonly type: 'place'; readonly slot: number }
-  /** Swap two players' slots (between drives). */
+  /** Swap two players' spots, field or bench (between drives). */
   | { readonly type: 'swap'; readonly a: number; readonly b: number };
 
 export type ArcadeEvent =
@@ -324,8 +330,9 @@ export type ArcadeEvent =
   | {
       readonly type: 'joined';
       readonly name: string;
+      /** The spot it took (7 up: the bench), and who it replaced, if anyone. */
       readonly slot: number;
-      readonly replaced: string;
+      readonly replaced: string | null;
     }
   | { readonly type: 'driveStarted'; readonly drive: number; readonly name: string }
   | { readonly type: 'areaCleared'; readonly area: number }

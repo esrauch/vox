@@ -302,21 +302,29 @@
 /* ── The roster (TRICK OR TREAT!) ─────────────────────────────────────── */
 
 .hud-roster {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  /* Left: the field by position. Right: the bench. */
+  grid-template-columns: 1.15fr 1fr;
+  align-items: start;
   gap: 10px;
   width: 100%;
   max-width: 460px;
 }
 
+.hud-roster-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
 .hud-roster-group {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .hud-roster-group h3 {
-  grid-column: 1 / -1;
   margin: 0;
   font-size: 0.8rem;
   font-weight: 400;
@@ -347,6 +355,16 @@
 
 button.hud-roster-row:active {
   translate: 2px 2px;
+}
+
+.hud-roster-row.empty {
+  justify-content: center;
+  min-height: 64px;
+  text-align: center;
+  font-size: 0.7rem;
+  opacity: 0.45;
+  border-style: dashed;
+  box-shadow: none;
 }
 
 .hud-roster-row.selected {
@@ -388,11 +406,40 @@ button.hud-roster-row:active {
   color: var(--candy-purple);
 }
 
-.hud-name {
+.hud-player-head {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   min-width: 0;
+}
+
+/* The photo box: the kind's pixel portrait (render/kindIcons.ts) in a framed square. */
+.hud-photo {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  padding: 2px;
+  border: 3px solid var(--ink);
+  background: rgb(20 14 36 / 0.6);
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.5);
+}
+
+.hud-photo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hud-recruit .hud-photo {
+  width: 46px;
+  height: 46px;
+}
+
+.hud-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.1;
 }
 
 .hud-name strong {
@@ -403,33 +450,11 @@ button.hud-roster-row:active {
   font-size: 0.95em;
 }
 
-/* The kind, as a little colored chip. */
-.hud-kind {
-  flex: none;
-  padding: 0 4px;
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
+.hud-name small {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink);
-  background: var(--bone);
-  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.5);
-}
-
-.hud-kind.kind-human {
-  background: #ffb627;
-}
-
-.hud-kind.kind-ghost {
-  background: #ffffff;
-}
-
-.hud-kind.kind-golem {
-  background: #9aa0a8;
-}
-
-.hud-kind.kind-werewolf {
-  color: white;
-  background: #8b5a2b;
+  opacity: 0.65;
 }
 
 .hud-fits {
@@ -445,7 +470,7 @@ button.hud-roster-row:active {
 
 .hud-stat {
   display: grid;
-  grid-template-columns: 3.6em 1fr 1.8em 2.2em;
+  grid-template-columns: 3.2em 1fr 1.7em 2em;
   align-items: center;
   gap: 5px;
   font-size: 0.66rem;

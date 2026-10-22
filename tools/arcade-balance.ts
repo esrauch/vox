@@ -29,6 +29,7 @@ import { bulletEnd, contact, pocketTime, sweepAngle } from '../src/arcade/sim/ba
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
 import { FORM_STATS, ROSTER_ROLES } from '../src/arcade/content/team';
 import { rngFor } from '../src/arcade/sim/random';
+import { BENCH_START } from '../src/arcade/sim/team';
 import { breakMarker, jukeShowing } from '../src/arcade/sim/breakit';
 import { canThrow, step } from '../src/arcade/sim/step';
 import type { ArcadeEvent, Form, Role, RunState, Stats, StepInput } from '../src/arcade/sim/types';
@@ -313,21 +314,33 @@ function count(
 }
 
 /**
- * TRICK OR TREAT! for the bot: with `perks` on, a random perk; a recruit
- * takes the weakest slot of the position it prefers. With it off, it skips.
+ * TRICK OR TREAT! for the bot: with `perks` on, a random perk. A recruit
+ * lands on the bench; it then swaps it in for the weakest player in the
+ * position it prefers, if the recruit is better (by total stats). With the
+ * bench full, the recruit replaces the weakest one on the bench. With
+ * `perks` off, it skips.
  */
 function draftPick(state: RunState, rng: Rng, perks: boolean): RunState {
   if (!perks || state.offer.length === 0) return dispatch(state, { type: 'skipDraft' }).state;
-  const picked = dispatch(state, { type: 'pick', offer: rng.int(0, state.offer.length - 1) }).state;
-  const recruit = picked.recruit;
-  if (!recruit) return picked;
-  const total = (st: { hustle: number; hands: number; heft: number }): number =>
-    st.hustle + st.hands + st.heft;
-  const slots = picked.roster
-    .map((p, slot) => ({ p, slot }))
-    .filter(({ slot }) => ROSTER_ROLES[slot] === recruit.preferred)
-    .sort((a, b) => total(a.p.stats) - total(b.p.stats));
-  return dispatch(picked, { type: 'place', slot: slots[0]?.slot ?? 0 }).state;
+  const before = state.bench.length;
+  let s = dispatch(state, { type: 'pick', offer: rng.int(0, state.offer.length - 1) }).state;
+  const total = (st: Stats): number => st.hustle + st.hands + st.heft;
+  if (s.recruit) {
+    const weakest = s.bench
+      .map((p, seat) => ({ p, seat }))
+      .sort((a, b) => total(a.p.stats) - total(b.p.stats))[0];
+    s = dispatch(s, { type: 'place', slot: BENCH_START + (weakest?.seat ?? 0) }).state;
+  } else if (s.bench.length > before) {
+    const recruit = s.bench[s.bench.length - 1];
+    const slot = s.roster
+      .map((p, i) => ({ p, i }))
+      .filter(({ i }) => ROSTER_ROLES[i] === recruit?.preferred)
+      .sort((a, b) => total(a.p.stats) - total(b.p.stats))[0];
+    if (recruit && slot && total(recruit.stats) > total(slot.p.stats)) {
+      s = dispatch(s, { type: 'swap', a: slot.i, b: BENCH_START + s.bench.length - 1 }).state;
+    }
+  }
+  return s.phase === 'draft' ? dispatch(s, { type: 'skipDraft' }).state : s;
 }
 
 function playRun(seed: number, scenario: Scenario, t: Tally): void {

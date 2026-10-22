@@ -9,7 +9,16 @@ import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
 import { assignMarks } from './ai';
 import { lineUpDefense, lineUpTeam } from './bodies';
-import { applyPerk, noPerks, rollOffer, startingRoster } from './team';
+import { BENCH_SIZE } from '../content/team';
+import {
+  BENCH_START,
+  applyPerk,
+  atSpot,
+  noPerks,
+  rollOffer,
+  setSpot,
+  startingRoster,
+} from './team';
 import type {
   Action,
   ArcadeEvent,
@@ -59,6 +68,7 @@ export function createRun(seed: number, roster: RosterPlayer[] = startingRoster(
     play: { index: 0, flipped: false },
     tackle: null,
     roster,
+    bench: [],
     perks: noPerks(),
     offer: [],
     recruit: null,
@@ -231,37 +241,52 @@ function hike(state: RunState, events: ArcadeEvent[]): void {
 
 // ── TRICK OR TREAT! ─────────────────────────────────────────────────────────
 
-/** Take a perk on offer. A recruit then waits for you to choose its slot. */
+/**
+ * Take a perk on offer. A recruit takes a seat on the bench and the roster
+ * stays open (swap it in, then Done); with the bench full it waits for you to
+ * choose who it replaces.
+ */
 function pick(state: RunState, index: number, events: ArcadeEvent[]): void {
   const perk = state.offer[index];
   if (state.phase !== 'draft' || state.recruit || !perk) return;
   events.push({ type: 'perk', perk });
   if (perk.kind === 'recruit') {
-    state.recruit = perk.player;
+    state.offer = [];
+    if (state.bench.length < BENCH_SIZE) {
+      state.bench.push(perk.player);
+      events.push({
+        type: 'joined',
+        name: perk.player.name,
+        slot: BENCH_START + state.bench.length - 1,
+        replaced: null,
+      });
+    } else {
+      state.recruit = perk.player;
+    }
     return;
   }
   applyPerk(state.perks, perk);
   leaveDraft(state);
 }
 
-/** Put the recruit into a slot; whoever was there leaves. */
+/** The bench is full: put the recruit in a spot (field or bench); whoever was there leaves. */
 function place(state: RunState, slot: number, events: ArcadeEvent[]): void {
   const recruit = state.recruit;
-  const replaced = state.roster[slot];
+  const replaced = atSpot(state, slot);
   if (state.phase !== 'draft' || !recruit || !replaced) return;
-  state.roster[slot] = recruit;
+  setSpot(state, slot, recruit);
   state.recruit = null;
   events.push({ type: 'joined', name: recruit.name, slot, replaced: replaced.name });
-  leaveDraft(state);
+  relineTeam(state);
 }
 
-/** Swap two players' slots (any player can play any position). */
+/** Swap two players' spots, field or bench (any player can play any position). */
 function swap(state: RunState, a: number, b: number): void {
-  const pa = state.roster[a];
-  const pb = state.roster[b];
-  if (state.phase !== 'draft' || !pa || !pb || a === b) return;
-  state.roster[a] = pb;
-  state.roster[b] = pa;
+  const pa = atSpot(state, a);
+  const pb = atSpot(state, b);
+  if (state.phase !== 'draft' || state.recruit || !pa || !pb || a === b) return;
+  setSpot(state, a, pb);
+  setSpot(state, b, pa);
   relineTeam(state);
 }
 

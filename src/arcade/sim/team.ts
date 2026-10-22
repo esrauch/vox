@@ -57,9 +57,28 @@ export function noPerks(): Perks {
 }
 
 /** Monster Mash: whether this player's kind is the only one of its kind on the team. */
+/** Spots on the roster screen: the field slots (0-6), then the bench seats from here. */
+export const BENCH_START = ROSTER_ROLES.length;
+
+/** Who's in a spot (a field slot or a bench seat), if anyone. */
+export function atSpot(state: RunState, spot: number): RosterPlayer | undefined {
+  return spot < BENCH_START ? state.roster[spot] : state.bench[spot - BENCH_START];
+}
+
+/** Put a player in a spot that has someone in it. */
+export function setSpot(state: RunState, spot: number, p: RosterPlayer): void {
+  if (spot < BENCH_START) state.roster[spot] = p;
+  else state.bench[spot - BENCH_START] = p;
+}
+
 export function uniqueKind(roster: readonly RosterPlayer[], slot: number): boolean {
   const kind = roster[slot]?.kind;
   return kind !== undefined && roster.filter((p) => p.kind === kind).length === 1;
+}
+
+/** A player's stats with the team's perks (for everyone and for its kind), as it would play, before Monster Mash. */
+export function fieldedStats(state: RunState, p: RosterPlayer): Stats {
+  return plus(plus(p.stats, state.perks.all), state.perks.byKind[p.kind] ?? ZERO);
 }
 
 /** A roster player's stats in play: its own, plus the perks for everyone and for its kind, plus Monster Mash. */

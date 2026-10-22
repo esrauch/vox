@@ -19,7 +19,8 @@ export interface HudHandlers {
   onDraft(offer: number): void;
   onSkip(): void;
   /** In the draft: tap a roster player (to place a recruit there, or to swap two). */
-  onRoster?(slot: number): void;
+  /** A tap on a roster spot (RosterRow.spot). */
+  onRoster?(spot: number): void;
 }
 
 /** One of your players on the roster panel. */
@@ -35,15 +36,17 @@ export interface StatBar {
 }
 
 export interface RosterRow {
-  /** The position it's playing, e.g. "Runner": rows are grouped under it, in order. */
+  /** Its spot, handed back when it's tapped (the game's own numbering). */
+  readonly spot: number;
+  /** The position it's playing, e.g. "Runner": field rows are grouped under it, in order. */
   readonly position: string;
   /** Highlighted (picked for a swap). */
   readonly selected?: boolean;
   readonly name: string;
   /** Its form, e.g. "Werewolf". */
   readonly form: string;
-  /** A class-safe kind, e.g. "werewolf": colors the kind chip. */
-  readonly kind: string;
+  /** Its portrait: trusted SVG markup, drawn in the photo box. */
+  readonly icon: string;
   readonly stats: readonly StatBar[];
   /** A short note, e.g. "prefers Catcher · Monster Mash +10", or "". */
   readonly note: string;
@@ -55,7 +58,7 @@ export interface RosterRow {
 export interface RecruitView {
   readonly name: string;
   readonly form: string;
-  readonly kind: string;
+  readonly icon: string;
   readonly stats: readonly StatBar[];
   readonly note: string;
 }
@@ -67,7 +70,10 @@ export interface DraftView {
   readonly offer: readonly CardFace[];
   /** A recruit waiting for a slot: shown instead of the offer. */
   readonly recruit?: RecruitView;
+  /** The players on the field, in lineup order… */
   readonly roster: readonly RosterRow[];
+  /** …and the bench: a row per seat, null for an empty one. */
+  readonly bench: readonly (RosterRow | null)[];
   /** What to do now, under the roster heading. */
   readonly hand: string | null;
   /** The Skip button's words (default "Skip"). */
@@ -212,12 +218,14 @@ export class Hud {
         ),
       ),
     );
-    const roster = document.createElement('div');
-    roster.className = 'hud-roster';
-    // One group per position, in lineup order: Blockers, Runners, Catchers.
+    const onRoster = this.handlers.onRoster;
+    const tap = (row: RosterRow) => (onRoster ? () => onRoster(row.spot) : undefined);
+    // Left: the field, one group per position in lineup order. Right: the bench.
+    const field = document.createElement('div');
+    field.className = 'hud-roster-col';
     let group: HTMLElement | null = null;
     let groupName = '';
-    draft.roster.forEach((row, i) => {
+    for (const row of draft.roster) {
       if (!group || row.position !== groupName) {
         groupName = row.position;
         group = document.createElement('section');
@@ -227,15 +235,34 @@ export class Hud {
         if (row.fits) {
           const star = document.createElement('span');
           star.className = 'hud-fits';
-          star.textContent = ' ★ preferred';
+          star.textContent = ' ★';
           label.append(star);
         }
         group.append(label);
-        roster.append(group);
+        field.append(group);
       }
-      const onRoster = this.handlers.onRoster;
-      group.append(rosterRow(row, onRoster ? () => onRoster(i) : undefined));
-    });
+      group.append(rosterRow(row, tap(row)));
+    }
+    const bench = document.createElement('div');
+    bench.className = 'hud-roster-col hud-bench';
+    const benchGroup = document.createElement('section');
+    benchGroup.className = 'hud-roster-group';
+    const benchLabel = document.createElement('h3');
+    benchLabel.textContent = 'Bench';
+    benchGroup.append(
+      benchLabel,
+      ...draft.bench.map((row) => {
+        if (row) return rosterRow(row, tap(row));
+        const seat = document.createElement('div');
+        seat.className = 'hud-roster-row empty';
+        seat.textContent = 'Empty seat';
+        return seat;
+      }),
+    );
+    bench.append(benchGroup);
+    const roster = document.createElement('div');
+    roster.className = 'hud-roster';
+    roster.append(field, bench);
     const hand = document.createElement('p');
     hand.className = 'hud-roster-hand';
     hand.textContent = draft.hand ?? '';
@@ -287,7 +314,7 @@ function rosterRow(row: RosterRow, onTap?: () => void): HTMLElement {
   const el = document.createElement(onTap ? 'button' : 'div');
   el.className = `hud-roster-row${onTap ? ' interactive' : ''}${row.selected ? ' selected' : ''}`;
   if (onTap) el.addEventListener('click', onTap);
-  el.append(nameLine(row.name, row.form, row.kind), statBars(row.stats));
+  el.append(header(row.name, row.form, row.icon), statBars(row.stats));
   if (row.note) {
     const note = document.createElement('em');
     note.textContent = row.note;
@@ -301,7 +328,7 @@ function recruitCard(r: RecruitView): HTMLElement {
   el.className = 'hud-recruit';
   const tag = document.createElement('small');
   tag.textContent = 'NEW PLAYER';
-  el.append(tag, nameLine(r.name, r.form, r.kind), statBars(r.stats));
+  el.append(tag, header(r.name, r.form, r.icon), statBars(r.stats));
   if (r.note) {
     const note = document.createElement('em');
     note.textContent = r.note;
@@ -310,17 +337,22 @@ function recruitCard(r: RecruitView): HTMLElement {
   return el;
 }
 
-/** "Boo Radish [GHOST]". */
-function nameLine(name: string, form: string, kind: string): HTMLElement {
-  const line = document.createElement('div');
-  line.className = 'hud-name';
+/** The photo box, then the name with its kind under it. */
+function header(name: string, form: string, icon: string): HTMLElement {
+  const head = document.createElement('div');
+  head.className = 'hud-player-head';
+  const photo = document.createElement('span');
+  photo.className = 'hud-photo';
+  photo.innerHTML = icon;
+  const text = document.createElement('span');
+  text.className = 'hud-name';
   const n = document.createElement('strong');
   n.textContent = name;
-  const chip = document.createElement('span');
-  chip.className = `hud-kind kind-${kind}`;
-  chip.textContent = form;
-  line.append(n, chip);
-  return line;
+  const kind = document.createElement('small');
+  kind.textContent = form;
+  text.append(n, kind);
+  head.append(photo, text);
+  return head;
 }
 
 /** The highest stat a bar shows full (50, ordinary, fills half). */

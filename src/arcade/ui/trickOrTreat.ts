@@ -3,8 +3,9 @@
  * recruit bios, and the roster panel, where you can swap players' positions
  * or choose who a recruit replaces.
  */
-import { ROSTER_ROLES } from '../content/team';
-import { playerStats, uniqueKind } from '../sim/team';
+import { BENCH_SIZE, ROSTER_ROLES } from '../content/team';
+import { BENCH_START, atSpot, fieldedStats, playerStats, uniqueKind } from '../sim/team';
+import { kindIcon } from './kindIcons';
 import type { Form, Perk, Position, RosterPlayer, RunState, Stats } from '../sim/types';
 import type { CardFace, DraftView, RosterRow, StatBar } from '../../ui/hud';
 
@@ -77,7 +78,17 @@ const bars = (s: Stats, key?: keyof Stats): StatBar[] =>
 const mashed = (roster: readonly RosterPlayer[], slot: number): boolean =>
   uniqueKind(roster, slot) && roster.some((q) => q.kind !== roster[slot]?.kind);
 
-/** The TRICK OR TREAT! screen: the offer, or (with a recruit picked) the question of who it replaces. */
+const withDelta = (shown: StatBar[], before: Stats, after: Stats): StatBar[] =>
+  shown.map((bar, i) => {
+    const k = STAT_ORDER[i] ?? 'heft';
+    return { ...bar, delta: after[k] - before[k] };
+  });
+
+/**
+ * The TRICK OR TREAT! screen: the offer, then (after a recruit takes a bench
+ * seat) the lineup to set; or, with the bench full, who the recruit replaces.
+ * The field is on the left by position, the bench on the right; any two swap.
+ */
 export function trickOrTreatView(state: RunState, selected: number | null): DraftView {
   const recruit = state.recruit;
   const roster: RosterRow[] = state.roster.map((p, slot) => {
@@ -88,53 +99,69 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
       p.preferred !== position ? `prefers ${POSITION[p.preferred]}` : '',
       mashed(state.roster, slot) ? 'Monster Mash +10' : '',
     ];
-    // Placing a recruit: what this slot would have with it there instead (its perks and Monster Mash included).
     let shown = bars(stats, KEY_STAT[position]);
-    let fits = false;
     if (recruit) {
+      // What this slot would have with the recruit there instead (its perks and Monster Mash included).
       const after = { ...state, roster: state.roster.map((q, i) => (i === slot ? recruit : q)) };
-      const gain = playerStats(after, slot);
-      shown = shown.map((bar, i) => {
-        const k = STAT_ORDER[i] ?? 'heft';
-        return { ...bar, delta: gain[k] - stats[k] };
-      });
-      fits = recruit.preferred === position;
+      shown = withDelta(shown, stats, playerStats(after, slot));
     }
     return {
+      spot: slot,
       position: POSITION[position],
       selected: selected === slot,
       name: p.name,
       form: KIND[p.kind],
-      kind: p.kind,
+      icon: kindIcon(p.kind),
       stats: shown,
       note: notes.filter(Boolean).join(' · '),
-      fits,
+      fits: recruit?.preferred === position,
+    };
+  });
+  const bench = Array.from({ length: BENCH_SIZE }, (_, seat): RosterRow | null => {
+    const p = state.bench[seat];
+    if (!p) return null;
+    const stats = fieldedStats(state, p);
+    const shown = bars(stats);
+    return {
+      spot: BENCH_START + seat,
+      position: 'Bench',
+      selected: selected === BENCH_START + seat,
+      name: p.name,
+      form: KIND[p.kind],
+      icon: kindIcon(p.kind),
+      stats: recruit ? withDelta(shown, stats, fieldedStats(state, recruit)) : shown,
+      note: `prefers ${POSITION[p.preferred]}`,
     };
   });
   if (recruit) {
-    const after = { ...state, roster: [...state.roster, recruit] };
     return {
-      title: `Who does ${recruit.name} replace?`,
+      title: `The bench is full: who does ${recruit.name} replace?`,
       offer: [],
       recruit: {
         name: recruit.name,
         form: KIND[recruit.kind],
-        kind: recruit.kind,
-        stats: bars(playerStats(after, after.roster.length - 1), KEY_STAT[recruit.preferred]),
+        icon: kindIcon(recruit.kind),
+        stats: bars(fieldedStats(state, recruit), KEY_STAT[recruit.preferred]),
         note: `prefers ${POSITION[recruit.preferred]}`,
       },
       roster,
+      bench,
       hand: 'Tap the player to let go. The numbers show what that spot gains or loses; ★ marks the position it prefers.',
       skip: `Pass on ${recruit.name}`,
     };
   }
-  const from = selected === null ? null : state.roster[selected];
+  const from = selected === null ? null : atSpot(state, selected);
+  const swapHint = from
+    ? `Now tap who ${from.name} swaps with (or ${from.name} again to cancel).`
+    : 'Tap any two players to swap them, field or bench.';
+  if (state.offer.length === 0) {
+    return { title: 'Set your lineup', offer: [], roster, bench, hand: swapHint, skip: 'Done' };
+  }
   return {
     title: 'TRICK OR TREAT!',
     offer: state.offer.map(perkFace),
     roster,
-    hand: from
-      ? `Now tap who ${from.name} swaps places with (or ${from.name} again to cancel).`
-      : 'Tap two players to swap their positions.',
+    bench,
+    hand: swapHint,
   };
 }

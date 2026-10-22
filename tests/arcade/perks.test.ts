@@ -3,7 +3,8 @@ import { arcadeTuning } from '../../src/arcade/content/tuning';
 import { pocketTime, sweepSpeed } from '../../src/arcade/sim/ball';
 import { createRun, dispatch, endDown, nextDown } from '../../src/arcade/sim/run';
 import { forceBreakKind } from '../../src/arcade/sim/step';
-import { applyPerk, noPerks, playerStats } from '../../src/arcade/sim/team';
+import { BENCH_SIZE } from '../../src/arcade/content/team';
+import { BENCH_START, applyPerk, noPerks, playerStats } from '../../src/arcade/sim/team';
 import type { ArcadeEvent, Perk, RunState } from '../../src/arcade/sim/types';
 import { v } from '../../src/arcade/sim/vec';
 import { carry, ofType, playState, run, stand, tapAt, throwAt, untilGrabbed } from './helpers';
@@ -73,28 +74,46 @@ describe('TRICK OR TREAT!', () => {
     expect(playerStats(s, 0)).toEqual(s.roster[0]!.stats);
   });
 
-  it('a recruit waits for you to choose who it replaces, then joins in that slot', () => {
-    const recruit = {
-      name: 'Boo Radish',
-      kind: 'ghost' as const,
-      preferred: 'catcher' as const,
-      stats: { hustle: 70, hands: 75, heft: 30 },
-    };
-    const picked = dispatch(offering({ rarity: 'rare', kind: 'recruit', player: recruit }), {
+  const boo = {
+    name: 'Boo Radish',
+    kind: 'ghost' as const,
+    preferred: 'catcher' as const,
+    stats: { hustle: 50, hands: 70, heft: 30 },
+  };
+
+  it('a recruit takes a bench seat, and the roster stays open until Done', () => {
+    const picked = dispatch(offering({ rarity: 'rare', kind: 'recruit', player: boo }), {
       type: 'pick',
       offer: 0,
     });
     expect(picked.state.phase).toBe('draft');
-    expect(picked.state.recruit?.name).toBe('Boo Radish');
-    const gone = picked.state.roster[6]!.name;
-    const placed = dispatch(picked.state, { type: 'place', slot: 6 });
-    expect(placed.state.phase).toBe('setup');
-    expect(placed.state.roster[6]!.name).toBe('Boo Radish');
-    expect(ofType(placed.events, 'joined')[0]).toMatchObject({
+    expect(picked.state.bench.map((p) => p.name)).toEqual(['Boo Radish']);
+    expect(picked.state.offer).toEqual([]);
+    expect(ofType(picked.events, 'joined')[0]).toMatchObject({
       name: 'Boo Radish',
-      slot: 6,
-      replaced: gone,
+      slot: BENCH_START,
+      replaced: null,
     });
+    // Swap it onto the field, then Done.
+    const gone = picked.state.roster[6]!.name;
+    const swapped = dispatch(picked.state, { type: 'swap', a: 6, b: BENCH_START }).state;
+    expect(swapped.roster[6]!.name).toBe('Boo Radish');
+    expect(swapped.bench[0]!.name).toBe(gone);
+    expect(swapped.field.players.some((p) => p.form === 'ghost')).toBe(true);
+    expect(dispatch(swapped, { type: 'skipDraft' }).state.phase).toBe('setup');
+  });
+
+  it('with the bench full, a recruit waits for you to choose who it replaces', () => {
+    const s = offering({ rarity: 'rare', kind: 'recruit', player: boo });
+    s.bench = Array.from({ length: BENCH_SIZE }, (_, i) => ({ ...s.roster[0]!, name: `Sub ${i}` }));
+    const picked = dispatch(s, { type: 'pick', offer: 0 }).state;
+    expect(picked.recruit?.name).toBe('Boo Radish');
+    // No swapping while it waits.
+    expect(dispatch(picked, { type: 'swap', a: 0, b: 1 }).state.roster).toEqual(picked.roster);
+    const placed = dispatch(picked, { type: 'place', slot: BENCH_START + 1 });
+    expect(placed.state.recruit).toBeNull();
+    expect(placed.state.bench.map((p) => p.name)).toEqual(['Sub 0', 'Boo Radish', 'Sub 2']);
+    expect(ofType(placed.events, 'joined')[0]).toMatchObject({ replaced: 'Sub 1' });
   });
 
   it('any player can play any position: two swap slots', () => {
