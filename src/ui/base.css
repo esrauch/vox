@@ -25,7 +25,7 @@ body {
   margin: 0;
   height: 100dvh;
   overflow: hidden;
-  background: var(--sky, #8fd3ff);
+  background: var(--backdrop, #3b2a55);
   color: var(--ink, #2b2140);
   font-family: 'Creepster', system-ui, sans-serif;
   letter-spacing: 0.03em;

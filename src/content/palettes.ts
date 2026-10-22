@@ -5,9 +5,10 @@
 
 export type Hex = `#${string}`;
 
-/** Shared colors used everywhere: the field, the sky, the UI chrome. */
+/** Shared colors used everywhere: the backdrop, the UI chrome. */
 export const common = {
-  sky: '#8fd3ff',
+  /** The world behind everything: the page, the empty scene and the fog all fade to this dark purple-grey. */
+  backdrop: '#3b2a55',
   grass: '#7ed957',
   grassDark: '#6cc447',
   pumpkin: '#ff8a1f',
@@ -83,7 +84,7 @@ export const biomes = {
     skyTop: '#1c1236',
     skyMid: '#4a2f6e',
     skyHorizon: '#d9774a',
-    fog: '#3b2a55',
+    fog: common.backdrop,
     /** Moonlight from above and a purple bounce from below. */
     moon: '#e6e2ff',
     hemiSky: '#c5b3ff',

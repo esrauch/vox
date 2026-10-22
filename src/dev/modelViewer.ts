@@ -24,7 +24,7 @@ renderer.setPixelRatio(renderMode ? 1 : Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(hexToNumber(common.sky));
+scene.background = new THREE.Color(hexToNumber(common.backdrop));
 scene.add(new THREE.HemisphereLight(0xffffff, hexToNumber(common.grassDark), 1.3));
 const sun = new THREE.DirectionalLight(0xffffff, 1.8);
 sun.position.set(-4, 8, 6);
