@@ -30,10 +30,11 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 - [x] **Design pass** (GAMEPLAY.md, *The Run* and *The Defense*): three areas (Forest, Swamp, Farm), each Boss with one gimmick that attacks one thing you do.
 - [ ] **Forest:** the **Frog** defender; **Mister Frog** (top hat) and **Frog Rain**: a telegraphed lane before the snap, frogs falling in it with shadows first, flattening whoever is under them.
-- [ ] **Swamp:** the Safety becomes a **Witch**; the **Bog Hand** (planted grabber) and **mud patches**; **the King** (a crowned scarecrow) and the **Two-Part Grab** (two Break it! tests in a row).
-- [ ] **Farm:** the **Crow**; rows of Scarecrows; **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers).
-- [ ] **Models** for the new defenders and the three Bosses (top hat, crown, bigger crown), readable from the game camera; the baby pumpkins.
-- [ ] **The story's beats:** beating Mister Frog and the King returns a baby pumpkin (it joins Jack); beating the Queen gets the family home to the patch, the game's ending.
+- [ ] **Swamp:** the Safety becomes a **Witch**; the **Bog Hand** (planted grabber) and **mud patches**; **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers).
+- [ ] **Farm:** the **Crow**; rows of Scarecrows; **the King** (a crowned scarecrow) and the **Two-Part Grab** (two Break it! tests in a row).
+- [ ] **Models** for the new defenders and the three Bosses (top hat, crown, bigger crown), readable from the game camera.
+- [ ] **Boss perks:** beating Mister Frog gives **Hot Arm** (taken out of the TRICK OR TREAT! pool); the Queen's perk is ▲ to decide.
+- [ ] **The two cutscenes:** at the start, Jack asks a football team to help him get home; at the end, everyone (your team and every defender you met, Bosses included) dances in the pumpkin patch.
 - [ ] **Difficulty targets:** a practised player who never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
 
 ## B2. Impact and Feel
@@ -82,8 +83,8 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
-- **2026-10-22:** **The progression is designed:** Forest (Mister Frog, Frog Rain), Swamp (the King, the Two-Part Grab; Witches as Safeties) and the Farm (the Queen, the Hex), ending at the pumpkin patch. Not built yet.
-- **2026-10-22:** **The game is now Get Jack Back.** Jack the pumpkin ball is the hero: each of the first two Bosses gives back one of his baby pumpkins, and beating the third gets them home to their patch (story in the docs; not built yet). The title screen, page titles and package are renamed, and winning says "Jack is home!".
+- **2026-10-22:** **The progression is designed:** Forest (Mister Frog, Frog Rain), Swamp (the Queen, the Hex; Witches as Safeties) and the Farm (the King, the Two-Part Grab), ending at the pumpkin patch. The first two Bosses each give a special perk (Mister Frog: Hot Arm, which leaves the TRICK OR TREAT! pool). The story is two tiny cutscenes: Jack asking a team for help, and everyone dancing in the patch at the end. Not built yet.
+- **2026-10-22:** **The game is now Get Jack Back.** Jack the pumpkin ball is the hero, trying to get home to his pumpkin patch. The title screen, page titles and package are renamed, and winning says "Jack is home!".
 - **2026-10-22:** **Docs rewritten** for the game as it is; the screenshot tool and the model contact sheet follow the arcade camera. A **local cleanup pass** (dead code, comments, shared stat helpers), with the bigger refactors noted in TECHNICAL.md.
 - **2026-10-22:** **No more clipping.** After a catch or handoff each helper blocks its own defender instead of all piling onto one; teammates collide and give way to the carrier; bodies lying down get nudged aside; Golems' bodies are as wide as their model. With working blocks, runs got long and swingy, so on a handoff the Catchers now run decoy routes.
 - **2026-10-22:** **Runs are the safe call, passes the gamble.** The play fake: for about a second after a handoff the defense keeps playing the pass. Runs average about 4 yards and gain nothing about 5% of the time; a good passer averages about 5½, with a quarter gaining nothing.

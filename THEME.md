@@ -8,7 +8,7 @@ This document is about who, where and what it feels like. It does not cover rule
 
 ## The Pitch in One Breath
 
-**Arcade Halloween Football.** **Jack**, a jack-o'-lantern, has lost his two baby pumpkins and his way home to the patch, and he's got a football team to help. They play through a haunted forest, one drive at a time, past gnomes, scarecrows, owls and bats that don't want them there. You call the play, time the throw and break the tackles; everything else crashes together on its own. You start as seven plain, keen humans; drive by drive, the forest sends you recruits: a Golem built like a linebacker, a Werewolf that won't stop running, a Ghost that plucks passes out of the air. Keep going until a 4th down goes wrong.
+**Arcade Halloween Football.** **Jack**, a jack-o'-lantern, has lost his way home to the pumpkin patch, and he's asked a football team to help. They play through a haunted forest, a swamp and a farm, one drive at a time, past gnomes, scarecrows, owls and bats that don't want them there. You call the play, time the throw and break the tackles; everything else crashes together on its own. You start as seven plain, keen humans; drive by drive, the forest sends you recruits: a Golem built like a linebacker, a Werewolf that won't stop running, a Ghost that plucks passes out of the air. Keep going until a 4th down goes wrong.
 
 **The feel:** snappy, fast, silly, and above all *physical*: every play ends in a pile-up. It's closer to *Crossy Road* and *Retro Bowl* than to *Blood Bowl*: pick it up in seconds, laugh every few seconds, one more go. **It's a portrait, one-thumb phone game in voxels**, to a cheerful Halloween soundtrack.
 
@@ -16,23 +16,19 @@ Inspirations: *Retro Bowl* (pocket-sized arcade football), *Crossy Road* (feel, 
 
 ## The Story
 
-**Jack is the pumpkin ball.** He and his two babies were carried off from their pumpkin patch, and now he's trying to get them all back home. The forest won't let him through, so his team plays its way across, one drive at a time.
+**Jack is the pumpkin ball,** and he wants to go home to his patch. That's all the plot there is, and it's told in two tiny cutscenes:
 
-The way home crosses three places, each with a Boss, each in a hat of its own:
+- **At the start:** Jack bounces up to a football team and asks for help getting back to his patch. A few seconds, then the first snap.
+- **At the end:** in the pumpkin patch, everyone dances: your team, Jack, and every defender you played through, Bosses included.
 
-- **The Forest: Mister Frog,** in a top hat, holds Jack's first baby. Beat him and the baby is back with Jack.
-- **The Swamp: the King,** a scarecrow in a crown (the Swamp's scarecrow on his post in the bog), holds the second baby.
-- **The Farm: the Queen,** a witch twice the size of any other, in a crown, rules the pumpkin patch. Beat her and the family is home.
-
-
-The babies are little jack-o'-lanterns: small, round, glowing, and as readable as Jack himself.
+The way home crosses three places, each with a Boss in a hat of its own: **Mister Frog** (a top hat) in the Forest, **the Queen** (a witch twice the size of any other, in a crown) in the Swamp, and **the King** (a scarecrow in a crown) at the Farm, by the patch. Nobody explains why they're in the way; they just are.
 
 ## Core Fantasy
 
 - **You call the play and make the throw.** You're Jack, the pumpkin who's also the quarterback: you read the defense, pick the play, and let yourself fly at the right moment.
-- **You're bringing your family home.** Every Boss beaten is a baby back, or the last step to the patch.
+- **You're getting Jack home.** Every Boss beaten is a step closer to the patch, and the first two each leave you a gift: a special perk.
 - **A plain team becomes a monster team.** You start with seven ordinary humans. By the end of a good run your lineup is a pack of misfits, each a trade-off: the Golem nobody can move, the Werewolf nobody can catch, the Ghost who catches everything.
-- **Every recruit is a little story.** The Werewolf you picked up after the second drive, who broke three tackles against the Treant's Guard, is *your* Werewolf.
+- **Every recruit is a little story.** The Werewolf you picked up after the second drive, who broke three tackles against Mister Frog, is *your* Werewolf.
 - **Chaos you can read.** The defense is all on show, but four downs go fast. You call the play and adapt as it falls apart.
 
 ## Tone
@@ -99,10 +95,10 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 Plus the **Frog** (a Cover that crouches, then leaps) and the **Witch on a Broom** as a hazard swooping over the passing lanes. **Boss: Mister Frog,** who rains frogs down a lane.
 
 ### The Swamp
-The Forest's locals, drowned. **Witches take the Safety's place,** hanging deep on their brooms; the **Bog Hand** (planted in the mud, grabs whoever passes close) and **mud patches** that slow everyone are new. **Boss: the King,** a scarecrow in a crown.
+The Forest's locals, drowned. **Witches take the Safety's place,** hanging deep on their brooms; the **Bog Hand** (planted in the mud, grabs whoever passes close) and **mud patches** that slow everyone are new. **Boss: the Queen,** a witch twice the size of any other, in a crown, whose Hex hides the aim line.
 
 ### The Farm
-Rows of scarecrows, and **Crows**, bats that swoop down a lane instead of looping. The pumpkin patch is the end zone. **Boss: the Queen,** a witch twice the size of any other, in a crown, whose Hex hides the aim line.
+Rows of scarecrows, and **Crows**, bats that swoop down a lane instead of looping. The pumpkin patch is the end zone. **Boss: the King,** a scarecrow in a crown.
 
 Each area has its own locals, hazards and look, and a Boss defense at the end of its four drives. It's always the same team, growing as it goes.
 
@@ -122,12 +118,11 @@ Every player and every defender is described by **three attributes**, the **Thre
 
 ## Title
 
-**Get Jack Back**: Jack the jack-o'-lantern getting his babies back, and getting back to the patch. It's the game's name; *Arcade Halloween Football* is the pitch.
+**Get Jack Back**: getting Jack the jack-o'-lantern back to his patch. It's the game's name; *Arcade Halloween Football* is the pitch.
 
 Runners-up, kept for reuse inside the game (perks, achievements, area names): *Fourth & Ghoul* (the old title), *Field of Screams*, *Hike & Shriek*, *Trick Play*, *Ghoul Line*, *Boo-tball*, *The Boo Zone*, *Haunted Huddle*, *Hail Mary Shelley*, *Fright Night Football*, *Touchdown Town*. *Fee Fi Fo Fumble* lives on as a crowd chant.
 
 ## Open Questions
 
 - **What makes runs different from each other** beyond the perks and recruits? Perhaps a starting coach or team, or the team's colors and name.
-- **Why did they take the babies?** Mister Frog and the King took one each; the Queen just rules the patch. Is there a reason, or is it a tournament of hats?
-- **What does the patch look like** when Jack gets home, and is there a joke at the end that nobody ever reaches?
+- **What does the patch look like** when Jack gets home, and is there a joke in the dance that nobody expects?
