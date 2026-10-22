@@ -17,19 +17,11 @@ import {
 import { BASE_STATS, FORM_STATS, POSITION_STAT, ROSTER_ROLES } from '../content/team';
 import type { Rng } from '../../sim/rng';
 import { rngFor } from './random';
+import { even, plus, ZERO } from './stats';
 import type { Form, Perk, Perks, Position, Rarity, RosterPlayer, RunState, Stats } from './types';
 
 const STATS: readonly (keyof Stats)[] = ['hustle', 'hands', 'heft'];
 const KINDS: readonly Form[] = ['human', 'ghost', 'golem', 'werewolf'];
-const ZERO: Stats = { hustle: 0, hands: 0, heft: 0 };
-
-const plus = (a: Stats, b: Stats, k = 1): Stats => ({
-  hustle: a.hustle + b.hustle * k,
-  hands: a.hands + b.hands * k,
-  heft: a.heft + b.heft * k,
-});
-const even = (n: number): Stats => ({ hustle: n, hands: n, heft: n });
-
 /** The seven you start with: plain humans, each in the position it prefers. */
 export function startingRoster(): RosterPlayer[] {
   return ROSTER_ROLES.map((role, i) => {

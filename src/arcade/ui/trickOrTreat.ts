@@ -4,6 +4,7 @@
  * or choose who a recruit replaces.
  */
 import { BENCH_SIZE, POSITION_STAT, ROSTER_ROLES } from '../content/team';
+import { MONSTER_MASH_BONUS } from '../content/perks';
 import { BENCH_START, atSpot, fieldedStats, playerStats, uniqueKind } from '../sim/team';
 import { kindIcon } from './kindIcons';
 import type { Form, Perk, Position, RosterPlayer, RunState, Stats } from '../sim/types';
@@ -68,10 +69,6 @@ const STAT_ORDER: readonly (keyof Stats)[] = ['heft', 'hustle', 'hands'];
 const bars = (s: Stats, key?: keyof Stats): StatBar[] =>
   STAT_ORDER.map((k) => ({ label: STAT[k], value: s[k], key: k === key }));
 
-/** Monster Mash applies: the only one of its kind, on a team that isn't all one kind. */
-const mashed = (roster: readonly RosterPlayer[], slot: number): boolean =>
-  uniqueKind(roster, slot) && roster.some((q) => q.kind !== roster[slot]?.kind);
-
 const withDelta = (shown: StatBar[], before: Stats, after: Stats): StatBar[] =>
   shown.map((bar, i) => {
     const k = STAT_ORDER[i] ?? 'heft';
@@ -93,7 +90,7 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
     const stats = playerStats(state, slot);
     const notes = [
       p.preferred !== position ? `prefers ${POSITION[p.preferred]}` : '',
-      mashed(state.roster, slot) ? 'Monster Mash +10' : '',
+      uniqueKind(state.roster, slot) ? `Monster Mash +${MONSTER_MASH_BONUS}` : '',
     ];
     let shown = bars(stats, POSITION_STAT[position]);
     if (recruit) {

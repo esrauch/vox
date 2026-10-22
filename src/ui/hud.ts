@@ -1,11 +1,12 @@
 /**
  * The DOM HUD over the canvas (TECHNICAL.md §6): the drive banner and down
  * and distance at the top; the hand of play cards, Flip and the context button
- * (PLAY, HIKE!, RESUME, AGAIN) at the bottom; message pops; and the draft
- * overlay. Aiming happens on the canvas itself (see game.ts).
+ * (PLAY, HIKE!, RESUME, AGAIN) at the bottom; message pops and the big
+ * GREAT/OK/BAD; and the TRICK OR TREAT! overlay (the offer and the roster).
+ * The game's own buttons (THROW, Break it!) are in arcade/ui/controls.ts.
  *
  * The bottom bar keeps one height whether or not cards are showing, so the
- * camera's fit of the field doesn't jump between downs.
+ * layout doesn't jump between downs.
  */
 import './hud.css';
 
@@ -15,10 +16,10 @@ export interface HudHandlers {
   /** Tap a card in the hand: call that play. */
   onCard(hand: number): void;
   onFlip(): void;
-  /** In the draft: take an offer, or skip. */
+  /** TRICK OR TREAT!: take an offer, or skip (Done, Pass). */
   onDraft(offer: number): void;
   onSkip(): void;
-  /** In the draft: tap a roster player (to place a recruit there, or to swap two). */
+  /** TRICK OR TREAT!: tap a roster spot (to place a recruit there, or to swap two). */
   /** A tap on a roster spot (RosterRow.spot). */
   onRoster?(spot: number): void;
 }
@@ -63,7 +64,7 @@ export interface RecruitView {
   readonly note: string;
 }
 
-/** What the draft shows: the offers, your roster, and your team's hand. */
+/** What TRICK OR TREAT! shows: the offer (or the recruit waiting), your roster and bench, and what to do. */
 export interface DraftView {
   /** The heading over the offer (default "Pick one"). */
   readonly title?: string;
@@ -147,13 +148,6 @@ export class Hud {
   }
 
   /** Space the HUD takes at the top and bottom, so the camera can fit the field between. */
-  insets(): { top: number; bottom: number } {
-    return {
-      top: this.top.getBoundingClientRect().bottom + 4,
-      bottom: window.innerHeight - this.bottom.getBoundingClientRect().top + 4,
-    };
-  }
-
   /** The drive banner ("Drive 2 of 4 · Challenge") and down and distance ("3rd & 4"). */
   setTop(banner: string, downs: string | null): void {
     this.banner.textContent = banner;
@@ -173,14 +167,11 @@ export class Hud {
   setHand(
     cards: readonly CardFace[] | null,
     called: number | null,
-    /** Show Flip even before a card is called (it mirrors the whole hand); `flipped` marks it on. */
-    flip: { readonly always: boolean; readonly flipped: boolean } = {
-      always: false,
-      flipped: false,
-    },
+    /** Flip is on (shown once a card is called). */
+    flipped = false,
   ): void {
-    this.flipButton.hidden = !cards || (called === null && !flip.always);
-    this.flipButton.classList.toggle('on', flip.flipped);
+    this.flipButton.hidden = !cards || called === null;
+    this.flipButton.classList.toggle('on', flipped);
     const key = cards ? `${cards.map((c) => c.name + c.blurb).join('|')}#${called}` : '';
     if (key === this.handKey) return;
     this.handKey = key;

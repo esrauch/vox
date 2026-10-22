@@ -28,7 +28,8 @@ import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
 import { carrierOf, qbOf } from './sim/ai';
 import { createRun, dispatch, downAndDistance, startingRoster } from './sim/run';
 import { FORM_STATS } from './content/team';
-import { breakMarker, countdown, jukeShowing, mashLeft } from './sim/breakit';
+import { plus } from './sim/stats';
+import { breakMarker, countdown, jukeShowing, mashLeft, type BreakOutcome } from './sim/breakit';
 import { canThrow, step } from './sim/step';
 import type {
   Action,
@@ -56,16 +57,7 @@ function firstRoster(monsters: boolean): RosterPlayer[] {
   const kindFor = { blocker: 'golem', runner: 'werewolf', catcher: 'ghost' } as const;
   return roster.map((p) => {
     const kind = kindFor[p.preferred];
-    const form = FORM_STATS[kind];
-    return {
-      ...p,
-      kind,
-      stats: {
-        hustle: p.stats.hustle + form.hustle,
-        hands: p.stats.hands + form.hands,
-        heft: p.stats.heft + form.heft,
-      },
-    };
+    return { ...p, kind, stats: plus(p.stats, FORM_STATS[kind]) };
   });
 }
 
@@ -96,7 +88,7 @@ const KIND_NAME: Readonly<Record<DriveKind, string>> = {
 };
 const AREA_NUMERAL: readonly string[] = ['I', 'II', 'III'];
 /** How a Break it! went, in one big word. */
-const BREAK_WORD: Readonly<Record<'break' | 'drag' | 'tackle', string>> = {
+const BREAK_WORD: Readonly<Record<BreakOutcome, string>> = {
   break: 'GREAT!',
   drag: 'OK',
   tackle: 'BAD',
@@ -123,8 +115,8 @@ export class ArcadeGame {
   private lastFrame: number | null = null;
   private paused = false;
   /** What the player pressed since the last step, applied on the next one. */
-  private pending: { throw?: boolean; scramble?: boolean; breakTap?: boolean; juke?: -1 | 1 } = {};
-  /** TRICK OR TREAT!: the first player tapped for a swap. */
+  private pending: StepInput = {};
+  /** TRICK OR TREAT!: the spot first tapped for a swap. */
   private swapFrom: number | null = null;
   /** Where the camera looks (field yards, smoothed). */
   private focus = v(0, -4);
@@ -158,7 +150,7 @@ export class ArcadeGame {
       onFlip: () => this.act({ type: 'flip' }),
       onDraft: (offer) => this.act({ type: 'pick', offer }),
       onSkip: () => this.act({ type: 'skipDraft' }),
-      onRoster: (slot) => this.onRoster(slot),
+      onRoster: (spot) => this.onRoster(spot),
     });
     this.controls = new ArcadeControls(uiRoot, {
       onThrow: () => this.press({ throw: true }),
@@ -209,19 +201,19 @@ export class ArcadeGame {
     this.syncHud();
   }
 
-  /** TRICK OR TREAT!: tap a roster player to place a recruit there, or two in turn to swap them. */
-  private onRoster(slot: number): void {
+  /** TRICK OR TREAT!: tap a spot (field or bench) to place a recruit there, or two in turn to swap them. */
+  private onRoster(spot: number): void {
     this.conductor.play('uiClick');
     if (this.state.recruit) {
-      this.act({ type: 'place', slot });
+      this.act({ type: 'place', slot: spot });
       return;
     }
     if (this.swapFrom === null) {
-      this.swapFrom = slot;
+      this.swapFrom = spot;
     } else {
       const from = this.swapFrom;
       this.swapFrom = null;
-      if (from !== slot) this.act({ type: 'swap', a: from, b: slot });
+      if (from !== spot) this.act({ type: 'swap', a: from, b: spot });
     }
     this.syncHud();
   }
@@ -232,12 +224,7 @@ export class ArcadeGame {
   }
 
   /** A button press, applied on the next step (if it means anything right now). */
-  private press(input: {
-    throw?: boolean;
-    scramble?: boolean;
-    breakTap?: boolean;
-    juke?: -1 | 1;
-  }): void {
+  private press(input: StepInput): void {
     if (!this.conductor.started || this.paused) return;
     this.pending = { ...this.pending, ...input };
   }
@@ -245,13 +232,6 @@ export class ArcadeGame {
   private after(events: readonly ArcadeEvent[], prev: RunState): void {
     // A won drive marches on: the new drive's 0 is the old one's first-down line.
     if (events.some((e) => e.type === 'driveWon')) this.origin += prev.drive.firstDown;
-    if (
-      events.some(
-        (e) => e.type === 'downStarted' || e.type === 'driveStarted' || e.type === 'called',
-      )
-    ) {
-      this.bodies.sync(this.state);
-    }
     this.react(events, prev);
     if (events.length > 0 || this.state.phase !== prev.phase) this.syncHud();
   }
@@ -358,11 +338,6 @@ export class ArcadeGame {
         case 'handoff':
           play('catch');
           break;
-        case 'scrambled':
-          this.ball.burst(30, 3);
-          play('hop');
-          this.hud.pop('QB RUN!', 'good');
-          break;
         case 'caught':
           this.ball.burst(30, 3);
           play(e.contested ? 'cleanCatch' : 'catch');
@@ -395,8 +370,6 @@ export class ArcadeGame {
           );
           break;
         case 'grabbed':
-          play('burst');
-          break;
         case 'brokeTackle':
         case 'dragged':
           play('burst');
@@ -438,7 +411,7 @@ export class ArcadeGame {
             return { name: p?.name ?? '?', blurb: p?.handoff !== undefined ? 'Run' : 'Pass' };
           })
         : null;
-    this.hud.setHand(cards, called, { always: false, flipped });
+    this.hud.setHand(cards, called, flipped);
     if (phase !== 'draft') this.swapFrom = null;
     this.hud.setDraft(
       ready && phase === 'draft' ? trickOrTreatView(this.state, this.swapFrom) : null,

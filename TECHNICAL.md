@@ -517,3 +517,20 @@ Tests live in `tests/` and mirror these folders (115 at last count). Simulation 
 - **Audio** can't start before a user gesture. Songs and SFX are pre-rendered at load at 48 kHz (`RENDER_RATE`) without a context; the `AudioContext` is created on the PLAY tap.
 - **Event SFX** play when the beat is *heard*, so they're one output-latency late (an M3 task).
 - **Calibration:** Android measured about −115 ms uncalibrated on `/dev/beat.html`. The game no longer uses a saved offset (there's no tap judging); it relies on the heard-time mapping.
+
+## 23. Refactor Opportunities *(noted 2026-10-22)*
+
+A local cleanup pass (dead code, stale comments, small duplication) is done. These would each need a bigger change, so they're noted here instead:
+
+1. **Flatten the layout.** The arcade game is now the only game, but it lives in `src/arcade/` while pieces it relies on sit in the old shared folders: `render/{view,scenery}.ts`, `game/conductor.ts`, `sim/rng.ts`, `content/{tuning,palettes}.ts` (the old `tuning` now holds only beat and audio numbers), `ui/hud.ts`. Move everything under one tree (or lift `arcade/` up to `src/`) and fold the two tuning files together.
+2. **Rewrite this doc for the arcade code.** Most of §3–§10 and §19–§20 still describe the grid game (the note at the top says so). The arcade sim deserves its own Architecture section: the fixed step, `dispatch`, events, and where each rule lives.
+3. **Split `arcade/game.ts`** (about 470 lines). It holds the loop, the follow camera, input, the HUD sync and the event feedback (sounds and pops). The camera and `react()` (events → feedback) would each stand alone.
+4. **Give the roster screen its own component.** `ui/hud.ts` is a generic HUD that now also builds the arcade's roster (field and bench columns, stat bars, recruit card) and `hud.css` carries all of its styles; a `roster.ts` / `roster.css` pair would keep the HUD small.
+5. **Make the AI's "where to go" queries pure.** `playerTarget` advances a route's waypoint and `defenderTarget` a Bat's patrol while answering; and `carryBlocks` caches block assignments in a module-level variable keyed on the state. Better: decide assignments once a step and store them in the state (e.g. `field.blocks`), and advance waypoints in a separate pass.
+6. **Name the spots.** Roster spots are an implicit number (0–6 the field slots, 7 up the bench seats; `BENCH_START`), and the `place` action still calls its spot `slot`. A typed spot (`{ on: 'field' | 'bench', i }`) would make swaps and placing self-explanatory.
+7. **One word for a player's kind.** It's `Form` in the types, `kind` on `RosterPlayer`, `form` on `Player`, and `FORM_STATS` / `KIND_NAME` in content. Pick `Kind` everywhere.
+8. **Remember how the ball changed hands.** Whether this down was a handoff is worked out from `PLAYS[state.play.index].handoff` in several places (`ai.ts`, the balance tool). A field flag set at the hike (or on the carried ball) would say it once.
+9. **Speed up the sim.** `step()` deep-copies the whole state with `structuredClone` every step, which makes the balance tool slow (about 3 s a run, much more with the bot's throw look-ahead). Copy-on-write for the field, or a mutable step with an explicit snapshot for tests, would make balance runs far faster.
+10. **Split the balance tool and the big test file.** `tools/arcade-balance.ts` (about 500 lines) mixes the bot's policy, the scenarios and the report; `tests/arcade/sim.test.ts` (about 690 lines) covers everything. Split each by topic.
+11. **The game's name.** The title screen still says *Fourth & Ghoul* (as do `package.json` and these docs) while GAMEPLAY.md calls it *Arcade Halloween Football*. Decide, then rename in one go.
+

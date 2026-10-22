@@ -274,8 +274,6 @@ export interface RunState {
 export interface StepInput {
   /** THROW: a bullet along the sweeping line. */
   readonly throw?: boolean;
-  /** RUN: the QB keeps it. */
-  readonly scramble?: boolean;
   /** A tap in Break it! (the bar, and each tap of a mash). */
   readonly breakTap?: boolean;
   /** A juke: a tap on the left (-1) or right (+1) side of the screen. */
@@ -305,7 +303,6 @@ export type ArcadeEvent =
   | { readonly type: 'called'; readonly play: string; readonly flipped: boolean }
   | { readonly type: 'snapped' }
   | { readonly type: 'handoff'; readonly id: number }
-  | { readonly type: 'scrambled'; readonly id: number }
   | { readonly type: 'thrown'; readonly target: Vec; readonly landsAt: number }
   | { readonly type: 'caught'; readonly id: number; readonly contested: boolean }
   /** A pass knocked down: `contested` when your player had a hand to it too and lost it. */

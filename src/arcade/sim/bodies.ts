@@ -12,6 +12,7 @@ import {
   ROLE_RADIUS,
   ROSTER_ROLES,
 } from '../content/team';
+import { even, plus } from './stats';
 import { playerStats } from './team';
 import type { Play } from '../content/plays';
 import type { Defender, Drive, Player, RunState, Stats } from './types';
@@ -37,14 +38,6 @@ export function defenderPhysics(stats: Stats, reachBonus: number): ReturnType<ty
   const p = physicsOf(stats);
   return { ...p, reach: p.reach + reachBonus };
 }
-
-const plus = (a: Stats, b: Stats, k = 1): Stats => ({
-  hustle: a.hustle + b.hustle * k,
-  hands: a.hands + b.hands * k,
-  heft: a.heft + b.heft * k,
-});
-
-const even = (n: number): Stats => ({ hustle: n, hands: n, heft: n });
 
 /**
  * Your team for a down: the QB behind the line of scrimmage, and the seven

@@ -4,8 +4,7 @@
  * gives the same result. See GAMEPLAY.md, A Down and Break it!.
  *
  * Order within a step in play:
- *   1. The player's buttons: THROW fires a bullet along the sweeping line;
- *      RUN gives the QB the ball to run.
+ *   1. THROW fires a bullet along the sweeping line.
  *   2. The carrier picks its lane (the emptiest), every so often.
  *   3. Everyone moves toward their target (ai.ts, physics.ts); overlaps are
  *      pushed apart by weight.
@@ -64,7 +63,6 @@ export function step(prev: RunState, input: StepInput = {}): ArcadeResult {
   }
 
   if (input.throw) throwBullet(state, events);
-  else if (input.scramble) scramble(state, events);
   const carrier = carrierOf(state);
   if (carrier && state.step % Math.max(1, Math.round(arcadeTuning.carrier.laneEvery / DT)) === 0) {
     state.field.lane = chooseLane(state, carrier);
@@ -79,12 +77,12 @@ export function step(prev: RunState, input: StepInput = {}): ArcadeResult {
   return { state, events };
 }
 
-/** Whether the QB can throw (or run) right now: in play, with the ball. */
+/** Whether the QB can throw right now: in play, with the ball. */
 export function canThrow(state: RunState): boolean {
   return state.phase === 'play' && state.field.ball.at === 'qb' && qbOf(state) !== null;
 }
 
-// ── The buttons ─────────────────────────────────────────────────────────────
+// ── THROW ───────────────────────────────────────────────────────────────────
 
 /** THROW: a bullet along the line, as far as its range (or the sideline). */
 function throwBullet(state: RunState, events: ArcadeEvent[]): void {
@@ -94,14 +92,6 @@ function throwBullet(state: RunState, events: ArcadeEvent[]): void {
   const landsAt = state.time + flightTime(qb.pos, target, state.perks.throwScale);
   state.field.ball = { at: 'flight', from: qb.pos, target, thrownAt: state.time, landsAt };
   events.push({ type: 'thrown', target, landsAt });
-}
-
-/** RUN: the QB tucks it and runs, drifting to the open side. */
-function scramble(state: RunState, events: ArcadeEvent[]): void {
-  const qb = qbOf(state);
-  if (!qb || !canThrow(state)) return;
-  giveBall(state, qb);
-  events.push({ type: 'scrambled', id: qb.id });
 }
 
 /** Someone has the ball now: it runs, and picks its lane. */

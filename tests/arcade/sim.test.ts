@@ -252,14 +252,6 @@ describe('throwing: a bullet along the line', () => {
     expect(ofType(r.events, 'incomplete')).toHaveLength(1);
     expect(run(r.state, PAUSE + 0.1).state.drive.down).toBe(2);
   });
-
-  it('RUN: the QB keeps it and runs, drifting to the open side', () => {
-    const s = playState([], [{ kind: 'cover', pos: v(-3, 2) }]);
-    const r = run(s, 0.6, { scramble: true });
-    expect(ofType(r.events, 'scrambled')).toEqual([{ type: 'scrambled', id: 1 }]);
-    expect(body(r.state, 1).pos.x).toBeGreaterThan(0.3);
-    expect(canThrow(r.state)).toBe(false);
-  });
 });
 
 describe('the carrier, and Break it! (the bar)', () => {

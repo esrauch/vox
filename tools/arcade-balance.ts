@@ -29,6 +29,7 @@ import { bulletEnd, contact, pocketTime, sweepAngle } from '../src/arcade/sim/ba
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
 import { FORM_STATS, ROSTER_ROLES } from '../src/arcade/content/team';
 import { rngFor } from '../src/arcade/sim/random';
+import { plus } from '../src/arcade/sim/stats';
 import { BENCH_START } from '../src/arcade/sim/team';
 import { breakMarker, jukeShowing } from '../src/arcade/sim/breakit';
 import { canThrow, step } from '../src/arcade/sim/step';
@@ -256,7 +257,6 @@ function count(
         t.passes++;
         break;
       case 'handoff':
-      case 'scrambled':
         t.handoffs++;
         ran.now = true;
         break;
@@ -355,16 +355,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
       ...scenario.training,
       ...scenario.roleTraining?.[p.preferred],
     };
-    const form = FORM_STATS[kind];
-    return {
-      ...p,
-      kind,
-      stats: {
-        hustle: p.stats.hustle + form.hustle + extra.hustle,
-        hands: p.stats.hands + form.hands + extra.hands,
-        heft: p.stats.heft + form.heft + extra.heft,
-      },
-    };
+    return { ...p, kind, stats: plus(plus(p.stats, FORM_STATS[kind]), extra) };
   });
   let state = createRun(seed, roster);
   const plan: Plan = { tackleAt: -1, tapAt: 1, sawAt: null, side: 1, reaction: 0.3 };
