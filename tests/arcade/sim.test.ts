@@ -481,14 +481,6 @@ describe('Break it!: the mash and the juke', () => {
     expect(ofType(mash(grabbed('mash'), 60).events, 'tackled')).toHaveLength(1);
   });
 
-  it('on a handoff, a BAD one still falls forward', () => {
-    const g = grabbed('mash');
-    g.play = { index: PLAYS.findIndex((p) => p.handoff !== undefined), flipped: false };
-    const r = mash(g, 60);
-    expect(ofType(r.events, 'breakResult')[0]?.outcome).toBe('tackle');
-    expect(ofType(r.events, 'dragged')[0]?.yards).toBe(arcadeTuning.carrier.fallForward);
-  });
-
   it('mash: more Heft fills it faster; an extra tackler, slower', () => {
     const perTap = (heft: number, extra = false) => {
       const t = grabbed('mash', { heft }, extra).tackle!;

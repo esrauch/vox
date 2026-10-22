@@ -12,9 +12,11 @@
  * throws when it knows the bullet would be caught deep enough: early in
  * the pocket at the first-down line, settling for anything past the line
  * of scrimmage as the pocket runs out (it looks ahead by simulating the
- * throw). In Break it! it hits the bar's sweet spot 60% of the time,
- * mashes at about 8 taps a second, and jukes the right way 90% of the
- * time, 0.3 s after the arrow shows.
+ * throw). In Break it! it plays like a fair person, BAD about one time in
+ * ten at an even match: on the bar it aims for the middle of the sweet
+ * spot with a timing error, it mashes at about 7½ taps a second, and it
+ * jukes the right way 91% of the time, about a quarter second after the
+ * arrow shows.
  *
  * BOT='{"predict": false}' reads the field off the screen instead (lit,
  * green, deep), BOT='{"predict": false, "read": false}' throws at the first
@@ -59,13 +61,14 @@ const BOT = {
   react: 0.25,
   /** With this share of the pocket left, it gives up waiting and throws anyway. */
   panic: 0.12,
-  /** How often it hits Break it!'s sweet spot (otherwise it taps at a random moment). */
-  breakSkill: 0.6,
+  /** Bar: it aims for the middle of the sweet spot, off by a normal error this big (a share of the meter). */
+  barError: 0.14,
   /** Mash: taps a second. */
-  mashRate: 8,
-  /** Juke: how long it takes to react to the arrow (seconds), and how often it picks the right side. */
-  jukeReaction: 0.3,
-  jukeRight: 0.9,
+  mashRate: 7.5,
+  /** Juke: how long it takes to react to the arrow (seconds, a normal spread), and how often it picks the right side. */
+  jukeReaction: 0.26,
+  jukeSpread: 0.07,
+  jukeRight: 0.91,
   ...(JSON.parse(process.env.BOT ?? '{}') as object),
 };
 
@@ -126,6 +129,8 @@ interface Tally {
   /** On handoffs: how far past the line the carrier was first grabbed, and by what. */
   runGrabs: number[];
   runGrabbers: Map<string, number>;
+  /** Break it! results by kind: "bar tackle" → count. */
+  breakResults: Map<string, number>;
 }
 
 const bump = (m: Map<string, number>, k: string, by = 1): void => {
@@ -139,6 +144,12 @@ interface Plan {
   /** Juke: when it saw the arrow, and which side it'll tap. */
   sawAt: number | null;
   side: -1 | 1;
+  reaction: number;
+}
+
+/** A standard normal draw (Box-Muller). */
+function normal(rng: Rng): number {
+  return Math.sqrt(-2 * Math.log(1 - rng.next())) * Math.cos(2 * Math.PI * rng.next());
 }
 
 /** Whether a bullet fired along the line right now would be caught (a quick look along its flight). */
@@ -205,10 +216,7 @@ function botInput(state: RunState, rng: Rng, plan: Plan): StepInput {
     switch (t.kind) {
       case 'bar':
         if (fresh) {
-          plan.tapAt =
-            rng.next() < BOT.breakSkill
-              ? t.sweet.from + rng.next() * (t.sweet.to - t.sweet.from)
-              : rng.next();
+          plan.tapAt = (t.sweet.from + t.sweet.to) / 2 + BOT.barError * normal(rng);
         }
         return (breakMarker(state) ?? 0) >= plan.tapAt ? { breakTap: true } : {};
       case 'mash':
@@ -218,8 +226,9 @@ function botInput(state: RunState, rng: Rng, plan: Plan): StepInput {
         if (plan.sawAt === null) {
           plan.sawAt = state.time;
           plan.side = rng.next() < BOT.jukeRight ? t.side : t.side === 1 ? -1 : 1;
+          plan.reaction = Math.max(0.1, BOT.jukeReaction + BOT.jukeSpread * normal(rng));
         }
-        return state.time - plan.sawAt >= BOT.jukeReaction ? { juke: plan.side } : {};
+        return state.time - plan.sawAt >= plan.reaction ? { juke: plan.side } : {};
     }
   }
   if (!canThrow(state)) return {};
@@ -277,6 +286,9 @@ function count(
         bump(t.battedBy, `${by ? by.kind : 'witch'}${e.contested ? ' (contested)' : ''}`);
         break;
       }
+      case 'breakResult':
+        bump(t.breakResults, `${state.tackle?.kind ?? '?'} ${e.outcome}`);
+        break;
       case 'brokeTackle':
         t.breaks++;
         break;
@@ -342,7 +354,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
     };
   });
   let state = createRun(seed, roster);
-  const plan: Plan = { tackleAt: -1, tapAt: 1, sawAt: null, side: 1 };
+  const plan: Plan = { tackleAt: -1, tapAt: 1, sawAt: null, side: 1, reaction: 0.3 };
   const ran = { now: false, grabbed: false };
   let driveKey = '';
   for (let guard = 0; guard < 200000 && state.phase !== 'over' && state.phase !== 'won'; guard++) {
@@ -424,6 +436,18 @@ function report(scenario: Scenario, t: Tally): void {
   ] as const) {
     if (k.gains.length > 0) console.log(`  ${name} ${spread(k.gains)}`);
   }
+  {
+    const kinds = ['bar', 'mash', 'juke'].map((k) => {
+      const n = (o: string): number => t.breakResults.get(`${k} ${o}`) ?? 0;
+      const all = n('break') + n('drag') + n('tackle');
+      return `${k} GREAT ${pct(n('break'), all)} OK ${pct(n('drag'), all)} BAD ${pct(n('tackle'), all)}`;
+    });
+    const bad = [...t.breakResults.entries()]
+      .filter(([k]) => k.endsWith('tackle'))
+      .reduce((a, [, n]) => a + n, 0);
+    const all = [...t.breakResults.values()].reduce((a, n) => a + n, 0);
+    console.log(`  Break it! BAD ${pct(bad, all)} · ${kinds.join(' · ')}`);
+  }
   if (t.runGrabs.length > 0) {
     const g = [...t.runGrabs].sort((a, b) => a - b);
     const q = (f: number): string => (g[Math.floor(f * (g.length - 1))] ?? 0).toFixed(1);
@@ -466,6 +490,7 @@ for (const scenario of SCENARIOS) {
     breaks: 0,
     runGrabs: [],
     runGrabbers: new Map(),
+    breakResults: new Map(),
   };
   for (let seed = 1; seed <= RUNS; seed++) playRun(seed, scenario, t);
   report(scenario, t);

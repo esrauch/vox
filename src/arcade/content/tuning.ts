@@ -127,8 +127,6 @@ export const arcadeTuning = {
     lookAhead: 3,
     /** …and picks the emptiest lane again this often (seconds). */
     laneEvery: 0.25,
-    /** On a handoff, a BAD Break it! still falls forward this far (yards): the pile goes forward. */
-    fallForward: 1.5,
   },
   defense: {
     /** Added to every defender's stats each area after the first… */
