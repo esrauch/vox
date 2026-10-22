@@ -47,7 +47,7 @@ export interface RosterRow {
   readonly stats: readonly StatBar[];
   /** A short note, e.g. "prefers Catcher · Monster Mash +10", or "". */
   readonly note: string;
-  /** Marked as a good fit (a recruit preferring this position). */
+  /** Its position is the one the recruit prefers: starred on the position's heading. */
   readonly fits?: boolean;
 }
 
@@ -224,6 +224,12 @@ export class Hud {
         group.className = 'hud-roster-group';
         const label = document.createElement('h3');
         label.textContent = `${row.position}s`;
+        if (row.fits) {
+          const star = document.createElement('span');
+          star.className = 'hud-fits';
+          star.textContent = ' ★ preferred';
+          label.append(star);
+        }
         group.append(label);
         roster.append(group);
       }
@@ -279,11 +285,9 @@ function cardButton(face: CardFace, className: string, onClick: () => void): HTM
 
 function rosterRow(row: RosterRow, onTap?: () => void): HTMLElement {
   const el = document.createElement(onTap ? 'button' : 'div');
-  el.className =
-    `hud-roster-row${onTap ? ' interactive' : ''}` +
-    `${row.selected ? ' selected' : ''}${row.fits ? ' fits' : ''}`;
+  el.className = `hud-roster-row${onTap ? ' interactive' : ''}${row.selected ? ' selected' : ''}`;
   if (onTap) el.addEventListener('click', onTap);
-  el.append(nameLine(row.name, row.form, row.kind, row.fits), statBars(row.stats));
+  el.append(nameLine(row.name, row.form, row.kind), statBars(row.stats));
   if (row.note) {
     const note = document.createElement('em');
     note.textContent = row.note;
@@ -306,8 +310,8 @@ function recruitCard(r: RecruitView): HTMLElement {
   return el;
 }
 
-/** "Boo Radish [GHOST] ★". */
-function nameLine(name: string, form: string, kind: string, fits = false): HTMLElement {
+/** "Boo Radish [GHOST]". */
+function nameLine(name: string, form: string, kind: string): HTMLElement {
   const line = document.createElement('div');
   line.className = 'hud-name';
   const n = document.createElement('strong');
@@ -316,13 +320,6 @@ function nameLine(name: string, form: string, kind: string, fits = false): HTMLE
   chip.className = `hud-kind kind-${kind}`;
   chip.textContent = form;
   line.append(n, chip);
-  if (fits) {
-    const star = document.createElement('span');
-    star.className = 'hud-fits';
-    star.textContent = '★';
-    star.title = 'Its preferred position';
-    line.append(star);
-  }
   return line;
 }
 

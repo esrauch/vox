@@ -355,10 +355,6 @@ button.hud-roster-row:active {
   translate: 0 -3px;
 }
 
-.hud-roster-row.fits {
-  border-color: var(--slime-green);
-}
-
 .hud-roster-row em,
 .hud-recruit em {
   font-style: normal;
@@ -437,10 +433,7 @@ button.hud-roster-row:active {
 }
 
 .hud-fits {
-  flex: none;
-  margin-left: auto;
   color: var(--slime-green);
-  text-shadow: 2px 2px 0 var(--ink);
 }
 
 /* Stat bars: chunky segmented blocks, the slot's key stat in pumpkin. */

@@ -124,7 +124,7 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
         note: `prefers ${POSITION[recruit.preferred]}`,
       },
       roster,
-      hand: 'Tap the player to let go. The numbers show what that spot gains or loses; ★ is the spot it prefers.',
+      hand: 'Tap the player to let go. The numbers show what that spot gains or loses; ★ marks the position it prefers.',
       skip: `Pass on ${recruit.name}`,
     };
   }
