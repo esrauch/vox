@@ -3,19 +3,25 @@
  * straight through the simulation (no rendering, no audio, no browser) with
  * a bot, and reports how far teams get, how downs end and how long they
  * take. For comparing team builds and tuning numbers, not for absolute
- * difficulty: the bot isn't a good player.
+ * difficulty: the bot is a decent player, not a perfect one.
  *
  *   npm run balance:arcade [runs per scenario]
  *
- * The bot plays the timing game like a fair, not great, player: it calls a
- * random card of the three (Flip half the time). On a pass it throws when a
- * bullet fired right now would be caught, reacting only some of the time it
- * could; with the pocket nearly gone it runs half the time and throws the
- * other half. In Break it! it hits the bar's sweet spot BREAK_SKILL of the
- * time (tapping at random otherwise), mashes at about 8 taps a second, and
- * jukes the right way 90% of the time, 0.3 s after the arrow shows. There are no upgrades yet: each scenario fixes
- * the team's forms.
+ * The bot plays like a practised player by default: it calls a random pass
+ * card (never a handoff while it has a pass; Flip half the time), and
+ * throws when it knows the bullet would be caught deep enough: early in
+ * the pocket at the first-down line, settling for anything past the line
+ * of scrimmage as the pocket runs out (it looks ahead by simulating the
+ * throw). In Break it! it hits the bar's sweet spot 60% of the time,
+ * mashes at about 8 taps a second, and jukes the right way 90% of the
+ * time, 0.3 s after the arrow shows.
+ *
+ * BOT='{"predict": false}' reads the field off the screen instead (lit,
+ * green, deep), BOT='{"predict": false, "read": false}' throws at the first
+ * catchable moment, and BOT='{"passOnly": false}' calls handoffs too: the
+ * older, weaker bots. See BOT below for every knob.
  */
+import { PLAYS } from '../src/arcade/content/plays';
 import { qbOf } from '../src/arcade/sim/ai';
 import { bulletEnd, contact, pocketTime, sweepAngle } from '../src/arcade/sim/ball';
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
@@ -24,21 +30,42 @@ import { rngFor } from '../src/arcade/sim/random';
 import { breakMarker, jukeShowing } from '../src/arcade/sim/breakit';
 import { canThrow, step } from '../src/arcade/sim/step';
 import type { ArcadeEvent, Form, Role, RunState, Stats, StepInput } from '../src/arcade/sim/types';
-import { lerp } from '../src/arcade/sim/vec';
+import { dist, lerp } from '../src/arcade/sim/vec';
+import { litPlayers } from '../src/arcade/render/sweep';
 import type { Rng } from '../src/sim/rng';
 
 const RUNS = Number(process.argv[2]) || 200;
-/** Of the steps where a throw would be caught, the share it reacts on (a person isn't instant). */
-const REACT = 0.25;
-/** With this share of the pocket left, it gives up waiting: half the time it runs, half it throws anyway. */
-const PANIC = 0.12;
-/** How often it hits Break it!'s sweet spot (otherwise it taps at a random moment). */
-const BREAK_SKILL = 0.6;
-/** Mash: its chance of a tap each step (about 8 taps a second). */
-const MASH_RATE = 8 / 60;
-/** Juke: how long it takes to react to the arrow (seconds), and how often it picks the right side. */
-const JUKE_REACTION = 0.3;
-const JUKE_RIGHT = 0.9;
+
+/** How the bot plays. BOT='{"read": false, ...}' overrides any of these. */
+const BOT = {
+  /**
+   * Read the field like a person: throw only while the line is over an open
+   * receiver (a green ring), and early in the pocket only a deep one, at or
+   * past the first-down line; the depth it wants shrinks to the line of
+   * scrimmage as the pocket runs out. Off: throw at the first catchable moment.
+   */
+  read: true,
+  /**
+   * Know where a throw would really be caught (a practised player who leads
+   * receivers): looks ahead by simulating the throw, every few steps. Uses
+   * the same depth it wants as `read`. Slow.
+   */
+  predict: true,
+  /** Never call a handoff while there's a pass card in the hand. */
+  passOnly: true,
+  /** Of the steps where it would throw, the share it reacts on (a person isn't instant). */
+  react: 0.25,
+  /** With this share of the pocket left, it gives up waiting and throws anyway. */
+  panic: 0.12,
+  /** How often it hits Break it!'s sweet spot (otherwise it taps at a random moment). */
+  breakSkill: 0.6,
+  /** Mash: taps a second. */
+  mashRate: 8,
+  /** Juke: how long it takes to react to the arrow (seconds), and how often it picks the right side. */
+  jukeReaction: 0.3,
+  jukeRight: 0.9,
+  ...(JSON.parse(process.env.BOT ?? '{}') as object),
+};
 
 interface Scenario {
   readonly name: string;
@@ -122,6 +149,46 @@ function wouldCatch(state: RunState): boolean {
   return false;
 }
 
+/**
+ * What a person reads off the screen: the line is over a receiver (it's lit
+ * gold), its ring is green (no defender could reach a ball there), and it's
+ * deep enough. Early on it wants the first-down line; as the pocket runs out
+ * (`left` from 1 to 0) it settles for anyone past the line of scrimmage.
+ */
+function readsOpen(state: RunState, left: number): boolean {
+  const want = wantedDepth(state, left);
+  const lit = litPlayers(state);
+  return state.field.players.some(
+    (p) =>
+      lit.has(p.id) &&
+      p.pos.y >= want &&
+      state.field.defenders.every((d) => d.down > 0 || dist(d.pos, p.pos) > d.reach + 0.5),
+  );
+}
+
+/** The depth it wants a catch at: the first-down line early in the pocket, the line of scrimmage at the end. */
+function wantedDepth(state: RunState, left: number): number {
+  const { los, firstDown } = state.drive;
+  return los + (firstDown - los) * Math.min(1, left / 0.6);
+}
+
+/** Throw now (in a copy) and follow the ball: is it caught, at or past the depth it wants? */
+function predictsCatch(state: RunState, left: number): boolean {
+  let s = structuredClone(state);
+  for (let i = 0; i < 120; i++) {
+    const r = step(s, i === 0 ? { throw: true } : {});
+    s = r.state;
+    for (const e of r.events) {
+      if (e.type === 'caught') {
+        const by = s.field.players.find((p) => p.id === e.id);
+        return (by?.pos.y ?? -Infinity) >= wantedDepth(state, left);
+      }
+      if (e.type === 'batted' || e.type === 'incomplete' || e.type === 'downEnded') return false;
+    }
+  }
+  return false;
+}
+
 function botInput(state: RunState, rng: Rng, plan: Plan): StepInput {
   if (state.phase === 'breakit' && state.tackle) {
     const t = state.tackle;
@@ -134,26 +201,31 @@ function botInput(state: RunState, rng: Rng, plan: Plan): StepInput {
       case 'bar':
         if (fresh) {
           plan.tapAt =
-            rng.next() < BREAK_SKILL
+            rng.next() < BOT.breakSkill
               ? t.sweet.from + rng.next() * (t.sweet.to - t.sweet.from)
               : rng.next();
         }
         return (breakMarker(state) ?? 0) >= plan.tapAt ? { breakTap: true } : {};
       case 'mash':
-        return rng.next() < MASH_RATE ? { breakTap: true } : {};
+        return rng.next() < BOT.mashRate / 60 ? { breakTap: true } : {};
       case 'juke':
         if (!jukeShowing(state)) return {};
         if (plan.sawAt === null) {
           plan.sawAt = state.time;
-          plan.side = rng.next() < JUKE_RIGHT ? t.side : t.side === 1 ? -1 : 1;
+          plan.side = rng.next() < BOT.jukeRight ? t.side : t.side === 1 ? -1 : 1;
         }
-        return state.time - plan.sawAt >= JUKE_REACTION ? { juke: plan.side } : {};
+        return state.time - plan.sawAt >= BOT.jukeReaction ? { juke: plan.side } : {};
     }
   }
   if (!canThrow(state)) return {};
   const left = 1 - (state.time - state.snappedAt) / pocketTime(state);
-  if (left < PANIC) return { throw: true };
-  if (wouldCatch(state) && rng.next() < REACT) return { throw: true };
+  if (left < BOT.panic) return { throw: true };
+  const wants = BOT.predict
+    ? Math.round(state.time * 60) % 3 === 0 && predictsCatch(state, left)
+    : BOT.read
+      ? readsOpen(state, left)
+      : wouldCatch(state);
+  if (wants && rng.next() < BOT.react) return { throw: true };
   return {};
 }
 
@@ -269,10 +341,14 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
     }
     if (state.phase === 'setup') {
       if (rng.next() < 0.5) state = dispatch(state, { type: 'flip' }).state;
-      const called = dispatch(state, {
-        type: 'call',
-        hand: rng.int(0, state.hand.length - 1),
-      }).state;
+      const passes = state.hand
+        .map((c, i) => ({ c, i }))
+        .filter(({ c }) => PLAYS[c]?.handoff === undefined);
+      const hand =
+        BOT.passOnly && passes.length > 0
+          ? (rng.pick(passes)?.i ?? 0)
+          : rng.int(0, state.hand.length - 1);
+      const called = dispatch(state, { type: 'call', hand }).state;
       const hiked = dispatch(called, { type: 'hike' });
       count(t, hiked.events, state, ran);
       state = hiked.state;
