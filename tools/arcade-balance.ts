@@ -53,6 +53,8 @@ const BOT = {
   predict: true,
   /** Never call a handoff while there's a pass card in the hand. */
   passOnly: true,
+  /** Always call a handoff when there's one in the hand (for measuring the run game). */
+  runOnly: false,
   /** Of the steps where it would throw, the share it reacts on (a person isn't instant). */
   react: 0.25,
   /** With this share of the pocket left, it gives up waiting and throws anyway. */
@@ -111,8 +113,8 @@ interface Tally {
   passes: number;
   handoffs: number;
   /** Yards and downs on handoffs, and on everything else. */
-  run: { yards: number; downs: number };
-  pass: { yards: number; downs: number };
+  run: { yards: number; downs: number; gains: number[] };
+  pass: { yards: number; downs: number; gains: number[] };
   catches: number;
   contested: number;
   pancakes: number;
@@ -121,6 +123,9 @@ interface Tally {
   /** Passes batted down, by who did it. */
   battedBy: Map<string, number>;
   breaks: number;
+  /** On handoffs: how far past the line the carrier was first grabbed, and by what. */
+  runGrabs: number[];
+  runGrabbers: Map<string, number>;
 }
 
 const bump = (m: Map<string, number>, k: string, by = 1): void => {
@@ -233,7 +238,7 @@ function count(
   t: Tally,
   events: readonly ArcadeEvent[],
   state: RunState,
-  ran: { now: boolean },
+  ran: { now: boolean; grabbed: boolean },
 ): void {
   for (const e of events) {
     switch (e.type) {
@@ -247,6 +252,15 @@ function count(
         break;
       case 'grabbed':
         t.grabs++;
+        if (ran.now && !ran.grabbed) {
+          ran.grabbed = true;
+          const c = state.field.players.find((p) => p.id === e.id);
+          if (c) t.runGrabs.push(c.pos.y - state.drive.los);
+          for (const id of e.by) {
+            const d = state.field.defenders.find((x) => x.id === id);
+            bump(t.runGrabbers, d?.kind ?? '?');
+          }
+        }
         break;
       case 'dragged':
         t.drags++;
@@ -275,8 +289,10 @@ function count(
           const kind = ran.now ? t.run : t.pass;
           kind.yards += e.gained;
           kind.downs++;
+          kind.gains.push(e.gained);
         }
         ran.now = false;
+        ran.grabbed = false;
         break;
       default:
         break;
@@ -327,7 +343,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
   });
   let state = createRun(seed, roster);
   const plan: Plan = { tackleAt: -1, tapAt: 1, sawAt: null, side: 1 };
-  const ran = { now: false };
+  const ran = { now: false, grabbed: false };
   let driveKey = '';
   for (let guard = 0; guard < 200000 && state.phase !== 'over' && state.phase !== 'won'; guard++) {
     const key = `${state.drive.area}:${state.drive.kind}`;
@@ -341,13 +357,18 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
     }
     if (state.phase === 'setup') {
       if (rng.next() < 0.5) state = dispatch(state, { type: 'flip' }).state;
+      const runs = state.hand
+        .map((c, i) => ({ c, i }))
+        .filter(({ c }) => PLAYS[c]?.handoff !== undefined);
       const passes = state.hand
         .map((c, i) => ({ c, i }))
         .filter(({ c }) => PLAYS[c]?.handoff === undefined);
       const hand =
-        BOT.passOnly && passes.length > 0
-          ? (rng.pick(passes)?.i ?? 0)
-          : rng.int(0, state.hand.length - 1);
+        BOT.runOnly && runs.length > 0
+          ? (rng.pick(runs)?.i ?? 0)
+          : BOT.passOnly && passes.length > 0
+            ? (rng.pick(passes)?.i ?? 0)
+            : rng.int(0, state.hand.length - 1);
       const called = dispatch(state, { type: 'call', hand }).state;
       const hiked = dispatch(called, { type: 'hike' });
       count(t, hiked.events, state, ran);
@@ -367,6 +388,19 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
 const pct = (a: number, b: number): string =>
   b === 0 ? '  —  ' : `${((100 * a) / b).toFixed(0).padStart(3)}%`;
 
+/** How a play's gains spread: mean, standard deviation, and the share in each band. */
+function spread(gains: readonly number[]): string {
+  const n = gains.length;
+  const mean = gains.reduce((a, b) => a + b, 0) / n;
+  const sd = Math.sqrt(gains.reduce((a, b) => a + (b - mean) ** 2, 0) / n);
+  const band = (lo: number, hi: number): string =>
+    pct(gains.filter((g) => g >= lo && g < hi).length, n);
+  return (
+    `mean ${mean.toFixed(1)} sd ${sd.toFixed(1)} · ≤0 ${band(-99, 0.5)} · 1-2 ${band(0.5, 2.5)} · ` +
+    `3-5 ${band(2.5, 5.5)} · 6-9 ${band(5.5, 9.5)} · 10+ ${band(9.5, 999)}`
+  );
+}
+
 function report(scenario: Scenario, t: Tally): void {
   console.log(`\n## ${scenario.name}  (${t.runs} runs)`);
   console.log(
@@ -384,6 +418,20 @@ function report(scenario: Scenario, t: Tally): void {
     `  yards a run ${(t.run.yards / Math.max(1, t.run.downs)).toFixed(1)} (${t.run.downs}) · yards a pass play ${(t.pass.yards / Math.max(1, t.pass.downs)).toFixed(1)} · completions ${pct(t.catches, t.passes)} (contested ${pct(t.contested, t.catches)}) · ` +
       `pancakes ${(t.pancakes / t.runs).toFixed(1)}/run · Break it! ${t.grabs}: broke ${pct(t.breaks, t.grabs)}, dragged ${pct(t.drags, t.grabs)}`,
   );
+  for (const [name, k] of [
+    ['runs ', t.run],
+    ['passes', t.pass],
+  ] as const) {
+    if (k.gains.length > 0) console.log(`  ${name} ${spread(k.gains)}`);
+  }
+  if (t.runGrabs.length > 0) {
+    const g = [...t.runGrabs].sort((a, b) => a - b);
+    const q = (f: number): string => (g[Math.floor(f * (g.length - 1))] ?? 0).toFixed(1);
+    const by = [...t.runGrabbers.entries()].map(([k, n]) => `${k} ${n}`).join(', ');
+    console.log(
+      `  handoffs first grabbed at (yards past the line) p10 ${q(0.1)} · median ${q(0.5)} · p90 ${q(0.9)} · by ${by}`,
+    );
+  }
   [0, 1, 2].forEach((area) => {
     const row = DRIVE_KINDS.map((k) => {
       const key = `${area}:${k}`;
@@ -407,8 +455,8 @@ for (const scenario of SCENARIOS) {
     results: new Map(),
     passes: 0,
     handoffs: 0,
-    run: { yards: 0, downs: 0 },
-    pass: { yards: 0, downs: 0 },
+    run: { yards: 0, downs: 0, gains: [] },
+    pass: { yards: 0, downs: 0, gains: [] },
     catches: 0,
     contested: 0,
     pancakes: 0,
@@ -416,6 +464,8 @@ for (const scenario of SCENARIOS) {
     drags: 0,
     battedBy: new Map(),
     breaks: 0,
+    runGrabs: [],
+    runGrabbers: new Map(),
   };
   for (let seed = 1; seed <= RUNS; seed++) playRun(seed, scenario, t);
   report(scenario, t);

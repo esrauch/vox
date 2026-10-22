@@ -481,6 +481,14 @@ describe('Break it!: the mash and the juke', () => {
     expect(ofType(mash(grabbed('mash'), 60).events, 'tackled')).toHaveLength(1);
   });
 
+  it('on a handoff, a BAD one still falls forward', () => {
+    const g = grabbed('mash');
+    g.play = { index: PLAYS.findIndex((p) => p.handoff !== undefined), flipped: false };
+    const r = mash(g, 60);
+    expect(ofType(r.events, 'breakResult')[0]?.outcome).toBe('tackle');
+    expect(ofType(r.events, 'dragged')[0]?.yards).toBe(arcadeTuning.carrier.fallForward);
+  });
+
   it('mash: more Heft fills it faster; an extra tackler, slower', () => {
     const perTap = (heft: number, extra = false) => {
       const t = grabbed('mash', { heft }, extra).tackle!;
@@ -640,4 +648,27 @@ describe('determinism', () => {
 
 it('dist is Euclidean', () => {
   expect(dist(v(0, 0), v(3, 4))).toBe(5);
+});
+
+describe('the play fake', () => {
+  /** A Runner with the ball at the snap, and a Cover out wide on a Catcher. */
+  const coverX = (handoff: boolean) => {
+    const s = playState(
+      [
+        { role: 'runner', pos: v(0, -3) },
+        { role: 'catcher', pos: v(6, 0) },
+      ],
+      [{ kind: 'cover', pos: v(6, 2), mark: 3 }],
+    );
+    s.play = {
+      index: PLAYS.findIndex((p) => (p.handoff !== undefined) === handoff),
+      flipped: false,
+    };
+    return body(run(carry(s, 2), 0.5).state, 100).pos.x;
+  };
+
+  it('after a handoff the defense keeps playing the pass for a moment', () => {
+    // Fooled, the Cover stays out with its Catcher; otherwise it comes for the carrier.
+    expect(coverX(true)).toBeGreaterThan(coverX(false) + 0.5);
+  });
 });

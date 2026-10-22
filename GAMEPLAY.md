@@ -79,6 +79,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
    | **Sweep** *(handoff)* | A Runner takes it wide toward the sideline and turns upfield behind the other Runner; the Catchers block downfield. |
 
    **Every Runner gets out past the line of scrimmage** (only the Blockers stay home), and no route runs deeper than a throw can reach. A curl can end coming back. **Choosing a handoff card is choosing to run.**
+
+   **Runs are the safe call, passes the gamble.** A handoff is almost always a couple of yards; a pass is less likely to work but worth more when it does. Two rules make a run safe: **the play fake** (for about a second after the handoff, the defense keeps playing the pass, except anyone right next to the carrier) and **falling forward** (a BAD Break it! on a run still drags the pile about a yard and a half). A GREAT one can still break it long. *(Balance runs, 2026-10-22: runs average 3.1 yards and gain nothing only 6% of the time; a good passer averages 5.6 a pass, with 22% gaining nothing.)*
 2. **The sweep.** On a pass play an **aim line sweeps from the QB**, sideline to sideline and back, like a lighthouse beam. **A receiver the line is passing over lights up.** It sweeps faster in later areas.
 3. **One button:**
    - **THROW** fires a **bullet** along the line: fast and flat. The **first one of your players it reaches** catches it (anyone within a few yards of the QB is skipped). If a defender gets to it first, it's **batted down**. If nobody's in the way, it's **incomplete**.

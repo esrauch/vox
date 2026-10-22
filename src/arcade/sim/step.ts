@@ -21,6 +21,7 @@
  * In Break it! the play is frozen until it's decided (sim/breakit.ts).
  * Before the snap and between drives only the Bats move.
  */
+import { PLAYS } from '../content/plays';
 import { arcadeTuning, DT } from '../content/tuning';
 import { carrierOf, chooseLane, qbOf } from './ai';
 import { bulletEnd, flightTime, pocketTime, resolveFlight, sweepAngle } from './ball';
@@ -171,6 +172,11 @@ function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void
     outcome = 'drag';
   }
   events.push({ type: 'breakResult', outcome });
+  // A handoff carrier falls forward: a BAD one still drags them a yard or so (the pile goes forward).
+  const runPlay = PLAYS[state.play.index]?.handoff !== undefined;
+  const dragYards =
+    outcome === 'tackle' && runPlay ? arcadeTuning.carrier.fallForward : t.dragYards;
+  if (outcome === 'tackle' && runPlay) outcome = 'drag';
   const tacklers = state.field.defenders.filter((d) => t.tacklers.includes(d.id));
   state.tackle = null;
   state.phase = 'play';
@@ -188,8 +194,8 @@ function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void
     for (const d of tacklers) {
       d.latch = scale(norm(sub(d.pos, carrier.pos)), carrier.radius + d.radius);
     }
-    state.field.drag = { to: carrier.pos.y + t.dragYards };
-    events.push({ type: 'dragged', id: carrier.id, yards: t.dragYards });
+    state.field.drag = { to: carrier.pos.y + dragYards };
+    events.push({ type: 'dragged', id: carrier.id, yards: dragYards });
     return;
   }
   tackle(state, carrier, t.tacklers[0] ?? -1, events);

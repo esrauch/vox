@@ -11,8 +11,10 @@
  * - **Rushers** charge the QB. **Covers** trail their mark. **Scarecrows** are
  *   planted. **The Owl** hangs deep, level with your deepest player, and
  *   comes down to meet the carrier. **Bats** loop their square. After the
- *   catch, everyone who moves chases the carrier.
+ *   catch, everyone who moves chases the carrier; after a handoff, once the
+ *   play fake wears off (fooled).
  */
+import { PLAYS } from '../content/plays';
 import { arcadeTuning } from '../content/tuning';
 import type { Defender, Player, RunState, Vec } from './types';
 import { add, dist, norm, scale, sub, v } from './vec';
@@ -91,7 +93,9 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
   }
   if (state.phase !== 'play') return null;
   const carrier = carrierOf(state);
-  if (carrier) return add(carrier.pos, scale(carrier.vel, defense.chaseLead));
+  if (carrier && !fooled(state, d, carrier)) {
+    return add(carrier.pos, scale(carrier.vel, defense.chaseLead));
+  }
   const qb = qbOf(state);
   switch (d.kind) {
     case 'rusher':
@@ -113,6 +117,20 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
     default:
       return null;
   }
+}
+
+/**
+ * The play fake: for a moment after a handoff the defense still plays the
+ * pass (Rushers go for the pumpkin, Covers stay on their Catchers), except
+ * a defender right next to the carrier, who sees it.
+ */
+function fooled(state: RunState, d: Defender, carrier: Player): boolean {
+  const play = PLAYS[state.play.index];
+  return (
+    play?.handoff !== undefined &&
+    state.time - state.snappedAt < defense.playFake &&
+    dist(d.pos, carrier.pos) > defense.fakeSees
+  );
 }
 
 /** At the snap: each Cover marks the nearest route runner nobody's marking yet (Covers choose in id order). */

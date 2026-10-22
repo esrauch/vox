@@ -127,6 +127,8 @@ export const arcadeTuning = {
     lookAhead: 3,
     /** …and picks the emptiest lane again this often (seconds). */
     laneEvery: 0.25,
+    /** On a handoff, a BAD Break it! still falls forward this far (yards): the pile goes forward. */
+    fallForward: 1.5,
   },
   defense: {
     /** Added to every defender's stats each area after the first… */
@@ -139,6 +141,10 @@ export const arcadeTuning = {
     chaseLead: 0.3,
     /** A Bat's loop: a square this wide. */
     batLoop: 3.5,
+    /** The play fake: after a handoff the defense keeps playing the pass this long (seconds)… */
+    playFake: 0.9,
+    /** …except a defender this close to the carrier (yards), who sees it. */
+    fakeSees: 2,
   },
   witch: {
     /** Her speed across the field. */
