@@ -14,7 +14,7 @@ import {
   RECRUIT_STAR_BONUS,
   STARTING_NAMES,
 } from '../content/perks';
-import { BASE_STATS, FORM_STATS, KIND_POSITION, ROSTER_ROLES } from '../content/team';
+import { BASE_STATS, FORM_STATS, POSITION_STAT, ROSTER_ROLES } from '../content/team';
 import type { Rng } from '../../sim/rng';
 import { rngFor } from './random';
 import type { Form, Perk, Perks, Position, Rarity, RosterPlayer, RunState, Stats } from './types';
@@ -151,24 +151,25 @@ function sameAs(a: Perk, b: Perk): boolean {
   return a.kind !== 'recruit';
 }
 
+/** The position a player's best stat suits (a tie, at random among them). */
+function suits(rng: Rng, stats: Stats): Position {
+  const best = Math.max(...POSITIONS.map((p) => stats[POSITION_STAT[p]]));
+  return rng.pick(POSITIONS.filter((p) => stats[POSITION_STAT[p]] === best));
+}
+
 /** A recruit: a name, a kind (monsters are rarer), a position it prefers, and stats to match. */
 function makeRecruit(rng: Rng, rarity: Rarity): RosterPlayer {
   const kind: Form = rarity === 'common' ? 'human' : rng.pick(KINDS.filter((k) => k !== 'human'));
-  const preferred: Position = KIND_POSITION[kind] ?? rng.pick(POSITIONS);
   const star = rarity === 'epic' ? RECRUIT_STAR_BONUS : 0;
   // Each stat a little either way (in fives), so no two of a kind are quite alike.
   const jitter = (): number => 5 * rng.int(-2, 2);
   const base = plus(BASE_STATS, FORM_STATS[kind]);
-  return {
-    name: rng.pick(RECRUIT_NAMES[kind]),
-    kind,
-    preferred,
-    stats: {
-      hustle: base.hustle + star + jitter(),
-      hands: base.hands + star + jitter(),
-      heft: base.heft + star + jitter(),
-    },
+  const stats: Stats = {
+    hustle: base.hustle + star + jitter(),
+    hands: base.hands + star + jitter(),
+    heft: base.heft + star + jitter(),
   };
+  return { name: rng.pick(RECRUIT_NAMES[kind]), kind, preferred: suits(rng, stats), stats };
 }
 
 // ── Taking a perk ───────────────────────────────────────────────────────────

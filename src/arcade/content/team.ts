@@ -63,9 +63,9 @@ export const FORM_STATS: Readonly<Record<Form, Stats>> = {
   werewolf: { hustle: UP, hands: DOWN, heft: 0 },
 };
 
-/** The position a monster suits (its strong stat); a human has no favorite. */
-export const KIND_POSITION: Readonly<Partial<Record<Form, Position>>> = {
-  ghost: 'catcher',
-  golem: 'blocker',
-  werewolf: 'runner',
+/** The stat each position leans on; a player prefers the position its best stat suits. */
+export const POSITION_STAT: Readonly<Record<Position, keyof Stats>> = {
+  blocker: 'heft',
+  runner: 'hustle',
+  catcher: 'hands',
 };

@@ -3,7 +3,7 @@
  * recruit bios, and the roster panel, where you can swap players' positions
  * or choose who a recruit replaces.
  */
-import { BENCH_SIZE, ROSTER_ROLES } from '../content/team';
+import { BENCH_SIZE, POSITION_STAT, ROSTER_ROLES } from '../content/team';
 import { BENCH_START, atSpot, fieldedStats, playerStats, uniqueKind } from '../sim/team';
 import { kindIcon } from './kindIcons';
 import type { Form, Perk, Position, RosterPlayer, RunState, Stats } from '../sim/types';
@@ -63,12 +63,6 @@ export function perkFace(perk: Perk): CardFace {
   }
 }
 
-/** The stat each position leans on. */
-const KEY_STAT: Readonly<Record<Position, keyof Stats>> = {
-  blocker: 'heft',
-  runner: 'hustle',
-  catcher: 'hands',
-};
 const STAT_ORDER: readonly (keyof Stats)[] = ['heft', 'hustle', 'hands'];
 
 const bars = (s: Stats, key?: keyof Stats): StatBar[] =>
@@ -101,7 +95,7 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
       p.preferred !== position ? `prefers ${POSITION[p.preferred]}` : '',
       mashed(state.roster, slot) ? 'Monster Mash +10' : '',
     ];
-    let shown = bars(stats, KEY_STAT[position]);
+    let shown = bars(stats, POSITION_STAT[position]);
     if (recruit) {
       // What this slot would have with the recruit there instead (its perks and Monster Mash included).
       const after = { ...state, roster: state.roster.map((q, i) => (i === slot ? recruit : q)) };
@@ -143,7 +137,7 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
         name: recruit.name,
         form: KIND[recruit.kind],
         icon: kindIcon(recruit.kind),
-        stats: bars(fieldedStats(state, recruit), KEY_STAT[recruit.preferred]),
+        stats: bars(fieldedStats(state, recruit), POSITION_STAT[recruit.preferred]),
         note: `prefers ${POSITION[recruit.preferred]}`,
       },
       roster,

@@ -3,8 +3,8 @@ import { arcadeTuning } from '../../src/arcade/content/tuning';
 import { pocketTime, sweepSpeed } from '../../src/arcade/sim/ball';
 import { createRun, dispatch, endDown, nextDown } from '../../src/arcade/sim/run';
 import { forceBreakKind } from '../../src/arcade/sim/step';
-import { BENCH_SIZE } from '../../src/arcade/content/team';
-import { BENCH_START, applyPerk, noPerks, playerStats } from '../../src/arcade/sim/team';
+import { BENCH_SIZE, POSITION_STAT } from '../../src/arcade/content/team';
+import { BENCH_START, applyPerk, noPerks, playerStats, rollOffer } from '../../src/arcade/sim/team';
 import type { ArcadeEvent, Perk, RunState } from '../../src/arcade/sim/types';
 import { v } from '../../src/arcade/sim/vec';
 import { carry, ofType, playState, run, stand, tapAt, throwAt, untilGrabbed } from './helpers';
@@ -80,6 +80,21 @@ describe('TRICK OR TREAT!', () => {
     preferred: 'catcher' as const,
     stats: { hustle: 50, hands: 70, heft: 30 },
   };
+
+  it('a recruit prefers the position its best stat suits', () => {
+    let seen = 0;
+    for (let seed = 1; seed <= 60; seed++) {
+      for (const perk of rollOffer(createRun(seed))) {
+        if (perk.kind !== 'recruit') continue;
+        seen++;
+        const { stats, preferred } = perk.player;
+        expect(stats[POSITION_STAT[preferred]]).toBe(
+          Math.max(stats.hustle, stats.hands, stats.heft),
+        );
+      }
+    }
+    expect(seen).toBeGreaterThan(5);
+  });
 
   it('a recruit takes a bench seat, and the roster stays open until Done', () => {
     const picked = dispatch(offering({ rarity: 'rare', kind: 'recruit', player: boo }), {

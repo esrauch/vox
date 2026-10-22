@@ -187,7 +187,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ### New players
 
-**A recruit arrives with a little bio card:** a **name**, its **Heft / Hands / Hustle**, its **kind** (Human, Ghost, Golem, Werewolf, Skeleton…), and a **preferred position**. It takes a seat on the bench, and the roster stays open so you can swap it in (then **Done**). With the bench full, you pick who it replaces, on the field or the bench. It can go in any slot, but it plays best in its preferred one. Only the seven on the field play, and only they count for team bonuses like Monster Mash.
+**A recruit arrives with a little bio card:** a **name**, its **Heft / Hands / Hustle**, its **kind** (Human, Ghost, Golem, Werewolf, Skeleton…), and a **preferred position**: the one its best stat suits (Heft → Blocker, Hustle → Runner, Hands → Catcher). It takes a seat on the bench, and the roster stays open so you can swap it in (then **Done**). With the bench full, you pick who it replaces, on the field or the bench. It can go in any slot, but it plays best in its preferred one. Only the seven on the field play, and only they count for team bonuses like Monster Mash.
 
 > **Bonesy Malone** · Skeleton · *prefers Runner*
 > Heft 45 · Hands 50 · Hustle 75
