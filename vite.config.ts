@@ -19,7 +19,6 @@ export default defineConfig({
           : {
               devIndex: resolve(import.meta.dirname, 'dev/index.html'),
               devBeat: resolve(import.meta.dirname, 'dev/beat.html'),
-              devScreen: resolve(import.meta.dirname, 'dev/screen.html'),
               devModels: resolve(import.meta.dirname, 'dev/models.html'),
               devAudio: resolve(import.meta.dirname, 'dev/audio.html'),
             }),

@@ -133,7 +133,7 @@ export class ArcadeGame {
     this.seed = options.seed;
     this.monsters = options.monsters ?? false;
     this.state = createRun(this.seed, firstRoster(this.monsters));
-    this.view = new View(canvas, { follow: true, fov: 50 });
+    this.view = new View(canvas, { fov: 50 });
     const { scene } = this.view;
     scene.add(createArcadeTurf());
     const scenery = new ForestScenery(scene, this.view, {

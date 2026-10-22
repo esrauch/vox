@@ -8,8 +8,6 @@ import * as THREE from 'three';
 import { biomes, hexToNumber, type Hex } from '../content/palettes';
 import { createRng } from '../sim/rng';
 import { getGeometry, voxelMaterial } from '../voxel/models';
-import { COLS, ROWS } from '../sim/grid';
-import { TURF_AHEAD, TURF_BEHIND } from './field';
 
 /** Where the field is, in world units: the scenery goes around it. */
 export interface FieldLayout {
@@ -21,14 +19,6 @@ export interface FieldLayout {
   /** …and the field the sim plays on ends at endZ (the back of the end zone). */
   readonly endZ: number;
 }
-
-/** The grid game's field (render/field.ts). */
-export const GRID_LAYOUT: FieldLayout = {
-  halfWidth: COLS / 2,
-  nearZ: TURF_BEHIND + 0.5,
-  farZ: -(ROWS + TURF_AHEAD - 0.5),
-  endZ: -(ROWS - 0.5),
-};
 
 /** Which part of the scenery a prop belongs to (see ForestScenery). */
 type Part = 'always' | 'beyond' | 'treeLine';
@@ -57,7 +47,7 @@ export class ForestScenery {
   private readonly beyond = new THREE.Group();
   private readonly treeLine = new THREE.Group();
 
-  constructor(scene: THREE.Scene, mood: Mood, layout: FieldLayout = GRID_LAYOUT) {
+  constructor(scene: THREE.Scene, mood: Mood, layout: FieldLayout) {
     this.group = createForestScenery(scene, mood, layout, {
       beyond: this.beyond,
       treeLine: this.treeLine,
