@@ -141,6 +141,30 @@ export function contact(
   return null;
 }
 
+/** How finely aimContact looks along the line (yards). */
+const AIM_STEP = 0.25;
+
+/**
+ * What a bullet thrown along the line right now would meet first, with
+ * everyone frozen where they stand (no looking ahead in time): the aim line
+ * stops there, and a receiver who'd catch it lights up. `at` is where along
+ * the line it happens (the line's end for an incomplete).
+ */
+export function aimContact(
+  state: RunState,
+  from: Vec,
+  end: Vec,
+): { readonly outcome: NonNullable<FlightOutcome>; readonly at: Vec } {
+  const length = dist(from, end);
+  const steps = Math.max(1, Math.ceil(length / AIM_STEP));
+  for (let i = 1; i <= steps; i++) {
+    const at = lerp(from, end, i / steps);
+    const outcome = contact(state, from, at, i === steps, end);
+    if (outcome) return { outcome, at };
+  }
+  return { outcome: { kind: 'incomplete', at: end }, at: end };
+}
+
 /** A rusher locked up with one of your players: it can't get a hand to the ball, which goes past it. */
 export function engaged(state: RunState, d: Defender): boolean {
   return (

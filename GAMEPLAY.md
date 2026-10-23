@@ -52,7 +52,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   | Boss | Perk |
   |---|---|
   | **Mister Frog** | **Hot Arm:** the ball flies twice as fast. |
-  | **The Queen** | ▲ *To decide.* |
+  | **The Queen** | **Gift of Foresight:** a receiver's ring turns orange when a throw right now *would* be caught, looking ahead along the bullet's flight as everyone keeps moving. ▲ *An approximation (each body carried along its current velocity for the flight) is cheap enough to run every frame.* |
 
 - **The story is two tiny cutscenes:** at the start, Jack asks a football team to help him get home to his patch; at the end, in the patch, your team and every defender you played through (Bosses included) dance.
 
@@ -96,7 +96,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
    **Every Runner gets out past the line of scrimmage** (only the Blockers stay home), and no route runs deeper than a throw can reach. A curl can end coming back. **Choosing a handoff card is choosing to run.**
 
    **Runs are the safe call, passes the gamble.** A handoff is almost always a couple of yards; a pass is less likely to work but worth more when it does. On a run only the Blockers and the other Runner block; **the Catchers keep running their routes as decoys**, pulling their Covers away (after a catch, everyone blocks for the carrier). What makes a run safe is **the play fake**: for about a second after the handoff, the defense keeps playing the pass (except anyone right next to the carrier). The yards after the grab still come from Break it!: an OK one drags the pile forward, a GREAT one can break it long, a BAD one goes down where it stands. *(Balance runs, 2026-10-22, with a bot that gets BAD about one time in ten: runs average 4.1 yards and gain nothing 5% of the time; a good passer averages 5.4 a pass, with 25% gaining nothing.)*
-2. **The sweep.** On a pass play an **aim line sweeps from the QB**, sideline to sideline and back, like a lighthouse beam. **A receiver the line is passing over lights up.** It sweeps faster in later areas.
+2. **The sweep.** On a pass play an **aim line sweeps from the QB**, sideline to sideline and back, like a lighthouse beam. **The line stops at the first thing a bullet thrown right now would meet:** a receiver who'd catch it (its ring lights up gold) or a defender who'd bat it down. It's judged with everyone where they stand, not where they'll be when the ball arrives, so a receiver running across the field can still be gone by then. It sweeps faster in later areas.
 3. **One button:**
    - **THROW** fires a **bullet** along the line: fast and flat. The **first one of your players it reaches** catches it (anyone within a few yards of the QB is skipped). If a defender gets to it first, it's **batted down**. If nobody's in the way, it's **incomplete**.
 4. **The pocket holds for three sweeps.** If the QB still has the ball when the line finishes its third pass across, the pocket collapses: **SACKED!** A faster sweep means a quicker pocket.
@@ -260,9 +260,9 @@ The tension: a recruit of a kind you already have feeds the "+20 to every Ghost"
 | What | How it's shown |
 |---|---|
 | **Your team** | Gold and orange, in helmets. One build for every position; only Golems are built like linebackers (wide and low), so a broad body is always a Golem. |
-| **Who's open, and how far they can reach** | A ring under each receiver **as wide as its catch range**: a bullet coming inside the ring is caught. Green when no defender could reach a ball there, red when one could, gold while the aim line is over it. Better Hands, a bigger ring. |
+| **Who's open, and how far they can reach** | A ring under each receiver **as wide as its catch range**: a bullet coming inside the ring is caught. Green when no defender could reach a ball there, red when one could, gold when the aim line stops on it (a throw now would be caught there, as things stand). Better Hands, a bigger ring. |
 | **How far each defender reaches** | A purple ring around every defender, as wide as its reach: a bullet coming inside it gets batted down (a Scarecrow's is widest). Gone once it's down, after the catch, and for a Rhino Beetle locked up at the line. |
-| **Where the ball will go** | The sweeping aim line, with gold dashes; the receivers it's over light up gold. |
+| **Where the ball will go** | The sweeping aim line, with gold dashes, stopping at the first receiver or defender a bullet thrown now would meet. |
 | **The carrier** | Holds the ball high, with a gold ring underfoot. |
 | **What the defense will do** | Their facing: rushers toward the QB, Covers toward their Catcher. |
 | **Down and distance** | "3rd & 4" and the gold first-down line. |

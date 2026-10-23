@@ -24,8 +24,7 @@
  * older, weaker bots. See BOT below for every knob.
  */
 import { PLAYS } from '../src/arcade/content/plays';
-import { qbOf } from '../src/arcade/sim/ai';
-import { bulletEnd, contact, pocketTime, sweepAngle } from '../src/arcade/sim/ball';
+import { pocketTime } from '../src/arcade/sim/ball';
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
 import { FORM_STATS, ROSTER_ROLES } from '../src/arcade/content/team';
 import { rngFor } from '../src/arcade/sim/random';
@@ -34,7 +33,7 @@ import { BENCH_START } from '../src/arcade/sim/team';
 import { breakMarker, jukeShowing } from '../src/arcade/sim/breakit';
 import { canThrow, step } from '../src/arcade/sim/step';
 import type { ArcadeEvent, Form, Role, RunState, Stats, StepInput } from '../src/arcade/sim/types';
-import { dist, lerp } from '../src/arcade/sim/vec';
+import { dist } from '../src/arcade/sim/vec';
 import { litPlayers } from '../src/arcade/render/sweep';
 import type { Rng } from '../src/sim/rng';
 
@@ -154,17 +153,9 @@ function normal(rng: Rng): number {
   return Math.sqrt(-2 * Math.log(1 - rng.next())) * Math.cos(2 * Math.PI * rng.next());
 }
 
-/** Whether a bullet fired along the line right now would be caught (a quick look along its flight). */
+/** Whether a bullet fired along the line right now would be caught, with everyone where they stand. */
 function wouldCatch(state: RunState): boolean {
-  const qb = qbOf(state);
-  if (!qb) return false;
-  const end = bulletEnd(state, qb.pos, sweepAngle(state));
-  for (let u = 0.02; u <= 1.0001; u += 0.02) {
-    const at = lerp(qb.pos, end, Math.min(1, u));
-    const outcome = contact(state, qb.pos, at, u >= 1, end);
-    if (outcome) return outcome.kind === 'caught';
-  }
-  return false;
+  return litPlayers(state).size > 0;
 }
 
 /**

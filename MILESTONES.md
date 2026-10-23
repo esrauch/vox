@@ -33,7 +33,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [ ] **Swamp:** the Safety becomes a **Witch**; the **Bog Hand** (planted grabber) and **mud patches**; **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers).
 - [ ] **Farm:** the **Crow**; rows of Scarecrows; **the King** (a crowned scarecrow) and the **Two-Part Grab** (two Break it! tests in a row).
 - [ ] **Models** for the new defenders and the three Bosses (top hat, crown, bigger crown), readable from the game camera.
-- [ ] **Boss perks:** beating Mister Frog gives **Hot Arm** (taken out of the TRICK OR TREAT! pool); the Queen's perk is ▲ to decide.
+- [ ] **Boss perks:** beating Mister Frog gives **Hot Arm** (taken out of the TRICK OR TREAT! pool); the Queen gives **Gift of Foresight** (an orange ring when a throw now would really be caught, looking ahead along the flight; approximate, cheap enough for every frame).
 - [ ] **The two cutscenes:** at the start, Jack asks a football team to help him get home; at the end, everyone (your team and every defender you met, Bosses included) dances in the pumpkin patch.
 - [ ] **Difficulty targets:** a practised player who never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
 
@@ -48,7 +48,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [ ] **Sound on every contact,** the crowd, and big hits landing on the beat when they can.
 - [ ] **Haptics** on the snap, the throw, the catch and hits.
 - [ ] **No dead time:** the next down lines up in about a second.
-- [ ] **The throw highlight tells the truth:** a lit, green receiver crossing the field is often gone by the time the bullet arrives (about 55% complete); lead it, or light only catchable ones.
+- [x] **The aim line stops at the first catch or block,** judged with everyone where they stand; only the receiver it stops on lights gold. *(2026-10-22. It doesn't look ahead in time, so a crossing receiver can still be gone by the time the ball arrives: Gift of Foresight is the look-ahead.)*
 
 ## B3. Monsters and the Build
 
@@ -83,6 +83,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-22:** **The aim line stops at the first catch or block** (with everyone frozen where they stand, `sim/ball.ts` `aimContact`), and only the receiver it stops on lights gold. The Queen's Boss perk will be **Gift of Foresight**, the same idea looking ahead in time.
 - **2026-10-22:** **The progression is designed:** Forest (Mister Frog, Frog Rain), Swamp (the Queen, the Hex; Witches as Safeties) and the Farm (the King, the Two-Part Grab), ending at the pumpkin patch. The first two Bosses each give a special perk (Mister Frog: Hot Arm, which leaves the TRICK OR TREAT! pool). The story is two tiny cutscenes: Jack asking a team for help, and everyone dancing in the patch at the end. Not built yet.
 - **2026-10-22:** **The game is now Get Jack Back.** Jack the pumpkin ball is the hero, trying to get home to his pumpkin patch. The title screen, page titles and package are renamed, and winning says "Jack is home!".
 - **2026-10-22:** **Docs rewritten** for the game as it is; the screenshot tool and the model contact sheet follow the arcade camera. A **local cleanup pass** (dead code, comments, shared stat helpers), with the bigger refactors noted in TECHNICAL.md.

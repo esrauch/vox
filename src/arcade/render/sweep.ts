@@ -1,11 +1,13 @@
 /**
  * The sweeping aim line (GAMEPLAY.md, A Down): from the QB along the line's
- * angle, as far as a bullet would fly, as a row of dashes marching outward.
- * It shows only while the QB has the ball on a pass play.
+ * angle, as a row of dashes marching outward, stopping where a bullet thrown
+ * now would first be caught or batted down (everyone where they stand: it
+ * doesn't look ahead in time), or at the bullet's range. The receiver it
+ * stops on lights up. It shows only while the QB has the ball on a pass play.
  */
 import * as THREE from 'three';
 import { hexToNumber, team } from '../../content/palettes';
-import { bulletEnd, sweepAngle } from '../sim/ball';
+import { aimContact, bulletEnd, sweepAngle } from '../sim/ball';
 import { qbOf } from '../sim/ai';
 import { canThrow } from '../sim/step';
 import type { RunState } from '../sim/types';
@@ -41,7 +43,8 @@ export class ArcadeSweep {
     this.group.visible = show;
     if (!show || !qb) return;
     const angle = sweepAngle(state);
-    const end = bulletEnd(state, qb.pos, angle);
+    // The line stops where a bullet thrown now would first be caught or batted (or at its range).
+    const end = aimNow(state)?.at ?? bulletEnd(state, qb.pos, angle);
     const length = dist(qb.pos, end);
     const march = (state.time * 3) % SPACING;
     this.dashes.forEach((dash, i) => {
@@ -54,23 +57,15 @@ export class ArcadeSweep {
   }
 }
 
-/** The players the line is over right now (a bullet now would reach them): they light up. */
-export function litPlayers(state: RunState): Set<number> {
-  const lit = new Set<number>();
+/** What a bullet thrown now would meet first (aimContact), or null when there's no throw to make. */
+export function aimNow(state: RunState): ReturnType<typeof aimContact> | null {
   const qb = qbOf(state);
-  if (!qb || !canThrow(state)) return lit;
-  const end = bulletEnd(state, qb.pos, sweepAngle(state));
-  const dx = end.x - qb.pos.x;
-  const dy = end.y - qb.pos.y;
-  const len2 = dx * dx + dy * dy;
-  for (const p of state.field.players) {
-    if (p.role === 'qb' || p.job.kind !== 'route') continue;
-    const t = Math.max(
-      0,
-      Math.min(1, ((p.pos.x - qb.pos.x) * dx + (p.pos.y - qb.pos.y) * dy) / len2),
-    );
-    const near = Math.hypot(qb.pos.x + dx * t - p.pos.x, qb.pos.y + dy * t - p.pos.y);
-    if (near <= p.reach && dist(p.pos, qb.pos) >= 3) lit.add(p.id);
-  }
-  return lit;
+  if (!qb || !canThrow(state)) return null;
+  return aimContact(state, qb.pos, bulletEnd(state, qb.pos, sweepAngle(state)));
+}
+
+/** The receiver who'd catch a bullet thrown right now, with everyone where they stand: it lights up. */
+export function litPlayers(state: RunState): Set<number> {
+  const aim = aimNow(state);
+  return new Set(aim?.outcome.kind === 'caught' ? [aim.outcome.by.id] : []);
 }

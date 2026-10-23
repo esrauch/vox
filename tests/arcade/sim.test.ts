@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PLAYS } from '../../src/arcade/content/plays';
 import { arcadeTuning } from '../../src/arcade/content/tuning';
-import { pocketTime, sweepAngle, sweepSpeed } from '../../src/arcade/sim/ball';
+import { aimContact, pocketTime, sweepAngle, sweepSpeed } from '../../src/arcade/sim/ball';
 import { physicsOf } from '../../src/arcade/sim/bodies';
 import {
   createRun,
@@ -632,6 +632,32 @@ describe('determinism', () => {
 
 it('dist is Euclidean', () => {
   expect(dist(v(0, 0), v(3, 4))).toBe(5);
+});
+
+describe('the aim line', () => {
+  // The QB is at (0, -4); the line runs straight upfield to (0, 20).
+  const end = v(0, 20);
+
+  it('stops at the receiver who would catch it now', () => {
+    const s = playState([{ pos: v(0, 8), job: stand(v(0, 8)) }]);
+    const aim = aimContact(s, v(0, -4), end);
+    expect(aim.outcome.kind).toBe('caught');
+    expect(aim.at.y).toBeLessThan(8);
+    expect(aim.at.y).toBeGreaterThan(8 - 2);
+  });
+
+  it('stops at a defender in the way, short of the receiver', () => {
+    const s = playState([{ pos: v(0, 8), job: stand(v(0, 8)) }], [{ kind: 'cover', pos: v(0, 3) }]);
+    const aim = aimContact(s, v(0, -4), end);
+    expect(aim.outcome.kind).toBe('batted');
+    expect(aim.at.y).toBeLessThan(3);
+  });
+
+  it('runs to its range when nothing is in the way', () => {
+    const aim = aimContact(playState([]), v(0, -4), end);
+    expect(aim.outcome.kind).toBe('incomplete');
+    expect(aim.at).toEqual(end);
+  });
 });
 
 describe('crowding', () => {

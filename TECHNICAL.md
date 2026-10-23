@@ -100,7 +100,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 | `step.ts` | The 60 Hz step above; `canThrow`, `giveBall`, Break it! resolution, the pocket, the drag, tackles. |
 | `ai.ts` | Each body's target. Blockers stand between a rusher and the QB; route runners follow their waypoints; once someone has the ball, each helper takes **its own** threat (`carryBlocks`), and on a handoff the Catchers keep running their routes as decoys. Rushers charge the QB, Covers trail their mark, the Owl hangs deep, Bats loop. **The play fake:** for a moment after a handoff the defense keeps playing the pass. `chooseLane`, `assignMarks`. |
 | `physics.ts` | Moving and pushing apart by weight. Scarecrows can't be moved; teammates give way to the carrier; bodies lying down get nudged aside; blocked defenders are slowed; nobody but the carrier is shoved out of bounds. |
-| `ball.ts` | The sweep (`sweepAngle`, `scanTime`, `pocketTime`, faster each area), the bullet (`bulletEnd`, `flightTime`), and `contact`: the nearest eligible catcher in reach catches it, a defender in reach bats it (a contest goes to the better Hands, ties to you); Blockers and the QB are never eligible, and a Rhino Beetle locked up with a player can't reach it. |
+| `ball.ts` | The sweep (`sweepAngle`, `scanTime`, `pocketTime`, faster each area), the bullet (`bulletEnd`, `flightTime`), and `contact`: the nearest eligible catcher in reach catches it, a defender in reach bats it (a contest goes to the better Hands, ties to you); Blockers and the QB are never eligible, and a Rhino Beetle locked up with a player can't reach it. `aimContact` walks `contact` along the aim line with everyone frozen, for the line's stop point and the lit receiver. |
 | `breakit.ts` | The three tests (the bar, MASH!, JUKE!), each sized by the Heft or Hustle gap and narrowed by extra tacklers, with its countdown; `judgeBreakIt` gives break, drag or tackle. |
 | `team.ts` | The roster and bench: `startingRoster`, `playerStats` (own stats + perks + Monster Mash), `fieldedStats`, the offer (`rollOffer`: perks by rarity, recruits), `applyPerk`, spots (`BENCH_START`, `atSpot`, `setSpot`). |
 | `bodies.ts` | Stats into physics, and lining both teams up for a down. |
@@ -119,9 +119,9 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 - **What's drawn** (`src/arcade/render/`):
   - `world.ts`: yards → world (one unit a yard).
   - `field.ts`: the turf strip and the drive's lines (scrimmage, the gold first-down line).
-  - `bodies.ts`: every player (its kind's model in the team helmet; Golems stretched wide and low, the one linebacker build; Ghosts hovering) and defender, turning to face where they're going and tipping over when down; the rings: gold under the carrier, each receiver's catch range (green open, red covered, gold while the sweep is over it), and every defender's purple reach.
+  - `bodies.ts`: every player (its kind's model in the team helmet; Golems stretched wide and low, the one linebacker build; Ghosts hovering) and defender, turning to face where they're going and tipping over when down; the rings: gold under the carrier, each receiver's catch range (green open, red covered, gold when the aim line stops on it), and every defender's purple reach.
   - `ball.ts`, `embers.ts`: the pumpkin (it is the QB: there's no QB model), its light, and an instanced pool of embers that drift off it, trail it in flight and burst on throws and catches.
-  - `sweep.ts`: the sweeping aim line, and which receivers it's over (`litPlayers`).
+  - `sweep.ts`: the sweeping aim line, stopping at the first catch or block a throw now would meet (`aimNow`, from the sim's `aimContact`), and the receiver it stops on (`litPlayers`).
   - `routes.ts`: the called play's routes before the snap.
 - **Shared with the dev pages:** `src/render/view.ts` (renderer, scene, lights) and `src/render/scenery.ts` (`ForestScenery`: the forest floor, fog, props along the field, the tree line on the Boss drive).
 - **Mobile performance:** the pixel ratio is capped at 2; keep draw calls low (target under ~100) and don't allocate in the frame loop.
