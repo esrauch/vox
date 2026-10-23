@@ -67,7 +67,8 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     creature: 'Frog in a top hat',
     // The Forest's Boss: twice a player's size, heavy and grabby, and slow off the mark.
     stats: { hustle: 50, hands: 70, heft: 90 },
-    radius: 1.0,
+    // Drawn twice its model's size (render/bodies.ts): its body is as wide as it looks.
+    radius: 1.45,
     planted: false,
     reachBonus: 0.6,
   },
@@ -76,7 +77,8 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     creature: 'Witch in a crown',
     // The Candy Kingdom's Boss: twice a player's size, quick and with a long reach for the ball.
     stats: { hustle: 60, hands: 90, heft: 70 },
-    radius: 1.0,
+    // Drawn twice its model's size (render/bodies.ts): its body is as wide as it looks.
+    radius: 1.45,
     planted: false,
     reachBonus: 1.0,
   },
