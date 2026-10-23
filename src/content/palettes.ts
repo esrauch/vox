@@ -86,8 +86,9 @@ export const voxel = {
  */
 export const biomes = {
   forest: {
-    grass: '#4f7f4c',
-    grassDark: '#447245',
+    /** Deep, cool greens, so the pumpkin's orange light leaves them green rather than khaki. */
+    grass: '#3f8f4f',
+    grassDark: '#357c43',
     floor: '#253a2c',
     skyTop: '#1c1236',
     skyMid: '#4a2f6e',

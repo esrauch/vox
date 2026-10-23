@@ -1,40 +1,93 @@
 /**
- * The arcade field: one long strip of turf with a stripe every yard (a
- * lighter band every five), and the lines that move with the drive.
+ * The arcade field: one long strip of pixel turf (mowing stripes every
+ * yard, a lighter band every five, flecks of grass; each area in its own
+ * colours), and the lines that move with the drive.
  */
 import * as THREE from 'three';
 import { biomes, hexToNumber, team } from '../../content/palettes';
 import { arcadeTuning } from '../content/tuning';
 import type { Drive } from '../sim/types';
-import { biomeAtYard } from './world';
-import type { Biome } from '../content/defense';
-import { FIELD_AHEAD, FIELD_BEHIND } from './world';
+import { createRng } from '../../sim/rng';
+import { FIELD_AHEAD, FIELD_BEHIND, biomeAtYard } from './world';
 
 const HALF = arcadeTuning.field.halfWidth;
 
+/** Texture pixels to a yard of turf: chunky, like the rest of the pixel look. */
+const TURF_PX = 8;
+
+/**
+ * The turf's pixel texture, the whole long strip in one canvas: each area's
+ * stretch in its own colours, a lighter or darker band every five yards,
+ * mowing stripes every yard, and flecks (darker blades and lighter tufts in
+ * the Forest; sprinkles in the Candy Kingdom), so it reads as grass, not sand.
+ */
+function turfTexture(rows: number): THREE.CanvasTexture {
+  const w = Math.round(HALF * 2 * TURF_PX);
+  const h = rows * TURF_PX;
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const g = canvas.getContext('2d');
+  const rng = createRng(31);
+  // Scales the colour in linear light (so 0.86 is a visible, not a huge, step on screen).
+  const shade = (hex: string, k: number): string => {
+    const c = new THREE.Color(hex).multiplyScalar(k);
+    return `#${c.getHexString()}`;
+  };
+  if (g) {
+    for (let i = 0; i < rows; i++) {
+      // Canvas row 0 is the far end of the strip (texture v runs from the far end to the near).
+      const yard = FIELD_AHEAD - 1 - i;
+      const biome = biomeAtYard(yard);
+      const palette = biomes[biome];
+      const band = Math.floor(yard / 5) % 2 === 0 ? palette.grass : palette.grassDark;
+      const base = shade(band, yard % 2 === 0 ? 1 : 0.86);
+      const top = i * TURF_PX;
+      g.fillStyle = base;
+      g.fillRect(0, top, w, TURF_PX);
+      // Flecks over the yard: a few to every square yard.
+      const flecks = Math.round((w / TURF_PX) * 3);
+      for (let f = 0; f < flecks; f++) {
+        const x = rng.int(0, w - 1);
+        const y = top + rng.int(0, TURF_PX - 1);
+        if (biome === 'candy') {
+          g.fillStyle = rng.pick(['#fff8ee', '#7fe3c0', '#ffd23f', '#a259ff', shade(band, 0.85)]);
+          g.fillRect(x, y, rng.next() < 0.5 ? 2 : 1, 1);
+        } else if (rng.next() < 0.7) {
+          g.fillStyle = shade(band, 0.65); // a darker blade, two pixels tall
+          g.fillRect(x, y, 1, 2);
+        } else {
+          g.fillStyle = shade(band, 1.3); // a lighter tuft
+          g.fillRect(x, y, 1, 1);
+        }
+      }
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  // Crisp pixels up close, smooth far away (no shimmer down the field).
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  return texture;
+}
+
 export function createArcadeTurf(): THREE.Group {
   const group = new THREE.Group();
-  // Each area's stretch of turf in its own colours (the Forest's greens, the Candy Kingdom's pinks).
-  const shades = (biome: Biome) => ({
-    light: new THREE.Color(hexToNumber(biomes[biome].grass)),
-    dark: new THREE.Color(hexToNumber(biomes[biome].grassDark)),
-  });
   const rows = FIELD_BEHIND + FIELD_AHEAD;
-  const tiles = new THREE.InstancedMesh(
-    new THREE.BoxGeometry(HALF * 2, 0.3, 1),
-    new THREE.MeshLambertMaterial(),
-    rows,
-  );
-  tiles.receiveShadow = true;
-  const m = new THREE.Matrix4();
-  for (let i = 0; i < rows; i++) {
-    const y = i - FIELD_BEHIND;
-    m.makeTranslation(0, -0.15, -(y + 0.5));
-    tiles.setMatrixAt(i, m);
-    const { light, dark } = shades(biomeAtYard(y));
-    tiles.setColorAt(i, Math.floor(y / 5) % 2 === 0 ? light : dark);
-  }
-  group.add(tiles);
+  // One long slab: the pixel turf on top, plain earth down its sides.
+  const earth = new THREE.MeshLambertMaterial({ color: hexToNumber(biomes.forest.floor) });
+  const top = new THREE.MeshLambertMaterial({ map: turfTexture(rows) });
+  const turf = new THREE.Mesh(new THREE.BoxGeometry(HALF * 2, 0.3, rows), [
+    earth,
+    earth,
+    top,
+    earth,
+    earth,
+    earth,
+  ]);
+  turf.position.set(0, -0.15, -(FIELD_AHEAD - FIELD_BEHIND) / 2);
+  turf.receiveShadow = true;
+  group.add(turf);
   // Chalk sidelines.
   for (const sign of [-1, 1]) {
     const line = new THREE.Mesh(
