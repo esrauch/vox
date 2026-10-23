@@ -83,8 +83,8 @@ interface Scenario {
   readonly roleTraining?: Partial<Record<Role, Partial<Stats>>>;
   /** Take a TRICK OR TREAT! card after each won drive (otherwise skip)… */
   readonly perks?: boolean;
-  /** …always this one: the new player, the stat boost, the pool perk, or (default) at random. */
-  readonly pick?: 'player' | 'stat' | 'pool' | 'random';
+  /** …always this one: the new player, the stat boost, or (default) either at random. */
+  readonly pick?: 'player' | 'stat' | 'random';
 }
 
 /** BALANCE_SCENARIO='{"name": "...", ...}' runs just that one scenario instead. */
@@ -93,10 +93,9 @@ const SCENARIOS: readonly Scenario[] = custom
   ? [JSON.parse(custom) as Scenario]
   : [
       { name: 'All human (never upgrade)' },
-      { name: 'Random TRICK OR TREAT! cards', perks: true },
+      { name: 'Random TRICK OR TREAT! card', perks: true },
       { name: 'Always the new player', perks: true, pick: 'player' },
       { name: 'Always the stat boost', perks: true, pick: 'stat' },
-      { name: 'Always the pool perk', perks: true, pick: 'pool' },
       { name: 'Trained: +10 Hustle', training: { hustle: 10 } },
       { name: 'Trained: +10 Hands', training: { hands: 10 } },
       { name: 'Trained: +10 Heft', training: { heft: 10 } },
@@ -321,7 +320,7 @@ function draftPick(state: RunState, rng: Rng, scenario: Scenario): RunState {
     return dispatch(state, { type: 'skipDraft' }).state;
   }
   const before = state.bench.length;
-  const want = { player: 'recruit', stat: 'playerStat', pool: null, random: undefined }[
+  const want = { player: 'recruit', stat: 'playerStat', random: undefined }[
     scenario.pick ?? 'random'
   ];
   const index =
@@ -329,9 +328,7 @@ function draftPick(state: RunState, rng: Rng, scenario: Scenario): RunState {
       ? rng.int(0, state.offer.length - 1)
       : Math.max(
           0,
-          state.offer.findIndex((p) =>
-            want === null ? p.kind !== 'recruit' && p.kind !== 'playerStat' : p.kind === want,
-          ),
+          state.offer.findIndex((p) => p.kind === want),
         );
   let s = dispatch(state, { type: 'pick', offer: index }).state;
   const total = (st: Stats): number => st.hustle + st.hands + st.heft;

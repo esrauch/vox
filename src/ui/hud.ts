@@ -16,7 +16,7 @@ export interface HudHandlers {
   /** Tap a card in the hand: call that play. */
   onCard(hand: number): void;
   onFlip(): void;
-  /** TRICK OR TREAT!: take an offer, or skip (Done, Pass). */
+  /** TRICK OR TREAT!: take an offer; Done once the lineup is set. */
   onDraft(offer: number): void;
   onSkip(): void;
   /** TRICK OR TREAT!: tap a roster spot (to place a recruit there, or to swap two). */
@@ -77,7 +77,7 @@ export interface DraftView {
   readonly bench: readonly (RosterRow | null)[];
   /** What to do now, under the roster heading. */
   readonly hand: string | null;
-  /** The Skip button's words (default "Skip"). */
+  /** The button that moves on (e.g. "Done"); none while there's a choice to make. */
   readonly skip?: string;
 }
 
@@ -259,7 +259,8 @@ export class Hud {
     hand.textContent = draft.hand ?? '';
     const skip = document.createElement('button');
     skip.className = 'hud-skip';
-    skip.textContent = draft.skip ?? 'Skip';
+    skip.textContent = draft.skip ?? '';
+    skip.hidden = !draft.skip;
     skip.addEventListener('click', () => this.handlers.onSkip());
     const top: HTMLElement[] = draft.recruit ? [recruitCard(draft.recruit)] : [offer];
     this.draft.replaceChildren(

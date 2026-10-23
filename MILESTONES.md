@@ -33,7 +33,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [ ] **Swamp:** the Safety becomes a **Witch**; the **Bog Hand** (planted grabber) and **mud patches**; **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers).
 - [ ] **Farm:** the **Crow**; rows of Scarecrows; **the King** (a crowned scarecrow) and the **Two-Part Grab** (two Break it! tests in a row).
 - [ ] **Models** for the new defenders and the three Bosses (top hat, crown, bigger crown), readable from the game camera.
-- [ ] **Boss perks:** beating Mister Frog gives **Hot Arm** (taken out of the TRICK OR TREAT! pool); the Queen gives **Gift of Foresight** (an orange ring when a throw now would really be caught, looking ahead along the flight; approximate, cheap enough for every frame).
+- [ ] **Boss perks:** beating Mister Frog gives **Hot Arm** (out of TRICK OR TREAT!); the Queen gives **Gift of Foresight** (an orange ring when a throw now would really be caught, looking ahead along the flight; approximate, cheap enough for every frame).
 - [ ] **The two cutscenes:** at the start, Jack asks a football team to help him get home; at the end, everyone (your team and every defender you met, Bosses included) dances in the pumpkin patch.
 - [ ] **Difficulty targets:** a practised player who never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
 
@@ -83,6 +83,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-22:** **TRICK OR TREAT! is exactly two cards, and no Skip:** a new player and a stat boost for one of your players, the boost now half on its main stat and a quarter on each other (40 / 60 / 80 in all by zone: +20 / +10 / +10 in the Forest). The pool perks are gone. Balance (the reading bot, 100 runs): always the boost 6.7 drives won, always the player 6.6.
 - **2026-10-22:** **TRICK OR TREAT! is always three kinds of card:** a new player (stats adding to 200 / 250 / 300 by zone, in its kind's shape), a stat boost for one of your field players' main stat (+40 / +60 / +80: tuned so it matches the new player in balance runs), and a pool perk at the zone's rarity (common in the Forest). Hot Arm left the pool for Mister Frog.
 - **2026-10-22:** **The aim line stops at the first catch or block** (with everyone frozen where they stand, `sim/ball.ts` `aimContact`), and only the receiver it stops on lights gold. The Queen's Boss perk will be **Gift of Foresight**, the same idea looking ahead in time.
 - **2026-10-22:** **The progression is designed:** Forest (Mister Frog, Frog Rain), Swamp (the Queen, the Hex; Witches as Safeties) and the Farm (the King, the Two-Part Grab), ending at the pumpkin patch. The first two Bosses each give a special perk (Mister Frog: Hot Arm, which leaves the TRICK OR TREAT! pool). The story is two tiny cutscenes: Jack asking a team for help, and everyone dancing in the patch at the end. Not built yet.

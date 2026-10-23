@@ -1,48 +1,30 @@
 /**
- * TRICK OR TREAT! (GAMEPLAY.md, Building Up): the perks, how rare each is,
- * and the names of the players who might join you. The rules for taking a
- * perk are in sim/team.ts.
+ * TRICK OR TREAT! (GAMEPLAY.md, Building Up): what the two cards are worth
+ * in each zone, Monster Mash, and the names of the players who might join
+ * you. The rules for taking a card are in sim/team.ts.
  */
-import type { Form, Position, Rarity } from '../sim/types';
+import type { Form, Position } from '../sim/types';
 
 /**
- * Every offer is three cards: a new player, a stat boost for one of yours,
- * and one perk from the pool at the zone's rarity. These are by zone
- * (Forest, Swamp, Farm), for the zone of the drive about to be played.
+ * Every offer is two cards: a new player, and a stat boost for one of
+ * yours. These are by zone (Forest, Swamp, Farm), for the zone of the drive
+ * about to be played.
  */
 export const ZONE_OFFER: readonly {
   /** A new player's Hustle + Hands + Heft. */
   readonly recruitTotal: number;
   /**
-   * What the stat boost adds to one player's main stat. Tuned (balance runs, 2026-10-22) so
-   * always taking it does about as well as always taking the new player.
+   * The stat boost's total: half on the player's main stat, a quarter on
+   * each of the other two (40 is +20 / +10 / +10). Tuned with the balance
+   * runs against the new player (2026-10-22).
    */
-  readonly statBoost: number;
-  /** The rarity of the third card (a lower one if none of that rarity is left). */
-  readonly rarity: Rarity;
+  readonly boostTotal: number;
 }[] = [
-  { recruitTotal: 200, statBoost: 40, rarity: 'common' },
-  { recruitTotal: 250, statBoost: 60, rarity: 'rare' },
-  { recruitTotal: 300, statBoost: 80, rarity: 'epic' },
+  { recruitTotal: 200, boostTotal: 40 },
+  { recruitTotal: 250, boostTotal: 60 },
+  { recruitTotal: 300, boostTotal: 80 },
 ];
 
-/**
- * The pool for the third card, by rarity. A perk you already have (a
- * one-off) isn't offered again. Hot Arm isn't here: it's Mister Frog's
- * Boss perk.
- */
-export const PERK_RARITY = {
-  allStat: 'common',
-  extraSweep: 'common',
-  kindStat: 'rare',
-  slowSweep: 'rare',
-  secondWind: 'rare',
-  magnet: 'rare',
-} as const satisfies Record<string, Rarity>;
-
-/** How much the stat perks add (stats are on a 50-is-ordinary scale; 10 is a step). */
-export const ALL_STAT_BONUS = 10;
-export const KIND_STAT_BONUS = 20;
 /** Monster Mash: this much to every stat for each player whose kind is unique on the team. */
 export const MONSTER_MASH_BONUS = 10;
 

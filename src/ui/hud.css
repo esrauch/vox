@@ -531,3 +531,7 @@ button.hud-roster-row:active {
 .hud-stat-delta.down {
   color: var(--danger);
 }
+
+.hud-skip[hidden] {
+  display: none;
+}

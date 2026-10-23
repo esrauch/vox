@@ -102,7 +102,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 | `physics.ts` | Moving and pushing apart by weight. Scarecrows can't be moved; teammates give way to the carrier; bodies lying down get nudged aside; blocked defenders are slowed; nobody but the carrier is shoved out of bounds. |
 | `ball.ts` | The sweep (`sweepAngle`, `scanTime`, `pocketTime`, faster each area), the bullet (`bulletEnd`, `flightTime`), and `contact`: the nearest eligible catcher in reach catches it, a defender in reach bats it (a contest goes to the better Hands, ties to you); Blockers and the QB are never eligible, and a Rhino Beetle locked up with a player can't reach it. `aimContact` walks `contact` along the aim line with everyone frozen, for the line's stop point and the lit receiver. |
 | `breakit.ts` | The three tests (the bar, MASH!, JUKE!), each sized by the Heft or Hustle gap and narrowed by extra tacklers, with its countdown; `judgeBreakIt` gives break, drag or tackle. |
-| `team.ts` | The roster and bench: `startingRoster`, `playerStats` (own stats + perks + Monster Mash), `fieldedStats`, the offer (`rollOffer`: perks by rarity, recruits), `applyPerk`, spots (`BENCH_START`, `atSpot`, `setSpot`). |
+| `team.ts` | The roster and bench: `startingRoster`, `playerStats` (own stats + perks + Monster Mash), `fieldedStats`, the offer (`rollOffer`: a new player and a stat boost, sized by zone), `applyPerk` (Boss perks), spots (`BENCH_START`, `atSpot`, `setSpot`). |
 | `bodies.ts` | Stats into physics, and lining both teams up for a down. |
 | `random.ts`, `vec.ts`, `stats.ts` | Seeded randomness, 2D vectors, stat arithmetic. |
 
@@ -172,7 +172,7 @@ src/arcade/content/
   team.ts      // roster roles and line-up, BASE_STATS, FORM_STATS (each kind's trade), POSITION_STAT, BENCH_SIZE, radii
   plays.ts     // PLAYS: each card's assignments (block, or a route of waypoints); handoff cards name the Runner
   defense.ts   // DEFENDERS (each kind's stats, radius, reach bonus, planted) and FOREST: the area's drives and spots
-  perks.ts     // rarity weights, perk bonuses, names for starters and recruits
+  perks.ts     // ZONE_OFFER (the new player's total and the stat boost, by zone), Monster Mash, names
 src/content/
   palettes.ts  // every color: common, team, voxel (model colors), biomes
   tuning.ts    // the beat-clock page's and the mixer's numbers

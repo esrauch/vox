@@ -4,7 +4,7 @@ import { pocketTime, sweepSpeed } from '../../src/arcade/sim/ball';
 import { createRun, dispatch, endDown, nextDown } from '../../src/arcade/sim/run';
 import { forceBreakKind } from '../../src/arcade/sim/step';
 import { ZONE_OFFER } from '../../src/arcade/content/perks';
-import { BENCH_SIZE, POSITION_STAT } from '../../src/arcade/content/team';
+import { BENCH_SIZE, POSITION_STAT, ROSTER_ROLES } from '../../src/arcade/content/team';
 import { BENCH_START, applyPerk, noPerks, playerStats, rollOffer } from '../../src/arcade/sim/team';
 import type { ArcadeEvent, Perk, RunState } from '../../src/arcade/sim/types';
 import { v } from '../../src/arcade/sim/vec';
@@ -27,11 +27,11 @@ const offering = (perk: Perk): RunState => {
 };
 
 describe('TRICK OR TREAT!', () => {
-  it('after a won drive, three cards are offered, each with a rarity', () => {
+  it('after a won drive, TRICK OR TREAT! offers two cards', () => {
     for (let seed = 1; seed <= 20; seed++) {
       const s = atDraft(seed);
       expect(s.phase).toBe('draft');
-      expect(s.offer).toHaveLength(3);
+      expect(s.offer).toHaveLength(2);
       for (const p of s.offer) expect(['common', 'rare', 'epic']).toContain(p.rarity);
     }
   });
@@ -43,18 +43,13 @@ describe('TRICK OR TREAT!', () => {
     return { s, offer: rollOffer(s) };
   };
 
-  it('every offer is a new player, a stat boost for one of yours, and a pool perk', () => {
+  it('every offer is exactly two cards: a new player and a stat boost for one of yours', () => {
     for (let seed = 1; seed <= 30; seed++) {
-      const { offer } = offerIn(0, seed);
-      expect(offer.map((p) => p.kind).slice(0, 2)).toEqual(['recruit', 'playerStat']);
-      expect(offer).toHaveLength(3);
-      // In the Forest the third card is a common; Hot Arm is a Boss perk, never offered.
-      expect(offer[2]!.rarity).toBe('common');
-      expect(offer.some((p) => p.kind === 'hotArm')).toBe(false);
+      expect(offerIn(0, seed).offer.map((p) => p.kind)).toEqual(['recruit', 'playerStat']);
     }
   });
 
-  it('the new player and the boost grow by zone: 200 / 250 / 300 and +40 / +60 / +80', () => {
+  it('the new player and the boost grow by zone: 200 / 250 / 300 and 40 / 60 / 80', () => {
     ZONE_OFFER.forEach((zone, i) => {
       for (let seed = 1; seed <= 20; seed++) {
         const { offer } = offerIn(i, seed);
@@ -63,7 +58,12 @@ describe('TRICK OR TREAT!', () => {
         if (recruit.kind !== 'recruit' || boost.kind !== 'playerStat') throw new Error('offer');
         const st = recruit.player.stats;
         expect(st.hustle + st.hands + st.heft).toBe(zone.recruitTotal);
-        expect(boost.amount).toBe(zone.statBoost);
+        // Half on the main stat (the one its position leans on), a quarter on each other.
+        const b = boost.boost;
+        expect(b.hustle + b.hands + b.heft).toBe(zone.boostTotal);
+        expect(b[boost.main]).toBe(zone.boostTotal / 2);
+        const role = ROSTER_ROLES[boost.spot];
+        expect(boost.main).toBe(POSITION_STAT[role && role !== 'qb' ? role : 'catcher']);
       }
     });
   });
@@ -86,15 +86,19 @@ describe('TRICK OR TREAT!', () => {
       kind: 'playerStat' as const,
       spot: 0,
       name: s.roster[0]!.name,
-      stat: 'heft' as const,
-      amount: 20,
+      main: 'heft' as const,
+      boost: { heft: 20, hustle: 10, hands: 10 },
     };
     s.offer = [boost, ...s.offer.slice(1)];
-    const heft = s.roster[0]!.stats.heft;
+    const before = s.roster[0]!.stats;
     const swapped = dispatch(s, { type: 'swap', a: 0, b: 4 }).state;
     const taken = dispatch(swapped, { type: 'pick', offer: 0 }).state;
     expect(taken.roster[4]!.name).toBe(boost.name);
-    expect(taken.roster[4]!.stats.heft).toBe(heft + 20);
+    expect(taken.roster[4]!.stats).toEqual({
+      heft: before.heft + 20,
+      hustle: before.hustle + 10,
+      hands: before.hands + 10,
+    });
     expect(taken.phase).toBe('setup');
   });
 

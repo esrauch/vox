@@ -8,6 +8,7 @@ import { PLAYS } from '../content/plays';
 import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
 import { assignMarks } from './ai';
+import { plus } from './stats';
 import { lineUpDefense, lineUpTeam } from './bodies';
 import { BENCH_SIZE } from '../content/team';
 import {
@@ -271,7 +272,7 @@ function pick(state: RunState, index: number, events: ArcadeEvent[]): void {
     if (p)
       setSpot(state, perk.spot, {
         ...p,
-        stats: { ...p.stats, [perk.stat]: p.stats[perk.stat] + perk.amount },
+        stats: plus(p.stats, perk.boost),
       });
   } else {
     applyPerk(state.perks, perk);

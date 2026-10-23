@@ -4,10 +4,7 @@
  * offer, and taking a perk.
  */
 import {
-  ALL_STAT_BONUS,
-  KIND_STAT_BONUS,
   MONSTER_MASH_BONUS,
-  PERK_RARITY,
   POSITIONS,
   RECRUIT_NAMES,
   STARTING_NAMES,
@@ -17,7 +14,7 @@ import { BASE_STATS, FORM_STATS, POSITION_STAT, ROSTER_ROLES } from '../content/
 import type { Rng } from '../../sim/rng';
 import { rngFor } from './random';
 import { even, plus, ZERO } from './stats';
-import type { Form, Perk, Perks, Position, Rarity, RosterPlayer, RunState, Stats } from './types';
+import type { Form, Perk, Perks, Position, RosterPlayer, RunState, Stats } from './types';
 
 const STATS: readonly (keyof Stats)[] = ['hustle', 'hands', 'heft'];
 const KINDS: readonly Form[] = ['human', 'ghost', 'golem', 'werewolf'];
@@ -83,72 +80,32 @@ export function playerStats(state: RunState, slot: number): Stats {
 // ── The offer ───────────────────────────────────────────────────────────────
 
 /**
- * TRICK OR TREAT!'s three cards: a new player, a stat boost for one of
- * yours, and a perk from the pool at the zone's rarity (ZONE_OFFER: by the
- * zone of the drive about to be played).
+ * TRICK OR TREAT!'s two cards: a new player, and a stat boost for one of
+ * yours (ZONE_OFFER: by the zone of the drive about to be played).
  */
 export function rollOffer(state: RunState): Perk[] {
   const rng = rngFor(state.seed, 'perks', state.drivesWon);
   const zone = ZONE_OFFER[Math.min(state.drive.area, ZONE_OFFER.length - 1)] ?? ZONE_OFFER[0];
   if (!zone) return [];
-  const offer: Perk[] = [
+  return [
     { rarity: 'common', kind: 'recruit', player: makeRecruit(rng, zone.recruitTotal) },
-    statBoost(state, rng, zone.statBoost),
+    statBoost(state, rng, zone.boostTotal),
   ];
-  const perk = poolPerk(state, rng, zone.rarity);
-  if (perk) offer.push(perk);
-  return offer;
 }
 
-/** A boost to one field player's main stat: the one its position leans on. */
-function statBoost(state: RunState, rng: Rng, amount: number): Perk {
+/** A boost for one field player: half of `total` on its position's main stat, a quarter on each other. */
+function statBoost(state: RunState, rng: Rng, total: number): Perk {
   const spot = rng.int(0, state.roster.length - 1);
   const role = ROSTER_ROLES[spot];
-  const stat = POSITION_STAT[role && role !== 'qb' ? role : 'catcher'];
+  const main = POSITION_STAT[role && role !== 'qb' ? role : 'catcher'];
   return {
     rarity: 'common',
     kind: 'playerStat',
     spot,
     name: state.roster[spot]?.name ?? '?',
-    stat,
-    amount,
+    main,
+    boost: { ...even(total / 4), [main]: total / 2 },
   };
-}
-
-const RARITIES: readonly Rarity[] = ['common', 'rare', 'epic'];
-
-/** A perk from the pool at this rarity, or the nearest lower one that has any left. */
-function poolPerk(state: RunState, rng: Rng, rarity: Rarity): Perk | null {
-  for (let r = RARITIES.indexOf(rarity); r >= 0; r--) {
-    const at = RARITIES[r] ?? 'common';
-    const kinds = (Object.keys(PERK_RARITY) as (keyof typeof PERK_RARITY)[]).filter(
-      (k) => PERK_RARITY[k] === at && !owned(state.perks, k),
-    );
-    if (kinds.length === 0) continue;
-    const kind = rng.pick(kinds);
-    const stat = rng.pick(STATS);
-    switch (kind) {
-      case 'allStat':
-        return { rarity: at, kind, stat, amount: ALL_STAT_BONUS };
-      case 'kindStat':
-        // A kind you have on the team, so it's worth something.
-        return {
-          rarity: at,
-          kind,
-          stat,
-          form: rng.pick(state.roster.map((p) => p.kind)),
-          amount: KIND_STAT_BONUS,
-        };
-      default:
-        return { rarity: at, kind };
-    }
-  }
-  return null;
-}
-
-/** The one-off perks can only be had once. */
-function owned(perks: Perks, kind: keyof typeof PERK_RARITY): boolean {
-  return (kind === 'secondWind' && perks.secondWind) || (kind === 'magnet' && perks.magnet);
 }
 
 /** The position a player's best stat suits (a tie, at random among them). */

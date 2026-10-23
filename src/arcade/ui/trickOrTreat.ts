@@ -34,6 +34,12 @@ export function bio(p: RosterPlayer): string {
   return `${KIND[p.kind]} · prefers ${POSITION[p.preferred]} · ${statLine(p.stats)}`;
 }
 
+/** "+20 Heft, +10 Hustle, +10 Hands": the main stat first. */
+function boostText(boost: Stats, main: keyof Stats): string {
+  const order = [main, ...(['heft', 'hustle', 'hands'] as const).filter((k) => k !== main)];
+  return order.map((k) => `+${boost[k]} ${STAT[k]}`).join(', ');
+}
+
 export function perkFace(perk: Perk): CardFace {
   const rarity = perk.rarity;
   switch (perk.kind) {
@@ -64,8 +70,8 @@ export function perkFace(perk: Perk): CardFace {
     case 'playerStat':
       return {
         rarity,
-        name: `+${perk.amount} ${STAT[perk.stat]}`,
-        blurb: `For ${perk.name}, for good.`,
+        name: `Boost ${perk.name}`,
+        blurb: `${boostText(perk.boost, perk.main)}, for good.`,
       };
   }
 }
@@ -91,7 +97,7 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
   // The player a stat boost on offer is for: its row says so.
   const boostNote = (spot: number): string => {
     const b = state.offer.find((o) => o.kind === 'playerStat' && o.spot === spot);
-    return b?.kind === 'playerStat' ? `on offer: +${b.amount} ${STAT[b.stat]}` : '';
+    return b?.kind === 'playerStat' ? `on offer: ${boostText(b.boost, b.main)}` : '';
   };
   // ★ on the position heading the player in question prefers: the recruit waiting, or the player tapped.
   const starred = (recruit ?? (selected === null ? undefined : atSpot(state, selected)))?.preferred;
@@ -154,7 +160,6 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
       roster,
       bench,
       hand: 'Tap the player to let go. The numbers show what that spot gains or loses; ★ marks the position it prefers.',
-      skip: `Pass on ${recruit.name}`,
     };
   }
   const from = selected === null ? null : atSpot(state, selected);

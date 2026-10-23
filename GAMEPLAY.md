@@ -47,7 +47,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   | **The Swamp** | **The Queen** (a witch, double size, in a crown) | **The Hex:** the aim line shrinks to a short stub by the pumpkin, and receivers stop lighting up. The sweep still runs at full speed: you extrapolate. | Your timing |
   | **The Farm** | **The King** (a scarecrow in a crown) *(beating him gets Jack home: the end)* | **The Two-Part Grab:** when he grabs the carrier it's two Break it! tests back to back, and the second comes only if you pass the first. | The team you've built |
 
-- **Boss perks:** beating a Boss gives its special perk, on top of that drive's TRICK OR TREAT!. These perks are never in the TRICK OR TREAT! pool.
+- **Boss perks:** beating a Boss gives its special perk, on top of that drive's TRICK OR TREAT!. They're the only perks there are.
 
   | Boss | Perk |
   |---|---|
@@ -135,7 +135,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Before the snap** | **HIKE!** | Start the called play. |
 | **Pass play** | **THROW** | Fire a bullet along the sweeping line. |
 | **Grabbed** | **Tap** anywhere (a juke: its ◀ or ▶ button) | Break it! |
-| **Between drives** | **Tap a card** | Take that perk (or skip). |
+| **Between drives** | **Tap a card** | Take the new player or the stat boost. |
 | **Between drives** | **Tap two players** | Swap them, field or bench. |
 
 **One thumb, portrait, no aiming.** Everything is a tap at the right moment.
@@ -183,31 +183,18 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Building Up: TRICK OR TREAT!
 
-**After every won drive: TRICK OR TREAT!** Three cards are offered, always the same three kinds; pick one (or skip) and play on; a new player keeps the screen open until you tap **Done**. **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
+**After every won drive: TRICK OR TREAT!** Two cards are offered, a new player and a stat boost; take one and play on (a new player keeps the screen open until you tap **Done**). **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
 
 ### The offer
+
+**Exactly two cards, and you take one:** there's no skipping, because either one is worth having (a new player can always sit on the bench).
 
 | Card | What it is | Forest | Swamp | Farm |
 |---|---|---|---|---|
 | **A new player** | A random kind, its stats adding up to the zone's total, shared out in its kind's shape (a Ghost mostly Hands, a Golem mostly Heft, a Human evenly), a little different every time | 200 | 250 | 300 |
-| **A stat boost** | One of your field players, picked at random, gets this much on its position's main stat (Heft for a Blocker, Hustle for a Runner, Hands for a Catcher), for good; its roster row says so | +40 | +60 | +80 |
-| **A perk from the pool** | One perk of the zone's rarity, below | common | rare | epic *(rare until there are epics)* |
+| **A stat boost** | One of your field players, picked at random, for good: half on its position's main stat (Heft for a Blocker, Hustle for a Runner, Hands for a Catcher), a quarter on each of the other two; its roster row says so | +20 / +10 / +10 | +30 / +15 / +15 | +40 / +20 / +20 |
 
-The zone is the one of the drive about to be played, so the offer after the Forest's Boss is already the Swamp's. *(Balance runs, 2026-10-22: always taking the stat boost does about as well as always taking the new player. Always taking the pool perk does better: +10 to a stat for everyone is a lot.)*
-
-### The pool
-
-| Rarity | Perk | What it does |
-|---|---|---|
-| Common | **+10 (stat) to everyone** | The baseline: a sure, small step for the whole team |
-| Common | **Extra Sweep** | The pocket holds for one more sweep before the sack |
-| Rare | **+20 (stat) to every Ghost** *(or Golem, Werewolf…)* | Rewards having several of one kind |
-| Rare | **Slow-Mo Sweep** | The aim line sweeps 25% slower: easier timing, but fewer chances before the pocket collapses |
-| Rare | **Second Wind** | Once per drive, a BAD Break it! counts as OK |
-| Rare | **Candy Corn Magnet** | A ball that would fall incomplete gets twice the reach from your Catchers |
-| Epic | **Haunted Line** *(not built yet)* | Defenders your Blockers pancake come back as your ghosts for the rest of the down, and block for you |
-
-Hot Arm isn't in the pool: it's Mister Frog's Boss perk.
+The zone is the one of the drive about to be played, so the offer after the Forest's Boss is already the Swamp's. *(Balance runs, 2026-10-22: always taking the stat boost does about as well as always taking the new player.)*
 
 ### New players
 
@@ -225,7 +212,7 @@ Hot Arm isn't in the pool: it's Mister Frog's Boss perk.
 | **Monster Mash** | Players of different kinds | **+10 to every stat for each player whose kind is unique on your team** (the only one of its kind) |
 | ▲ *More to come* | *e.g. three of one kind* | *e.g. that kind's perk bonuses doubled* |
 
-The tension: a recruit of a kind you already have feeds the "+20 to every Ghost" perks; a recruit of a new kind feeds Monster Mash.
+The tension: a recruit of a new kind feeds Monster Mash; a stat boost makes the player you already have better.
 
 ---
 
