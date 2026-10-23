@@ -144,6 +144,19 @@ export const arcadeTuning = {
     /** …except a defender this close to the carrier (yards), who sees it. */
     fakeSees: 2,
   },
+  fieldProps: {
+    /** How many to a 10-yard stretch (at random in this range)… */
+    min: 2,
+    max: 3,
+    /** …kept this far out of the middle (the pumpkin's lane), this far in from the sidelines… */
+    center: 2.2,
+    edge: 1,
+    /** …and at least this far apart (edge to edge), so there's always a way between. */
+    gap: 2.2,
+    /** A body looks this far ahead for a prop in its way, and passes it with this much room. */
+    lookAhead: 2.5,
+    margin: 0.25,
+  },
   hex: {
     /** The Queen's Hex: the aim line shows only this much of itself (yards from the pumpkin). */
     stub: 3,

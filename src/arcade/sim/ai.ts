@@ -17,6 +17,7 @@
 import { PLAYS } from '../content/plays';
 import { arcadeTuning } from '../content/tuning';
 import type { Defender, Player, RunState, Vec } from './types';
+import { clearOfProps } from './props';
 import { add, dist, norm, scale, sub, v } from './vec';
 
 const { defense, carrier: carrierTuning } = arcadeTuning;
@@ -52,7 +53,9 @@ export function playerTarget(state: RunState, p: Player): Vec | null {
       const job = p.job;
       const to = job.to[job.index];
       if (!to) return null;
-      if (dist(p.pos, to) < 0.5 && job.index < job.to.length - 1) job.index++;
+      // A waypoint inside a prop counts as reached at its edge.
+      const goal = clearOfProps(state.field.props, to, p.radius);
+      if (dist(p.pos, goal) < 0.5 && job.index < job.to.length - 1) job.index++;
       return job.to[job.index] ?? null;
     }
   }
@@ -203,15 +206,17 @@ export function assignMarks(state: RunState): void {
  */
 export function chooseLane(state: RunState, carrier: Player): number {
   const hw = arcadeTuning.field.halfWidth - 0.8;
-  const ahead = state.field.defenders.filter(
-    (d) => up(d) && d.pos.y > carrier.pos.y - 0.5 && d.pos.y < carrier.pos.y + 9,
-  );
+  // Defenders still up in front, and props in the way, all take room.
+  const ahead = [
+    ...state.field.defenders.filter((d) => up(d)).map((d) => d.pos),
+    ...state.field.props.map((p) => v(p.x, p.y)),
+  ].filter((pos) => pos.y > carrier.pos.y - 0.5 && pos.y < carrier.pos.y + 9);
   let best = carrier.pos.x;
   let bestScore = -Infinity;
   for (let x = -hw; x <= hw + 1e-6; x += 0.5) {
     // Room: the nearest defender to this lane, counting the ones closer up the field as nearer.
     const room = Math.min(
-      ...ahead.map((d) => Math.abs(d.pos.x - x) + 0.35 * (d.pos.y - carrier.pos.y)),
+      ...ahead.map((pos) => Math.abs(pos.x - x) + 0.35 * (pos.y - carrier.pos.y)),
       6,
     );
     // Frog Rain: keep out of the lane the frogs are falling in, if it's still ahead.

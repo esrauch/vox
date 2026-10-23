@@ -22,6 +22,7 @@ import { arcadeTuning, DT } from './content/tuning';
 import { ArcadeBall } from './render/ball';
 import { ArcadeBodies } from './render/bodies';
 import { ArcadeLines, createArcadeTurf } from './render/field';
+import { ArcadeFieldProps } from './render/fieldProps';
 import { ArcadeFrogRain } from './render/frogRain';
 import { ArcadeWitches } from './render/witches';
 import { ArcadeRoutes } from './render/routes';
@@ -112,6 +113,7 @@ export class ArcadeGame {
   private readonly lines: ArcadeLines;
   private readonly routes: ArcadeRoutes;
   private readonly frogRain: ArcadeFrogRain;
+  private readonly fieldProps: ArcadeFieldProps;
   private readonly witches: ArcadeWitches;
   private readonly hud: Hud;
   private readonly controls: ArcadeControls;
@@ -152,6 +154,7 @@ export class ArcadeGame {
     this.lines = new ArcadeLines(scene);
     this.routes = new ArcadeRoutes(scene);
     this.frogRain = new ArcadeFrogRain(scene);
+    this.fieldProps = new ArcadeFieldProps(scene);
     this.witches = new ArcadeWitches(scene);
     this.bodies = new ArcadeBodies(scene);
     this.ball = new ArcadeBall(scene);
@@ -254,6 +257,7 @@ export class ArcadeGame {
     this.ball.update(state, this.origin, this.bodies, dt, performance.now() / 1000);
     this.sweep.update(state, this.origin);
     this.frogRain.update(state, this.origin);
+    this.fieldProps.update(state, this.origin);
     this.witches.update(state, this.origin);
     this.controls.setButtons(canThrow(state) && !this.paused);
     this.controls.setBreak(this.breakView());

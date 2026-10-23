@@ -156,6 +156,18 @@
       "source": "Original voxel model (Candy Kingdom prop: gingerbread house), written by Claude",
       "author": "Claude",
       "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/candyProps/gumdrop.voxt",
+      "source": "Original voxel model (Candy Kingdom field prop: gumdrop), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/candyProps/lollipop.voxt",
+      "source": "Original voxel model (Candy Kingdom field prop: lollipop), written by Claude",
+      "author": "Claude",
+      "license": "original"
     }
   ]
 }

@@ -8,6 +8,7 @@ import { PLAYS } from '../content/plays';
 import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
 import { assignMarks } from './ai';
+import { propsForDrive } from './props';
 import { lineUpDefense, lineUpTeam } from './bodies';
 import { applyPerk, atSpot, bestSpot, noPerks, rollOffer, setSpot, startingRoster } from './team';
 import type {
@@ -77,6 +78,7 @@ export function createRun(
       players: [],
       defenders: [],
       witches: [],
+      props: [],
       frogLane: null,
       frogs: [],
       hex: false,
@@ -122,7 +124,11 @@ export function setUpDrive(
     down: 1,
     los: start,
   };
-  state.field = { ...state.field, witches: witches(state, spec) };
+  state.field = {
+    ...state.field,
+    witches: witches(state, spec),
+    props: propsForDrive(state.seed, area, index),
+  };
   events.push({ type: 'driveStarted', drive: index, name: spec.name });
   setUpDown(state, events);
   if (!ready) state.phase = 'draft';
@@ -195,6 +201,7 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     players,
     defenders,
     witches: state.field.witches,
+    props: state.field.props,
     frogLane: spec.frogRain ? frogLane(state) : null,
     frogs: [],
     hex: spec.hex ?? false,

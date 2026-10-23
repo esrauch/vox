@@ -9,6 +9,7 @@
  */
 import { arcadeTuning, DT } from '../content/tuning';
 import { defenderTarget, playerTarget } from './ai';
+import { clearOfProps, steerAround } from './props';
 import type { Body, RunState } from './types';
 import { add, clampLen, dist, len, norm, scale, sub, v } from './vec';
 
@@ -37,7 +38,9 @@ export function moveBodies(state: RunState): void {
       b.vel = v(0, 0);
       continue;
     }
-    const target = b.side === 'team' ? playerTarget(state, b) : defenderTarget(state, b);
+    const aim = b.side === 'team' ? playerTarget(state, b) : defenderTarget(state, b);
+    // Never aim inside a prop: aim for its edge instead.
+    const target = aim ? clearOfProps(state.field.props, aim, b.radius) : null;
     let desired = v(0, 0);
     if (target) {
       const to = sub(target, b.pos);
@@ -49,6 +52,8 @@ export function moveBodies(state: RunState): void {
             : b.speed;
       // Arrive: ease off over the last stretch so nobody orbits its target.
       desired = scale(norm(to), speed * Math.min(1, len(to) / 0.6));
+      // And go round any prop in the way.
+      desired = steerAround(state.field.props, b, desired, target);
     }
     b.vel = add(b.vel, clampLen(sub(desired, b.vel), bodyTuning.accel * DT));
     b.pos = add(b.pos, scale(b.vel, DT));

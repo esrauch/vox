@@ -4,7 +4,7 @@
  * upfield). The first drive is a handful of sleepy defenders; the Boss
  * brings the whole forest. Every area adds to every defender's stats.
  */
-import type { DefenderKind, Stats } from '../sim/types';
+import type { DefenderKind, PropKind, Stats } from '../sim/types';
 
 export interface DefenderDef {
   readonly name: string;
@@ -111,6 +111,8 @@ export type Biome = 'forest' | 'candy';
 export interface ArcadeArea {
   readonly name: string;
   readonly biome: Biome;
+  /** The props on its stretch of the field (sim/props.ts): things to go around. */
+  readonly fieldProps: readonly PropKind[];
   /** Its own look for a kind of defender (a model id), where it isn't the Forest's: the rule stays the kind's. */
   readonly looks: Partial<Record<DefenderKind, string>>;
   readonly intro: DefenseSpec;
@@ -123,6 +125,12 @@ export const FOREST: ArcadeArea = {
   name: 'The Haunted Forest',
   biome: 'forest',
   looks: {},
+  fieldProps: [
+    { model: 'forestProps/pine', radius: 0.45, scale: 0.6 },
+    { model: 'forestProps/deadTree', radius: 0.35, scale: 0.65 },
+    { model: 'forestProps/stump', radius: 0.42, scale: 1 },
+    { model: 'forestProps/toadstools', radius: 0.38, scale: 1.2 },
+  ],
   intro: {
     name: 'A Quiet Clearing',
     witches: 0,
@@ -209,6 +217,11 @@ export const CANDY_KINGDOM: ArcadeArea = {
   name: 'The Candy Kingdom',
   biome: 'candy',
   looks: { cover: 'candy/gingerbreadMan', safety: 'forest/witch' },
+  fieldProps: [
+    { model: 'candyProps/gumdrop', radius: 0.5, scale: 1 },
+    { model: 'candyProps/lollipop', radius: 0.35, scale: 1 },
+    { model: 'candyProps/candyCane', radius: 0.3, scale: 0.8 },
+  ],
   intro: {
     name: 'Gumdrop Lane',
     witches: 0,

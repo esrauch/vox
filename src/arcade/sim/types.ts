@@ -98,6 +98,20 @@ export type Ball =
 
 export type DeadBall = 'batted' | 'incomplete' | 'sacked' | 'tackled';
 
+/** A kind of prop on the field: its model, how big it is to bump into (yards), and how big it's drawn. */
+export interface PropKind {
+  readonly model: string;
+  readonly radius: number;
+  readonly scale: number;
+}
+
+/** A prop on the field (sim/props.ts): a solid circle everyone goes around; the ball flies over. */
+export interface FieldProp extends PropKind {
+  readonly id: number;
+  readonly x: number;
+  readonly y: number;
+}
+
 /** Mister Frog's Frog Rain: the lane it falls in this down (shown before the snap). */
 export interface FrogLane {
   /** The lane's middle (yards across) and half its width. */
@@ -120,6 +134,8 @@ export interface Field {
   readonly players: Player[];
   readonly defenders: Defender[];
   readonly witches: readonly Witch[];
+  /** This drive's props on the field (and the stretches either side of it). */
+  props: readonly FieldProp[];
   /** Frog Rain (Mister Frog's drive): this down's lane, and the frogs falling in it once it's snapped. */
   frogLane: FrogLane | null;
   frogs: FrogDrop[];

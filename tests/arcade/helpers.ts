@@ -101,6 +101,7 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
     players: [qb, ...team],
     defenders: defs,
     witches: [],
+    props: [],
     frogLane: null,
     frogs: [],
     hex: false,

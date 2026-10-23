@@ -24,6 +24,7 @@ import { arcadeTuning, DT } from '../content/tuning';
 import { carrierOf, chooseLane, qbOf } from './ai';
 import { bulletEnd, flightTime, pocketTime, resolveFlight, sweepAngle } from './ball';
 import { moveBodies, separate, touching } from './physics';
+import { pushOutOfProps } from './props';
 import { judgeBreakIt, startBreakIt } from './breakit';
 import { endDown, nextDown } from './run';
 import type { ArcadeEvent, ArcadeResult, BreakKind, Player, RunState, StepInput } from './types';
@@ -59,6 +60,7 @@ export function step(prev: RunState, input: StepInput = {}): ArcadeResult {
   if (state.phase !== 'play') {
     moveBodies(state);
     separate(state);
+    pushOutOfProps(state);
     return { state, events };
   }
 
@@ -69,6 +71,7 @@ export function step(prev: RunState, input: StepInput = {}): ArcadeResult {
   }
   moveBodies(state);
   separate(state);
+  pushOutOfProps(state);
   if (frogRain(state, events)) return { state, events };
   if (resolveContact(state, events)) return { state, events };
   if (dragDone(state, events)) return { state, events };

@@ -105,6 +105,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 | `breakit.ts` | The three tests (the bar, MASH!, JUKE!), each sized by the Heft or Hustle gap and narrowed by extra tacklers, with its countdown; `judgeBreakIt` gives break, drag or tackle. |
 | `team.ts` | The roster and bench: `startingRoster`, `playerStats` (own stats + perks), `fieldedStats`, the offer (`rollOffer`: two new players of different kinds, sized by zone), `bestSpot` (where a new player goes), `applyPerk` (Boss perks), spots (`BENCH_START`, `atSpot`, `setSpot`). |
 | `bodies.ts` | Stats into physics, and lining both teams up for a down. |
+| `props.ts` | Props on the field: laid per 10-yard stretch from the seed (`propsForDrive`), solid circles; `steerAround` (a body turns away from one in its path), `clearOfProps` (a target or waypoint inside one moves to its edge), `pushOutOfProps` (after the shoves). |
 | `random.ts`, `vec.ts`, `stats.ts` | Seeded randomness, 2D vectors, stat arithmetic. |
 
 **Determinism:** `step` and `dispatch` clone the state (`structuredClone`) and return a new one; the input state is never modified. A test runs long seeded runs and checks the invariants (no NaNs, nobody off the field but the carrier).
@@ -126,6 +127,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
   - `routes.ts`: the called play's routes before the snap.
   - `frogRain.ts`: Mister Frog's lane on the turf, each frog's shadow, and the frogs falling onto it.
   - `witches.ts`: each Witch on a Broom flying her row, facing her way, with her shadow.
+  - `fieldProps.ts`: the props on the field, rebuilt when a new drive lays its own.
 - **Shared with the dev pages:** `src/render/view.ts` (renderer, scene, lights) and `src/render/scenery.ts` (`ForestScenery`: the forest floor, fog, props along the field, the tree line on the Boss drive).
 - **Mobile performance:** the pixel ratio is capped at 2; keep draw calls low (target under ~100) and don't allocate in the frame loop.
 

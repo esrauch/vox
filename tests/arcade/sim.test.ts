@@ -15,6 +15,7 @@ import {
 import { breakMarker, countdown, jukeShowing } from '../../src/arcade/sim/breakit';
 import { canThrow, forceBreakKind, step } from '../../src/arcade/sim/step';
 import { litPlayers } from '../../src/arcade/render/sweep';
+import { propsForDrive } from '../../src/arcade/sim/props';
 import { DT } from '../../src/arcade/content/tuning';
 import type { ArcadeEvent, RunState } from '../../src/arcade/sim/types';
 import { dist, v } from '../../src/arcade/sim/vec';
@@ -801,5 +802,56 @@ describe('the Candy Kingdom', () => {
     const hexed = structuredClone(s);
     hexed.field.hex = true;
     expect(lit(hexed).size).toBe(0);
+  });
+});
+
+describe('props on the field', () => {
+  const tree = { id: 0, model: 'forestProps/stump', radius: 0.45, scale: 1 };
+
+  it('are laid the same for a seed, out of the middle lane, in from the sidelines, with room between', () => {
+    for (let seed = 1; seed <= 30; seed++) {
+      const props = propsForDrive(seed, seed % 2, seed % 4);
+      expect(propsForDrive(seed, seed % 2, seed % 4)).toEqual(props);
+      expect(props.length).toBeGreaterThan(0);
+      for (const p of props) {
+        expect(Math.abs(p.x) - p.radius).toBeGreaterThanOrEqual(
+          arcadeTuning.fieldProps.center - 1e-9,
+        );
+        expect(Math.abs(p.x) + p.radius).toBeLessThanOrEqual(arcadeTuning.field.halfWidth);
+      }
+    }
+    // Each area lays its own along its own stretch: the Candy Kingdom's first ten yards are candy,
+    // and the stretch behind its first drive is still the Forest's.
+    const first = propsForDrive(1, 1, 0);
+    const own = first.filter((p) => p.y >= 0 && p.y < 10);
+    expect(own.length).toBeGreaterThan(0);
+    expect(own.every((p) => p.model.startsWith('candyProps/'))).toBe(true);
+    expect(first.filter((p) => p.y < 0).every((p) => p.model.startsWith('forestProps/'))).toBe(
+      true,
+    );
+  });
+
+  it('a route straight through a prop goes round it to the end', () => {
+    const s = playState([{ pos: v(4, 0), job: { kind: 'route', to: [v(4, 10)], index: 0 } }]);
+    s.field.props = [{ ...tree, x: 4, y: 5 }];
+    const r = run(s, 5);
+    expect(dist(body(r.state, 2).pos, v(4, 10))).toBeLessThan(0.6);
+  });
+
+  it('a waypoint inside a prop counts as reached at its edge, and the route goes on', () => {
+    const s = playState([
+      { pos: v(4, 0), job: { kind: 'route', to: [v(4, 5), v(8, 5)], index: 0 } },
+    ]);
+    s.field.props = [{ ...tree, x: 4, y: 5 }];
+    const r = run(s, 5);
+    expect(dist(body(r.state, 2).pos, v(8, 5))).toBeLessThan(0.6);
+  });
+
+  it('a carrier running at a prop gets round it and on upfield', () => {
+    const s = carry(playState([{ role: 'runner', pos: v(4, 0), job: stand(v(4, 0)) }]), 2);
+    s.field.lane = 4;
+    s.field.props = [{ ...tree, x: 4, y: 3 }];
+    const r = run(s, 3);
+    expect(body(r.state, 2).pos.y).toBeGreaterThan(6);
   });
 });
