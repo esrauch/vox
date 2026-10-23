@@ -23,7 +23,8 @@ export interface Stats {
 
 export type Role = 'qb' | 'blocker' | 'runner' | 'catcher';
 export type Form = 'human' | 'golem' | 'werewolf' | 'ghost';
-export type DefenderKind = 'rusher' | 'cover' | 'zone' | 'safety' | 'bat';
+/** The defenders; `misterFrog` is the Forest's Boss (he plays deep, like the Owl). */
+export type DefenderKind = 'rusher' | 'cover' | 'zone' | 'safety' | 'bat' | 'misterFrog';
 
 /** Everything that moves and collides: a circle with stats turned into physics. */
 interface BodyBase {
@@ -97,10 +98,31 @@ export type Ball =
 
 export type DeadBall = 'batted' | 'incomplete' | 'sacked' | 'tackled';
 
+/** Mister Frog's Frog Rain: the lane it falls in this down (shown before the snap). */
+export interface FrogLane {
+  /** The lane's middle (yards across) and half its width. */
+  readonly x: number;
+  readonly half: number;
+  /** It runs from the line of scrimmage up to here (yards upfield). */
+  readonly from: number;
+  readonly to: number;
+}
+
+/** One falling frog: where it lands, and the seconds of live play until it does (below 0: landed). */
+export interface FrogDrop {
+  readonly id: number;
+  readonly x: number;
+  readonly y: number;
+  left: number;
+}
+
 export interface Field {
   readonly players: Player[];
   readonly defenders: Defender[];
   readonly witches: readonly Witch[];
+  /** Frog Rain (Mister Frog's drive): this down's lane, and the frogs falling in it once it's snapped. */
+  frogLane: FrogLane | null;
+  frogs: FrogDrop[];
   ball: Ball;
   /** The carrier's lane: the x it runs for (it picks the emptiest one itself, every moment). */
   lane: number;
@@ -323,6 +345,13 @@ export type ArcadeEvent =
       /** The field slot it took (-1: it sat on the bench), and who it put on the bench, if anyone. */
       readonly slot: number;
       readonly replaced: string | null;
+    }
+  /** A frog landed (Frog Rain); `flattened` are the bodies it knocked down. */
+  | {
+      readonly type: 'frogLanded';
+      readonly x: number;
+      readonly y: number;
+      readonly flattened: readonly number[];
     }
   | { readonly type: 'driveStarted'; readonly drive: number; readonly name: string }
   | { readonly type: 'areaCleared'; readonly area: number }

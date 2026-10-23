@@ -85,11 +85,12 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 1. **THROW** fires a bullet along the sweeping aim line.
 2. The carrier picks the emptiest lane every so often (`ai.ts`, `chooseLane`).
 3. Everyone moves toward their target (`ai.ts`) at their own speed; overlaps are pushed apart by weight (`physics.ts`).
-4. **Contact:** a much heavier blocker pancakes the defender it's on; a defender touching the carrier starts **Break it!**; running into a planted Scarecrow is a tackle.
-5. A carrier dragging tacklers goes down when the drag runs out.
-6. **The pocket:** once its sweeps are done with the ball still at the QB, it's a sack.
-7. **The bullet** in the air (`ball.ts`): who it reaches first, if anyone.
-8. The carrier over the first-down line wins the drive; over the sideline, it's down there.
+4. **Frog Rain** (Mister Frog's drive): falling frogs count down (only while the play is live) and flatten whoever they land on; a carrier hit is tackled.
+5. **Contact:** a much heavier blocker pancakes the defender it's on; a defender touching the carrier starts **Break it!**; running into a planted Scarecrow is a tackle.
+6. A carrier dragging tacklers goes down when the drag runs out.
+7. **The pocket:** once its sweeps are done with the ball still at the QB, it's a sack.
+8. **The bullet** in the air (`ball.ts`): who it reaches first, if anyone.
+9. The carrier over the first-down line wins the drive; over the sideline, it's down there.
 
 **Where each rule lives:**
 
@@ -123,6 +124,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
   - `ball.ts`, `embers.ts`: the pumpkin (it is the QB: there's no QB model), its light, and an instanced pool of embers that drift off it, trail it in flight and burst on throws and catches.
   - `sweep.ts`: the sweeping aim line, stopping at the first catch or block a throw now would meet (`aimNow`, from the sim's `aimContact`), and the receiver it stops on (`litPlayers`).
   - `routes.ts`: the called play's routes before the snap.
+  - `frogRain.ts`: Mister Frog's lane on the turf, each frog's shadow, and the frogs falling onto it.
 - **Shared with the dev pages:** `src/render/view.ts` (renderer, scene, lights) and `src/render/scenery.ts` (`ForestScenery`: the forest floor, fog, props along the field, the tree line on the Boss drive).
 - **Mobile performance:** the pixel ratio is capped at 2; keep draw calls low (target under ~100) and don't allocate in the frame loop.
 

@@ -1,0 +1,67 @@
+# Forest Frog: a small candy-purple frog with bulging eyes, the size of a
+# player. Mister Frog rains them down; later a defender of its own.
+# Built from simple shapes by a generator.
+size 9 7 7
+voxel 0.08
+colors
+  P purple
+  d purpleDark
+  L purpleLight
+  w white
+  k ink
+slice 0
+  .........
+  .........
+  .........
+  .........
+  .........
+  .........
+  .d.....d.
+slice 1
+  ..w...w..
+  .wkw.wkw.
+  ..wPPPw..
+  ..ddddd..
+  ..LLLLL..
+  ...LLL...
+  .d.....d.
+slice 2
+  .PPP.PPP.
+  .PwPPPwP.
+  .PPPPPPP.
+  .PPLLLPP.
+  .PLLLLLP.
+  ..PLLLP..
+  .d.....d.
+slice 3
+  .........
+  ..PPPPP..
+  .PPPPPPP.
+  .PPPPPPP.
+  PPPPPPPPP
+  PPPPPPPPP
+  ...PPP...
+slice 4
+  .........
+  ...PPP...
+  .PPPPPPP.
+  .PPPPPPP.
+  PPPPPPPPP
+  PPPPPPPPP
+  .P.PPP.P.
+slice 5
+  .........
+  .........
+  ..PPPPP..
+  .PPPPPPP.
+  PPPPPPPPP
+  PPPPPPPPP
+  .P.....P.
+slice 6
+  .........
+  .........
+  .........
+  ...PPP...
+  ...PPP...
+  .........
+  .........

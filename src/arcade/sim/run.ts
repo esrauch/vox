@@ -19,6 +19,8 @@ import type {
   RosterPlayer,
   RunState,
   Witch,
+  FrogDrop,
+  FrogLane,
 } from './types';
 
 export const DRIVE_KINDS: readonly DriveKind[] = ['intro', 'challenge', 'gimmick', 'boss'];
@@ -62,7 +64,16 @@ export function createRun(seed: number, roster: RosterPlayer[] = startingRoster(
     bench: [],
     perks: noPerks(),
     offer: [],
-    field: { players: [], defenders: [], witches: [], ball: { at: 'qb' }, lane: 0, drag: null },
+    field: {
+      players: [],
+      defenders: [],
+      witches: [],
+      frogLane: null,
+      frogs: [],
+      ball: { at: 'qb' },
+      lane: 0,
+      drag: null,
+    },
     snappedAt: 0,
     pause: 0,
     result: null,
@@ -117,6 +128,29 @@ function witches(state: RunState, spec: DefenseSpec): Witch[] {
   }));
 }
 
+/** Frog Rain: this down's lane, picked at random (never over the pumpkin), so you can Flip away from it. */
+function frogLane(state: RunState): FrogLane {
+  const f = arcadeTuning.frogRain;
+  const rng = rngFor(state.seed, 'frogLane', state.drivesWon, state.drive.down, state.nextId);
+  const { los } = state.drive;
+  return { x: rng.pick(f.lanes), half: f.half, from: los - f.behind, to: los + f.ahead };
+}
+
+/** Frog Rain at the snap: when and where each frog will land, along the lane. */
+function frogDrops(state: RunState): FrogDrop[] {
+  const lane = state.field.frogLane;
+  if (!lane) return [];
+  const f = arcadeTuning.frogRain;
+  const rng = rngFor(state.seed, 'frogs', state.drivesWon, state.drive.down, state.nextId);
+  const count = Math.floor((f.lasts - f.first) / f.every) + 1;
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    x: lane.x + (2 * rng.next() - 1) * lane.half * 0.8,
+    y: lane.from + rng.next() * (lane.to - lane.from),
+    left: f.first + i * f.every,
+  }));
+}
+
 /** How many play cards are dealt each down. */
 const HAND = 3;
 
@@ -146,6 +180,8 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     players,
     defenders,
     witches: state.field.witches,
+    frogLane: spec.frogRain ? frogLane(state) : null,
+    frogs: [],
     ball: { at: 'qb' },
     lane: 0,
     drag: null,
@@ -212,6 +248,7 @@ function hike(state: RunState, events: ArcadeEvent[]): void {
   if (state.phase !== 'setup' || state.called === null || !play) return;
   state.phase = 'play';
   state.snappedAt = state.time;
+  state.field.frogs = frogDrops(state);
   assignMarks(state);
   events.push({ type: 'snapped' });
   const runner =

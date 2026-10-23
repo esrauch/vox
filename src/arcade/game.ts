@@ -22,6 +22,7 @@ import { arcadeTuning, DT } from './content/tuning';
 import { ArcadeBall } from './render/ball';
 import { ArcadeBodies } from './render/bodies';
 import { ArcadeLines, createArcadeTurf } from './render/field';
+import { ArcadeFrogRain } from './render/frogRain';
 import { ArcadeRoutes } from './render/routes';
 import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
@@ -105,6 +106,7 @@ export class ArcadeGame {
   private readonly sweep: ArcadeSweep;
   private readonly lines: ArcadeLines;
   private readonly routes: ArcadeRoutes;
+  private readonly frogRain: ArcadeFrogRain;
   private readonly hud: Hud;
   private readonly controls: ArcadeControls;
 
@@ -141,6 +143,7 @@ export class ArcadeGame {
     this.view.hemi.intensity = SKY_FILL;
     this.lines = new ArcadeLines(scene);
     this.routes = new ArcadeRoutes(scene);
+    this.frogRain = new ArcadeFrogRain(scene);
     this.bodies = new ArcadeBodies(scene);
     this.ball = new ArcadeBall(scene);
     this.sweep = new ArcadeSweep(scene);
@@ -241,6 +244,7 @@ export class ArcadeGame {
     this.bodies.update(state, this.origin, dt, litPlayers(state));
     this.ball.update(state, this.origin, this.bodies, dt, performance.now() / 1000);
     this.sweep.update(state, this.origin);
+    this.frogRain.update(state, this.origin);
     this.controls.setButtons(canThrow(state) && !this.paused);
     this.controls.setBreak(this.breakView());
     this.follow(dt);
@@ -369,6 +373,17 @@ export class ArcadeGame {
         case 'brokeTackle':
         case 'dragged':
           play('burst');
+          break;
+        case 'frogLanded':
+          play('hop');
+          if (e.flattened.length > 0) {
+            // Good when it squashes the defense, bad when it squashes your own.
+            const ours = e.flattened.some((id) =>
+              this.state.field.players.some((p) => p.id === id),
+            );
+            play('burst');
+            this.hud.pop('SPLAT!', ours ? 'bad' : 'good');
+          }
           break;
         case 'outOfBounds':
           this.hud.pop('OUT OF BOUNDS', 'bad');

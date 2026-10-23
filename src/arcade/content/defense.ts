@@ -62,6 +62,15 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     planted: false,
     reachBonus: 0.3,
   },
+  misterFrog: {
+    name: 'Mister Frog',
+    creature: 'Frog in a top hat',
+    // The Forest's Boss: twice a player's size, heavy and grabby, and slow off the mark.
+    stats: { hustle: 50, hands: 70, heft: 90 },
+    radius: 1.0,
+    planted: false,
+    reachBonus: 0.6,
+  },
 };
 
 export interface DefenseSpot {
@@ -77,6 +86,8 @@ export interface DefenseSpec {
   readonly witches: number;
   /** Added to every defender's stats on top of the area's boost (a sleepy first drive is negative). */
   readonly boost: number;
+  /** Mister Frog's Frog Rain: a lane shown before each snap, frogs falling in it during the down. */
+  readonly frogRain?: boolean;
 }
 
 const d = (kind: DefenderKind, x: number, y: number): DefenseSpot => ({ kind, x, y });
@@ -152,9 +163,10 @@ export const FOREST: ArcadeArea = {
     },
   ],
   boss: {
-    name: "The Treant's Guard",
-    witches: 1,
+    name: "Mister Frog's Pond",
+    witches: 0,
     boost: 0,
+    frogRain: true,
     defenders: [
       d('rusher', -1.8, 1),
       d('rusher', 1.8, 1),
@@ -163,7 +175,8 @@ export const FOREST: ArcadeArea = {
       d('cover', 3.5, 6),
       d('zone', -2.8, 9),
       d('bat', 1.4, 7),
-      owl,
+      // Mister Frog plays deep, like the Owl.
+      d('misterFrog', 0, 12),
     ],
   },
 };

@@ -29,7 +29,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 **Done when** each drive of an area plays differently, each Boss is an event, and the balance runs hit the targets below.
 
 - [x] **Design pass** (GAMEPLAY.md, *The Run* and *The Defense*): three areas (Forest, Swamp, Farm), each Boss with one gimmick that attacks one thing you do.
-- [ ] **Forest:** the **Frog** defender; **Mister Frog** (top hat) and **Frog Rain**: a telegraphed lane before the snap, frogs falling in it with shadows first, flattening whoever is under them.
+- [~] **Forest:** the **Frog** defender; **Mister Frog** (top hat) and **Frog Rain**: a telegraphed lane before the snap, frogs falling in it with shadows first, flattening whoever is under them. *(2026-10-22: Mister Frog and Frog Rain are built: he plays deep like the Owl on the Boss drive; the lane is a purple strip off to one side, never over the pumpkin; a frog every 0.45 s of live play, its shadow showing 0.7 s first; a carrier it lands on is tackled there, anyone else is flattened for a moment; carriers steer clear of the lane. The Frog defender is still to do; its model, `forest/frog`, is the rain's.)*
 - [ ] **Swamp:** the Safety becomes a **Witch**; the **Bog Hand** (planted grabber) and **mud patches**; **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers).
 - [ ] **Farm:** the **Crow**; rows of Scarecrows; **the King** (a crowned scarecrow) and the **Two-Part Grab** (two Break it! tests in a row).
 - [~] **Models** for the new defenders and the three Bosses, readable from the game camera. *(2026-10-22: the three Bosses are modelled at twice a player's size: `bosses/misterFrog` (a white top hat), `bosses/queen` (a witch with a broom and a crown), `bosses/king` (a scarecrow with a crown). Not yet in the game or checked from the game camera.)*
@@ -74,6 +74,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Loose Ends
 
+- [ ] **The Witches aren't drawn.** The Witch on a Broom still bats passes in the sim (the Gimmick drive Witching Hour), but there's no model or view for her in the game.
 - [ ] **Listen to the three waiting song loops** (Graveyard Shuffle, Midnight Chase, Skeleton Stomp) and decide which to keep.
 - [ ] **Push** `main` (the user pushes), and delete the merged branches `design/arcade` and `design/roster-stats`.
 - [ ] **The refactors** listed in TECHNICAL.md §22.
@@ -82,6 +83,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-22:** **Mister Frog and his Frog Rain are in the game** on the Forest's Boss drive (Mister Frog's Pond): a lane shown before each snap, frogs falling in it during the down (shadows first), flattening whoever is under them and tackling a carrier. Balance: the area I Boss drive is won 90% (good bot) / 79% (reading bot), the hardest drive of its area. Until the Swamp and Farm exist, every area's Boss is Mister Frog.
 - **2026-10-22:** **Two new players, no stat boost, an endless bench.** Every TRICK OR TREAT! is two new players of different kinds (the stat boost was confusing next to the new player). The bench has no limit, newest on top: a full run ends with eleven on it. The new player card no longer says who it replaces.
 - **2026-10-22:** **New Player! and More Stats!:** each card is a player card like the roster's (the new player, or the player the boost is for, with the gains on its bars). A new player goes straight into the field slot it improves most (on a tie, its preferred position), and whoever was there sits on the bench; with the bench full, the weakest leaves. **Monster Mash is gone.**
 - **2026-10-22:** **TRICK OR TREAT! is exactly two cards, and no Skip:** a new player and a stat boost for one of your players, the boost now half on its main stat and a quarter on each other (40 / 60 / 80 in all by zone: +20 / +10 / +10 in the Forest). The pool perks are gone. Balance (the reading bot, 100 runs): always the boost 6.7 drives won, always the player 6.6.

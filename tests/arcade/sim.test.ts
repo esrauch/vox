@@ -9,10 +9,12 @@ import {
   downAndDistance,
   endDown,
   nextDown,
+  setUpDrive,
   startingRoster,
 } from '../../src/arcade/sim/run';
 import { breakMarker, countdown, jukeShowing } from '../../src/arcade/sim/breakit';
 import { canThrow, forceBreakKind, step } from '../../src/arcade/sim/step';
+import { DT } from '../../src/arcade/content/tuning';
 import type { ArcadeEvent, RunState } from '../../src/arcade/sim/types';
 import { dist, v } from '../../src/arcade/sim/vec';
 import {
@@ -704,5 +706,61 @@ describe('the play fake', () => {
   it('after a handoff the defense keeps playing the pass for a moment', () => {
     // Fooled, the Cover stays out with its Catcher; otherwise it comes for the carrier.
     expect(coverX(true)).toBeGreaterThan(coverX(false) + 0.5);
+  });
+});
+
+describe("Mister Frog's Frog Rain", () => {
+  it('his drive shows a lane each down, never over the pumpkin', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      const s = createRun(seed);
+      setUpDrive(s, 0, 3, [], true);
+      expect(s.drive.kind).toBe('boss');
+      expect(s.field.defenders.some((d) => d.kind === 'misterFrog')).toBe(true);
+      const lane = s.field.frogLane!;
+      expect(Math.abs(lane.x) - lane.half).toBeGreaterThan(1);
+    }
+    // Other drives have none.
+    const s = createRun(1);
+    expect(s.field.frogLane).toBeNull();
+  });
+
+  const frogAt = (x: number, y: number, left = DT * 2) => ({ id: 0, x, y, left });
+
+  it('a frog landing on the carrier tackles it there', () => {
+    const s = carry(playState([{ role: 'runner', pos: v(4, 3), job: stand(v(4, 3)) }]), 2);
+    s.field.frogs = [frogAt(4, 3)];
+    const r = run(s, 0.2);
+    expect(ofType(r.events, 'frogLanded')[0]?.flattened).toContain(2);
+    expect(ofType(r.events, 'tackled')).toHaveLength(1);
+  });
+
+  it('a frog flattens a receiver or a defender under it, and misses everyone else', () => {
+    const s = playState(
+      [
+        { pos: v(4, 6), job: stand(v(4, 6)) },
+        { pos: v(-4, 6), job: stand(v(-4, 6)) },
+      ],
+      [{ kind: 'cover', pos: v(4.6, 6.4) }],
+    );
+    s.field.frogs = [frogAt(4, 6)];
+    const r = run(s, 0.1);
+    expect(ofType(r.events, 'frogLanded')[0]?.flattened.slice().sort()).toEqual([100, 2]);
+    expect(body(r.state, 2).down).toBeGreaterThan(0);
+    expect(body(r.state, 3).down).toBe(0);
+  });
+
+  it('the rain waits while Break it! is on', () => {
+    const s = carry(
+      playState([{ role: 'runner', pos: v(0, 2) }], [{ kind: 'cover', pos: v(0, 4) }]),
+      2,
+    );
+    s.field.lane = 0;
+    let st = untilGrabbed(s).state;
+    expect(st.phase).toBe('breakit');
+    st.field.frogs = [frogAt(4, 6, 0.5)];
+    // Well inside the countdown, so it's still Break it!.
+    for (let i = 0; i < 30; i++) st = step(st).state;
+    expect(st.phase).toBe('breakit');
+    expect(st.field.frogs[0]?.left).toBe(0.5);
   });
 });

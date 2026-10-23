@@ -29,6 +29,7 @@ const DEFENDER_MODEL: Readonly<Record<DefenderKind, string>> = {
   zone: 'forest/waller',
   safety: 'forest/safety',
   bat: 'forest/picker',
+  misterFrog: 'bosses/misterFrog',
 };
 
 /** A Golem's linebacker build: its model stretched (x/z wide, y tall). Everyone else is drawn as modelled. */

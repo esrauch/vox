@@ -126,6 +126,12 @@
       "source": "Original voxel model (Boss: the King, a scarecrow in a gold crown), written by Claude",
       "author": "Claude",
       "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forest/frog.voxt",
+      "source": "Original voxel model (Forest Frog: a small candy-purple frog, rained down by Mister Frog), written by Claude",
+      "author": "Claude",
+      "license": "original"
     }
   ]
 }

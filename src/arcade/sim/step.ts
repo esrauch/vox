@@ -27,7 +27,7 @@ import { moveBodies, separate, touching } from './physics';
 import { judgeBreakIt, startBreakIt } from './breakit';
 import { endDown, nextDown } from './run';
 import type { ArcadeEvent, ArcadeResult, BreakKind, Player, RunState, StepInput } from './types';
-import { norm, scale, sub } from './vec';
+import { dist, norm, scale, sub, v } from './vec';
 
 const { contact, field } = arcadeTuning;
 
@@ -69,6 +69,7 @@ export function step(prev: RunState, input: StepInput = {}): ArcadeResult {
   }
   moveBodies(state);
   separate(state);
+  if (frogRain(state, events)) return { state, events };
   if (resolveContact(state, events)) return { state, events };
   if (dragDone(state, events)) return { state, events };
   if (pocket(state, events)) return { state, events };
@@ -183,6 +184,45 @@ function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void
     return;
   }
   tackle(state, carrier, t.tacklers[0] ?? -1, events);
+}
+
+/**
+ * Frog Rain (Mister Frog): each frog's countdown runs only while the play is
+ * live; when one lands it flattens whoever is under it, and a carrier it lands
+ * on is tackled there. Landed frogs hop off after a moment.
+ */
+function frogRain(state: RunState, events: ArcadeEvent[]): boolean {
+  const f = arcadeTuning.frogRain;
+  const frogs = state.field.frogs;
+  if (frogs.length === 0) return false;
+  const carrier = carrierOf(state);
+  let tackled = false;
+  for (const frog of frogs) {
+    const before = frog.left;
+    frog.left -= DT;
+    if (before <= 0 || frog.left > 0) continue;
+    const at = v(frog.x, frog.y);
+    const under = [...state.field.players, ...state.field.defenders].filter(
+      (b) =>
+        b.down <= 0 &&
+        !(b.side === 'team' && b.role === 'qb') &&
+        !(b.side === 'defense' && (b.planted || b.kind === 'misterFrog')) &&
+        dist(b.pos, at) <= f.radius + b.radius,
+    );
+    for (const b of under) {
+      b.down = f.flatTime;
+      b.vel = v(0, 0);
+      if (b.side === 'defense') b.latch = null;
+    }
+    events.push({ type: 'frogLanded', x: frog.x, y: frog.y, flattened: under.map((b) => b.id) });
+    if (carrier && under.includes(carrier)) tackled = true;
+  }
+  state.field.frogs = frogs.filter((frog) => frog.left > -0.6);
+  if (tackled && carrier) {
+    tackle(state, carrier, -1, events);
+    return true;
+  }
+  return false;
 }
 
 /** A carrier dragging tacklers goes down once it reaches the end of the drag. */

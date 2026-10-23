@@ -110,7 +110,8 @@ export function lineUpDefense(
   const loop = arcadeTuning.defense.batLoop;
   return spec.defenders.map((spot, i): Defender => {
     const def = DEFENDERS[spot.kind];
-    let y = spot.kind === 'safety' ? Math.max(los + 8, firstDown + 1) : los + spot.y;
+    const deep = spot.kind === 'safety' || spot.kind === 'misterFrog';
+    let y = deep ? Math.max(los + 8, firstDown + 1) : los + spot.y;
     if (kind === 'boss') y = Math.min(y, firstDown + 9);
     const home = v(spot.x, y);
     const stats = plus(def.stats, even(boost));

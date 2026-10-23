@@ -149,7 +149,8 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
       const behind = heading.x === 0 && heading.y === 0 ? v(0, -1) : scale(heading, -1);
       return add(mark.pos, scale(behind, defense.coverTrail));
     }
-    case 'safety': {
+    case 'safety':
+    case 'misterFrog': {
       const deepest = state.field.players
         .filter((p) => p.role !== 'qb')
         .sort((a, b) => b.pos.y - a.pos.y || a.id - b.id)[0];
@@ -193,7 +194,8 @@ export function assignMarks(state: RunState): void {
 }
 
 /**
- * The lane a carrier runs for (GAMEPLAY.md: no steering): of the lanes
+ * The lane a carrier runs for (GAMEPLAY.md: no steering), keeping out of
+ * any Frog Rain lane: of the lanes
  * across the field, the one with the most room ahead of it, counting the
  * defenders still up in front, preferring to stay near where it is. The QB
  * running it does the same: it drifts to the open side.
@@ -211,7 +213,14 @@ export function chooseLane(state: RunState, carrier: Player): number {
       ...ahead.map((d) => Math.abs(d.pos.x - x) + 0.35 * (d.pos.y - carrier.pos.y)),
       6,
     );
-    const score = room - 0.15 * Math.abs(x - carrier.pos.x);
+    // Frog Rain: keep out of the lane the frogs are falling in, if it's still ahead.
+    const frogs = state.field.frogLane;
+    const inRain =
+      frogs !== null &&
+      state.field.frogs.some((f) => f.left > 0) &&
+      carrier.pos.y < frogs.to &&
+      Math.abs(x - frogs.x) < frogs.half + carrier.radius;
+    const score = room - 0.15 * Math.abs(x - carrier.pos.x) - (inRain ? 4 : 0);
     if (score > bestScore) {
       bestScore = score;
       best = x;
