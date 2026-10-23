@@ -174,7 +174,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   | **Golem** | = | -- | ++ | Blocker |
   | **Werewolf** | -- | ++ | = | Runner |
 
-  Individuals vary: a recruit's stats land within ±10 of its kind's, so no two are alike (your starting seven are the plain 50s). **A new kind should follow the same rule:** one stat up, one down, a total of 150, and a position it suits.
+  **The kind is a shape, not a total:** a recruit's stats add up to its zone's total (200, 250, 300; TRICK OR TREAT!), shared out in its kind's shape and nudged a little, so no two are alike (your starting seven are the plain 50s). **A new kind should follow the same rule:** one stat up, one down, a total of 150 for its shape, and a position it suits.
 - **Everyone starts human and plain.** A fresh team is a bit slow, a bit light, a bit clumsy: good enough for the sleepy first drive, not for the Boss.
 - **Any player can play any position** (2 Blocker slots, 2 Runner slots, 3 Catcher slots). The plays only ever talk to the slots, so the team always lines up 2 / 2 / 3; who you put where is up to you, and their stats decide how well it works. A Golem in a Catcher slot is a slow Catcher nobody can tackle.
 - **The numbers live on the roster screen** (between drives). On the field, the stats only show through what happens.
@@ -183,9 +183,19 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Building Up: TRICK OR TREAT!
 
-**After every won drive: TRICK OR TREAT!** Three perks are offered, each with a **rarity**; pick one (or skip) and play on; a new player keeps the screen open until you tap **Done**. **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
+**After every won drive: TRICK OR TREAT!** Three cards are offered, always the same three kinds; pick one (or skip) and play on; a new player keeps the screen open until you tap **Done**. **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
 
-### The perks
+### The offer
+
+| Card | What it is | Forest | Swamp | Farm |
+|---|---|---|---|---|
+| **A new player** | A random kind, its stats adding up to the zone's total, shared out in its kind's shape (a Ghost mostly Hands, a Golem mostly Heft, a Human evenly), a little different every time | 200 | 250 | 300 |
+| **A stat boost** | One of your field players, picked at random, gets this much on its position's main stat (Heft for a Blocker, Hustle for a Runner, Hands for a Catcher), for good; its roster row says so | +40 | +60 | +80 |
+| **A perk from the pool** | One perk of the zone's rarity, below | common | rare | epic *(rare until there are epics)* |
+
+The zone is the one of the drive about to be played, so the offer after the Forest's Boss is already the Swamp's. *(Balance runs, 2026-10-22: always taking the stat boost does about as well as always taking the new player. Always taking the pool perk does better: +10 to a stat for everyone is a lot.)*
+
+### The pool
 
 | Rarity | Perk | What it does |
 |---|---|---|
@@ -196,16 +206,15 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | Rare | **Second Wind** | Once per drive, a BAD Break it! counts as OK |
 | Rare | **Candy Corn Magnet** | A ball that would fall incomplete gets twice the reach from your Catchers |
 | Epic | **Haunted Line** *(not built yet)* | Defenders your Blockers pancake come back as your ghosts for the rest of the down, and block for you |
-| Varies | **New player** | A recruit joins your team (below): a plain human is common, a monster rare, a star (+15 to everything) epic |
 
-▲ *Rarity sets how often a perk turns up, and later areas offer rarer ones more often.*
+Hot Arm isn't in the pool: it's Mister Frog's Boss perk.
 
 ### New players
 
 **A recruit arrives with a little bio card:** a **name**, its **Heft / Hands / Hustle**, its **kind** (Human, Ghost, Golem, Werewolf, Skeleton…), and a **preferred position**: the one its best stat suits (Heft → Blocker, Hustle → Runner, Hands → Catcher). It takes a seat on the bench, and the roster stays open so you can swap it in (then **Done**). With the bench full, you pick who it replaces, on the field or the bench. It can go in any slot, but it plays best in its preferred one. Only the seven on the field play, and only they count for team bonuses like Monster Mash.
 
-> **Bonesy Malone** · Skeleton · *prefers Runner*
-> Heft 45 · Hands 50 · Hustle 75
+> **Howlin' Hal** · Werewolf · *prefers Runner*
+> Heft 65 · Hands 40 · Hustle 95 *(a Forest recruit: 200 in all)*
 
 ### Team bonuses
 

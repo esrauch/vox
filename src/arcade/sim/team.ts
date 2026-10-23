@@ -9,10 +9,9 @@ import {
   MONSTER_MASH_BONUS,
   PERK_RARITY,
   POSITIONS,
-  RARITY_WEIGHT,
   RECRUIT_NAMES,
-  RECRUIT_STAR_BONUS,
   STARTING_NAMES,
+  ZONE_OFFER,
 } from '../content/perks';
 import { BASE_STATS, FORM_STATS, POSITION_STAT, ROSTER_ROLES } from '../content/team';
 import type { Rng } from '../../sim/rng';
@@ -83,64 +82,73 @@ export function playerStats(state: RunState, slot: number): Stats {
 
 // ── The offer ───────────────────────────────────────────────────────────────
 
-/** Three perks, each of a rarity drawn by RARITY_WEIGHT, never the same perk twice. */
+/**
+ * TRICK OR TREAT!'s three cards: a new player, a stat boost for one of
+ * yours, and a perk from the pool at the zone's rarity (ZONE_OFFER: by the
+ * zone of the drive about to be played).
+ */
 export function rollOffer(state: RunState): Perk[] {
   const rng = rngFor(state.seed, 'perks', state.drivesWon);
-  const offer: Perk[] = [];
-  for (let tries = 0; offer.length < 3 && tries < 40; tries++) {
-    const perk = drawPerk(state, rng, drawRarity(rng));
-    if (perk && !offer.some((o) => sameAs(o, perk))) offer.push(perk);
-  }
+  const zone = ZONE_OFFER[Math.min(state.drive.area, ZONE_OFFER.length - 1)] ?? ZONE_OFFER[0];
+  if (!zone) return [];
+  const offer: Perk[] = [
+    { rarity: 'common', kind: 'recruit', player: makeRecruit(rng, zone.recruitTotal) },
+    statBoost(state, rng, zone.statBoost),
+  ];
+  const perk = poolPerk(state, rng, zone.rarity);
+  if (perk) offer.push(perk);
   return offer;
 }
 
-function drawRarity(rng: Rng): Rarity {
-  const r = rng.next();
-  if (r < RARITY_WEIGHT.epic) return 'epic';
-  if (r < RARITY_WEIGHT.epic + RARITY_WEIGHT.rare) return 'rare';
-  return 'common';
+/** A boost to one field player's main stat: the one its position leans on. */
+function statBoost(state: RunState, rng: Rng, amount: number): Perk {
+  const spot = rng.int(0, state.roster.length - 1);
+  const role = ROSTER_ROLES[spot];
+  const stat = POSITION_STAT[role && role !== 'qb' ? role : 'catcher'];
+  return {
+    rarity: 'common',
+    kind: 'playerStat',
+    spot,
+    name: state.roster[spot]?.name ?? '?',
+    stat,
+    amount,
+  };
 }
 
-function drawPerk(state: RunState, rng: Rng, rarity: Rarity): Perk | null {
-  // Recruits come at every rarity; the rest come at their own.
-  if (rng.next() < 0.3) return { rarity, kind: 'recruit', player: makeRecruit(rng, rarity) };
-  const kinds = (Object.keys(PERK_RARITY) as (keyof typeof PERK_RARITY)[]).filter(
-    (k) => PERK_RARITY[k] === rarity && !owned(state.perks, k),
-  );
-  if (kinds.length === 0) return null;
-  const kind = rng.pick(kinds);
-  const stat = rng.pick(STATS);
-  switch (kind) {
-    case 'allStat':
-      return { rarity, kind, stat, amount: ALL_STAT_BONUS };
-    case 'kindStat':
-      // A kind you have on the team, so it's worth something.
-      return {
-        rarity,
-        kind,
-        stat,
-        form: rng.pick(state.roster.map((p) => p.kind)),
-        amount: KIND_STAT_BONUS,
-      };
-    default:
-      return { rarity, kind };
+const RARITIES: readonly Rarity[] = ['common', 'rare', 'epic'];
+
+/** A perk from the pool at this rarity, or the nearest lower one that has any left. */
+function poolPerk(state: RunState, rng: Rng, rarity: Rarity): Perk | null {
+  for (let r = RARITIES.indexOf(rarity); r >= 0; r--) {
+    const at = RARITIES[r] ?? 'common';
+    const kinds = (Object.keys(PERK_RARITY) as (keyof typeof PERK_RARITY)[]).filter(
+      (k) => PERK_RARITY[k] === at && !owned(state.perks, k),
+    );
+    if (kinds.length === 0) continue;
+    const kind = rng.pick(kinds);
+    const stat = rng.pick(STATS);
+    switch (kind) {
+      case 'allStat':
+        return { rarity: at, kind, stat, amount: ALL_STAT_BONUS };
+      case 'kindStat':
+        // A kind you have on the team, so it's worth something.
+        return {
+          rarity: at,
+          kind,
+          stat,
+          form: rng.pick(state.roster.map((p) => p.kind)),
+          amount: KIND_STAT_BONUS,
+        };
+      default:
+        return { rarity: at, kind };
+    }
   }
+  return null;
 }
 
 /** The one-off perks can only be had once. */
 function owned(perks: Perks, kind: keyof typeof PERK_RARITY): boolean {
-  return (
-    (kind === 'secondWind' && perks.secondWind) ||
-    (kind === 'magnet' && perks.magnet) ||
-    (kind === 'hotArm' && perks.throwScale > 1)
-  );
-}
-
-function sameAs(a: Perk, b: Perk): boolean {
-  if (a.kind !== b.kind) return false;
-  if (a.kind === 'allStat' && b.kind === 'allStat') return a.stat === b.stat;
-  if (a.kind === 'kindStat' && b.kind === 'kindStat') return a.stat === b.stat && a.form === b.form;
-  return a.kind !== 'recruit';
+  return (kind === 'secondWind' && perks.secondWind) || (kind === 'magnet' && perks.magnet);
 }
 
 /** The position a player's best stat suits (a tie, at random among them). */
@@ -149,24 +157,34 @@ function suits(rng: Rng, stats: Stats): Position {
   return rng.pick(POSITIONS.filter((p) => stats[POSITION_STAT[p]] === best));
 }
 
-/** A recruit: a name, a kind (monsters are rarer), a position it prefers, and stats to match. */
-function makeRecruit(rng: Rng, rarity: Rarity): RosterPlayer {
-  const kind: Form = rarity === 'common' ? 'human' : rng.pick(KINDS.filter((k) => k !== 'human'));
-  const star = rarity === 'epic' ? RECRUIT_STAR_BONUS : 0;
-  // Each stat a little either way (in fives), so no two of a kind are quite alike.
-  const jitter = (): number => 5 * rng.int(-2, 2);
-  const base = plus(BASE_STATS, FORM_STATS[kind]);
+/** How much each stat of a recruit may wander from its kind's shape (a share, either way). */
+const RECRUIT_SPREAD = 0.2;
+
+/**
+ * A recruit: a random kind, and stats adding up to `total`, shared out in
+ * the shape of its kind (a Ghost mostly Hands, a Golem mostly Heft; a Human
+ * evenly), each share nudged a little at random, in fives.
+ */
+function makeRecruit(rng: Rng, total: number): RosterPlayer {
+  const kind = rng.pick(KINDS);
+  const shape = plus(BASE_STATS, FORM_STATS[kind]);
+  const weight = (k: keyof Stats): number => shape[k] * (1 + RECRUIT_SPREAD * (2 * rng.next() - 1));
+  const w = { hustle: weight('hustle'), hands: weight('hands'), heft: weight('heft') };
+  const sum = w.hustle + w.hands + w.heft;
+  const fives = (x: number): number => 5 * Math.round((total * x) / sum / 5);
+  const rounded = { hustle: fives(w.hustle), hands: fives(w.hands), heft: fives(w.heft) };
+  // Rounding can leave it a five off: put the difference on its biggest stat.
+  const biggest = STATS.reduce((a, b) => (rounded[b] > rounded[a] ? b : a));
   const stats: Stats = {
-    hustle: base.hustle + star + jitter(),
-    hands: base.hands + star + jitter(),
-    heft: base.heft + star + jitter(),
+    ...rounded,
+    [biggest]: rounded[biggest] + total - (rounded.hustle + rounded.hands + rounded.heft),
   };
   return { name: rng.pick(RECRUIT_NAMES[kind]), kind, preferred: suits(rng, stats), stats };
 }
 
 // ── Taking a perk ───────────────────────────────────────────────────────────
 
-/** Apply a perk to the team (a recruit is placed separately, once you've chosen its slot). */
+/** Apply a perk to the team (a recruit and a player's stat boost are handled by `pick`, in run.ts). */
 export function applyPerk(perks: Perks, perk: Perk): void {
   switch (perk.kind) {
     case 'allStat':
@@ -194,6 +212,7 @@ export function applyPerk(perks: Perks, perk: Perk): void {
       perks.throwScale *= 2;
       break;
     case 'recruit':
+    case 'playerStat':
       break;
   }
 }

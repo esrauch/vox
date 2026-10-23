@@ -265,7 +265,17 @@ function pick(state: RunState, index: number, events: ArcadeEvent[]): void {
     }
     return;
   }
-  applyPerk(state.perks, perk);
+  if (perk.kind === 'playerStat') {
+    // The boost is the player's own, wherever it plays from now on.
+    const p = atSpot(state, perk.spot);
+    if (p)
+      setSpot(state, perk.spot, {
+        ...p,
+        stats: { ...p.stats, [perk.stat]: p.stats[perk.stat] + perk.amount },
+      });
+  } else {
+    applyPerk(state.perks, perk);
+  }
   leaveDraft(state);
 }
 
@@ -287,6 +297,10 @@ function swap(state: RunState, a: number, b: number): void {
   if (state.phase !== 'draft' || state.recruit || !pa || !pb || a === b) return;
   setSpot(state, a, pb);
   setSpot(state, b, pa);
+  // A stat boost on offer follows its player to the new spot.
+  state.offer = state.offer.map((o) =>
+    o.kind !== 'playerStat' ? o : { ...o, spot: o.spot === a ? b : o.spot === b ? a : o.spot },
+  );
   relineTeam(state);
 }
 
@@ -342,10 +356,10 @@ export function nextDown(state: RunState, events: ArcadeEvent[]): void {
       state.phase = 'won';
       return;
     }
-    // TRICK OR TREAT! happens in front of the next drive, already lined up.
-    state.offer = rollOffer(state);
+    // TRICK OR TREAT! happens in front of the next drive, already lined up (its zone sets the offer).
     if (lastDrive) setUpDrive(state, drive.area + 1, 0, events, false);
     else setUpDrive(state, drive.area, drive.index + 1, events, false);
+    state.offer = rollOffer(state);
     return;
   }
   if (drive.down >= arcadeTuning.drive.downs) {

@@ -3,6 +3,7 @@ import { arcadeTuning } from '../../src/arcade/content/tuning';
 import { pocketTime, sweepSpeed } from '../../src/arcade/sim/ball';
 import { createRun, dispatch, endDown, nextDown } from '../../src/arcade/sim/run';
 import { forceBreakKind } from '../../src/arcade/sim/step';
+import { ZONE_OFFER } from '../../src/arcade/content/perks';
 import { BENCH_SIZE, POSITION_STAT } from '../../src/arcade/content/team';
 import { BENCH_START, applyPerk, noPerks, playerStats, rollOffer } from '../../src/arcade/sim/team';
 import type { ArcadeEvent, Perk, RunState } from '../../src/arcade/sim/types';
@@ -26,14 +27,75 @@ const offering = (perk: Perk): RunState => {
 };
 
 describe('TRICK OR TREAT!', () => {
-  it('after a won drive, three different perks are offered, each with a rarity', () => {
+  it('after a won drive, three cards are offered, each with a rarity', () => {
     for (let seed = 1; seed <= 20; seed++) {
       const s = atDraft(seed);
       expect(s.phase).toBe('draft');
       expect(s.offer).toHaveLength(3);
-      expect(new Set(s.offer.map((p) => JSON.stringify(p))).size).toBe(3);
       for (const p of s.offer) expect(['common', 'rare', 'epic']).toContain(p.rarity);
     }
+  });
+
+  /** The offer in a zone (0 Forest, 1 Swamp, 2 Farm). */
+  const offerIn = (zone: number, seed: number) => {
+    const s = atDraft(seed);
+    s.drive = { ...s.drive, area: zone };
+    return { s, offer: rollOffer(s) };
+  };
+
+  it('every offer is a new player, a stat boost for one of yours, and a pool perk', () => {
+    for (let seed = 1; seed <= 30; seed++) {
+      const { offer } = offerIn(0, seed);
+      expect(offer.map((p) => p.kind).slice(0, 2)).toEqual(['recruit', 'playerStat']);
+      expect(offer).toHaveLength(3);
+      // In the Forest the third card is a common; Hot Arm is a Boss perk, never offered.
+      expect(offer[2]!.rarity).toBe('common');
+      expect(offer.some((p) => p.kind === 'hotArm')).toBe(false);
+    }
+  });
+
+  it('the new player and the boost grow by zone: 200 / 250 / 300 and +40 / +60 / +80', () => {
+    ZONE_OFFER.forEach((zone, i) => {
+      for (let seed = 1; seed <= 20; seed++) {
+        const { offer } = offerIn(i, seed);
+        const recruit = offer[0]!;
+        const boost = offer[1]!;
+        if (recruit.kind !== 'recruit' || boost.kind !== 'playerStat') throw new Error('offer');
+        const st = recruit.player.stats;
+        expect(st.hustle + st.hands + st.heft).toBe(zone.recruitTotal);
+        expect(boost.amount).toBe(zone.statBoost);
+      }
+    });
+  });
+
+  it('a new player is shaped like its kind: a Ghost mostly Hands, a Golem mostly Heft', () => {
+    for (let seed = 1; seed <= 60; seed++) {
+      const recruit = offerIn(0, seed).offer[0]!;
+      if (recruit.kind !== 'recruit') continue;
+      const { kind, stats } = recruit.player;
+      if (kind === 'ghost') expect(stats.hands).toBeGreaterThan(stats.heft);
+      if (kind === 'golem') expect(stats.heft).toBeGreaterThan(stats.hustle);
+      if (kind === 'werewolf') expect(stats.hustle).toBeGreaterThan(stats.hands);
+    }
+  });
+
+  it('the stat boost goes to that player for good, and follows it through a swap', () => {
+    const s = atDraft();
+    const boost = {
+      rarity: 'common' as const,
+      kind: 'playerStat' as const,
+      spot: 0,
+      name: s.roster[0]!.name,
+      stat: 'heft' as const,
+      amount: 20,
+    };
+    s.offer = [boost, ...s.offer.slice(1)];
+    const heft = s.roster[0]!.stats.heft;
+    const swapped = dispatch(s, { type: 'swap', a: 0, b: 4 }).state;
+    const taken = dispatch(swapped, { type: 'pick', offer: 0 }).state;
+    expect(taken.roster[4]!.name).toBe(boost.name);
+    expect(taken.roster[4]!.stats.heft).toBe(heft + 20);
+    expect(taken.phase).toBe('setup');
   });
 
   it('+10 to a stat for everyone shows up on every player in the line-up', () => {

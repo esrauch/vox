@@ -61,6 +61,12 @@ export function perkFace(perk: Perk): CardFace {
       return { rarity, name: 'Hot Arm', blurb: 'The ball flies twice as fast.' };
     case 'recruit':
       return { rarity, name: `New: ${perk.player.name}`, blurb: bio(perk.player) };
+    case 'playerStat':
+      return {
+        rarity,
+        name: `+${perk.amount} ${STAT[perk.stat]}`,
+        blurb: `For ${perk.name}, for good.`,
+      };
   }
 }
 
@@ -82,6 +88,11 @@ const withDelta = (shown: StatBar[], before: Stats, after: Stats): StatBar[] =>
  */
 export function trickOrTreatView(state: RunState, selected: number | null): DraftView {
   const recruit = state.recruit;
+  // The player a stat boost on offer is for: its row says so.
+  const boostNote = (spot: number): string => {
+    const b = state.offer.find((o) => o.kind === 'playerStat' && o.spot === spot);
+    return b?.kind === 'playerStat' ? `on offer: +${b.amount} ${STAT[b.stat]}` : '';
+  };
   // ★ on the position heading the player in question prefers: the recruit waiting, or the player tapped.
   const starred = (recruit ?? (selected === null ? undefined : atSpot(state, selected)))?.preferred;
   const roster: RosterRow[] = state.roster.map((p, slot) => {
@@ -91,6 +102,7 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
     const notes = [
       p.preferred !== position ? `prefers ${POSITION[p.preferred]}` : '',
       uniqueKind(state.roster, slot) ? `Monster Mash +${MONSTER_MASH_BONUS}` : '',
+      boostNote(slot),
     ];
     let shown = bars(stats, POSITION_STAT[position]);
     if (recruit) {
@@ -123,7 +135,9 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
       form: KIND[p.kind],
       icon: kindIcon(p.kind),
       stats: recruit ? withDelta(shown, stats, fieldedStats(state, recruit)) : shown,
-      note: `prefers ${POSITION[p.preferred]}`,
+      note: [`prefers ${POSITION[p.preferred]}`, boostNote(BENCH_START + seat)]
+        .filter(Boolean)
+        .join(' · '),
     };
   });
   if (recruit) {

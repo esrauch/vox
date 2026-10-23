@@ -5,14 +5,32 @@
  */
 import type { Form, Position, Rarity } from '../sim/types';
 
-/** How often each rarity turns up in an offer (shares of 1). */
-export const RARITY_WEIGHT: Readonly<Record<Rarity, number>> = {
-  common: 0.6,
-  rare: 0.32,
-  epic: 0.08,
-};
+/**
+ * Every offer is three cards: a new player, a stat boost for one of yours,
+ * and one perk from the pool at the zone's rarity. These are by zone
+ * (Forest, Swamp, Farm), for the zone of the drive about to be played.
+ */
+export const ZONE_OFFER: readonly {
+  /** A new player's Hustle + Hands + Heft. */
+  readonly recruitTotal: number;
+  /**
+   * What the stat boost adds to one player's main stat. Tuned (balance runs, 2026-10-22) so
+   * always taking it does about as well as always taking the new player.
+   */
+  readonly statBoost: number;
+  /** The rarity of the third card (a lower one if none of that rarity is left). */
+  readonly rarity: Rarity;
+}[] = [
+  { recruitTotal: 200, statBoost: 40, rarity: 'common' },
+  { recruitTotal: 250, statBoost: 60, rarity: 'rare' },
+  { recruitTotal: 300, statBoost: 80, rarity: 'epic' },
+];
 
-/** The perks that aren't recruits, by rarity. A perk you already have (a one-off) isn't offered again. */
+/**
+ * The pool for the third card, by rarity. A perk you already have (a
+ * one-off) isn't offered again. Hot Arm isn't here: it's Mister Frog's
+ * Boss perk.
+ */
 export const PERK_RARITY = {
   allStat: 'common',
   extraSweep: 'common',
@@ -20,7 +38,6 @@ export const PERK_RARITY = {
   slowSweep: 'rare',
   secondWind: 'rare',
   magnet: 'rare',
-  hotArm: 'rare',
 } as const satisfies Record<string, Rarity>;
 
 /** How much the stat perks add (stats are on a 50-is-ordinary scale; 10 is a step). */
@@ -47,9 +64,6 @@ export const RECRUIT_NAMES: Readonly<Record<Form, readonly string[]>> = {
   golem: ['Rocky Rumble', 'Gravel Gus', 'Boulder Bob', 'Pebbles McStone'],
   werewolf: ['Howlin’ Hal', 'Fang Fennimore', 'Lupe Moonrun', 'Shaggy Shanks'],
 };
-
-/** A recruit's rarity: a plain human is common, a monster rare, and a star (extra stats) epic. */
-export const RECRUIT_STAR_BONUS = 15;
 
 /** Every position, for recruits' preferences. */
 export const POSITIONS: readonly Position[] = ['blocker', 'runner', 'catcher'];

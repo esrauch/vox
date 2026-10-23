@@ -81,8 +81,10 @@ interface Scenario {
   readonly training?: Partial<Stats>;
   /** …or only to one role's. */
   readonly roleTraining?: Partial<Record<Role, Partial<Stats>>>;
-  /** Take a random TRICK OR TREAT! perk after each won drive (otherwise skip). */
+  /** Take a TRICK OR TREAT! card after each won drive (otherwise skip)… */
   readonly perks?: boolean;
+  /** …always this one: the new player, the stat boost, the pool perk, or (default) at random. */
+  readonly pick?: 'player' | 'stat' | 'pool' | 'random';
 }
 
 /** BALANCE_SCENARIO='{"name": "...", ...}' runs just that one scenario instead. */
@@ -91,7 +93,10 @@ const SCENARIOS: readonly Scenario[] = custom
   ? [JSON.parse(custom) as Scenario]
   : [
       { name: 'All human (never upgrade)' },
-      { name: 'Random TRICK OR TREAT! perks', perks: true },
+      { name: 'Random TRICK OR TREAT! cards', perks: true },
+      { name: 'Always the new player', perks: true, pick: 'player' },
+      { name: 'Always the stat boost', perks: true, pick: 'stat' },
+      { name: 'Always the pool perk', perks: true, pick: 'pool' },
       { name: 'Trained: +10 Hustle', training: { hustle: 10 } },
       { name: 'Trained: +10 Hands', training: { hands: 10 } },
       { name: 'Trained: +10 Heft', training: { heft: 10 } },
@@ -311,10 +316,24 @@ function count(
  * bench full, the recruit replaces the weakest one on the bench. With
  * `perks` off, it skips.
  */
-function draftPick(state: RunState, rng: Rng, perks: boolean): RunState {
-  if (!perks || state.offer.length === 0) return dispatch(state, { type: 'skipDraft' }).state;
+function draftPick(state: RunState, rng: Rng, scenario: Scenario): RunState {
+  if (!scenario.perks || state.offer.length === 0) {
+    return dispatch(state, { type: 'skipDraft' }).state;
+  }
   const before = state.bench.length;
-  let s = dispatch(state, { type: 'pick', offer: rng.int(0, state.offer.length - 1) }).state;
+  const want = { player: 'recruit', stat: 'playerStat', pool: null, random: undefined }[
+    scenario.pick ?? 'random'
+  ];
+  const index =
+    want === undefined
+      ? rng.int(0, state.offer.length - 1)
+      : Math.max(
+          0,
+          state.offer.findIndex((p) =>
+            want === null ? p.kind !== 'recruit' && p.kind !== 'playerStat' : p.kind === want,
+          ),
+        );
+  let s = dispatch(state, { type: 'pick', offer: index }).state;
   const total = (st: Stats): number => st.hustle + st.hands + st.heft;
   if (s.recruit) {
     const weakest = s.bench
@@ -359,7 +378,7 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
       bump(t.attempts, key);
     }
     if (state.phase === 'draft') {
-      state = draftPick(state, rng, scenario.perks ?? false);
+      state = draftPick(state, rng, scenario);
       continue;
     }
     if (state.phase === 'setup') {

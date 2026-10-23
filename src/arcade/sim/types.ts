@@ -201,6 +201,14 @@ export type Perk = { readonly rarity: Rarity } & (
   | { readonly kind: 'magnet' }
   | { readonly kind: 'hotArm' }
   | { readonly kind: 'recruit'; readonly player: RosterPlayer }
+  /** A boost to one player's main stat (for the position it's in when offered); `spot` follows it through swaps. */
+  | {
+      readonly kind: 'playerStat';
+      readonly spot: number;
+      readonly name: string;
+      readonly stat: keyof Stats;
+      readonly amount: number;
+    }
 );
 
 /** Everything the perks taken so far add up to. */

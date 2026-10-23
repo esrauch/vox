@@ -83,6 +83,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-22:** **TRICK OR TREAT! is always three kinds of card:** a new player (stats adding to 200 / 250 / 300 by zone, in its kind's shape), a stat boost for one of your field players' main stat (+40 / +60 / +80: tuned so it matches the new player in balance runs), and a pool perk at the zone's rarity (common in the Forest). Hot Arm left the pool for Mister Frog.
 - **2026-10-22:** **The aim line stops at the first catch or block** (with everyone frozen where they stand, `sim/ball.ts` `aimContact`), and only the receiver it stops on lights gold. The Queen's Boss perk will be **Gift of Foresight**, the same idea looking ahead in time.
 - **2026-10-22:** **The progression is designed:** Forest (Mister Frog, Frog Rain), Swamp (the Queen, the Hex; Witches as Safeties) and the Farm (the King, the Two-Part Grab), ending at the pumpkin patch. The first two Bosses each give a special perk (Mister Frog: Hot Arm, which leaves the TRICK OR TREAT! pool). The story is two tiny cutscenes: Jack asking a team for help, and everyone dancing in the patch at the end. Not built yet.
 - **2026-10-22:** **The game is now Get Jack Back.** Jack the pumpkin ball is the hero, trying to get home to his pumpkin patch. The title screen, page titles and package are renamed, and winning says "Jack is home!".
