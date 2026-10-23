@@ -49,7 +49,15 @@ export function defenseBoost(area: number, kind: DriveKind, spec: DefenseSpec): 
   return area * d.perArea + (kind === 'boss' ? d.boss : 0) + spec.boost;
 }
 
-export function createRun(seed: number, roster: RosterPlayer[] = startingRoster()): RunState {
+/**
+ * A new run. `startArea` (0-based) starts it at that area's first drive
+ * instead, as if the drives before it were won (for trying later areas).
+ */
+export function createRun(
+  seed: number,
+  roster: RosterPlayer[] = startingRoster(),
+  startArea = 0,
+): RunState {
   const state: RunState = {
     seed,
     step: 0,
@@ -83,7 +91,9 @@ export function createRun(seed: number, roster: RosterPlayer[] = startingRoster(
     yards: 0,
     nextId: 1,
   };
-  setUpDrive(state, 0, 0, [], true);
+  const area = Math.max(0, Math.min(startArea, arcadeTuning.run.areas - 1));
+  state.drivesWon = area * DRIVE_KINDS.length;
+  setUpDrive(state, area, 0, [], true);
   return state;
 }
 

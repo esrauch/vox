@@ -767,6 +767,15 @@ describe("Mister Frog's Frog Rain", () => {
 });
 
 describe('the Candy Kingdom', () => {
+  it('a run can start there (?area=2), as if the Forest were won', () => {
+    const s = createRun(3, startingRoster(), 1);
+    expect(s.drive.area).toBe(1);
+    expect(s.drive.index).toBe(0);
+    expect(s.drive.name).toBe('Gumdrop Lane');
+    expect(s.drivesWon).toBe(4);
+    expect(s.phase).toBe('setup');
+  });
+
   it('is the second area: its own drives, and the Queen on its Boss drive', () => {
     const s = createRun(3);
     setUpDrive(s, 1, 0, [], true);

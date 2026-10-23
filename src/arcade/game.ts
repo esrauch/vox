@@ -28,7 +28,7 @@ import { ArcadeRoutes } from './render/routes';
 import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
 import { carrierOf, qbOf } from './sim/ai';
-import { createRun, dispatch, downAndDistance, startingRoster } from './sim/run';
+import { DRIVE_KINDS, createRun, dispatch, downAndDistance, startingRoster } from './sim/run';
 import { FORM_STATS } from './content/team';
 import { plus } from './sim/stats';
 import { breakMarker, countdown, jukeShowing, mashLeft, type BreakOutcome } from './sim/breakit';
@@ -50,6 +50,8 @@ export interface ArcadeOptions {
   seed: number;
   /** Start with a monster team (Golem Blockers, Werewolf Runners, Ghost Catchers): ?monsters=1, for a look at them. */
   monsters?: boolean;
+  /** Start at this area (1 the Forest, 2 the Candy Kingdom, 3 the third): ?area=2, for trying later areas. */
+  area?: number;
 }
 
 /** The starting team, or (with `monsters`) the same players turned into each position's monster. */
@@ -100,6 +102,8 @@ export class ArcadeGame {
   private state: RunState;
   private seed: number;
   private readonly monsters: boolean;
+  /** The area runs start at (0-based). */
+  private readonly startArea: number;
   private readonly conductor = new Conductor();
   private readonly view: View;
   private readonly bodies: ArcadeBodies;
@@ -128,7 +132,9 @@ export class ArcadeGame {
   constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement, options: ArcadeOptions) {
     this.seed = options.seed;
     this.monsters = options.monsters ?? false;
-    this.state = createRun(this.seed, firstRoster(this.monsters));
+    this.startArea = Math.max(0, (options.area ?? 1) - 1);
+    this.state = createRun(this.seed, firstRoster(this.monsters), this.startArea);
+    this.origin = this.startOrigin();
     this.view = new View(canvas, { fov: 50 });
     const { scene } = this.view;
     scene.add(createArcadeTurf());
@@ -453,12 +459,17 @@ export class ArcadeGame {
       this.act({ type: 'hike' });
     } else if (phase === 'over' || phase === 'won') {
       this.seed++;
-      this.state = createRun(this.seed, firstRoster(this.monsters));
-      this.origin = 0;
+      this.state = createRun(this.seed, firstRoster(this.monsters), this.startArea);
+      this.origin = this.startOrigin();
       this.focus = v(0, -4);
       this.bodies.sync(this.state);
     }
     this.syncHud();
+  }
+
+  /** Where a run's first drive sits on the long field: past the areas it skipped. */
+  private startOrigin(): number {
+    return this.state.drive.area * DRIVE_KINDS.length * arcadeTuning.drive.distance;
   }
 
   private pause(): void {

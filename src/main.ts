@@ -18,7 +18,12 @@ await Promise.race([
 
 const params = new URLSearchParams(location.search);
 const seed = Number(params.get('seed')) || Math.floor(Math.random() * 1e9);
-const game = new ArcadeGame(canvas, ui, { seed, monsters: params.has('monsters') });
+// ?monsters=1 starts with a monster team; ?area=2 or ?area=3 starts at that area.
+const game = new ArcadeGame(canvas, ui, {
+  seed,
+  monsters: params.has('monsters'),
+  area: Number(params.get('area')) || 1,
+});
 
 // Dev builds expose the game for debugging from the console.
 if (import.meta.env.DEV) Object.assign(window, { game });
