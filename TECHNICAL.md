@@ -220,7 +220,7 @@ slice 0
 ### Build and runtime
 
 - **`.voxt` is the runtime format.** Vite loads every `.voxt` under `assets-src/voxels/` as text (so edits hot-reload); it's parsed and greedy-meshed once at load into cached geometry (`src/voxel/`).
-- **Model ids are paths:** `forest/chaser` is `assets-src/voxels/forest/chaser.voxt`. Folders: `team/` (our players, the ball), `forest/` (defenders), `forestProps/` (scenery).
+- **Model ids are paths:** `forest/chaser` is `assets-src/voxels/forest/chaser.voxt`. Folders: `team/` (our players, the ball), `forest/` (defenders), `bosses/` (the three Bosses), `forestProps/` (scenery).
 - **Orientation:** a model's front (slice 0) faces +z. In play, bodies turn to face where they're going.
 
 ### Preview loop (how Claude sees its work)
@@ -381,6 +381,7 @@ Everything a future session (human or Claude) needs to carry on without the orig
 |---|---|---|
 | Players | 9×14×5 at 0.08 → ~0.7 wide, 1.1 tall | `team/walkOn`, `team/ghost`, `team/werewolf`; `team/golem` at 0.09, drawn 1.45× wide |
 | Defenders | 0.6–0.9 wide, 0.6–1.1 tall | `forest/*` |
+| Bosses | twice a player: 17×27×9 at 0.085 → ~1.45 wide, 2.3 tall | `bosses/misterFrog`, `bosses/queen`, `bosses/king` |
 | Ball | the round jack-o'-lantern at 0.15 | `team/ball` |
 | Scenery props | up to 2–3 units tall | `forestProps/pine` |
 
