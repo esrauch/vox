@@ -8,7 +8,7 @@ This document is about who, where and what it feels like. It does not cover rule
 
 ## The Pitch in One Breath
 
-**Arcade Halloween Football.** **Jack**, a jack-o'-lantern, has lost his way home to the pumpkin patch, and he's asked a football team to help. They play through a haunted forest, a swamp and a farm, one drive at a time, past gnomes, scarecrows, owls and bats that don't want them there. You call the play, time the throw and break the tackles; everything else crashes together on its own. You start as seven plain, keen humans; drive by drive, the forest sends you recruits: a Golem built like a linebacker, a Werewolf that won't stop running, a Ghost that plucks passes out of the air. Keep going until a 4th down goes wrong.
+**Arcade Halloween Football.** **Jack**, a jack-o'-lantern, has lost his way home to the pumpkin patch, and he's asked a football team to help. They play through a haunted forest, a candy kingdom and a farm, one drive at a time, past gnomes, scarecrows, owls and bats that don't want them there. You call the play, time the throw and break the tackles; everything else crashes together on its own. You start as seven plain, keen humans; drive by drive, the forest sends you recruits: a Golem built like a linebacker, a Werewolf that won't stop running, a Ghost that plucks passes out of the air. Keep going until a 4th down goes wrong.
 
 **The feel:** snappy, fast, silly, and above all *physical*: every play ends in a pile-up. It's closer to *Crossy Road* and *Retro Bowl* than to *Blood Bowl*: pick it up in seconds, laugh every few seconds, one more go. **It's a portrait, one-thumb phone game in voxels**, to a cheerful Halloween soundtrack.
 
@@ -21,7 +21,7 @@ Inspirations: *Retro Bowl* (pocket-sized arcade football), *Crossy Road* (feel, 
 - **At the start:** Jack bounces up to a football team and asks for help getting back to his patch. A few seconds, then the first snap.
 - **At the end:** in the pumpkin patch, everyone dances: your team, Jack, and every defender you played through, Bosses included.
 
-The way home crosses three places, each with a Boss in a hat of its own: **Mister Frog** (a top hat) in the Forest, **the Queen** (a witch twice the size of any other, in a crown) in the Swamp, and **the King** (a scarecrow in a crown) at the Farm, by the patch. Nobody explains why they're in the way; they just are.
+The way home crosses three places, each with a Boss in a hat of its own: **Mister Frog** (a top hat) in the Forest, **the Queen** (a witch twice the size of any other, in a crown) in the Candy Kingdom, and **the King** (a scarecrow in a crown) at the Farm, by the patch. Nobody explains why they're in the way; they just are.
 
 ## Core Fantasy
 
@@ -94,8 +94,8 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 
 Plus the **Frog** (a Cover that crouches, then leaps) and the **Witch on a Broom** as a hazard swooping over the passing lanes. **Boss: Mister Frog,** who rains frogs down a lane.
 
-### The Swamp
-The Forest's locals, drowned. **Witches take the Safety's place,** hanging deep on their brooms; the **Bog Hand** (planted in the mud, grabs whoever passes close) and **mud patches** that slow everyone are new. **Boss: the Queen,** a witch twice the size of any other, in a crown, whose Hex hides the aim line.
+### The Candy Kingdom
+The Queen's gingerbread realm: pink-and-white turf, gingerbread houses, candy canes and a few trees along the sidelines. **Witches take the Safety's place,** hanging deep on their brooms, and the **Gingerbread Man** is new: a flat cookie with icing eyes and smile, and the opposition's purple gumdrop buttons and bow tie. **Boss: the Queen,** a witch twice the size of any other, in a crown, whose Hex hides the aim line.
 
 ### The Farm
 Rows of scarecrows, and **Crows**, bats that swoop down a lane instead of looping. The pumpkin patch is the end zone. **Boss: the King,** a scarecrow in a crown.

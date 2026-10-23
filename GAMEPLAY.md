@@ -44,7 +44,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   | Area | Boss | Gimmick | Attacks |
   |---|---|---|---|
   | **The Forest** | **Mister Frog** (top hat) | **Frog Rain:** before the snap a lane lights up on the turf; during the down, frogs fall in it one by one (each shows a shadow first) and flatten whoever is under them. You see the lane while choosing a card, so you pick a play, or **Flip** it, to keep your routes out. | Where your routes go |
-  | **The Swamp** | **The Queen** (a witch, double size, in a crown) | **The Hex:** the aim line shrinks to a short stub by the pumpkin, and receivers stop lighting up. The sweep still runs at full speed: you extrapolate. | Your timing |
+  | **The Candy Kingdom** | **The Queen** (a witch, double size, in a crown) | **The Hex:** the aim line shrinks to a short stub by the pumpkin, and receivers stop lighting up. The sweep still runs at full speed: you extrapolate. | Your timing |
   | **The Farm** | **The King** (a scarecrow in a crown) *(beating him gets Jack home: the end)* | **The Two-Part Grab:** when he grabs the carrier it's two Break it! tests back to back, and the second comes only if you pass the first. | The team you've built |
 
 - **Boss perks:** beating a Boss gives its special perk, on top of that drive's TRICK OR TREAT!. They're the only perks there are.
@@ -56,7 +56,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 - **The story is two tiny cutscenes:** at the start, Jack asks a football team to help him get home to his patch; at the end, in the patch, your team and every defender you played through (Bosses included) dance.
 
-  ▲ *Until the Swamp and the Farm are built, the forest is played three times, stiffer each time.*
+  ▲ *Until the Candy Kingdom and the Farm are built, the forest is played three times, stiffer each time.*
 - **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!** and a Boss perk (or, the third time, Jack is home).
 - **There are no lives. Losing a drive is game over.** Four downs, and every one counts.
 - **The forest scales up as you do:** the first drive is a handful of sleepy defenders, the area III Boss is the whole forest at full strength (see *The Defense*).
@@ -189,7 +189,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 **Two new players, never of the same kind, and you take one:** there's no skipping (a new player can always sit on the bench). Each card is the player itself, drawn like a roster card: its photo, name and kind, its **Heft / Hustle / Hands** bars, and its **preferred position** (the one its best stat suits: Heft → Blocker, Hustle → Runner, Hands → Catcher).
 
-**A new player's stats add up to the zone's total:** **200** in the Forest, **250** in the Swamp, **300** on the Farm, shared out in its kind's shape (a Ghost mostly Hands, a Golem mostly Heft, a Human evenly) and nudged a little, so no two are alike. The zone is the one of the drive about to be played, so the offer after the Forest's Boss is already the Swamp's.
+**A new player's stats add up to the zone's total:** **200** in the Forest, **250** in the Candy Kingdom, **300** on the Farm, shared out in its kind's shape (a Ghost mostly Hands, a Golem mostly Heft, a Human evenly) and nudged a little, so no two are alike. The zone is the one of the drive about to be played, so the offer after the Forest's Boss is already the Candy Kingdom's.
 
 **Take one and it goes straight in:** into the field slot whose player it beats by the most total stats (on a tie, a slot of the position it prefers), and whoever was there sits on the bench. If it beats nobody, it sits on the bench itself. Then the roster stays open to rearrange (any two swap), and **Done** plays on. Only the seven on the field play.
 
@@ -209,13 +209,13 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Rusher** | Rhino Beetle | Charges the QB. Your Blockers have to out-shove it. |
 | **Cover** | Garden Gnome | Shadows a Catcher; after the catch, chases the carrier. Small, quick, light: easy to shove, hard to shake. |
 | **Zone** | Scarecrow | Planted: its long arms reach a **wide purple ring** on the turf, and any low ball coming down inside it is contested: its Hands beat a plain Catcher's, so it's a patch of field to throw away from (a Catcher with great Hands, like a Ghost, can still win it). Running into one stops you dead. |
-| **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. *(In the Swamp the Safety is a Witch.)* |
+| **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. *(In the Candy Kingdom the Safety is a Witch.)* |
 | **Bat** | Bat | Patrols a fixed loop and swats passes that fly through it. |
 | **Frog** *(new)* | Frog | Covers like a Gnome until the carrier gets close, then crouches (the telegraph) and leaps onto it. |
-| **Bog Hand** *(new, Swamp)* | Hand in the mud | Planted: grabs anyone who passes close. |
+| **Gingerbread Man** *(new, Candy Kingdom)* | Gingerbread Man | A Cover that crumbles when it's flattened or shaken off, then pulls itself back together a moment later. ▲ *Rule to confirm.* |
 | **Crow** *(new, Farm)* | Crow | A Bat that swoops down a lane instead of looping. |
 
-- **Each area has its own set:** the Forest adds Frogs; the Swamp swaps the Owl for Witches and adds Bog Hands and mud (everyone moves slower in it, defenders too); the Farm adds Crows and rows of Scarecrows. Older kinds keep their rules wherever they appear.
+- **Each area has its own set:** the Forest adds Frogs; the Candy Kingdom swaps the Owl for Witches and adds Gingerbread Men; the Farm adds Crows and rows of Scarecrows. Older kinds keep their rules wherever they appear.
 - **The Bosses:** Mister Frog is a Frog in a top hat; the Queen is a Witch twice the size, with the stats to match; the King is a Scarecrow in a crown.
 - **Hazards** stay simple patterns, like *Crossy Road*'s cars: the **Witch on a Broom** sweeps across the field and knocks down any pass she meets.
 - **Scaling, the lever behind the whole run:** the first drive of area I is **four slow defenders** (Intro 4, Challenge 5, Gimmicks 5 or 6, the Boss a full 8); every drive adds defenders or stats, and later areas bring more rushers and heavier, faster, grabbier versions of everyone. ▲ *Numbers to come from the balance runs: the target is that a team that never upgrades loses in area II, a decent build reaches the last Boss, and a strong one beats it.*

@@ -70,6 +70,14 @@ export const voxel = {
   stone: '#8d93a3',
   stoneDark: '#646a79',
   witchSkin: '#7fd15a',
+  // The Candy Kingdom.
+  gingerbread: '#c27a3e',
+  gingerbreadDark: '#8f5326',
+  icing: '#fff8ee',
+  candyRed: '#e8344e',
+  candyPink: '#ff8fc7',
+  mint: '#7fe3c0',
+  chocolate: '#4a2a1a',
 } as const satisfies Record<string, Hex>;
 
 /**

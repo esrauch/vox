@@ -125,6 +125,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
   - `sweep.ts`: the sweeping aim line, stopping at the first catch or block a throw now would meet (`aimNow`, from the sim's `aimContact`), and the receiver it stops on (`litPlayers`).
   - `routes.ts`: the called play's routes before the snap.
   - `frogRain.ts`: Mister Frog's lane on the turf, each frog's shadow, and the frogs falling onto it.
+  - `witches.ts`: each Witch on a Broom flying her row, facing her way, with her shadow.
 - **Shared with the dev pages:** `src/render/view.ts` (renderer, scene, lights) and `src/render/scenery.ts` (`ForestScenery`: the forest floor, fog, props along the field, the tree line on the Boss drive).
 - **Mobile performance:** the pixel ratio is capped at 2; keep draw calls low (target under ~100) and don't allocate in the frame loop.
 
@@ -222,7 +223,7 @@ slice 0
 ### Build and runtime
 
 - **`.voxt` is the runtime format.** Vite loads every `.voxt` under `assets-src/voxels/` as text (so edits hot-reload); it's parsed and greedy-meshed once at load into cached geometry (`src/voxel/`).
-- **Model ids are paths:** `forest/chaser` is `assets-src/voxels/forest/chaser.voxt`. Folders: `team/` (our players, the ball), `forest/` (defenders), `bosses/` (the three Bosses), `forestProps/` (scenery).
+- **Model ids are paths:** `forest/chaser` is `assets-src/voxels/forest/chaser.voxt`. Folders: `team/` (our players, the ball), `forest/` (defenders and the Witch), `candy/` (the Candy Kingdom's defenders), `bosses/` (the three Bosses), `forestProps/` and `candyProps/` (scenery).
 - **Orientation:** a model's front (slice 0) faces +z. In play, bodies turn to face where they're going.
 
 ### Preview loop (how Claude sees its work)

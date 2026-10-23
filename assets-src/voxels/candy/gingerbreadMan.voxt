@@ -1,0 +1,53 @@
+# Candy Kingdom Gingerbread Man: a flat cookie, arms out, with white icing
+# eyes, smile and cuffs, and the opposition's candy-purple gumdrop buttons
+# and bow tie. A player's size.
+size 9 13 3
+voxel 0.085
+mirror x
+colors
+  G gingerbread
+  d gingerbreadDark
+  i icing
+  P purple
+slice 0
+  ..GGG
+  .GGGG
+  .GiGG
+  .GGGG
+  ..Gii
+  ...PP
+  iGGGG
+  .GGGP
+  ..GGG
+  ..GGP
+  ..GGG
+  .GG..
+  .ii..
+slice 1
+  ..GGG
+  .GGGG
+  .GGGG
+  .GGGG
+  ..GGG
+  ...GG
+  GGGGG
+  .GGGG
+  ..GGG
+  ..GGG
+  ..GGG
+  .GG..
+  .GG..
+slice 2
+  ..ddd
+  .dddd
+  .dddd
+  .dddd
+  ..ddd
+  ...dd
+  ddddd
+  .dddd
+  ..ddd
+  ..ddd
+  ..ddd
+  .dd..
+  .dd..

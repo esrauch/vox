@@ -38,9 +38,10 @@ export interface Mood {
 }
 
 /**
- * The Forest around the long field. The sidelines run the whole way; past the
- * top of the field, the fences go on while there's another drive to come,
- * and on the Boss drive a tree line closes the field off behind the end zone.
+ * The Forest around the long field: toadstools, stumps and trees along the
+ * sidelines the whole way, and on the Boss drive a tree line closing the
+ * field off behind the end zone. (The 'beyond' part, shown only while
+ * there's another drive to come, is empty in the Forest.)
  */
 export class ForestScenery {
   readonly group: THREE.Group;
@@ -162,24 +163,6 @@ function forestPlacements(layout: FieldLayout): Placement[] {
   /** How many times longer the sidelines are than the field the sim plays on. */
   const long = (NEAR_Z - FAR_Z) / (3 - FIELD_FAR_Z);
 
-  // Crooked fences along both sidelines, with a glowing lantern every few rows.
-  // Past the top of the field they're the 'beyond' part: gone on the Boss drive.
-  for (const sign of [-1, 1]) {
-    for (let z = NEAR_Z; z > FAR_Z; z -= 1.15) {
-      out.push({
-        part: z > FIELD_FAR_Z ? 'always' : 'beyond',
-        model: 'forestProps/fence',
-        x: sign * (FIELD_HALF_W + 0.35),
-        z,
-        rotation: Math.PI / 2,
-        scale: 1,
-      });
-    }
-    for (let z = NEAR_Z - 1.5; z > FAR_Z; z -= 3) {
-      part = z > FIELD_FAR_Z ? 'always' : 'beyond';
-      place('forestProps/lantern', sign * (FIELD_HALF_W + 1.1), z, 0.6);
-    }
-  }
   // The tree line behind the end zone, on the Boss drive.
   part = 'treeLine';
   scatter(
@@ -202,12 +185,12 @@ function forestPlacements(layout: FieldLayout): Placement[] {
     }),
     () => 1 + rng.next() * 0.4,
   );
-  // Pumpkin patches and the woods along the sides, the whole length of the long field.
+  // The woods along the sides, the whole length of the long field: toadstools and stumps
+  // close in, trees behind. (No pumpkins: they're for the Farm.)
   part = 'always';
   const n = (count: number): number => Math.round(count * long);
-  scatter('forestProps/pumpkin', n(14), 0.55, side(1.6, 3.5));
-  scatter('forestProps/toadstools', n(10), 0.4, side(1.4, 4));
-  scatter('forestProps/stump', n(6), 0.5, side(2, 4.5));
+  scatter('forestProps/toadstools', n(16), 0.4, side(1.2, 4));
+  scatter('forestProps/stump', n(10), 0.5, side(1.6, 4.5));
   scatter('forestProps/deadTree', n(8), 0.9, side(3, 6));
   scatter('forestProps/pine', n(14), 1.1, side(4.5, 9), () => 0.9 + rng.next() * 0.4);
   return out;

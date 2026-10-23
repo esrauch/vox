@@ -132,6 +132,30 @@
       "source": "Original voxel model (Forest Frog: a small candy-purple frog, rained down by Mister Frog), written by Claude",
       "author": "Claude",
       "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/forest/witch.voxt",
+      "source": "Original voxel model (Witch on a Broom), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/candy/gingerbreadMan.voxt",
+      "source": "Original voxel model (Candy Kingdom defender: Gingerbread Man), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/candyProps/candyCane.voxt",
+      "source": "Original voxel model (Candy Kingdom prop: candy cane), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/candyProps/gingerbreadHouse.voxt",
+      "source": "Original voxel model (Candy Kingdom prop: gingerbread house), written by Claude",
+      "author": "Claude",
+      "license": "original"
     }
   ]
 }

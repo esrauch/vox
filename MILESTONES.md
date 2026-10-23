@@ -28,9 +28,9 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 **Done when** each drive of an area plays differently, each Boss is an event, and the balance runs hit the targets below.
 
-- [x] **Design pass** (GAMEPLAY.md, *The Run* and *The Defense*): three areas (Forest, Swamp, Farm), each Boss with one gimmick that attacks one thing you do.
+- [x] **Design pass** (GAMEPLAY.md, *The Run* and *The Defense*): three areas (Forest, Candy Kingdom, Farm), each Boss with one gimmick that attacks one thing you do.
 - [~] **Forest:** the **Frog** defender; **Mister Frog** (top hat) and **Frog Rain**: a telegraphed lane before the snap, frogs falling in it with shadows first, flattening whoever is under them. *(2026-10-22: Mister Frog and Frog Rain are built: he plays deep like the Owl on the Boss drive; the lane runs in from one sideline (either, at random) 40% of the way across, never over the pumpkin; a frog every 0.15 s of live play, its shadow showing 0.7 s first; a carrier it lands on is tackled there, anyone else is flattened for a moment; carriers steer clear of the lane. The Frog defender is still to do; its model, `forest/frog`, is the rain's.)*
-- [ ] **Swamp:** the Safety becomes a **Witch**; the **Bog Hand** (planted grabber) and **mud patches**; **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers).
+- [~] **Candy Kingdom:** the Safety becomes a **Witch**; the **Gingerbread Man**; sidelines of gingerbread houses, candy canes and a few trees; *(2026-10-22: models for the Gingerbread Man, a gingerbread house and a candy cane; the Witch model is back. Not in the game yet.)* **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers).
 - [ ] **Farm:** the **Crow**; rows of Scarecrows; **the King** (a crowned scarecrow) and the **Two-Part Grab** (two Break it! tests in a row).
 - [~] **Models** for the new defenders and the three Bosses, readable from the game camera. *(2026-10-22: the three Bosses are modelled at twice a player's size: `bosses/misterFrog` (a white top hat), `bosses/queen` (a witch with a broom and a crown), `bosses/king` (a scarecrow with a crown). Not yet in the game or checked from the game camera.)*
 - [ ] **Boss perks:** beating Mister Frog gives **Hot Arm** (out of TRICK OR TREAT!); the Queen gives **Gift of Foresight** (an orange ring when a throw now would really be caught, looking ahead along the flight; approximate, cheap enough for every frame).
@@ -74,7 +74,6 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Loose Ends
 
-- [ ] **The Witches aren't drawn.** The Witch on a Broom still bats passes in the sim (the Gimmick drive Witching Hour), but there's no model or view for her in the game.
 - [ ] **Listen to the three waiting song loops** (Graveyard Shuffle, Midnight Chase, Skeleton Stomp) and decide which to keep.
 - [ ] **Push** `main` (the user pushes), and delete the merged branches `design/arcade` and `design/roster-stats`.
 - [ ] **The refactors** listed in TECHNICAL.md §22.
@@ -83,6 +82,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-22:** **The second area is the Candy Kingdom** (instead of the Swamp, too close to the Forest): Witches as Safeties, the new Gingerbread Man, gingerbread houses and candy canes along the sidelines; models made (not in the game yet). **The Witches are visible again:** the Witch on a Broom flies her row with her shadow below (she'd been knocking passes down unseen). **The Forest's sidelines** are toadstools, stumps and trees only (no pumpkins, lanterns or fences; those wait for the Farm).
 - **2026-10-22:** **Harder later and in Break it!:** the sweep speeds up 30% per area after the first (was 15%: area III sweeps at 1.6×); the bar's sweet spot is under half its old size (0.09 of the bar at an even match, was 0.2) and its close band a little narrower; MASH! fills less per tap and needs 55% for a drag. JUKE! is unchanged. Bots: the bar's BAD rate went from about 11% to 22%; the good bot wins 11.2 of 12 drives (90% beat the game), the reading bot 5.9 (23%).
 - **2026-10-22:** **Mister Frog and his Frog Rain are in the game** on the Forest's Boss drive (Mister Frog's Pond): a lane shown before each snap, frogs falling in it during the down (shadows first), flattening whoever is under them and tackling a carrier. Balance: the area I Boss drive is won 90% (good bot) / 79% (reading bot), the hardest drive of its area. Until the Swamp and Farm exist, every area's Boss is Mister Frog.
 - **2026-10-22:** **Two new players, no stat boost, an endless bench.** Every TRICK OR TREAT! is two new players of different kinds (the stat boost was confusing next to the new player). The bench has no limit, newest on top: a full run ends with eleven on it. The new player card no longer says who it replaces.

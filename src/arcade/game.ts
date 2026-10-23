@@ -23,6 +23,7 @@ import { ArcadeBall } from './render/ball';
 import { ArcadeBodies } from './render/bodies';
 import { ArcadeLines, createArcadeTurf } from './render/field';
 import { ArcadeFrogRain } from './render/frogRain';
+import { ArcadeWitches } from './render/witches';
 import { ArcadeRoutes } from './render/routes';
 import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
@@ -107,6 +108,7 @@ export class ArcadeGame {
   private readonly lines: ArcadeLines;
   private readonly routes: ArcadeRoutes;
   private readonly frogRain: ArcadeFrogRain;
+  private readonly witches: ArcadeWitches;
   private readonly hud: Hud;
   private readonly controls: ArcadeControls;
 
@@ -144,6 +146,7 @@ export class ArcadeGame {
     this.lines = new ArcadeLines(scene);
     this.routes = new ArcadeRoutes(scene);
     this.frogRain = new ArcadeFrogRain(scene);
+    this.witches = new ArcadeWitches(scene);
     this.bodies = new ArcadeBodies(scene);
     this.ball = new ArcadeBall(scene);
     this.sweep = new ArcadeSweep(scene);
@@ -245,6 +248,7 @@ export class ArcadeGame {
     this.ball.update(state, this.origin, this.bodies, dt, performance.now() / 1000);
     this.sweep.update(state, this.origin);
     this.frogRain.update(state, this.origin);
+    this.witches.update(state, this.origin);
     this.controls.setButtons(canThrow(state) && !this.paused);
     this.controls.setBreak(this.breakView());
     this.follow(dt);
