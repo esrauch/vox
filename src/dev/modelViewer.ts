@@ -112,18 +112,22 @@ function renderSheet(group: string): void {
 
 function interactive(): void {
   let current: THREE.Object3D | null = null;
+  /** The shown model's size: the camera frames it, whatever its size and the screen's shape. */
+  let size = new THREE.Vector3(1, 1, 1);
   const show = (id: string): void => {
     if (current) scene.remove(current);
     const group = new THREE.Group();
-    group.add(modelMesh(id), tile(0));
+    const mesh = modelMesh(id);
+    group.add(mesh, tile(0));
     scene.add(group);
     current = group;
+    size = new THREE.Box3().setFromObject(mesh).getSize(new THREE.Vector3());
     const m = getModel(id);
-    const mesh = greedyMesh(m);
+    const quads = greedyMesh(m);
     info.textContent =
       `${id}: ${m.width}×${m.height}×${m.depth} voxels at ${m.scale} → ` +
       `${(m.width * m.scale).toFixed(2)} × ${(m.height * m.scale).toFixed(2)} × ` +
-      `${(m.depth * m.scale).toFixed(2)} units · ${mesh.quads} quads`;
+      `${(m.depth * m.scale).toFixed(2)} units · ${quads.quads} quads`;
     [...list.children].forEach((b) => b.classList.toggle('on', b.textContent === id));
     history.replaceState(null, '', `?model=${encodeURIComponent(id)}`);
   };
@@ -145,7 +149,10 @@ function interactive(): void {
   const first = params.get('model') ?? MODEL_IDS[0];
   if (first) show(first);
   renderer.setAnimationLoop((now) => {
-    aim(new THREE.Vector3(0, 0.5, 0), (now / 40) % 360, 22, 4.2);
+    // Far enough back to fit the model's height, and its width on a narrow screen (and a tile).
+    const across = Math.max(size.x, size.z, 1);
+    const dist = Math.max(size.y, across / camera.aspect, 1) * 3.6;
+    aim(new THREE.Vector3(0, size.y / 2, 0), (now / 40) % 360, 22, dist);
     renderer.render(scene, camera);
   });
 }
