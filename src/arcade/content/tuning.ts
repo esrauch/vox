@@ -145,15 +145,14 @@ export const arcadeTuning = {
     fakeSees: 2,
   },
   frogRain: {
-    /** The lane's half-width (yards), and where its middle can be: never over the pumpkin, so Flip matters. */
-    half: 1.5,
-    lanes: [-6, -3.5, 3.5, 6],
+    /** The lane runs in from one sideline (either, at random) this share of the way across: never over the pumpkin, so Flip matters. */
+    width: 0.4,
     /** It runs from just behind the line of scrimmage to this far upfield. */
     behind: 1,
     ahead: 16,
     /** The first frog lands this long into the down, then one every so often (seconds of live play)… */
     first: 0.6,
-    every: 0.45,
+    every: 0.15,
     /** …for this long. */
     lasts: 9,
     /** Its shadow shows this long before it lands. */

@@ -128,12 +128,15 @@ function witches(state: RunState, spec: DefenseSpec): Witch[] {
   }));
 }
 
-/** Frog Rain: this down's lane, picked at random (never over the pumpkin), so you can Flip away from it. */
+/** Frog Rain: this down's lane, in from a sideline picked at random (never over the pumpkin), so you can Flip away from it. */
 function frogLane(state: RunState): FrogLane {
   const f = arcadeTuning.frogRain;
   const rng = rngFor(state.seed, 'frogLane', state.drivesWon, state.drive.down, state.nextId);
   const { los } = state.drive;
-  return { x: rng.pick(f.lanes), half: f.half, from: los - f.behind, to: los + f.ahead };
+  const hw = arcadeTuning.field.halfWidth;
+  const half = hw * f.width;
+  const side = rng.next() < 0.5 ? -1 : 1;
+  return { x: side * (hw - half), half, from: los - f.behind, to: los + f.ahead };
 }
 
 /** Frog Rain at the snap: when and where each frog will land, along the lane. */
