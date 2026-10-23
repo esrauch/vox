@@ -26,9 +26,6 @@ export const LINEUP: readonly { readonly x: number; readonly y: number }[] = [
   { x: 4.2, y: -1.2 },
 ];
 
-/** Seats on the bench: players you keep but don't play (TRICK OR TREAT!). */
-export const BENCH_SIZE = 3;
-
 /** The QB lines up this far behind the line of scrimmage. */
 export const QB_DEPTH = 4;
 

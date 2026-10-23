@@ -57,7 +57,7 @@ The way home crosses three places, each with a Boss in a hat of its own: **Miste
 
 ### Seven players and a pumpkin
 
-**Your team is the QB and seven players: two Blockers, two Runners and three Catchers**, all in gold helmets and orange jerseys. Every human is built the same; what sets a player apart is its **kind**. They start as plain humans, keen and a bit useless, and line up again however many times they get flattened. Recruits wait on a bench of three.
+**Your team is the QB and seven players: two Blockers, two Runners and three Catchers**, all in gold helmets and orange jerseys. Every human is built the same; what sets a player apart is its **kind**. They start as plain humans, keen and a bit useless, and line up again however many times they get flattened. Recruits who don't make the lineup wait on the bench.
 
 ### Monsters: the forest's recruits
 

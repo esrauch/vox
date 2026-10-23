@@ -80,10 +80,8 @@ interface Scenario {
   readonly training?: Partial<Stats>;
   /** …or only to one role's. */
   readonly roleTraining?: Partial<Record<Role, Partial<Stats>>>;
-  /** Take a TRICK OR TREAT! card after each won drive (otherwise skip)… */
+  /** Take one of TRICK OR TREAT!'s two new players (at random) after each won drive, or skip. */
   readonly perks?: boolean;
-  /** …always this one: the new player, the stat boost, or (default) either at random. */
-  readonly pick?: 'player' | 'stat' | 'random';
 }
 
 /** BALANCE_SCENARIO='{"name": "...", ...}' runs just that one scenario instead. */
@@ -92,9 +90,7 @@ const SCENARIOS: readonly Scenario[] = custom
   ? [JSON.parse(custom) as Scenario]
   : [
       { name: 'All human (never upgrade)' },
-      { name: 'Random TRICK OR TREAT! card', perks: true },
-      { name: 'Always the new player', perks: true, pick: 'player' },
-      { name: 'Always the stat boost', perks: true, pick: 'stat' },
+      { name: 'A new player every time', perks: true },
       { name: 'Trained: +10 Hustle', training: { hustle: 10 } },
       { name: 'Trained: +10 Hands', training: { hands: 10 } },
       { name: 'Trained: +10 Heft', training: { heft: 10 } },
@@ -308,25 +304,15 @@ function count(
 }
 
 /**
- * TRICK OR TREAT! for the bot: with `perks` on, a card (by `pick`, or at
- * random); a new player places itself (the sim's bestSpot), so it just
- * moves on. With `perks` off, it skips.
+ * TRICK OR TREAT! for the bot: with `perks` on, one of the two new players
+ * at random (it places itself: the sim's bestSpot); then Done. With `perks`
+ * off, it skips (the never-upgrade baseline: the game itself has no Skip).
  */
 function draftPick(state: RunState, rng: Rng, scenario: Scenario): RunState {
   if (!scenario.perks || state.offer.length === 0) {
     return dispatch(state, { type: 'skipDraft' }).state;
   }
-  const want = { player: 'recruit', stat: 'playerStat', random: undefined }[
-    scenario.pick ?? 'random'
-  ];
-  const index =
-    want === undefined
-      ? rng.int(0, state.offer.length - 1)
-      : Math.max(
-          0,
-          state.offer.findIndex((p) => p.kind === want),
-        );
-  const s = dispatch(state, { type: 'pick', offer: index }).state;
+  const s = dispatch(state, { type: 'pick', offer: rng.int(0, state.offer.length - 1) }).state;
   return s.phase === 'draft' ? dispatch(s, { type: 'skipDraft' }).state : s;
 }
 

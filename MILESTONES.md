@@ -15,7 +15,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [x] **A down:** three random play cards (Slants, Deep Shot, Curl & Flat, Dive, Sweep) with Flip and HIKE!; the sweeping aim line and THROW; the pocket of three sweeps; handoffs with the play fake and decoy Catchers; carriers that pick their own lane.
 - [x] **Break it!:** the bar, MASH! and JUKE!, each with a countdown and a big GREAT! / OK / BAD.
 - [x] **The run:** drives of four downs, areas of four drives (Intro, Challenge, Gimmick, Boss), three areas (the forest three times, stiffer each time), game over on a failed 4th down, a continuous field.
-- [x] **TRICK OR TREAT!:** New Player! or More Stats! after each won drive (sized by zone); a new player goes straight into its best slot; the roster (field by position, a bench of three, swap any two).
+- [x] **TRICK OR TREAT!:** two new players of different kinds after each won drive (sized by zone); the one you take goes straight into its best slot; the roster (field by position, an unlimited bench, newest on top, swap any two).
 - [x] **Your team:** humans 50 / 50 / 50; Golem, Werewolf and Ghost as stat trades, each with its model; Golems the only linebacker build; pixel portraits.
 - [x] **Rendering:** the third-person follow camera that always fits both sidelines; the pumpkin ball as QB and light, with embers; catch-range and reach rings; the forest scenery.
 - [x] **UI:** the retro pixel HUD and controls, the self-hosted Creepster font.
@@ -82,6 +82,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-22:** **Two new players, no stat boost, an endless bench.** Every TRICK OR TREAT! is two new players of different kinds (the stat boost was confusing next to the new player). The bench has no limit, newest on top: a full run ends with eleven on it. The new player card no longer says who it replaces.
 - **2026-10-22:** **New Player! and More Stats!:** each card is a player card like the roster's (the new player, or the player the boost is for, with the gains on its bars). A new player goes straight into the field slot it improves most (on a tie, its preferred position), and whoever was there sits on the bench; with the bench full, the weakest leaves. **Monster Mash is gone.**
 - **2026-10-22:** **TRICK OR TREAT! is exactly two cards, and no Skip:** a new player and a stat boost for one of your players, the boost now half on its main stat and a quarter on each other (40 / 60 / 80 in all by zone: +20 / +10 / +10 in the Forest). The pool perks are gone. Balance (the reading bot, 100 runs): always the boost 6.7 drives won, always the player 6.6.
 - **2026-10-22:** **TRICK OR TREAT! is always three kinds of card:** a new player (stats adding to 200 / 250 / 300 by zone, in its kind's shape), a stat boost for one of your field players' main stat (+40 / +60 / +80: tuned so it matches the new player in balance runs), and a pool perk at the zone's rarity (common in the Forest). Hot Arm left the pool for Mister Frog.

@@ -66,10 +66,8 @@ export interface PlayerCard {
 
 /** One card of TRICK OR TREAT!'s offer: a big title over a player card. */
 export interface OfferCard {
-  /** "New Player!", "More Stats!". */
+  /** "New Player!". */
   readonly title: string;
-  /** Which card it is: styles it. */
-  readonly kind: 'player' | 'stats';
   readonly player: PlayerCard;
 }
 
@@ -80,8 +78,8 @@ export interface DraftView {
   readonly offer: readonly OfferCard[];
   /** The players on the field, in lineup order… */
   readonly roster: readonly RosterRow[];
-  /** …and the bench: a row per seat, null for an empty one. */
-  readonly bench: readonly (RosterRow | null)[];
+  /** …and the bench, newest first. */
+  readonly bench: readonly RosterRow[];
   /** What to do now, under the roster heading. */
   readonly hand: string | null;
   /** The button that moves on (e.g. "Done"); none while there's a choice to make. */
@@ -241,13 +239,9 @@ export class Hud {
     benchLabel.textContent = 'Bench';
     benchGroup.append(
       benchLabel,
-      ...draft.bench.map((row) => {
-        if (row) return rosterRow(row, tap(row));
-        const seat = document.createElement('div');
-        seat.className = 'hud-roster-row empty';
-        seat.textContent = 'Empty seat';
-        return seat;
-      }),
+      ...(draft.bench.length > 0
+        ? draft.bench.map((row) => rosterRow(row, tap(row)))
+        : [emptyBench()]),
     );
     bench.append(benchGroup);
     const roster = document.createElement('div');
@@ -314,10 +308,18 @@ function rosterRow(row: RosterRow, onTap?: () => void): HTMLElement {
   return el;
 }
 
+/** The bench before anyone sits on it. */
+function emptyBench(): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'hud-roster-row empty';
+  el.textContent = 'Nobody yet';
+  return el;
+}
+
 /** An offer card: its big title, then the player card; tap to take it. */
 function offerButton(card: OfferCard, onTap: () => void): HTMLElement {
   const el = document.createElement('button');
-  el.className = `hud-offer ${card.kind} interactive`;
+  el.className = 'hud-offer interactive';
   el.addEventListener('click', onTap);
   const title = document.createElement('strong');
   title.className = 'hud-offer-title';

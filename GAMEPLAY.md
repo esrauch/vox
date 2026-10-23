@@ -18,7 +18,7 @@ Items marked **▲** are recommendations or details still open to change. Every 
 
 ## The Game in One Breath
 
-Tap PLAY and you're on the field. **Pick one of three play cards** and the ball is snapped: your Blockers shove the pass rush, your Catchers break for open grass, and an **aim line sweeps** back and forth from the QB. **Tap THROW** as it crosses an open receiver and a bullet zips out. Once someone has the ball it charges upfield on its own, and every time a gnome or an owl grabs it, **Break it!**: one well-timed tap shakes them off. See how far you get before they bury you. Four downs to make 10 yards. Make it and it's **TRICK OR TREAT!**: pick a perk (a stat boost, a slower sweep, a Ghost or a Golem to recruit) and shuffle your lineup. Miss on 4th down and the run is over. You start as a team of plain, weak humans against a sleepy defense; by the third area you're a pack of monsters against the whole forest.
+Tap PLAY and you're on the field. **Pick one of three play cards** and the ball is snapped: your Blockers shove the pass rush, your Catchers break for open grass, and an **aim line sweeps** back and forth from the QB. **Tap THROW** as it crosses an open receiver and a bullet zips out. Once someone has the ball it charges upfield on its own, and every time a gnome or an owl grabs it, **Break it!**: one well-timed tap shakes them off. See how far you get before they bury you. Four downs to make 10 yards. Make it and it's **TRICK OR TREAT!**: pick one of two new players (a Ghost, a Golem, a Werewolf, a keen Human) and it goes straight into your lineup. Miss on 4th down and the run is over. You start as a team of plain, weak humans against a sleepy defense; by the third area you're a pack of monsters against the whole forest.
 
 ---
 
@@ -135,7 +135,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Before the snap** | **HIKE!** | Start the called play. |
 | **Pass play** | **THROW** | Fire a bullet along the sweeping line. |
 | **Grabbed** | **Tap** anywhere (a juke: its ◀ or ▶ button) | Break it! |
-| **Between drives** | **Tap a card** | Take the new player or the stat boost. |
+| **Between drives** | **Tap a card** | Take one of the two new players. |
 | **Between drives** | **Tap two players** | Swap them, field or bench. |
 
 **One thumb, portrait, no aiming.** Everything is a tap at the right moment.
@@ -183,31 +183,20 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Building Up: TRICK OR TREAT!
 
-**After every won drive: TRICK OR TREAT!** Two cards are offered, **New Player!** and **More Stats!**; take one and play on (a new player keeps the screen open until you tap **Done**). **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
+**After every won drive: TRICK OR TREAT!** Two **New Player!** cards are offered; take one, set your lineup, and tap **Done**. **On the same screen is your roster: the seven on the field down the left, by position, and the bench down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
 
 ### The offer
 
-**Exactly two cards, and you take one:** there's no skipping, because either one is worth having (a new player can always sit on the bench).
+**Two new players, never of the same kind, and you take one:** there's no skipping (a new player can always sit on the bench). Each card is the player itself, drawn like a roster card: its photo, name and kind, its **Heft / Hustle / Hands** bars, and its **preferred position** (the one its best stat suits: Heft → Blocker, Hustle → Runner, Hands → Catcher).
 
-| Card | What it is | Forest | Swamp | Farm |
-|---|---|---|---|---|
-| **A new player** | A random kind, its stats adding up to the zone's total, shared out in its kind's shape (a Ghost mostly Hands, a Golem mostly Heft, a Human evenly), a little different every time | 200 | 250 | 300 |
-| **A stat boost** | One of your field players, picked at random, for good: half on its position's main stat (Heft for a Blocker, Hustle for a Runner, Hands for a Catcher), a quarter on each of the other two; its roster row says so | +20 / +10 / +10 | +30 / +15 / +15 | +40 / +20 / +20 |
+**A new player's stats add up to the zone's total:** **200** in the Forest, **250** in the Swamp, **300** on the Farm, shared out in its kind's shape (a Ghost mostly Hands, a Golem mostly Heft, a Human evenly) and nudged a little, so no two are alike. The zone is the one of the drive about to be played, so the offer after the Forest's Boss is already the Swamp's.
 
-The zone is the one of the drive about to be played, so the offer after the Forest's Boss is already the Swamp's. *(Balance runs, 2026-10-22: always taking the stat boost does about as well as always taking the new player.)*
+**Take one and it goes straight in:** into the field slot whose player it beats by the most total stats (on a tie, a slot of the position it prefers), and whoever was there sits on the bench. If it beats nobody, it sits on the bench itself. Then the roster stays open to rearrange (any two swap), and **Done** plays on. Only the seven on the field play.
 
-### New players
-
-**The New Player! card is the player itself,** drawn like a roster card: its photo, name and kind, its **Heft / Hustle / Hands** bars, its **preferred position** (the one its best stat suits: Heft → Blocker, Hustle → Runner, Hands → Catcher), and where it will go.
-
-**Take it and it goes straight in:** into the field slot whose player it beats by the most total stats (on a tie, a slot of the position it prefers), and whoever was there sits on the bench. If it beats nobody, it sits on the bench itself. **With the bench full, the weakest of the bench and the one sitting down leaves the team.** Then the roster stays open to rearrange (any two swap), and **Done** plays on. Only the seven on the field play.
+**The bench has no limit:** the newest sit at the top, and a full run ends with eleven players on it (one for each TRICK OR TREAT!).
 
 > **Howlin' Hal** · Werewolf · *prefers Runner*
 > Heft 65 · Hands 40 · Hustle 95 *(a Forest recruit: 200 in all)*
-
-### More Stats!
-
-**The More Stats! card is the player it's for,** drawn the same way, with the gains on its bars. Take it and the boost is that player's for good, and play goes on.
 
 ---
 
@@ -278,7 +267,7 @@ The smallest version that proves the fun, most of it built:
 - **A down:** three random play cards with Flip and HIKE!, the sweep and THROW, handoffs with the play fake, Break it!.
 - **The third-person camera** behind and above the QB, following the play.
 - **The defense:** Rushers, Covers, a Safety, Scarecrows and Bats, scaling by drive and area. The Witch.
-- **TRICK OR TREAT!** after each won drive: New Player! or More Stats!, the roster and bench.
+- **TRICK OR TREAT!** after each won drive: two new players to choose from, the roster and bench.
 - **Impact:** hit-pause, shake, flying bodies, the catch slow-mo, sound on every contact.
 
 **Then:** real levels, defenders and Bosses; a second area.

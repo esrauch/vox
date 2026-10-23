@@ -4,7 +4,7 @@ import { pocketTime, sweepSpeed } from '../../src/arcade/sim/ball';
 import { createRun, dispatch, endDown, nextDown } from '../../src/arcade/sim/run';
 import { forceBreakKind } from '../../src/arcade/sim/step';
 import { ZONE_OFFER } from '../../src/arcade/content/perks';
-import { BENCH_SIZE, POSITION_STAT, ROSTER_ROLES } from '../../src/arcade/content/team';
+import { POSITION_STAT, ROSTER_ROLES } from '../../src/arcade/content/team';
 import { applyPerk, noPerks, playerStats, rollOffer } from '../../src/arcade/sim/team';
 import type { ArcadeEvent, Perk, RunState } from '../../src/arcade/sim/types';
 import { v } from '../../src/arcade/sim/vec';
@@ -43,27 +43,23 @@ describe('TRICK OR TREAT!', () => {
     return { s, offer: rollOffer(s) };
   };
 
-  it('every offer is exactly two cards: a new player and a stat boost for one of yours', () => {
-    for (let seed = 1; seed <= 30; seed++) {
-      expect(offerIn(0, seed).offer.map((p) => p.kind)).toEqual(['recruit', 'playerStat']);
+  it('every offer is two new players, never of the same kind', () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const { offer } = offerIn(0, seed);
+      expect(offer.map((p) => p.kind)).toEqual(['recruit', 'recruit']);
+      const [a, b] = offer.map((p) => (p.kind === 'recruit' ? p.player.kind : null));
+      expect(a).not.toBe(b);
     }
   });
 
-  it('the new player and the boost grow by zone: 200 / 250 / 300 and 40 / 60 / 80', () => {
+  it('new players grow by zone: 200 / 250 / 300 in all', () => {
     ZONE_OFFER.forEach((zone, i) => {
       for (let seed = 1; seed <= 20; seed++) {
-        const { offer } = offerIn(i, seed);
-        const recruit = offer[0]!;
-        const boost = offer[1]!;
-        if (recruit.kind !== 'recruit' || boost.kind !== 'playerStat') throw new Error('offer');
-        const st = recruit.player.stats;
-        expect(st.hustle + st.hands + st.heft).toBe(zone.recruitTotal);
-        // Half on the main stat (the one its position leans on), a quarter on each other.
-        const b = boost.boost;
-        expect(b.hustle + b.hands + b.heft).toBe(zone.boostTotal);
-        expect(b[boost.main]).toBe(zone.boostTotal / 2);
-        const role = ROSTER_ROLES[boost.spot];
-        expect(boost.main).toBe(POSITION_STAT[role && role !== 'qb' ? role : 'catcher']);
+        for (const p of offerIn(i, seed).offer) {
+          if (p.kind !== 'recruit') throw new Error('offer');
+          const st = p.player.stats;
+          expect(st.hustle + st.hands + st.heft).toBe(zone.recruitTotal);
+        }
       }
     });
   });
@@ -77,29 +73,6 @@ describe('TRICK OR TREAT!', () => {
       if (kind === 'golem') expect(stats.heft).toBeGreaterThan(stats.hustle);
       if (kind === 'werewolf') expect(stats.hustle).toBeGreaterThan(stats.hands);
     }
-  });
-
-  it('the stat boost goes to that player for good, and follows it through a swap', () => {
-    const s = atDraft();
-    const boost = {
-      rarity: 'common' as const,
-      kind: 'playerStat' as const,
-      spot: 0,
-      name: s.roster[0]!.name,
-      main: 'heft' as const,
-      boost: { heft: 20, hustle: 10, hands: 10 },
-    };
-    s.offer = [boost, ...s.offer.slice(1)];
-    const before = s.roster[0]!.stats;
-    const swapped = dispatch(s, { type: 'swap', a: 0, b: 4 }).state;
-    const taken = dispatch(swapped, { type: 'pick', offer: 0 }).state;
-    expect(taken.roster[4]!.name).toBe(boost.name);
-    expect(taken.roster[4]!.stats).toEqual({
-      heft: before.heft + 20,
-      hustle: before.hustle + 10,
-      hands: before.hands + 10,
-    });
-    expect(taken.phase).toBe('setup');
   });
 
   it('+10 to a stat for everyone shows up on every player in the line-up', () => {
@@ -185,22 +158,24 @@ describe('TRICK OR TREAT!', () => {
     expect(ofType(r.events, 'joined')[0]).toMatchObject({ slot: -1, replaced: null });
   });
 
-  it('with the bench full, the weakest of the bench and the one sitting down leaves', () => {
+  it('the bench has no limit, and the newest sit at the top', () => {
     const s = offering({
       rarity: 'common',
       kind: 'recruit',
       player: { ...boo, stats: { hustle: 60, hands: 100, heft: 40 } },
     });
-    s.bench = Array.from({ length: BENCH_SIZE }, (_, i) => ({
-      ...s.roster[0]!,
-      name: `Sub ${i}`,
-      stats: { hustle: 60, hands: 60, heft: 60 + i },
-    }));
+    s.bench = Array.from({ length: 6 }, (_, i) => ({ ...s.roster[0]!, name: `Sub ${i}` }));
     const r = dispatch(s, { type: 'pick', offer: 0 });
-    // The plain 150 it replaced is weaker than every Sub, so it's the one who leaves.
     const replaced = ofType(r.events, 'joined')[0]!.replaced;
-    expect(ofType(r.events, 'left')[0]).toEqual({ type: 'left', name: replaced });
-    expect(r.state.bench.map((p) => p.name)).toEqual(['Sub 0', 'Sub 1', 'Sub 2']);
+    expect(r.state.bench.map((p) => p.name)).toEqual([
+      replaced,
+      'Sub 0',
+      'Sub 1',
+      'Sub 2',
+      'Sub 3',
+      'Sub 4',
+      'Sub 5',
+    ]);
   });
 
   it('any player can play any position: two swap slots', () => {

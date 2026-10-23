@@ -368,23 +368,13 @@ button.hud-roster-row:active {
   opacity: 0.85;
 }
 
-/* TRICK OR TREAT!'s two cards: a big title over a player card, like the roster's. */
+/* TRICK OR TREAT!'s two new players: a big title over a player card, like the roster's. */
 .hud-offer {
   padding: 8px 10px 9px;
   font-size: 0.8rem;
-  border: var(--edge) solid var(--accent-color);
-  background: var(--accent-fill);
+  border: var(--edge) solid var(--candy-purple);
+  background: rgb(162 89 255 / 0.2);
   box-shadow: 5px 5px 0 var(--ink);
-}
-
-.hud-offer.player {
-  --accent-color: var(--candy-purple);
-  --accent-fill: rgb(162 89 255 / 0.2);
-}
-
-.hud-offer.stats {
-  --accent-color: var(--slime-green);
-  --accent-fill: rgb(156 255 46 / 0.12);
 }
 
 button.hud-offer:active {
@@ -398,7 +388,7 @@ button.hud-offer:active {
   font-size: 1.25rem;
   letter-spacing: 0.04em;
   text-align: center;
-  color: var(--accent-color);
+  color: var(--candy-purple);
   text-shadow: 3px 3px 0 var(--ink);
 }
 

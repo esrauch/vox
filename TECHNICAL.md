@@ -102,7 +102,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 | `physics.ts` | Moving and pushing apart by weight. Scarecrows can't be moved; teammates give way to the carrier; bodies lying down get nudged aside; blocked defenders are slowed; nobody but the carrier is shoved out of bounds. |
 | `ball.ts` | The sweep (`sweepAngle`, `scanTime`, `pocketTime`, faster each area), the bullet (`bulletEnd`, `flightTime`), and `contact`: the nearest eligible catcher in reach catches it, a defender in reach bats it (a contest goes to the better Hands, ties to you); Blockers and the QB are never eligible, and a Rhino Beetle locked up with a player can't reach it. `aimContact` walks `contact` along the aim line with everyone frozen, for the line's stop point and the lit receiver. |
 | `breakit.ts` | The three tests (the bar, MASH!, JUKE!), each sized by the Heft or Hustle gap and narrowed by extra tacklers, with its countdown; `judgeBreakIt` gives break, drag or tackle. |
-| `team.ts` | The roster and bench: `startingRoster`, `playerStats` (own stats + perks), `fieldedStats`, the offer (`rollOffer`: a new player and a stat boost, sized by zone), `bestSpot` (where a new player goes) and `weakest`, `applyPerk` (Boss perks), spots (`BENCH_START`, `atSpot`, `setSpot`). |
+| `team.ts` | The roster and bench: `startingRoster`, `playerStats` (own stats + perks), `fieldedStats`, the offer (`rollOffer`: two new players of different kinds, sized by zone), `bestSpot` (where a new player goes), `applyPerk` (Boss perks), spots (`BENCH_START`, `atSpot`, `setSpot`). |
 | `bodies.ts` | Stats into physics, and lining both teams up for a down. |
 | `random.ts`, `vec.ts`, `stats.ts` | Seeded randomness, 2D vectors, stat arithmetic. |
 
@@ -132,9 +132,9 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 
 **Plain DOM and CSS, layered over the WebGL canvas.** The canvas fills the screen and a DOM root sits over it; the overlay doesn't block taps by default (`pointer-events: none`), and only real controls accept them.
 
-- **`src/ui/hud.ts`** (`Hud`): the drive banner and down and distance at the top; the prompt and the context button (PLAY, HIKE!, RESUME, AGAIN); the hand of three play cards and Flip; `pop()` for results and `big()` for Break it!'s GREAT / OK / BAD; and the **TRICK OR TREAT!** overlay: the two offer cards (New Player! and More Stats!, each a player card), and the roster with the field down the left by position and the bench down the right, each player a photo box, stat bars and a note.
+- **`src/ui/hud.ts`** (`Hud`): the drive banner and down and distance at the top; the prompt and the context button (PLAY, HIKE!, RESUME, AGAIN); the hand of three play cards and Flip; `pop()` for results and `big()` for Break it!'s GREAT / OK / BAD; and the **TRICK OR TREAT!** overlay: the two New Player! cards (each a player card), and the roster with the field down the left by position and the bench (no limit, newest first) down the right, each player a photo box, stat bars and a note.
 - **`src/arcade/ui/controls.ts`**: THROW, and the Break it! panel (the countdown, the bar, the mash meter, the juke buttons).
-- **`src/arcade/ui/trickOrTreat.ts`**: turns the run state into what the overlay shows (the New Player! and More Stats! cards as player cards, the roster rows, the ★ on a preferred position). **`kindIcons.ts`**: each kind's 12×12 pixel portrait as inline SVG.
+- **`src/arcade/ui/trickOrTreat.ts`**: turns the run state into what the overlay shows (the two New Player! cards as player cards, the roster rows, the ★ on a preferred position). **`kindIcons.ts`**: each kind's 12×12 pixel portrait as inline SVG.
 - **The look is retro pixel:** square corners, hard ink outlines, flat offset shadows, outlined text, segmented bars, scanlines on dark panels; the tokens are at the top of `src/ui/base.css` (`--edge`, `--text-edge`, `--scanlines`). Animations stay smooth.
 - **Font:** Creepster (OFL, self-hosted in `assets/fonts`), loaded before the game is built so no text ever shows in a fallback font.
 - **Colors** come from `src/content/palettes.ts` as CSS custom properties (`ui/paletteVars.ts`), so 2D and 3D always match.
@@ -172,7 +172,7 @@ src/arcade/content/
   team.ts      // roster roles and line-up, BASE_STATS, FORM_STATS (each kind's trade), POSITION_STAT, BENCH_SIZE, radii
   plays.ts     // PLAYS: each card's assignments (block, or a route of waypoints); handoff cards name the Runner
   defense.ts   // DEFENDERS (each kind's stats, radius, reach bonus, planted) and FOREST: the area's drives and spots
-  perks.ts     // ZONE_OFFER (the new player's total and the stat boost, by zone), names
+  perks.ts     // ZONE_OFFER (a new player's total, by zone), names
 src/content/
   palettes.ts  // every color: common, team, voxel (model colors), biomes
   tuning.ts    // the beat-clock page's and the mixer's numbers
@@ -339,7 +339,7 @@ Everything a future session (human or Claude) needs to carry on without the orig
 
 ### State of play (2026-10-22)
 
-- **Built:** the whole loop: drives of four downs over three areas, three play cards with Flip and HIKE!, the sweep and THROW, handoffs with the play fake, Break it! (bar, MASH!, JUKE!), the pumpkin ball as QB and light, TRICK OR TREAT! (New Player! or More Stats!, the roster and bench), the four kinds' models, the retro pixel UI, and the practised balance bot.
+- **Built:** the whole loop: drives of four downs over three areas, three play cards with Flip and HIKE!, the sweep and THROW, handoffs with the play fake, Break it! (bar, MASH!, JUKE!), the pumpkin ball as QB and light, TRICK OR TREAT! (two new players to choose from, the roster and bench), the four kinds' models, the retro pixel UI, and the practised balance bot.
 - **Next:** flesh out the levels, defenders and Bosses (GAMEPLAY.md, *The Defense*; MILESTONES.md).
 - **Loose ends:** `main` isn't pushed (the user pushes with `git -C /home/esr/Code/vox push origin main`); Pages must be switched to *Source: GitHub Actions*; an iPhone test and a listen to the waiting song loops are pending.
 

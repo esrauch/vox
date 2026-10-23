@@ -1,11 +1,11 @@
 /**
- * What TRICK OR TREAT! shows (GAMEPLAY.md, Building Up): the two cards (New
- * Player! and More Stats!, each a player card like the roster's), then the
- * roster to rearrange after a new player joins. The field is on the left
+ * What TRICK OR TREAT! shows (GAMEPLAY.md, Building Up): two new players
+ * to choose from (each a player card like the roster's), then the roster
+ * to rearrange once one joins. The field is on the left
  * by position, the bench on the right; any two swap.
  */
-import { BENCH_SIZE, POSITION_STAT, ROSTER_ROLES } from '../content/team';
-import { BENCH_START, atSpot, bestSpot, fieldedStats, playerStats } from '../sim/team';
+import { POSITION_STAT, ROSTER_ROLES } from '../content/team';
+import { BENCH_START, atSpot, fieldedStats, playerStats } from '../sim/team';
 import { kindIcon } from './kindIcons';
 import type { Form, Perk, Position, RosterPlayer, RunState, Stats } from '../sim/types';
 import type { DraftView, OfferCard, RosterRow, StatBar } from '../../ui/hud';
@@ -38,55 +38,24 @@ const slotPosition = (slot: number): Position => {
   return role && role !== 'qb' ? role : 'catcher';
 };
 
-/** One card of the offer. */
+/** A new player on offer, as a player card. */
 function offerCard(state: RunState, perk: Perk): OfferCard | null {
-  if (perk.kind === 'recruit') {
-    const p = perk.player;
-    const slot = bestSpot(state, p);
-    const goes =
-      slot === null
-        ? 'sits on the bench'
-        : `in for ${state.roster[slot]?.name ?? '?'} (${POSITION[slotPosition(slot)]})`;
-    return {
-      title: 'New Player!',
-      kind: 'player',
-      player: {
-        name: p.name,
-        form: KIND[p.kind],
-        icon: kindIcon(p.kind),
-        stats: bars(fieldedStats(state, p), POSITION_STAT[p.preferred]),
-        note: `prefers ${POSITION[p.preferred]} · ${goes}`,
-      },
-    };
-  }
-  if (perk.kind === 'playerStat') {
-    const p = atSpot(state, perk.spot);
-    if (!p) return null;
-    const now = fieldedStats(state, p);
-    const where = perk.spot < BENCH_START ? POSITION[slotPosition(perk.spot)] : 'Bench';
-    return {
-      title: 'More Stats!',
-      kind: 'stats',
-      player: {
-        name: p.name,
-        form: KIND[p.kind],
-        icon: kindIcon(p.kind),
-        stats: bars(now, perk.main).map((b, i) => ({
-          ...b,
-          delta: perk.boost[STAT_ORDER[i] ?? 'heft'],
-        })),
-        note: `${where} · for good`,
-      },
-    };
-  }
-  return null;
+  if (perk.kind !== 'recruit') return null;
+  const p = perk.player;
+  return {
+    title: 'New Player!',
+    player: {
+      name: p.name,
+      form: KIND[p.kind],
+      icon: kindIcon(p.kind),
+      stats: bars(fieldedStats(state, p), POSITION_STAT[p.preferred]),
+      note: `prefers ${POSITION[p.preferred]}`,
+    },
+  };
 }
 
-/** The TRICK OR TREAT! screen: the two cards, or (after a new player joins) the lineup to set. */
+/** The TRICK OR TREAT! screen: two new players to choose from, then the lineup to set. */
 export function trickOrTreatView(state: RunState, selected: number | null): DraftView {
-  // The player a stat boost on offer is for: its row says so.
-  const boosted = (spot: number): boolean =>
-    state.offer.some((o) => o.kind === 'playerStat' && o.spot === spot);
   // ★ on the position heading the tapped player prefers.
   const starred = (selected === null ? undefined : atSpot(state, selected))?.preferred;
   const row = (
@@ -103,14 +72,10 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
     form: KIND[p.kind],
     icon: kindIcon(p.kind),
     stats: bars(stats, key),
-    note: [
+    note:
       position === 'Bench' || p.preferred !== slotPosition(spot)
         ? `prefers ${POSITION[p.preferred]}`
         : '',
-      boosted(spot) ? 'More Stats! on offer' : '',
-    ]
-      .filter(Boolean)
-      .join(' · '),
   });
   const roster: RosterRow[] = state.roster.map((p, slot) => {
     const position = slotPosition(slot);
@@ -119,10 +84,10 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
       fits: starred === position,
     };
   });
-  const bench = Array.from({ length: BENCH_SIZE }, (_, seat): RosterRow | null => {
-    const p = state.bench[seat];
-    return p ? row(p, BENCH_START + seat, 'Bench', fieldedStats(state, p)) : null;
-  });
+  // The bench, newest first.
+  const bench = state.bench.map((p, seat) =>
+    row(p, BENCH_START + seat, 'Bench', fieldedStats(state, p)),
+  );
   const from = selected === null ? null : atSpot(state, selected);
   const hand = from
     ? `Now tap who ${from.name} swaps with (or ${from.name} again to cancel).`

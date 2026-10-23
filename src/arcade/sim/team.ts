@@ -83,44 +83,24 @@ export function bestSpot(state: RunState, recruit: RosterPlayer): number | null 
   return (best as { slot: number } | null)?.slot ?? null;
 }
 
-/** The weakest of these players (the least total stats; the last of equals). */
-export function weakest(players: readonly RosterPlayer[]): number {
-  let at = 0;
-  players.forEach((p, i) => {
-    if (total(p.stats) <= total(players[at]?.stats ?? p.stats)) at = i;
-  });
-  return at;
-}
-
 // ── The offer ───────────────────────────────────────────────────────────────
 
 /**
- * TRICK OR TREAT!'s two cards: a new player, and a stat boost for one of
- * yours (ZONE_OFFER: by the zone of the drive about to be played).
+ * TRICK OR TREAT!'s two cards: two new players, never of the same kind,
+ * their stats adding up to the zone's total (ZONE_OFFER, by the zone of the
+ * drive about to be played).
  */
 export function rollOffer(state: RunState): Perk[] {
   const rng = rngFor(state.seed, 'perks', state.drivesWon);
   const zone = ZONE_OFFER[Math.min(state.drive.area, ZONE_OFFER.length - 1)] ?? ZONE_OFFER[0];
   if (!zone) return [];
-  return [
-    { rarity: 'common', kind: 'recruit', player: makeRecruit(rng, zone.recruitTotal) },
-    statBoost(state, rng, zone.boostTotal),
-  ];
-}
-
-/** A boost for one field player: half of `total` on its position's main stat, a quarter on each other. */
-function statBoost(state: RunState, rng: Rng, total: number): Perk {
-  const spot = rng.int(0, state.roster.length - 1);
-  const role = ROSTER_ROLES[spot];
-  const main = POSITION_STAT[role && role !== 'qb' ? role : 'catcher'];
-  return {
+  const first = rng.pick(KINDS);
+  const second = rng.pick(KINDS.filter((k) => k !== first));
+  return [first, second].map((kind) => ({
     rarity: 'common',
-    kind: 'playerStat',
-    spot,
-    name: state.roster[spot]?.name ?? '?',
-    main,
-    boost: { ...even(total / 4), [main]: total / 2 },
-  };
+    kind: 'recruit',
+    player: makeRecruit(rng, zone.recruitTotal, kind),
+  }));
 }
 
 /** The position a player's best stat suits (a tie, at random among them). */
@@ -133,12 +113,11 @@ function suits(rng: Rng, stats: Stats): Position {
 const RECRUIT_SPREAD = 0.2;
 
 /**
- * A recruit: a random kind, and stats adding up to `total`, shared out in
+ * A recruit of this kind, its stats adding up to `total`, shared out in
  * the shape of its kind (a Ghost mostly Hands, a Golem mostly Heft; a Human
  * evenly), each share nudged a little at random, in fives.
  */
-function makeRecruit(rng: Rng, total: number): RosterPlayer {
-  const kind = rng.pick(KINDS);
+function makeRecruit(rng: Rng, total: number, kind: Form): RosterPlayer {
   const shape = plus(BASE_STATS, FORM_STATS[kind]);
   const weight = (k: keyof Stats): number => shape[k] * (1 + RECRUIT_SPREAD * (2 * rng.next() - 1));
   const w = { hustle: weight('hustle'), hands: weight('hands'), heft: weight('heft') };
@@ -156,7 +135,7 @@ function makeRecruit(rng: Rng, total: number): RosterPlayer {
 
 // ── Taking a perk ───────────────────────────────────────────────────────────
 
-/** Apply a perk to the team (a recruit and a player's stat boost are handled by `pick`, in run.ts). */
+/** Apply a perk to the team (a recruit is placed by `pick`, in run.ts). */
 export function applyPerk(perks: Perks, perk: Perk): void {
   switch (perk.kind) {
     case 'allStat':
@@ -184,7 +163,6 @@ export function applyPerk(perks: Perks, perk: Perk): void {
       perks.throwScale *= 2;
       break;
     case 'recruit':
-    case 'playerStat':
       break;
   }
 }

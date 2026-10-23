@@ -356,9 +356,6 @@ export class ArcadeGame {
         case 'joined':
           this.hud.pop(`${e.name.toUpperCase()} JOINS!`, 'good');
           break;
-        case 'left':
-          this.hud.pop(`${e.name.toUpperCase()} LEAVES`, 'bad');
-          break;
         case 'pancake':
           play('burst');
           break;

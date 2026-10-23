@@ -201,17 +201,6 @@ export type Perk = { readonly rarity: Rarity } & (
   | { readonly kind: 'magnet' }
   | { readonly kind: 'hotArm' }
   | { readonly kind: 'recruit'; readonly player: RosterPlayer }
-  /**
-   * A boost to one player's stats, most on its main stat (for the position it's in
-   * when offered): `main` names it; `spot` follows the player through swaps.
-   */
-  | {
-      readonly kind: 'playerStat';
-      readonly spot: number;
-      readonly name: string;
-      readonly main: keyof Stats;
-      readonly boost: Stats;
-    }
 );
 
 /** Everything the perks taken so far add up to. */
@@ -261,7 +250,7 @@ export interface RunState {
   tackle: Tackle | null;
   /** The seven on the field, in slot order (the slot decides the position played)… */
   roster: RosterPlayer[];
-  /** …and the bench: kept, but not playing (up to BENCH_SIZE). */
+  /** …and the bench: kept, but not playing, newest first (it has no limit). */
   bench: RosterPlayer[];
   /** What the perks taken so far add up to. */
   perks: Perks;
@@ -335,8 +324,6 @@ export type ArcadeEvent =
       readonly slot: number;
       readonly replaced: string | null;
     }
-  /** A player left the team: the bench was full and it was the weakest. */
-  | { readonly type: 'left'; readonly name: string }
   | { readonly type: 'driveStarted'; readonly drive: number; readonly name: string }
   | { readonly type: 'areaCleared'; readonly area: number }
   | { readonly type: 'gameOver'; readonly drivesWon: number; readonly yards: number };
