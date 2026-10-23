@@ -267,8 +267,6 @@ export interface RunState {
   perks: Perks;
   /** TRICK OR TREAT!: the three perks on offer… */
   offer: Perk[];
-  /** …and a recruit picked, waiting (the bench is full) for you to choose who it replaces. */
-  recruit: RosterPlayer | null;
   field: Field;
   /** When this down was snapped (sim time). */
   snappedAt: number;
@@ -301,12 +299,7 @@ export type Action =
   | { readonly type: 'skipDraft' }
   /** TRICK OR TREAT!: take one of the perks on offer. */
   | { readonly type: 'pick'; readonly offer: number }
-  /**
-   * The bench is full: put the recruit just picked in this spot (whoever was
-   * there leaves). Spots: 0-6 are the field slots, 7 up the bench seats.
-   */
-  | { readonly type: 'place'; readonly slot: number }
-  /** Swap two players' spots, field or bench (between drives). */
+  /** Swap two players' spots, field or bench (between drives). Spots: 0-6 are the field slots, 7 up the bench seats. */
   | { readonly type: 'swap'; readonly a: number; readonly b: number };
 
 export type ArcadeEvent =
@@ -338,10 +331,12 @@ export type ArcadeEvent =
   | {
       readonly type: 'joined';
       readonly name: string;
-      /** The spot it took (7 up: the bench), and who it replaced, if anyone. */
+      /** The field slot it took (-1: it sat on the bench), and who it put on the bench, if anyone. */
       readonly slot: number;
       readonly replaced: string | null;
     }
+  /** A player left the team: the bench was full and it was the weakest. */
+  | { readonly type: 'left'; readonly name: string }
   | { readonly type: 'driveStarted'; readonly drive: number; readonly name: string }
   | { readonly type: 'areaCleared'; readonly area: number }
   | { readonly type: 'gameOver'; readonly drivesWon: number; readonly yards: number };

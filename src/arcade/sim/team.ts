@@ -1,15 +1,9 @@
 /**
  * Your team between plays (GAMEPLAY.md, Your Team and Building Up): every
- * player's stats with the perks and Monster Mash added, the TRICK OR TREAT!
+ * player's stats with the perks added, the TRICK OR TREAT!
  * offer, and taking a perk.
  */
-import {
-  MONSTER_MASH_BONUS,
-  POSITIONS,
-  RECRUIT_NAMES,
-  STARTING_NAMES,
-  ZONE_OFFER,
-} from '../content/perks';
+import { POSITIONS, RECRUIT_NAMES, STARTING_NAMES, ZONE_OFFER } from '../content/perks';
 import { BASE_STATS, FORM_STATS, POSITION_STAT, ROSTER_ROLES } from '../content/team';
 import type { Rng } from '../../sim/rng';
 import { rngFor } from './random';
@@ -44,7 +38,6 @@ export function noPerks(): Perks {
   };
 }
 
-/** Monster Mash: whether this player's kind is the only one of its kind on the team. */
 /** Spots on the roster screen: the field slots (0-6), then the bench seats from here. */
 export const BENCH_START = ROSTER_ROLES.length;
 
@@ -59,22 +52,44 @@ export function setSpot(state: RunState, spot: number, p: RosterPlayer): void {
   else state.bench[spot - BENCH_START] = p;
 }
 
-export function uniqueKind(roster: readonly RosterPlayer[], slot: number): boolean {
-  const kind = roster[slot]?.kind;
-  return kind !== undefined && roster.filter((p) => p.kind === kind).length === 1;
-}
-
-/** A player's stats with the team's perks (for everyone and for its kind), as it would play, before Monster Mash. */
+/** A player's stats with the team's perks (for everyone and for its kind), as it would play. */
 export function fieldedStats(state: RunState, p: RosterPlayer): Stats {
   return plus(plus(p.stats, state.perks.all), state.perks.byKind[p.kind] ?? ZERO);
 }
 
-/** A roster player's stats in play: its own, plus the perks for everyone and for its kind, plus Monster Mash. */
+/** A field player's stats in play (by slot): its own, plus the perks. */
 export function playerStats(state: RunState, slot: number): Stats {
   const p = state.roster[slot];
-  if (!p) return even(50);
-  const mash = uniqueKind(state.roster, slot) ? even(MONSTER_MASH_BONUS) : ZERO;
-  return plus(plus(plus(p.stats, state.perks.all), state.perks.byKind[p.kind] ?? ZERO), mash);
+  return p ? fieldedStats(state, p) : even(50);
+}
+
+const total = (s: Stats): number => s.hustle + s.hands + s.heft;
+
+/**
+ * Where a new player goes: the field slot whose player it beats by the
+ * most total stats (on a tie, a slot of the position it prefers), or null
+ * when it beats nobody (it sits on the bench).
+ */
+export function bestSpot(state: RunState, recruit: RosterPlayer): number | null {
+  let best: { slot: number; gain: number; fits: boolean } | null = null;
+  state.roster.forEach((p, slot) => {
+    const gain = total(recruit.stats) - total(p.stats);
+    const fits = ROSTER_ROLES[slot] === recruit.preferred;
+    if (gain <= 0) return;
+    if (!best || gain > best.gain || (gain === best.gain && fits && !best.fits)) {
+      best = { slot, gain, fits };
+    }
+  });
+  return (best as { slot: number } | null)?.slot ?? null;
+}
+
+/** The weakest of these players (the least total stats; the last of equals). */
+export function weakest(players: readonly RosterPlayer[]): number {
+  let at = 0;
+  players.forEach((p, i) => {
+    if (total(p.stats) <= total(players[at]?.stats ?? p.stats)) at = i;
+  });
+  return at;
 }
 
 // ── The offer ───────────────────────────────────────────────────────────────

@@ -26,10 +26,9 @@
 import { PLAYS } from '../src/arcade/content/plays';
 import { pocketTime } from '../src/arcade/sim/ball';
 import { DRIVE_KINDS, createRun, dispatch, startingRoster } from '../src/arcade/sim/run';
-import { FORM_STATS, ROSTER_ROLES } from '../src/arcade/content/team';
+import { FORM_STATS } from '../src/arcade/content/team';
 import { rngFor } from '../src/arcade/sim/random';
 import { plus } from '../src/arcade/sim/stats';
-import { BENCH_START } from '../src/arcade/sim/team';
 import { breakMarker, jukeShowing } from '../src/arcade/sim/breakit';
 import { canThrow, step } from '../src/arcade/sim/step';
 import type { ArcadeEvent, Form, Role, RunState, Stats, StepInput } from '../src/arcade/sim/types';
@@ -309,17 +308,14 @@ function count(
 }
 
 /**
- * TRICK OR TREAT! for the bot: with `perks` on, a random perk. A recruit
- * lands on the bench; it then swaps it in for the weakest player in the
- * position it prefers, if the recruit is better (by total stats). With the
- * bench full, the recruit replaces the weakest one on the bench. With
- * `perks` off, it skips.
+ * TRICK OR TREAT! for the bot: with `perks` on, a card (by `pick`, or at
+ * random); a new player places itself (the sim's bestSpot), so it just
+ * moves on. With `perks` off, it skips.
  */
 function draftPick(state: RunState, rng: Rng, scenario: Scenario): RunState {
   if (!scenario.perks || state.offer.length === 0) {
     return dispatch(state, { type: 'skipDraft' }).state;
   }
-  const before = state.bench.length;
   const want = { player: 'recruit', stat: 'playerStat', random: undefined }[
     scenario.pick ?? 'random'
   ];
@@ -330,23 +326,7 @@ function draftPick(state: RunState, rng: Rng, scenario: Scenario): RunState {
           0,
           state.offer.findIndex((p) => p.kind === want),
         );
-  let s = dispatch(state, { type: 'pick', offer: index }).state;
-  const total = (st: Stats): number => st.hustle + st.hands + st.heft;
-  if (s.recruit) {
-    const weakest = s.bench
-      .map((p, seat) => ({ p, seat }))
-      .sort((a, b) => total(a.p.stats) - total(b.p.stats))[0];
-    s = dispatch(s, { type: 'place', slot: BENCH_START + (weakest?.seat ?? 0) }).state;
-  } else if (s.bench.length > before) {
-    const recruit = s.bench[s.bench.length - 1];
-    const slot = s.roster
-      .map((p, i) => ({ p, i }))
-      .filter(({ i }) => ROSTER_ROLES[i] === recruit?.preferred)
-      .sort((a, b) => total(a.p.stats) - total(b.p.stats))[0];
-    if (recruit && slot && total(recruit.stats) > total(slot.p.stats)) {
-      s = dispatch(s, { type: 'swap', a: slot.i, b: BENCH_START + s.bench.length - 1 }).state;
-    }
-  }
+  const s = dispatch(state, { type: 'pick', offer: index }).state;
   return s.phase === 'draft' ? dispatch(s, { type: 'skipDraft' }).state : s;
 }
 

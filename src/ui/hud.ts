@@ -49,14 +49,14 @@ export interface RosterRow {
   /** Its portrait: trusted SVG markup, drawn in the photo box. */
   readonly icon: string;
   readonly stats: readonly StatBar[];
-  /** A short note, e.g. "prefers Catcher · Monster Mash +10", or "". */
+  /** A short note, e.g. "prefers Catcher", or "". */
   readonly note: string;
   /** Its position is the one the player in question prefers: starred on the position's heading. */
   readonly fits?: boolean;
 }
 
-/** The player you're placing, shown as a card over the roster. */
-export interface RecruitView {
+/** A player as a card: the photo, name and kind, stat bars (with any gains), a note. */
+export interface PlayerCard {
   readonly name: string;
   readonly form: string;
   readonly icon: string;
@@ -64,13 +64,20 @@ export interface RecruitView {
   readonly note: string;
 }
 
-/** What TRICK OR TREAT! shows: the offer (or the recruit waiting), your roster and bench, and what to do. */
+/** One card of TRICK OR TREAT!'s offer: a big title over a player card. */
+export interface OfferCard {
+  /** "New Player!", "More Stats!". */
+  readonly title: string;
+  /** Which card it is: styles it. */
+  readonly kind: 'player' | 'stats';
+  readonly player: PlayerCard;
+}
+
+/** What TRICK OR TREAT! shows: the offer, your roster and bench, and what to do. */
 export interface DraftView {
-  /** The heading over the offer (default "Pick one"). */
-  readonly title?: string;
-  readonly offer: readonly CardFace[];
-  /** A recruit waiting for a slot: shown instead of the offer. */
-  readonly recruit?: RecruitView;
+  /** The heading over the offer. */
+  readonly title: string;
+  readonly offer: readonly OfferCard[];
   /** The players on the field, in lineup order… */
   readonly roster: readonly RosterRow[];
   /** …and the bench: a row per seat, null for an empty one. */
@@ -85,8 +92,6 @@ export interface DraftView {
 export interface CardFace {
   readonly name: string;
   readonly blurb: string;
-  /** A rarity, e.g. "rare": styles the card. */
-  readonly rarity?: string;
 }
 
 export class Hud {
@@ -202,13 +207,7 @@ export class Hud {
     };
     const offer = document.createElement('div');
     offer.className = 'hud-draft-row';
-    offer.append(
-      ...draft.offer.map((c, i) =>
-        cardButton(c, `hud-card${c.rarity ? ` rarity-${c.rarity}` : ''}`, () =>
-          this.handlers.onDraft(i),
-        ),
-      ),
-    );
+    offer.append(...draft.offer.map((c, i) => offerButton(c, () => this.handlers.onDraft(i))));
     const onRoster = this.handlers.onRoster;
     const tap = (row: RosterRow) => (onRoster ? () => onRoster(row.spot) : undefined);
     // Left: the field, one group per position in lineup order. Right: the bench.
@@ -262,9 +261,9 @@ export class Hud {
     skip.textContent = draft.skip ?? '';
     skip.hidden = !draft.skip;
     skip.addEventListener('click', () => this.handlers.onSkip());
-    const top: HTMLElement[] = draft.recruit ? [recruitCard(draft.recruit)] : [offer];
+    const top: HTMLElement[] = draft.offer.length > 0 ? [offer] : [];
     this.draft.replaceChildren(
-      heading(draft.title ?? 'Pick one'),
+      heading(draft.title),
       ...top,
       skip,
       heading('Your team'),
@@ -315,15 +314,19 @@ function rosterRow(row: RosterRow, onTap?: () => void): HTMLElement {
   return el;
 }
 
-function recruitCard(r: RecruitView): HTMLElement {
-  const el = document.createElement('div');
-  el.className = 'hud-recruit';
-  const tag = document.createElement('small');
-  tag.textContent = 'NEW PLAYER';
-  el.append(tag, header(r.name, r.form, r.icon), statBars(r.stats));
-  if (r.note) {
+/** An offer card: its big title, then the player card; tap to take it. */
+function offerButton(card: OfferCard, onTap: () => void): HTMLElement {
+  const el = document.createElement('button');
+  el.className = `hud-offer ${card.kind} interactive`;
+  el.addEventListener('click', onTap);
+  const title = document.createElement('strong');
+  title.className = 'hud-offer-title';
+  title.textContent = card.title;
+  const p = card.player;
+  el.append(title, header(p.name, p.form, p.icon), statBars(p.stats));
+  if (p.note) {
     const note = document.createElement('em');
-    note.textContent = r.note;
+    note.textContent = p.note;
     el.append(note);
   }
   return el;

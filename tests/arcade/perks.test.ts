@@ -5,7 +5,7 @@ import { createRun, dispatch, endDown, nextDown } from '../../src/arcade/sim/run
 import { forceBreakKind } from '../../src/arcade/sim/step';
 import { ZONE_OFFER } from '../../src/arcade/content/perks';
 import { BENCH_SIZE, POSITION_STAT, ROSTER_ROLES } from '../../src/arcade/content/team';
-import { BENCH_START, applyPerk, noPerks, playerStats, rollOffer } from '../../src/arcade/sim/team';
+import { applyPerk, noPerks, playerStats, rollOffer } from '../../src/arcade/sim/team';
 import type { ArcadeEvent, Perk, RunState } from '../../src/arcade/sim/types';
 import { v } from '../../src/arcade/sim/vec';
 import { carry, ofType, playState, run, stand, tapAt, throwAt, untilGrabbed } from './helpers';
@@ -128,18 +128,6 @@ describe('TRICK OR TREAT!', () => {
     expect(playerStats(after, 5).heft).toBe(after.roster[5]!.stats.heft);
   });
 
-  it('Monster Mash: +10 to every stat for each player whose kind is unique on the team', () => {
-    const s = atDraft();
-    s.roster[2] = { ...s.roster[2]!, kind: 'werewolf' };
-    expect(playerStats(s, 2)).toEqual({
-      hustle: s.roster[2]!.stats.hustle + 10,
-      hands: s.roster[2]!.stats.hands + 10,
-      heft: s.roster[2]!.stats.heft + 10,
-    });
-    // The six humans aren't unique.
-    expect(playerStats(s, 0)).toEqual(s.roster[0]!.stats);
-  });
-
   const boo = {
     name: 'Boo Radish',
     kind: 'ghost' as const,
@@ -162,39 +150,57 @@ describe('TRICK OR TREAT!', () => {
     expect(seen).toBeGreaterThan(5);
   });
 
-  it('a recruit takes a bench seat, and the roster stays open until Done', () => {
-    const picked = dispatch(offering({ rarity: 'rare', kind: 'recruit', player: boo }), {
-      type: 'pick',
-      offer: 0,
-    });
-    expect(picked.state.phase).toBe('draft');
-    expect(picked.state.bench.map((p) => p.name)).toEqual(['Boo Radish']);
-    expect(picked.state.offer).toEqual([]);
-    expect(ofType(picked.events, 'joined')[0]).toMatchObject({
-      name: 'Boo Radish',
-      slot: BENCH_START,
-      replaced: null,
-    });
-    // Swap it onto the field, then Done.
-    const gone = picked.state.roster[6]!.name;
-    const swapped = dispatch(picked.state, { type: 'swap', a: 6, b: BENCH_START }).state;
-    expect(swapped.roster[6]!.name).toBe('Boo Radish');
-    expect(swapped.bench[0]!.name).toBe(gone);
-    expect(swapped.field.players.some((p) => p.form === 'ghost')).toBe(true);
-    expect(dispatch(swapped, { type: 'skipDraft' }).state.phase).toBe('setup');
+  const take = (player: typeof boo) =>
+    dispatch(offering({ rarity: 'common', kind: 'recruit', player }), { type: 'pick', offer: 0 });
+
+  it('a new player goes straight into the slot it improves most, a slot it prefers on a tie', () => {
+    // 200 in all against seven plain 150s: it beats them all by the same, so it goes to a Catcher slot.
+    const star = { ...boo, stats: { hustle: 60, hands: 100, heft: 40 } };
+    const r = take(star);
+    const slot = r.state.roster.findIndex((p) => p.name === 'Boo Radish');
+    expect(ROSTER_ROLES[slot]).toBe('catcher');
+    expect(r.state.bench).toHaveLength(1);
+    expect(ofType(r.events, 'joined')[0]).toMatchObject({ slot, replaced: r.state.bench[0]!.name });
+    // The roster stays open to rearrange, then Done.
+    expect(r.state.phase).toBe('draft');
+    expect(r.state.offer).toEqual([]);
+    expect(r.state.field.players.some((p) => p.form === 'ghost')).toBe(true);
+    expect(dispatch(r.state, { type: 'skipDraft' }).state.phase).toBe('setup');
   });
 
-  it('with the bench full, a recruit waits for you to choose who it replaces', () => {
-    const s = offering({ rarity: 'rare', kind: 'recruit', player: boo });
-    s.bench = Array.from({ length: BENCH_SIZE }, (_, i) => ({ ...s.roster[0]!, name: `Sub ${i}` }));
-    const picked = dispatch(s, { type: 'pick', offer: 0 }).state;
-    expect(picked.recruit?.name).toBe('Boo Radish');
-    // No swapping while it waits.
-    expect(dispatch(picked, { type: 'swap', a: 0, b: 1 }).state.roster).toEqual(picked.roster);
-    const placed = dispatch(picked, { type: 'place', slot: BENCH_START + 1 });
-    expect(placed.state.recruit).toBeNull();
-    expect(placed.state.bench.map((p) => p.name)).toEqual(['Sub 0', 'Boo Radish', 'Sub 2']);
-    expect(ofType(placed.events, 'joined')[0]).toMatchObject({ replaced: 'Sub 1' });
+  it('it goes in for the weakest player, wherever it plays', () => {
+    const s = offering({
+      rarity: 'common',
+      kind: 'recruit',
+      player: { ...boo, stats: { hustle: 60, hands: 100, heft: 40 } },
+    });
+    s.roster[1] = { ...s.roster[1]!, stats: { hustle: 30, hands: 30, heft: 30 } };
+    const r = dispatch(s, { type: 'pick', offer: 0 }).state;
+    expect(r.roster[1]!.name).toBe('Boo Radish');
+  });
+
+  it('a new player who beats nobody sits on the bench', () => {
+    const r = take(boo); // 150, like everyone
+    expect(r.state.bench.map((p) => p.name)).toEqual(['Boo Radish']);
+    expect(ofType(r.events, 'joined')[0]).toMatchObject({ slot: -1, replaced: null });
+  });
+
+  it('with the bench full, the weakest of the bench and the one sitting down leaves', () => {
+    const s = offering({
+      rarity: 'common',
+      kind: 'recruit',
+      player: { ...boo, stats: { hustle: 60, hands: 100, heft: 40 } },
+    });
+    s.bench = Array.from({ length: BENCH_SIZE }, (_, i) => ({
+      ...s.roster[0]!,
+      name: `Sub ${i}`,
+      stats: { hustle: 60, hands: 60, heft: 60 + i },
+    }));
+    const r = dispatch(s, { type: 'pick', offer: 0 });
+    // The plain 150 it replaced is weaker than every Sub, so it's the one who leaves.
+    const replaced = ofType(r.events, 'joined')[0]!.replaced;
+    expect(ofType(r.events, 'left')[0]).toEqual({ type: 'left', name: replaced });
+    expect(r.state.bench.map((p) => p.name)).toEqual(['Sub 0', 'Sub 1', 'Sub 2']);
   });
 
   it('any player can play any position: two swap slots', () => {

@@ -199,10 +199,6 @@
   max-width: 460px;
 }
 
-.hud-draft-row .hud-card {
-  min-height: 96px;
-}
-
 .hud-skip {
   margin-top: 6px;
   padding: 8px 18px;
@@ -282,23 +278,6 @@
   color: var(--danger);
 }
 
-.hud-card.rarity-rare {
-  box-shadow:
-    inset 0 4px 0 rgb(255 255 255 / 0.55),
-    inset 0 -4px 0 rgb(0 0 0 / 0.15),
-    0 0 0 4px #4aa3ff,
-    4px 4px 0 4px var(--ink);
-}
-
-.hud-card.rarity-epic {
-  box-shadow:
-    inset 0 4px 0 rgb(255 255 255 / 0.55),
-    inset 0 -4px 0 rgb(0 0 0 / 0.15),
-    0 0 0 4px var(--candy-purple),
-    0 0 0 8px var(--ink),
-    4px 4px 0 8px var(--ink);
-}
-
 /* ── The roster (TRICK OR TREAT!) ─────────────────────────────────────── */
 
 .hud-roster {
@@ -335,7 +314,7 @@
 }
 
 .hud-roster-row,
-.hud-recruit {
+.hud-offer {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -374,7 +353,7 @@ button.hud-roster-row:active {
 }
 
 .hud-roster-row em,
-.hud-recruit em {
+.hud-offer em {
   font-style: normal;
   font-size: 0.68rem;
   opacity: 0.7;
@@ -389,21 +368,38 @@ button.hud-roster-row:active {
   opacity: 0.85;
 }
 
-/* The recruit you're placing, over the roster. */
-.hud-recruit {
-  width: 100%;
-  max-width: 300px;
-  padding: 10px 12px;
-  font-size: 0.9rem;
-  border: var(--edge) solid var(--candy-purple);
-  background: rgb(162 89 255 / 0.18);
+/* TRICK OR TREAT!'s two cards: a big title over a player card, like the roster's. */
+.hud-offer {
+  padding: 8px 10px 9px;
+  font-size: 0.8rem;
+  border: var(--edge) solid var(--accent-color);
+  background: var(--accent-fill);
   box-shadow: 5px 5px 0 var(--ink);
 }
 
-.hud-recruit small {
-  font-size: 0.65rem;
-  letter-spacing: 0.14em;
-  color: var(--candy-purple);
+.hud-offer.player {
+  --accent-color: var(--candy-purple);
+  --accent-fill: rgb(162 89 255 / 0.2);
+}
+
+.hud-offer.stats {
+  --accent-color: var(--slime-green);
+  --accent-fill: rgb(156 255 46 / 0.12);
+}
+
+button.hud-offer:active {
+  translate: 3px 3px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.hud-offer-title {
+  margin-bottom: 2px;
+  font-weight: 400;
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--accent-color);
+  text-shadow: 3px 3px 0 var(--ink);
 }
 
 .hud-player-head {
@@ -430,7 +426,7 @@ button.hud-roster-row:active {
   height: 100%;
 }
 
-.hud-recruit .hud-photo {
+.hud-offer .hud-photo {
   width: 46px;
   height: 46px;
 }
@@ -476,8 +472,8 @@ button.hud-roster-row:active {
   font-size: 0.66rem;
 }
 
-.hud-recruit .hud-stat {
-  font-size: 0.8rem;
+.hud-offer .hud-stat {
+  font-size: 0.72rem;
 }
 
 .hud-stat-label {

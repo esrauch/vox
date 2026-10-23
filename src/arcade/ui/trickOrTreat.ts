@@ -1,14 +1,14 @@
 /**
- * The words for TRICK OR TREAT! (GAMEPLAY.md, Building Up): perk cards,
- * recruit bios, and the roster panel, where you can swap players' positions
- * or choose who a recruit replaces.
+ * What TRICK OR TREAT! shows (GAMEPLAY.md, Building Up): the two cards (New
+ * Player! and More Stats!, each a player card like the roster's), then the
+ * roster to rearrange after a new player joins. The field is on the left
+ * by position, the bench on the right; any two swap.
  */
 import { BENCH_SIZE, POSITION_STAT, ROSTER_ROLES } from '../content/team';
-import { MONSTER_MASH_BONUS } from '../content/perks';
-import { BENCH_START, atSpot, fieldedStats, playerStats, uniqueKind } from '../sim/team';
+import { BENCH_START, atSpot, bestSpot, fieldedStats, playerStats } from '../sim/team';
 import { kindIcon } from './kindIcons';
 import type { Form, Perk, Position, RosterPlayer, RunState, Stats } from '../sim/types';
-import type { CardFace, DraftView, RosterRow, StatBar } from '../../ui/hud';
+import type { DraftView, OfferCard, RosterRow, StatBar } from '../../ui/hud';
 
 const STAT: Readonly<Record<keyof Stats, string>> = {
   hustle: 'Hustle',
@@ -27,153 +27,114 @@ const POSITION: Readonly<Record<Position, string>> = {
   catcher: 'Catcher',
 };
 
-const statLine = (s: Stats): string => `Hustle ${s.hustle} · Hands ${s.hands} · Heft ${s.heft}`;
-
-/** A recruit's bio: kind, the position it prefers, its stats. */
-export function bio(p: RosterPlayer): string {
-  return `${KIND[p.kind]} · prefers ${POSITION[p.preferred]} · ${statLine(p.stats)}`;
-}
-
-/** "+20 Heft, +10 Hustle, +10 Hands": the main stat first. */
-function boostText(boost: Stats, main: keyof Stats): string {
-  const order = [main, ...(['heft', 'hustle', 'hands'] as const).filter((k) => k !== main)];
-  return order.map((k) => `+${boost[k]} ${STAT[k]}`).join(', ');
-}
-
-export function perkFace(perk: Perk): CardFace {
-  const rarity = perk.rarity;
-  switch (perk.kind) {
-    case 'allStat':
-      return { rarity, name: `+${perk.amount} ${STAT[perk.stat]}`, blurb: 'Everyone on the team.' };
-    case 'kindStat':
-      return {
-        rarity,
-        name: `+${perk.amount} ${STAT[perk.stat]}`,
-        blurb: `Every ${KIND[perk.form]} on the team.`,
-      };
-    case 'extraSweep':
-      return { rarity, name: 'Extra Sweep', blurb: 'The pocket holds for one more sweep.' };
-    case 'slowSweep':
-      return { rarity, name: 'Slow-Mo Sweep', blurb: 'The aim line sweeps 25% slower.' };
-    case 'secondWind':
-      return { rarity, name: 'Second Wind', blurb: 'Once a drive, a BAD Break it! counts as OK.' };
-    case 'magnet':
-      return {
-        rarity,
-        name: 'Candy Corn Magnet',
-        blurb: 'A throw about to fall incomplete gets twice the reach.',
-      };
-    case 'hotArm':
-      return { rarity, name: 'Hot Arm', blurb: 'The ball flies twice as fast.' };
-    case 'recruit':
-      return { rarity, name: `New: ${perk.player.name}`, blurb: bio(perk.player) };
-    case 'playerStat':
-      return {
-        rarity,
-        name: `Boost ${perk.name}`,
-        blurb: `${boostText(perk.boost, perk.main)}, for good.`,
-      };
-  }
-}
-
 const STAT_ORDER: readonly (keyof Stats)[] = ['heft', 'hustle', 'hands'];
 
 const bars = (s: Stats, key?: keyof Stats): StatBar[] =>
   STAT_ORDER.map((k) => ({ label: STAT[k], value: s[k], key: k === key }));
 
-const withDelta = (shown: StatBar[], before: Stats, after: Stats): StatBar[] =>
-  shown.map((bar, i) => {
-    const k = STAT_ORDER[i] ?? 'heft';
-    return { ...bar, delta: after[k] - before[k] };
-  });
+/** The position a field slot plays. */
+const slotPosition = (slot: number): Position => {
+  const role = ROSTER_ROLES[slot];
+  return role && role !== 'qb' ? role : 'catcher';
+};
 
-/**
- * The TRICK OR TREAT! screen: the offer, then (after a recruit takes a bench
- * seat) the lineup to set; or, with the bench full, who the recruit replaces.
- * The field is on the left by position, the bench on the right; any two swap.
- */
-export function trickOrTreatView(state: RunState, selected: number | null): DraftView {
-  const recruit = state.recruit;
-  // The player a stat boost on offer is for: its row says so.
-  const boostNote = (spot: number): string => {
-    const b = state.offer.find((o) => o.kind === 'playerStat' && o.spot === spot);
-    return b?.kind === 'playerStat' ? `on offer: ${boostText(b.boost, b.main)}` : '';
-  };
-  // ★ on the position heading the player in question prefers: the recruit waiting, or the player tapped.
-  const starred = (recruit ?? (selected === null ? undefined : atSpot(state, selected)))?.preferred;
-  const roster: RosterRow[] = state.roster.map((p, slot) => {
-    const role = ROSTER_ROLES[slot];
-    const position: Position = role && role !== 'qb' ? role : 'catcher';
-    const stats = playerStats(state, slot);
-    const notes = [
-      p.preferred !== position ? `prefers ${POSITION[p.preferred]}` : '',
-      uniqueKind(state.roster, slot) ? `Monster Mash +${MONSTER_MASH_BONUS}` : '',
-      boostNote(slot),
-    ];
-    let shown = bars(stats, POSITION_STAT[position]);
-    if (recruit) {
-      // What this slot would have with the recruit there instead (its perks and Monster Mash included).
-      const after = { ...state, roster: state.roster.map((q, i) => (i === slot ? recruit : q)) };
-      shown = withDelta(shown, stats, playerStats(after, slot));
-    }
+/** One card of the offer. */
+function offerCard(state: RunState, perk: Perk): OfferCard | null {
+  if (perk.kind === 'recruit') {
+    const p = perk.player;
+    const slot = bestSpot(state, p);
+    const goes =
+      slot === null
+        ? 'sits on the bench'
+        : `in for ${state.roster[slot]?.name ?? '?'} (${POSITION[slotPosition(slot)]})`;
     return {
-      spot: slot,
-      position: POSITION[position],
-      selected: selected === slot,
-      name: p.name,
-      form: KIND[p.kind],
-      icon: kindIcon(p.kind),
-      stats: shown,
-      note: notes.filter(Boolean).join(' · '),
+      title: 'New Player!',
+      kind: 'player',
+      player: {
+        name: p.name,
+        form: KIND[p.kind],
+        icon: kindIcon(p.kind),
+        stats: bars(fieldedStats(state, p), POSITION_STAT[p.preferred]),
+        note: `prefers ${POSITION[p.preferred]} · ${goes}`,
+      },
+    };
+  }
+  if (perk.kind === 'playerStat') {
+    const p = atSpot(state, perk.spot);
+    if (!p) return null;
+    const now = fieldedStats(state, p);
+    const where = perk.spot < BENCH_START ? POSITION[slotPosition(perk.spot)] : 'Bench';
+    return {
+      title: 'More Stats!',
+      kind: 'stats',
+      player: {
+        name: p.name,
+        form: KIND[p.kind],
+        icon: kindIcon(p.kind),
+        stats: bars(now, perk.main).map((b, i) => ({
+          ...b,
+          delta: perk.boost[STAT_ORDER[i] ?? 'heft'],
+        })),
+        note: `${where} · for good`,
+      },
+    };
+  }
+  return null;
+}
+
+/** The TRICK OR TREAT! screen: the two cards, or (after a new player joins) the lineup to set. */
+export function trickOrTreatView(state: RunState, selected: number | null): DraftView {
+  // The player a stat boost on offer is for: its row says so.
+  const boosted = (spot: number): boolean =>
+    state.offer.some((o) => o.kind === 'playerStat' && o.spot === spot);
+  // ★ on the position heading the tapped player prefers.
+  const starred = (selected === null ? undefined : atSpot(state, selected))?.preferred;
+  const row = (
+    p: RosterPlayer,
+    spot: number,
+    position: string,
+    stats: Stats,
+    key?: keyof Stats,
+  ): RosterRow => ({
+    spot,
+    position,
+    selected: selected === spot,
+    name: p.name,
+    form: KIND[p.kind],
+    icon: kindIcon(p.kind),
+    stats: bars(stats, key),
+    note: [
+      position === 'Bench' || p.preferred !== slotPosition(spot)
+        ? `prefers ${POSITION[p.preferred]}`
+        : '',
+      boosted(spot) ? 'More Stats! on offer' : '',
+    ]
+      .filter(Boolean)
+      .join(' · '),
+  });
+  const roster: RosterRow[] = state.roster.map((p, slot) => {
+    const position = slotPosition(slot);
+    return {
+      ...row(p, slot, POSITION[position], playerStats(state, slot), POSITION_STAT[position]),
       fits: starred === position,
     };
   });
   const bench = Array.from({ length: BENCH_SIZE }, (_, seat): RosterRow | null => {
     const p = state.bench[seat];
-    if (!p) return null;
-    const stats = fieldedStats(state, p);
-    const shown = bars(stats);
-    return {
-      spot: BENCH_START + seat,
-      position: 'Bench',
-      selected: selected === BENCH_START + seat,
-      name: p.name,
-      form: KIND[p.kind],
-      icon: kindIcon(p.kind),
-      stats: recruit ? withDelta(shown, stats, fieldedStats(state, recruit)) : shown,
-      note: [`prefers ${POSITION[p.preferred]}`, boostNote(BENCH_START + seat)]
-        .filter(Boolean)
-        .join(' · '),
-    };
+    return p ? row(p, BENCH_START + seat, 'Bench', fieldedStats(state, p)) : null;
   });
-  if (recruit) {
-    return {
-      title: `The bench is full: who does ${recruit.name} replace?`,
-      offer: [],
-      recruit: {
-        name: recruit.name,
-        form: KIND[recruit.kind],
-        icon: kindIcon(recruit.kind),
-        stats: bars(fieldedStats(state, recruit), POSITION_STAT[recruit.preferred]),
-        note: `prefers ${POSITION[recruit.preferred]}`,
-      },
-      roster,
-      bench,
-      hand: 'Tap the player to let go. The numbers show what that spot gains or loses; ★ marks the position it prefers.',
-    };
-  }
   const from = selected === null ? null : atSpot(state, selected);
-  const swapHint = from
+  const hand = from
     ? `Now tap who ${from.name} swaps with (or ${from.name} again to cancel).`
     : 'Tap any two players to swap them, field or bench.';
   if (state.offer.length === 0) {
-    return { title: 'Set your lineup', offer: [], roster, bench, hand: swapHint, skip: 'Done' };
+    return { title: 'Set your lineup', offer: [], roster, bench, hand, skip: 'Done' };
   }
   return {
     title: 'TRICK OR TREAT!',
-    offer: state.offer.map(perkFace),
+    offer: state.offer.map((p) => offerCard(state, p)).filter((c): c is OfferCard => c !== null),
     roster,
     bench,
-    hand: swapHint,
+    hand,
   };
 }

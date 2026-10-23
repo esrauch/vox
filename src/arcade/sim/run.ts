@@ -12,13 +12,14 @@ import { plus } from './stats';
 import { lineUpDefense, lineUpTeam } from './bodies';
 import { BENCH_SIZE } from '../content/team';
 import {
-  BENCH_START,
   applyPerk,
   atSpot,
+  bestSpot,
   noPerks,
   rollOffer,
   setSpot,
   startingRoster,
+  weakest,
 } from './team';
 import type {
   Action,
@@ -72,7 +73,6 @@ export function createRun(seed: number, roster: RosterPlayer[] = startingRoster(
     bench: [],
     perks: noPerks(),
     offer: [],
-    recruit: null,
     field: { players: [], defenders: [], witches: [], ball: { at: 'qb' }, lane: 0, drag: null },
     snappedAt: 0,
     pause: 0,
@@ -190,9 +190,6 @@ export function dispatch(prev: RunState, action: Action): ArcadeResult {
     case 'pick':
       pick(state, action.offer, events);
       break;
-    case 'place':
-      place(state, action.slot, events);
-      break;
     case 'swap':
       swap(state, action.a, action.b);
       break;
@@ -243,59 +240,55 @@ function hike(state: RunState, events: ArcadeEvent[]): void {
 // ── TRICK OR TREAT! ─────────────────────────────────────────────────────────
 
 /**
- * Take a perk on offer. A recruit takes a seat on the bench and the roster
- * stays open (swap it in, then Done); with the bench full it waits for you to
- * choose who it replaces.
+ * Take a card on offer. A new player goes straight into the field slot it
+ * improves most (bestSpot), and whoever was there sits on the bench; if it
+ * beats nobody, it sits on the bench itself. With the bench full, the
+ * weakest of the bench and the one sitting down leaves. The roster stays
+ * open to rearrange, then Done. A stat boost is applied and play goes on.
  */
 function pick(state: RunState, index: number, events: ArcadeEvent[]): void {
   const perk = state.offer[index];
-  if (state.phase !== 'draft' || state.recruit || !perk) return;
+  if (state.phase !== 'draft' || !perk) return;
   events.push({ type: 'perk', perk });
   if (perk.kind === 'recruit') {
     state.offer = [];
-    if (state.bench.length < BENCH_SIZE) {
-      state.bench.push(perk.player);
-      events.push({
-        type: 'joined',
-        name: perk.player.name,
-        slot: BENCH_START + state.bench.length - 1,
-        replaced: null,
-      });
-    } else {
-      state.recruit = perk.player;
-    }
+    const recruit = perk.player;
+    const slot = bestSpot(state, recruit);
+    const replaced = slot === null ? null : (state.roster[slot] ?? null);
+    if (slot !== null) state.roster[slot] = recruit;
+    events.push({
+      type: 'joined',
+      name: recruit.name,
+      slot: slot ?? -1,
+      replaced: replaced?.name ?? null,
+    });
+    sitDown(state, replaced ?? recruit, events);
+    relineTeam(state);
     return;
   }
   if (perk.kind === 'playerStat') {
     // The boost is the player's own, wherever it plays from now on.
     const p = atSpot(state, perk.spot);
-    if (p)
-      setSpot(state, perk.spot, {
-        ...p,
-        stats: plus(p.stats, perk.boost),
-      });
+    if (p) setSpot(state, perk.spot, { ...p, stats: plus(p.stats, perk.boost) });
   } else {
     applyPerk(state.perks, perk);
   }
   leaveDraft(state);
 }
 
-/** The bench is full: put the recruit in a spot (field or bench); whoever was there leaves. */
-function place(state: RunState, slot: number, events: ArcadeEvent[]): void {
-  const recruit = state.recruit;
-  const replaced = atSpot(state, slot);
-  if (state.phase !== 'draft' || !recruit || !replaced) return;
-  setSpot(state, slot, recruit);
-  state.recruit = null;
-  events.push({ type: 'joined', name: recruit.name, slot, replaced: replaced.name });
-  relineTeam(state);
+/** A player takes a bench seat; with the bench full, the weakest of them all leaves the team. */
+function sitDown(state: RunState, p: RosterPlayer, events: ArcadeEvent[]): void {
+  state.bench.push(p);
+  if (state.bench.length <= BENCH_SIZE) return;
+  const [gone] = state.bench.splice(weakest(state.bench), 1);
+  if (gone) events.push({ type: 'left', name: gone.name });
 }
 
 /** Swap two players' spots, field or bench (any player can play any position). */
 function swap(state: RunState, a: number, b: number): void {
   const pa = atSpot(state, a);
   const pb = atSpot(state, b);
-  if (state.phase !== 'draft' || state.recruit || !pa || !pb || a === b) return;
+  if (state.phase !== 'draft' || !pa || !pb || a === b) return;
   setSpot(state, a, pb);
   setSpot(state, b, pa);
   // A stat boost on offer follows its player to the new spot.
@@ -308,7 +301,6 @@ function swap(state: RunState, a: number, b: number): void {
 /** On to the next drive (its defense is already lined up): your team, as it now is, lines up too. */
 function leaveDraft(state: RunState): void {
   state.offer = [];
-  state.recruit = null;
   state.phase = 'setup';
   relineTeam(state);
 }

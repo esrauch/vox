@@ -183,7 +183,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Building Up: TRICK OR TREAT!
 
-**After every won drive: TRICK OR TREAT!** Two cards are offered, a new player and a stat boost; take one and play on (a new player keeps the screen open until you tap **Done**). **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
+**After every won drive: TRICK OR TREAT!** Two cards are offered, **New Player!** and **More Stats!**; take one and play on (a new player keeps the screen open until you tap **Done**). **On the same screen is your roster: the seven on the field down the left, by position, and the bench (three seats) down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
 
 ### The offer
 
@@ -198,21 +198,16 @@ The zone is the one of the drive about to be played, so the offer after the Fore
 
 ### New players
 
-**A recruit arrives with a little bio card:** a **name**, its **Heft / Hands / Hustle**, its **kind** (Human, Ghost, Golem, Werewolf, Skeleton…), and a **preferred position**: the one its best stat suits (Heft → Blocker, Hustle → Runner, Hands → Catcher). It takes a seat on the bench, and the roster stays open so you can swap it in (then **Done**). With the bench full, you pick who it replaces, on the field or the bench. It can go in any slot, but it plays best in its preferred one. Only the seven on the field play, and only they count for team bonuses like Monster Mash.
+**The New Player! card is the player itself,** drawn like a roster card: its photo, name and kind, its **Heft / Hustle / Hands** bars, its **preferred position** (the one its best stat suits: Heft → Blocker, Hustle → Runner, Hands → Catcher), and where it will go.
+
+**Take it and it goes straight in:** into the field slot whose player it beats by the most total stats (on a tie, a slot of the position it prefers), and whoever was there sits on the bench. If it beats nobody, it sits on the bench itself. **With the bench full, the weakest of the bench and the one sitting down leaves the team.** Then the roster stays open to rearrange (any two swap), and **Done** plays on. Only the seven on the field play.
 
 > **Howlin' Hal** · Werewolf · *prefers Runner*
 > Heft 65 · Hands 40 · Hustle 95 *(a Forest recruit: 200 in all)*
 
-### Team bonuses
+### More Stats!
 
-**How your kinds add up matters**, *Balatro*-style:
-
-| Bonus | Your team | Effect |
-|---|---|---|
-| **Monster Mash** | Players of different kinds | **+10 to every stat for each player whose kind is unique on your team** (the only one of its kind) |
-| ▲ *More to come* | *e.g. three of one kind* | *e.g. that kind's perk bonuses doubled* |
-
-The tension: a recruit of a new kind feeds Monster Mash; a stat boost makes the player you already have better.
+**The More Stats! card is the player it's for,** drawn the same way, with the gains on its bars. Take it and the boost is that player's for good, and play goes on.
 
 ---
 
@@ -283,10 +278,10 @@ The smallest version that proves the fun, most of it built:
 - **A down:** three random play cards with Flip and HIKE!, the sweep and THROW, handoffs with the play fake, Break it!.
 - **The third-person camera** behind and above the QB, following the play.
 - **The defense:** Rushers, Covers, a Safety, Scarecrows and Bats, scaling by drive and area. The Witch.
-- **TRICK OR TREAT!** after each won drive: perks, recruits, the roster and bench, Monster Mash.
+- **TRICK OR TREAT!** after each won drive: New Player! or More Stats!, the roster and bench.
 - **Impact:** hit-pause, shake, flying bodies, the catch slow-mo, sound on every contact.
 
-**Then:** real levels, defenders and Bosses; more team bonuses; a second area.
+**Then:** real levels, defenders and Bosses; a second area.
 
 ---
 

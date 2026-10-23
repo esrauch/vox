@@ -201,13 +201,9 @@ export class ArcadeGame {
     this.syncHud();
   }
 
-  /** TRICK OR TREAT!: tap a spot (field or bench) to place a recruit there, or two in turn to swap them. */
+  /** TRICK OR TREAT!: tap two spots (field or bench) in turn to swap them. */
   private onRoster(spot: number): void {
     this.conductor.play('uiClick');
-    if (this.state.recruit) {
-      this.act({ type: 'place', slot: spot });
-      return;
-    }
     if (this.swapFrom === null) {
       this.swapFrom = spot;
     } else {
@@ -359,6 +355,9 @@ export class ArcadeGame {
           break;
         case 'joined':
           this.hud.pop(`${e.name.toUpperCase()} JOINS!`, 'good');
+          break;
+        case 'left':
+          this.hud.pop(`${e.name.toUpperCase()} LEAVES`, 'bad');
           break;
         case 'pancake':
           play('burst');

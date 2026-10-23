@@ -1,7 +1,6 @@
 /**
  * TRICK OR TREAT! (GAMEPLAY.md, Building Up): what the two cards are worth
- * in each zone, Monster Mash, and the names of the players who might join
- * you. The rules for taking a card are in sim/team.ts.
+ * in each zone, and the names of the players who might join you. The rules for taking a card are in sim/team.ts.
  */
 import type { Form, Position } from '../sim/types';
 
@@ -24,9 +23,6 @@ export const ZONE_OFFER: readonly {
   { recruitTotal: 250, boostTotal: 60 },
   { recruitTotal: 300, boostTotal: 80 },
 ];
-
-/** Monster Mash: this much to every stat for each player whose kind is unique on the team. */
-export const MONSTER_MASH_BONUS = 10;
 
 /** Your starting seven, in slot order (2 Blockers, 2 Runners, 3 Catchers): plain humans. */
 export const STARTING_NAMES: readonly string[] = [
