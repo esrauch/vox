@@ -6,15 +6,19 @@ import * as THREE from 'three';
 import { biomes, hexToNumber, team } from '../../content/palettes';
 import { arcadeTuning } from '../content/tuning';
 import type { Drive } from '../sim/types';
+import { biomeAtYard } from './world';
+import type { Biome } from '../content/defense';
 import { FIELD_AHEAD, FIELD_BEHIND } from './world';
 
 const HALF = arcadeTuning.field.halfWidth;
 
 export function createArcadeTurf(): THREE.Group {
   const group = new THREE.Group();
-  const palette = biomes.forest;
-  const light = new THREE.Color(hexToNumber(palette.grass));
-  const dark = new THREE.Color(hexToNumber(palette.grassDark));
+  // Each area's stretch of turf in its own colours (the Forest's greens, the Candy Kingdom's pinks).
+  const shades = (biome: Biome) => ({
+    light: new THREE.Color(hexToNumber(biomes[biome].grass)),
+    dark: new THREE.Color(hexToNumber(biomes[biome].grassDark)),
+  });
   const rows = FIELD_BEHIND + FIELD_AHEAD;
   const tiles = new THREE.InstancedMesh(
     new THREE.BoxGeometry(HALF * 2, 0.3, 1),
@@ -27,6 +31,7 @@ export function createArcadeTurf(): THREE.Group {
     const y = i - FIELD_BEHIND;
     m.makeTranslation(0, -0.15, -(y + 0.5));
     tiles.setMatrixAt(i, m);
+    const { light, dark } = shades(biomeAtYard(y));
     tiles.setColorAt(i, Math.floor(y / 5) % 2 === 0 ? light : dark);
   }
   group.add(tiles);

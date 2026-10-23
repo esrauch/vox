@@ -14,6 +14,7 @@ import {
 } from '../../src/arcade/sim/run';
 import { breakMarker, countdown, jukeShowing } from '../../src/arcade/sim/breakit';
 import { canThrow, forceBreakKind, step } from '../../src/arcade/sim/step';
+import { litPlayers } from '../../src/arcade/render/sweep';
 import { DT } from '../../src/arcade/content/tuning';
 import type { ArcadeEvent, RunState } from '../../src/arcade/sim/types';
 import { dist, v } from '../../src/arcade/sim/vec';
@@ -762,5 +763,34 @@ describe("Mister Frog's Frog Rain", () => {
     for (let i = 0; i < 30; i++) st = step(st).state;
     expect(st.phase).toBe('breakit');
     expect(st.field.frogs[0]?.left).toBe(0.5);
+  });
+});
+
+describe('the Candy Kingdom', () => {
+  it('is the second area: its own drives, and the Queen on its Boss drive', () => {
+    const s = createRun(3);
+    setUpDrive(s, 1, 0, [], true);
+    expect(s.drive.name).toBe('Gumdrop Lane');
+    setUpDrive(s, 1, 3, [], true);
+    expect(s.drive.name).toBe("The Queen's Court");
+    expect(s.field.defenders.some((d) => d.kind === 'queen')).toBe(true);
+    expect(s.field.hex).toBe(true);
+    expect(s.field.frogLane).toBeNull();
+    // The Forest's Boss drive has no Hex.
+    setUpDrive(s, 0, 3, [], true);
+    expect(s.field.hex).toBe(false);
+  });
+
+  it("the Queen's Hex: nobody lights up, even a receiver a throw would reach", () => {
+    const s = playState([{ pos: v(0, 8), job: stand(v(0, 8)) }]);
+    const lit = (st: RunState) => {
+      // Point the line straight at the receiver.
+      throwAt(st, v(0, 8));
+      return litPlayers(step(st).state);
+    };
+    expect(lit(structuredClone(s)).size).toBe(1);
+    const hexed = structuredClone(s);
+    hexed.field.hex = true;
+    expect(lit(hexed).size).toBe(0);
   });
 });

@@ -144,6 +144,10 @@ export const arcadeTuning = {
     /** …except a defender this close to the carrier (yards), who sees it. */
     fakeSees: 2,
   },
+  hex: {
+    /** The Queen's Hex: the aim line shows only this much of itself (yards from the pumpkin). */
+    stub: 3,
+  },
   frogRain: {
     /** The lane runs in from one sideline (either, at random) this share of the way across: never over the pumpkin, so Flip matters. */
     width: 0.4,

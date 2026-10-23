@@ -4,9 +4,11 @@
  * now would first be caught or batted down (everyone where they stand: it
  * doesn't look ahead in time), or at the bullet's range. The receiver it
  * stops on lights up. It shows only while the QB has the ball on a pass play.
+ * The Queen's Hex cuts it to a short purple stub, and nobody lights up.
  */
 import * as THREE from 'three';
-import { hexToNumber, team } from '../../content/palettes';
+import { common, hexToNumber, team } from '../../content/palettes';
+import { arcadeTuning } from '../content/tuning';
 import { aimContact, bulletEnd, sweepAngle } from '../sim/ball';
 import { qbOf } from '../sim/ai';
 import { canThrow } from '../sim/step';
@@ -21,16 +23,16 @@ const MAX_DASHES = 48;
 export class ArcadeSweep {
   private readonly group = new THREE.Group();
   private readonly dashes: THREE.Mesh[] = [];
+  private readonly material = new THREE.MeshBasicMaterial({
+    color: hexToNumber(team.accent),
+    transparent: true,
+    opacity: 0.9,
+  });
 
   constructor(scene: THREE.Scene) {
     const geo = new THREE.BoxGeometry(0.22, 0.05, 0.5);
-    const mat = new THREE.MeshBasicMaterial({
-      color: hexToNumber(team.accent),
-      transparent: true,
-      opacity: 0.9,
-    });
     for (let i = 0; i < MAX_DASHES; i++) {
-      const d = new THREE.Mesh(geo, mat);
+      const d = new THREE.Mesh(geo, this.material);
       this.dashes.push(d);
       this.group.add(d);
     }
@@ -43,9 +45,15 @@ export class ArcadeSweep {
     this.group.visible = show;
     if (!show || !qb) return;
     const angle = sweepAngle(state);
-    // The line stops where a bullet thrown now would first be caught or batted (or at its range).
-    const end = aimNow(state)?.at ?? bulletEnd(state, qb.pos, angle);
+    // The line stops where a bullet thrown now would first be caught or batted (or at its range);
+    // under the Queen's Hex it's only a short purple stub, and you judge the rest yourself.
+    const full = aimNow(state)?.at ?? bulletEnd(state, qb.pos, angle);
+    const hexed = state.field.hex;
+    const end = hexed
+      ? lerp(qb.pos, full, Math.min(1, arcadeTuning.hex.stub / Math.max(1e-6, dist(qb.pos, full))))
+      : full;
     const length = dist(qb.pos, end);
+    this.material.color.set(hexToNumber(hexed ? common.candyPurple : team.accent));
     const march = (state.time * 3) % SPACING;
     this.dashes.forEach((dash, i) => {
       const along = 1.2 + i * SPACING + march;
@@ -66,6 +74,8 @@ export function aimNow(state: RunState): ReturnType<typeof aimContact> | null {
 
 /** The receiver who'd catch a bullet thrown right now, with everyone where they stand: it lights up. */
 export function litPlayers(state: RunState): Set<number> {
+  // The Queen's Hex hides it.
+  if (state.field.hex) return new Set();
   const aim = aimNow(state);
   return new Set(aim?.outcome.kind === 'caught' ? [aim.outcome.by.id] : []);
 }

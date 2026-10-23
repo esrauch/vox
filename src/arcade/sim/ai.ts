@@ -150,7 +150,8 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
       return add(mark.pos, scale(behind, defense.coverTrail));
     }
     case 'safety':
-    case 'misterFrog': {
+    case 'misterFrog':
+    case 'queen': {
       const deepest = state.field.players
         .filter((p) => p.role !== 'qb')
         .sort((a, b) => b.pos.y - a.pos.y || a.id - b.id)[0];

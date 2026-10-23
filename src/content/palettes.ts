@@ -98,6 +98,12 @@ export const biomes = {
     hemiSky: '#c5b3ff',
     hemiGround: '#2c3f2f',
   },
+  candy: {
+    /** Pink-and-white checker turf, a berry floor beyond it. */
+    grass: '#f2a3c6',
+    grassDark: '#e48bb5',
+    floor: '#5c3350',
+  },
 } as const satisfies Record<string, Record<string, Hex>>;
 
 export type BiomeId = keyof typeof biomes;

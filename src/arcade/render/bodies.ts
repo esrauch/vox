@@ -18,6 +18,7 @@
 import * as THREE from 'three';
 import { common, hexToNumber, team } from '../../content/palettes';
 import { getGeometry, modelHeight, voxelMaterial } from '../../voxel/models';
+import { areaAt } from '../content/defense';
 import { engaged } from '../sim/ball';
 import type { Body, DefenderKind, Form, Player, RunState } from '../sim/types';
 import { dist } from '../sim/vec';
@@ -30,7 +31,11 @@ const DEFENDER_MODEL: Readonly<Record<DefenderKind, string>> = {
   safety: 'forest/safety',
   bat: 'forest/picker',
   misterFrog: 'bosses/misterFrog',
+  queen: 'bosses/queen',
 };
+
+/** A Witch on her broom (the Candy Kingdom's Safety) rides a little above the turf. */
+const WITCH_HOVER = 0.5;
 
 /** A Golem's linebacker build: its model stretched (x/z wide, y tall). Everyone else is drawn as modelled. */
 const GOLEM_SHAPE = { wide: 1.45, tall: 0.95 };
@@ -62,11 +67,20 @@ interface View {
   readonly reach: THREE.Mesh | null;
   /** What it was built to look like (kind and position): when either changes, it's rebuilt. */
   readonly look: string;
+  /** How far above the turf it rides (a Witch on her broom). */
+  readonly hover: number;
   yaw: number;
 }
 
-/** What a body looks like: a player's kind and position, or a defender's kind. */
-const lookOf = (b: Body): string => (b.side === 'team' ? `${b.form}/${b.role}` : b.kind);
+/** A body's model: a player's kind, or a defender's kind as this area draws it (a Gingerbread Man Cover…). */
+const modelOf = (state: RunState, b: Body): string =>
+  b.side === 'team'
+    ? KIND_MODEL[b.form]
+    : (areaAt(state.drive.area).looks[b.kind] ?? DEFENDER_MODEL[b.kind]);
+
+/** What a body looks like: its model and, for a player, the position it plays. */
+const lookOf = (state: RunState, b: Body): string =>
+  b.side === 'team' ? `${modelOf(state, b)}/${b.role}` : modelOf(state, b);
 
 export class ArcadeBodies {
   private readonly views = new Map<number, View>();
@@ -82,7 +96,7 @@ export class ArcadeBodies {
   /** Make the views match the bodies on the field: new ones, gone ones, and changed ones (called every frame). */
   sync(state: RunState): void {
     const bodies: Body[] = [...state.field.players, ...state.field.defenders];
-    const looks = new Map(bodies.map((b) => [b.id, lookOf(b)]));
+    const looks = new Map(bodies.map((b) => [b.id, lookOf(state, b)]));
     // Gone, or now someone else in that spot (a recruit joined, two players swapped): rebuild.
     for (const [id, v] of this.views) {
       if (looks.get(id) === v.look) continue;
@@ -93,7 +107,7 @@ export class ArcadeBodies {
     for (const b of bodies) {
       // There's no QB to draw: the pumpkin throws itself (render/ball.ts).
       if (b.side === 'team' && b.role === 'qb') continue;
-      if (!this.views.has(b.id)) this.views.set(b.id, this.create(b));
+      if (!this.views.has(b.id)) this.views.set(b.id, this.create(state, b));
     }
   }
 
@@ -119,7 +133,7 @@ export class ArcadeBodies {
       const hover =
         b.side === 'team' && b.form === 'ghost'
           ? GHOST_HOVER + 0.05 * Math.sin(state.time * 4 + b.id)
-          : 0;
+          : view.hover;
       view.body.position.y =
         b.down > 0
           ? 0.2
@@ -164,8 +178,8 @@ export class ArcadeBodies {
     return [...this.views.values()].flatMap((v) => [v.root, v.ring, ...(v.reach ? [v.reach] : [])]);
   }
 
-  private create(b: Body): View {
-    const model = b.side === 'defense' ? DEFENDER_MODEL[b.kind] : KIND_MODEL[b.form];
+  private create(state: RunState, b: Body): View {
+    const model = modelOf(state, b);
     // A Ghost is unlit: its white sheet (and team helmet) look the same whatever the light, so it reads at a glance.
     const ghost = b.side === 'team' && b.form === 'ghost';
     const body = new THREE.Mesh(getGeometry(model), ghost ? GHOST_MATERIAL : voxelMaterial);
@@ -182,7 +196,15 @@ export class ArcadeBodies {
       b.side === 'defense' ? new THREE.Mesh(this.reachGeo, this.ringMat(COVERAGE)) : null;
     if (reach) this.scene.add(reach);
     // Your team faces upfield, the defense faces you.
-    return { root, body, ring, reach, look: lookOf(b), yaw: b.side === 'team' ? Math.PI : 0 };
+    return {
+      root,
+      body,
+      ring,
+      reach,
+      look: lookOf(state, b),
+      hover: model === 'forest/witch' ? WITCH_HOVER : 0,
+      yaw: b.side === 'team' ? Math.PI : 0,
+    };
   }
 
   private ringMat(color: number): THREE.MeshBasicMaterial {

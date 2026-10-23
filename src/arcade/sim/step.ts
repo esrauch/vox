@@ -206,7 +206,7 @@ function frogRain(state: RunState, events: ArcadeEvent[]): boolean {
       (b) =>
         b.down <= 0 &&
         !(b.side === 'team' && b.role === 'qb') &&
-        !(b.side === 'defense' && (b.planted || b.kind === 'misterFrog')) &&
+        !(b.side === 'defense' && (b.planted || b.kind === 'misterFrog' || b.kind === 'queen')) &&
         dist(b.pos, at) <= f.radius + b.radius,
     );
     for (const b of under) {

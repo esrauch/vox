@@ -56,7 +56,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 - **The story is two tiny cutscenes:** at the start, Jack asks a football team to help him get home to his patch; at the end, in the patch, your team and every defender you played through (Bosses included) dance.
 
-  ▲ *Until the Candy Kingdom and the Farm are built, the forest is played three times, stiffer each time.*
+  ▲ *Until the Farm is built, the Forest comes round again as the third area.*
 - **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!** and a Boss perk (or, the third time, Jack is home).
 - **There are no lives. Losing a drive is game over.** Four downs, and every one counts.
 - **The forest scales up as you do:** the first drive is a handful of sleepy defenders, the area III Boss is the whole forest at full strength (see *The Defense*).
@@ -212,7 +212,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. *(In the Candy Kingdom the Safety is a Witch.)* |
 | **Bat** | Bat | Patrols a fixed loop and swats passes that fly through it. |
 | **Frog** *(new)* | Frog | Covers like a Gnome until the carrier gets close, then crouches (the telegraph) and leaps onto it. |
-| **Gingerbread Man** *(new, Candy Kingdom)* | Gingerbread Man | A Cover that crumbles when it's flattened or shaken off, then pulls itself back together a moment later. ▲ *Rule to confirm.* |
+| **Gingerbread Man** *(Candy Kingdom)* | Gingerbread Man | The Candy Kingdom's Cover: the same rule, a new look. |
 | **Crow** *(new, Farm)* | Crow | A Bat that swoops down a lane instead of looping. |
 
 - **Each area has its own set:** the Forest adds Frogs; the Candy Kingdom swaps the Owl for Witches and adds Gingerbread Men; the Farm adds Crows and rows of Scarecrows. Older kinds keep their rules wherever they appear.

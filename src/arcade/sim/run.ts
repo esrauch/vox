@@ -3,7 +3,7 @@
  * steps (the snap, moving on after a drive). Steps are advanced by step()
  * in step.ts. See GAMEPLAY.md, The Run, A Drive and A Down.
  */
-import { FOREST, type DefenseSpec } from '../content/defense';
+import { areaAt, type DefenseSpec } from '../content/defense';
 import { PLAYS } from '../content/plays';
 import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
@@ -30,15 +30,16 @@ export { startingRoster };
 
 /** The defense for a drive: the area's Intro, Challenge, a seeded Gimmick, or its Boss. */
 export function defenseFor(seed: number, area: number, index: number): DefenseSpec {
+  const a = areaAt(area);
   switch (DRIVE_KINDS[index]) {
     case 'intro':
-      return FOREST.intro;
+      return a.intro;
     case 'challenge':
-      return FOREST.challenge;
+      return a.challenge;
     case 'gimmick':
-      return rngFor(seed, 'gimmick', area).pick(FOREST.gimmicks);
+      return rngFor(seed, 'gimmick', area).pick(a.gimmicks);
     default:
-      return FOREST.boss;
+      return a.boss;
   }
 }
 
@@ -70,6 +71,7 @@ export function createRun(seed: number, roster: RosterPlayer[] = startingRoster(
       witches: [],
       frogLane: null,
       frogs: [],
+      hex: false,
       ball: { at: 'qb' },
       lane: 0,
       drag: null,
@@ -185,6 +187,7 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     witches: state.field.witches,
     frogLane: spec.frogRain ? frogLane(state) : null,
     frogs: [],
+    hex: spec.hex ?? false,
     ball: { at: 'qb' },
     lane: 0,
     drag: null,

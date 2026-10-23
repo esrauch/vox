@@ -8,6 +8,8 @@ import * as THREE from 'three';
 import { biomes, hexToNumber, type Hex } from '../content/palettes';
 import { createRng } from '../sim/rng';
 import { getGeometry, voxelMaterial } from '../voxel/models';
+import type { Biome } from '../arcade/content/defense';
+import { biomeAtYard } from '../arcade/render/world';
 
 /** Where the field is, in world units: the scenery goes around it. */
 export interface FieldLayout {
@@ -38,7 +40,8 @@ export interface Mood {
 }
 
 /**
- * The Forest around the long field: toadstools, stumps and trees along the
+ * The scenery around the long field, each area's along its own stretch.
+ * The Forest: toadstools, stumps and trees along the
  * sidelines the whole way, and on the Boss drive a tree line closing the
  * field off behind the end zone. (The 'beyond' part, shown only while
  * there's another drive to come, is empty in the Forest.)
@@ -81,8 +84,14 @@ function createForestScenery(
 
   const group = new THREE.Group();
   group.add(forestFloor(palette.floor, layout), parts.beyond, parts.treeLine);
+  // The Candy Kingdom's stretch of the field has its own floor laid over the forest's.
+  for (const band of biomeBands(layout, 'candy')) group.add(candyFloor(layout, band));
   const into: Readonly<Record<Part, THREE.Group>> = { always: group, ...parts };
-  const all = forestPlacements(layout);
+  // Each area's props only along its own stretch of the field.
+  const all = [
+    ...forestPlacements(layout).filter((p) => biomeAtZ(p.z) === 'forest'),
+    ...candyPlacements(layout).filter((p) => biomeAtZ(p.z) === 'candy'),
+  ];
   for (const part of ['always', 'beyond', 'treeLine'] as const) {
     for (const [model, placements] of groupBy(all.filter((p) => p.part === part))) {
       into[part].add(instanced(model, placements));
@@ -129,6 +138,98 @@ function forestFloor(base: Hex, { nearZ, farZ, halfWidth }: FieldLayout): THREE.
   floor.position.set(0, -0.3, (nearZ + farZ) / 2);
   floor.receiveShadow = true;
   return floor;
+}
+
+/** The biome at a world z (the field runs into the screen: z = −yards from the run's start). */
+const biomeAtZ = (z: number): Biome => biomeAtYard(-z);
+
+/** The stretches of the field (world z, near to far) where this biome is. */
+function biomeBands(layout: FieldLayout, biome: Biome): { near: number; far: number }[] {
+  const bands: { near: number; far: number }[] = [];
+  for (let z = layout.nearZ; z > layout.farZ; z -= 1) {
+    if (biomeAtZ(z) !== biome) continue;
+    const last = bands[bands.length - 1];
+    if (last && last.far === z + 1) last.far = z;
+    else bands.push({ near: z, far: z });
+  }
+  return bands.map((b) => ({ near: b.near, far: b.far - 1 }));
+}
+
+/** The Candy Kingdom's floor: a berry ground with sprinkles, over its stretch of the field. */
+function candyFloor(layout: FieldLayout, band: { near: number; far: number }): THREE.Mesh {
+  const size = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const g = canvas.getContext('2d');
+  if (g) {
+    g.fillStyle = biomes.candy.floor;
+    g.fillRect(0, 0, size, size);
+    const rng = createRng(11);
+    const sprinkles = ['#ff8fc7', '#7fe3c0', '#fff8ee', '#ffd23f', '#a259ff'];
+    for (let i = 0; i < 70; i++) {
+      g.fillStyle = rng.pick(sprinkles);
+      g.fillRect(rng.int(0, size - 1), rng.int(0, size - 1), rng.int(1, 2), 1);
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  const length = band.near - band.far;
+  const width = Math.max(96, layout.halfWidth * 2 + 70);
+  texture.repeat.set((12 * width) / 96, (12 * length) / 96);
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(width, length),
+    new THREE.MeshLambertMaterial({ map: texture }),
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(0, -0.29, (band.near + band.far) / 2);
+  floor.receiveShadow = true;
+  return floor;
+}
+
+/**
+ * The Candy Kingdom's props along the sidelines: candy canes close in,
+ * gingerbread houses behind them facing the field, a few trees at the back.
+ * Laid along the whole field, then kept only on the Candy Kingdom's stretch.
+ */
+function candyPlacements(layout: FieldLayout): Placement[] {
+  const { halfWidth, nearZ, farZ } = layout;
+  const rng = createRng(4242);
+  const out: Placement[] = [];
+  const taken: { x: number; z: number; r: number }[] = [];
+  const scatter = (
+    model: string,
+    count: number,
+    radius: number,
+    min: number,
+    max: number,
+    facing: boolean,
+    scale: () => number = () => 1,
+  ): void => {
+    for (let placed = 0, tries = 0; placed < count && tries < count * 30; tries++) {
+      const sign = rng.next() < 0.5 ? -1 : 1;
+      const x = sign * (halfWidth + min + rng.next() * (max - min));
+      const z = nearZ - rng.next() * (nearZ - farZ);
+      if (taken.some((t) => Math.hypot(t.x - x, t.z - z) < t.r + radius)) continue;
+      taken.push({ x, z, r: radius });
+      // A house turns its front (+z) to face the field; the rest at random.
+      const rotation = facing
+        ? sign < 0
+          ? Math.PI / 2
+          : -Math.PI / 2
+        : rng.int(0, 3) * (Math.PI / 2);
+      out.push({ part: 'always', model, x, z, rotation, scale: scale() });
+      placed++;
+    }
+  };
+  const long = (nearZ - farZ) / 40;
+  const n = (count: number): number => Math.round(count * long);
+  scatter('candyProps/candyCane', n(12), 0.4, 1.0, 3.2, false, () => 0.9 + rng.next() * 0.4);
+  scatter('candyProps/gingerbreadHouse', n(5), 1.6, 3.5, 7.5, true, () => 0.9 + rng.next() * 0.3);
+  scatter('forestProps/pine', n(4), 1.1, 6, 10, false, () => 0.9 + rng.next() * 0.4);
+  return out;
 }
 
 /** Where every prop goes. Deterministic, so the forest looks the same every run. */

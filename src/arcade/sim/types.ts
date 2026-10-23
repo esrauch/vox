@@ -23,8 +23,8 @@ export interface Stats {
 
 export type Role = 'qb' | 'blocker' | 'runner' | 'catcher';
 export type Form = 'human' | 'golem' | 'werewolf' | 'ghost';
-/** The defenders; `misterFrog` is the Forest's Boss (he plays deep, like the Owl). */
-export type DefenderKind = 'rusher' | 'cover' | 'zone' | 'safety' | 'bat' | 'misterFrog';
+/** The defenders; `misterFrog` and `queen` are Bosses (they play deep, like the Owl). */
+export type DefenderKind = 'rusher' | 'cover' | 'zone' | 'safety' | 'bat' | 'misterFrog' | 'queen';
 
 /** Everything that moves and collides: a circle with stats turned into physics. */
 interface BodyBase {
@@ -123,6 +123,8 @@ export interface Field {
   /** Frog Rain (Mister Frog's drive): this down's lane, and the frogs falling in it once it's snapped. */
   frogLane: FrogLane | null;
   frogs: FrogDrop[];
+  /** The Queen's Hex (her drive): the aim line shows only a stub, and receivers don't light up. */
+  hex: boolean;
   ball: Ball;
   /** The carrier's lane: the x it runs for (it picks the emptiest one itself, every moment). */
   lane: number;
