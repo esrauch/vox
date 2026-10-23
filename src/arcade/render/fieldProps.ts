@@ -1,7 +1,7 @@
 /**
  * The props on the field (sim/props.ts): trees, stumps and toadstools in the
  * Forest, gumdrops, lollipops and candy canes in the Candy Kingdom, each
- * where the sim has it, at its own size. Rebuilt whenever a new drive lays
+ * where the sim has it, drawn twice its kind's size (the sim's circle stays as it is). Rebuilt whenever a new drive lays
  * its props (they're in the drive's own coordinates).
  */
 import * as THREE from 'three';
@@ -9,6 +9,9 @@ import type { RunState } from '../sim/types';
 import { v } from '../sim/vec';
 import { getGeometry, voxelMaterial } from '../../voxel/models';
 import { toWorld } from './world';
+
+/** Props are drawn this many times their kind's size; what you bump into (the sim's circle) stays the same. */
+const DRAW_SCALE = 2;
 
 export class ArcadeFieldProps {
   private readonly group = new THREE.Group();
@@ -27,7 +30,7 @@ export class ArcadeFieldProps {
     for (const p of props) {
       const mesh = new THREE.Mesh(getGeometry(p.model), voxelMaterial);
       mesh.position.copy(toWorld(v(p.x, p.y), origin));
-      mesh.scale.setScalar(p.scale);
+      mesh.scale.setScalar(p.scale * DRAW_SCALE);
       // A few quarter turns, so a row of the same prop doesn't look stamped (by its id, so it never changes).
       mesh.rotation.y = (p.id % 4) * (Math.PI / 2) * (p.model.endsWith('lollipop') ? 0 : 1);
       mesh.castShadow = true;
