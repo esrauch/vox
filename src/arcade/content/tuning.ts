@@ -73,7 +73,7 @@ export const arcadeTuning = {
     /** …at this speed (degrees a second)… */
     degreesPerSecond: 75,
     /** …this much faster each area after the first (a share of it)… */
-    perArea: 0.15,
+    perArea: 0.3,
     /** …and again on the Boss drive. */
     boss: 0.1,
     /** The pocket holds while the line crosses this many times; then it's a sack. */
@@ -91,24 +91,24 @@ export const arcadeTuning = {
     /** …and the sweet spot never starts before this share of its trip, so there's time to react. */
     earliest: 0.34,
     /** The sweet spot's width (a share of the meter) at an even Heft match… */
-    sweet: 0.2,
+    sweet: 0.09,
     /** …this much wider for every point of Heft the carrier has over the tackler… */
-    perHeft: 0.06,
+    perHeft: 0.027,
     /** …never narrower or wider than these… */
-    minSweet: 0.05,
-    maxSweet: 0.6,
+    minSweet: 0.025,
+    maxSweet: 0.27,
     /** …and this many times narrower for every extra tackler on it. */
     perExtraTackler: 0.6,
     /** "Close": this far either side of the sweet spot, a drag. */
-    near: 0.12,
+    near: 0.1,
     /** Mash: this long to tap; each tap fills this share, plus this per point of Heft over the tackler (within the range). */
     mashSeconds: 1.2,
-    mashPerTap: 0.12,
-    mashPerHeft: 0.025,
+    mashPerTap: 0.1,
+    mashPerHeft: 0.02,
     mashMinPerTap: 0.05,
     mashMaxPerTap: 0.3,
     /** …full breaks it at once; this full by the end drags. */
-    mashDrag: 0.5,
+    mashDrag: 0.55,
     /** Juke: when the countdown ends the arrow shows; then there's this long to tap its side, plus this per point of Hustle over the tackler (within the range)… */
     jukeWindow: 0.55,
     jukePerHustle: 0.06,
