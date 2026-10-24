@@ -79,13 +79,17 @@ export const arcadeTuning = {
     /** The aim line sweeps this far either side of straight upfield (degrees)… */
     halfAngle: 62,
     /** …at this speed (degrees a second)… */
-    degreesPerSecond: 75,
+    degreesPerSecond: 112.5,
     /** …this much faster each area after the first (a share of it)… */
     perArea: 0.3,
     /** …and again on the Boss drive. */
     boss: 0.1,
-    /** The pocket holds while the line crosses this many times; then it's a sack. */
-    scans: 3,
+    /**
+     * The pocket holds while the line crosses this many times; then it's a
+     * sack. (4.5 at 112.5°/s is the same time as 3 at the old 75°/s: the
+     * line got faster, the pocket didn't get shorter.)
+     */
+    scans: 4.5,
   },
   breakit: {
     /**

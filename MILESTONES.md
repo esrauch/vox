@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **The aim line sweeps 50% faster** (112.5° a second); the pocket holds just as long as before (4.5 sweeps instead of 3).
 - **2026-10-24:** **The win screen has no AGAIN:** it's the end, and the roster dances on (a Game Over still offers AGAIN). **Two Safeties in the Candy Queendom and on Frederick's Farm,** one each side, each shadowing the deepest player on its own half.
 - **2026-10-24:** **Frog Rain comes half a second later:** the frogs land 2 s into the down on screen (1.6 s of sim time), not 1.5.
 - **2026-10-24:** **PLAY goes straight to the intro:** the start screen stays up until the intro's first frame is drawn, so the field never flashes up while the music gets ready (the first song now renders before the others).
