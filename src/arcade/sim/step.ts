@@ -307,14 +307,25 @@ function sack(state: RunState, qb: Player, events: ArcadeEvent[]): void {
  * going); when they reach the holder they land on it, and SHOO! has a moment
  * to drive them off. Too late, and they knock it down: a sack if the QB
  * still has it, a tackle if a carrier does. If the ball leaves the holder
- * first (a throw), they miss. Once a down.
+ * first (a throw), they miss. Two pairs a down: the second takes off a
+ * moment after the first is done. SHOO! isn't a Break it! (it doesn't count
+ * toward the two a down).
  */
 function royalCrows(state: RunState, input: StepInput, events: ArcadeEvent[]): boolean {
-  const c = state.field.crows;
-  if (!c || c.phase === 'gone') return false;
+  const flocks = state.field.crows;
+  if (!flocks) return false;
+  const i = flocks.findIndex((f) => f.phase !== 'gone');
+  const c = flocks[i];
+  if (!c) return false;
   const t = arcadeTuning.crows;
+  const gone = (): void => {
+    c.phase = 'gone';
+    c.goneAt = state.time;
+  };
   if (c.phase === 'perched') {
-    if (state.time - state.snappedAt < t.takeoff) return false;
+    const prev = flocks[i - 1];
+    const leaves = prev ? (prev.goneAt ?? Infinity) + t.nextFlock : state.snappedAt + t.takeoff;
+    if (state.time < leaves) return false;
     c.phase = 'flying';
   }
   const ball = state.field.ball;
@@ -322,7 +333,7 @@ function royalCrows(state: RunState, input: StepInput, events: ArcadeEvent[]): b
   if (c.phase === 'flying') {
     const goal = holder ? holder.pos : ball.at === 'flight' ? ball.target : null;
     if (!goal) {
-      c.phase = 'gone';
+      gone();
       return false;
     }
     const to = sub(goal, c.pos);
@@ -339,18 +350,18 @@ function royalCrows(state: RunState, input: StepInput, events: ArcadeEvent[]): b
   // SHOO!: on the holder until shooed, or until they strike.
   const on = holder && holder.id === c.on ? holder : null;
   if (!on) {
-    c.phase = 'gone';
+    gone();
     return false;
   }
   c.pos = on.pos;
   if (input.shoo) {
-    c.phase = 'gone';
+    gone();
     events.push({ type: 'crowsShooed' });
     return false;
   }
   c.left -= DT;
   if (c.left > 0) return false;
-  c.phase = 'gone';
+  gone();
   events.push({ type: 'crowsStruck', on: on.id });
   if (ball.at === 'qb') sack(state, on, events);
   else tackle(state, on, -1, events);

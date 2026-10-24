@@ -164,8 +164,8 @@ function frogLane(state: RunState): FrogLane {
 }
 
 /** The King's crows, back on his arms for a new down (he stands at BOSS_SPOT). */
-function perchedCrows(): RoyalCrows {
-  return { phase: 'perched', pos: BOSS_SPOT, left: 0, on: null };
+function perchedCrows(): RoyalCrows[] {
+  return [0, 1].map(() => ({ phase: 'perched', pos: BOSS_SPOT, left: 0, on: null, goneAt: null }));
 }
 
 /** How many play cards are dealt each down. */

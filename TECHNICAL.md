@@ -128,7 +128,8 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
   - `frogRain.ts`: Mister Frog's lane on the turf, its shadows filling in, and the shower of frogs.
   - `witches.ts`: each Witch on a Broom flying her row, facing her way, with her shadow.
   - `fieldProps.ts`: the props on the field, rebuilt when a new drive lays its own; on the last drive, the pumpkin patch behind the King.
-  - `royalCrows.ts`: the King's two crows: on his arms, flying at the ball, flapping over the holder.
+  - `royalCrows.ts`: the King's two pairs of crows (`field.crows`, in the order they go): on his arms and shoulders, flying at the ball, flapping over the holder.
+  - `queenCrown.ts`: the Queen's crown glowing purple, pulsing slowly (just for looks).
   - `outro.ts`: the win cutscene: the whole roster dancing around Jack in front of the King, GOT JACK BACK (the field's own bodies and ball are hidden meanwhile).
   - `intro.ts` / `intro.css`: the opening cutscene, staged on the turf behind the start with its own camera; speech bubbles pinned over the speakers; GET. JACK. BACK.; `finish` freezes the last frame (`canvas.toDataURL`) into an overlay that fades out over the first drive.
 - **Shared with the dev pages:** `src/render/view.ts` (renderer, scene, lights) and `src/render/scenery.ts` (`ForestScenery`: the forest floor, fog, props along the field, the tree line on the Boss drive).

@@ -66,7 +66,7 @@ export class ArcadeControls {
       <div class="arc-buttons" hidden>
         <button class="arc-btn arc-throw interactive">THROW</button>
       </div>
-      <button class="arc-shoo interactive" hidden>SHOO!</button>
+      <button class="arc-shoo interactive" hidden>SHOO CROWS!</button>
       <div class="arc-meter interactive" hidden>
         <div class="arc-meter-title">BREAK IT!</div>
         <div class="arc-meter-bar">

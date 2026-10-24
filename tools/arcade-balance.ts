@@ -228,7 +228,7 @@ function botInput(state: RunState, rng: Rng, plan: Plan): StepInput {
   }
   // SHOO!: the King's crows have landed; it reacts like it does to a juke's arrow.
   const crows = state.field.crows;
-  if (crows?.phase === 'shoo') {
+  if (crows?.some((f) => f.phase === 'shoo')) {
     if (plan.shooSaw === null) {
       plan.shooSaw = state.time;
       plan.shooReaction = Math.max(0.1, BOT.jukeReaction + BOT.jukeSpread * normal(rng));

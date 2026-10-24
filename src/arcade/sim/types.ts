@@ -128,9 +128,9 @@ export interface FrogLane {
 }
 
 /**
- * The King's crows (his drive): they sit on his arms, swoop at whoever has
- * the ball shortly after the snap, and land on them for the SHOO! test.
- * Once a down.
+ * A pair of the King's crows (his drive): they sit on him, swoop at
+ * whoever has the ball, and land on them for the SHOO! test. He has two
+ * pairs a down: the second goes once the first is done.
  */
 export interface RoyalCrows {
   /** On his arms; flying at the ball; on the holder (SHOO!); gone for the down. */
@@ -140,6 +140,8 @@ export interface RoyalCrows {
   left: number;
   /** Who they've landed on (a body id). */
   on: number | null;
+  /** When they were shooed off, missed or struck (sim time), or null. */
+  goneAt: number | null;
 }
 
 export interface Field {
@@ -155,8 +157,8 @@ export interface Field {
    */
   frogLane: FrogLane | null;
   frogDump: number | null;
-  /** The King's crows (his drive), or null. */
-  crows: RoyalCrows | null;
+  /** The King's two pairs of crows (his drive), in the order they go, or null. */
+  crows: RoyalCrows[] | null;
   ball: Ball;
   /** On a handoff, the Runner's planned route (it leans toward it when it picks its lane), or null. */
   runPath: readonly Vec[] | null;

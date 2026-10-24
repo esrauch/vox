@@ -192,6 +192,8 @@ export const arcadeTuning = {
     reach: 0.8,
     /** …and SHOO! has this long before they knock it down. */
     window: 0.6,
+    /** He has two pairs: the second takes off this long after the first is shooed (or misses). */
+    nextFlock: 0.8,
   },
   frogRain: {
     /** The lane runs in from one sideline (either, at random) this share of the way across: never over the pumpkin, so Flip matters. */

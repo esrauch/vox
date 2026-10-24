@@ -1028,13 +1028,19 @@ describe("the King's crows (SHOO!)", () => {
   /** A down on the King's drive, just snapped, the QB holding the ball with one Catcher deep. */
   const kingDown = () => {
     const s = playState([{ pos: v(0, 9), job: stand(v(0, 9)) }]);
-    s.field.crows = { phase: 'perched', pos: v(0, 12.5), left: 0, on: null };
+    s.field.crows = [0, 1].map(() => ({
+      phase: 'perched' as const,
+      pos: v(0, 12.5),
+      left: 0,
+      on: null,
+      goneAt: null,
+    }));
     return s;
   };
 
   it('they sit on the King until just after the snap, then fly at the ball and land on it', () => {
     const r = run(kingDown(), arcadeTuning.crows.takeoff - 0.1);
-    expect(r.state.field.crows?.phase).toBe('perched');
+    expect(r.state.field.crows?.[0]?.phase).toBe('perched');
     const landed = run(r.state, 4);
     expect(ofType(landed.events, 'crowsLanded')[0]?.on).toBe(1);
   });
@@ -1043,8 +1049,21 @@ describe("the King's crows (SHOO!)", () => {
     const s = untilCrows(kingDown());
     const r = run(s, 0.3, { shoo: true });
     expect(ofType(r.events, 'crowsShooed')).toHaveLength(1);
-    expect(r.state.field.crows?.phase).toBe('gone');
+    expect(r.state.field.crows?.[0]?.phase).toBe('gone');
+    expect(r.state.field.crows?.[1]?.phase).toBe('perched');
     expect(ofType(r.events, 'sacked')).toHaveLength(0);
+  });
+
+  it('then the second pair comes a moment later, and needs its own SHOO!', () => {
+    const first = run(untilCrows(kingDown()), 0.1, { shoo: true }).state;
+    const wait = run(first, arcadeTuning.crows.nextFlock - 0.1);
+    expect(wait.state.field.crows?.[1]?.phase).toBe('perched');
+    const second = untilCrows(wait.state);
+    expect(second.field.crows?.[1]?.phase).toBe('shoo');
+    const r = run(second, 0.2, { shoo: true });
+    expect(ofType(r.events, 'crowsShooed')).toHaveLength(1);
+    expect(r.state.field.crows?.every((f) => f.phase === 'gone')).toBe(true);
+    expect(r.state.field.breaks).toBe(0);
   });
 
   it('too late, and they knock the QB down: a sack', () => {
@@ -1065,8 +1084,9 @@ describe("the King's crows (SHOO!)", () => {
   /** Step until the crows land (SHOO! time). */
   function untilCrows(s: RunState): RunState {
     let st = s;
-    for (let i = 0; i < 600 && st.field.crows?.phase !== 'shoo'; i++) st = step(st).state;
-    expect(st.field.crows?.phase).toBe('shoo');
+    const shoo = (x: RunState) => !!x.field.crows?.some((f) => f.phase === 'shoo');
+    for (let i = 0; i < 600 && !shoo(st); i++) st = step(st).state;
+    expect(shoo(st)).toBe(true);
     return st;
   }
 });

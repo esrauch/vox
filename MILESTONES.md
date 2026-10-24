@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **The Queen's crown glows again,** pulsing slowly, just for looks. **The King has two pairs of crows:** the second pair takes off 0.8 s after the first is shooed or misses, and needs its own tap; the button now says **SHOO CROWS!** (SHOO never counts toward the two Break it!s a down).
 - **2026-10-24:** **Royal Decree replaces the Queen's Hex:** each down on her drive one of the three cards is banned (greyed, a red BANNED seal; tapping it pops BY ROYAL DECREE!). The Hex (the stub aim line, no lights, the glowing crown) is gone. **Pancakes last twice as long** (2.4 s).
 - **2026-10-24:** **Mister Frog hops** on the spot (a squat, a stretch up, a landing). **Bigger embers:** more of them, larger (one in five a flame chunk), white-hot at birth, living longer, bigger bursts; and in both cutscenes (off Jack, a burst when he's picked up, behind each title word, and a splash at each of his bounces in the win dance).
 - **2026-10-24:** **The intro can't be skipped any more** (it's short): no tap or Space to skip, no hint.
