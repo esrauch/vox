@@ -45,7 +45,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   | **The Forest** | A Quiet Clearing | Gnome Country | Bat Cave | Mister Frog's Pond |
   | **The Candy Kingdom** | Gumdrop Lane | Gingerbread Row | Broomstick Alley | The Queen's Court |
   | **The Farm** | The Back Forty | The Cornrows | A Murder of Crows | The King's Patch |
-- **The main game is three areas: 12 drives and three Bosses**, on the way to Jack's pumpkin patch (THEME.md). **Each Boss has one gimmick that attacks one thing you do, and the first two leave a special perk behind:**
+- **The main game is three areas: 12 drives and three Bosses**, on the way to Jack's pumpkin patch (THEME.md). **Each Boss has one gimmick that attacks one thing you do:**
 
   | Area | Boss | Gimmick | Attacks |
   |---|---|---|---|
@@ -53,17 +53,9 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   | **The Candy Kingdom** | **The Queen** (a witch, double size, in a crown) | **The Hex pulses:** from the snap it's clear for a second, then on for a second and a half, over and over, and her crown glows purple while it's on. While it's on the aim line shrinks to a short stub by the pumpkin and receivers stop lighting up (the sweep still runs at full speed); when it fades, everything shows again. Learn her rhythm and throw in the clear, or throw blind. | Your timing |
   | **The Farm** | **The King** (a giant scarecrow in a crown) *(beating his drive gets Jack home: the end)* | **SHOO!** Two crows sit on his arms. Half a second after the snap they swoop at whoever has the ball (while a pass is in the air, at where it's going), at half a bullet's speed. When they land on the holder a big **SHOO!** button pops up, with no freeze: tap it within about half a second and they're gone for the down; too late and they knock the holder down (a sack if Jack still has it, a tackle if a carrier does). If the ball leaves the holder first they miss, so **a quick deep pass leaves them behind**. Once a play. The King himself is only a prop: he stands guard, still, just past the first-down line in front of the pumpkin patch. | Your nerve: hold the ball and they come for it |
 
-- **Boss perks:** beating a Boss gives its special perk, on top of that drive's TRICK OR TREAT!. They're the only perks there are.
-
-  | Boss | Perk |
-  |---|---|
-  | **Mister Frog** | **Hot Arm:** the ball flies twice as fast. |
-  | **The Queen** | **Gift of Foresight:** a receiver's ring turns orange when a throw right now *would* be caught, looking ahead along the bullet's flight as everyone keeps moving. ▲ *An approximation (each body carried along its current velocity for the flight) is cheap enough to run every frame.* |
-
 - **The story is two tiny cutscenes:** at the start, Jack asks a football team to help him get home to his patch; at the end, in the patch, your team and every defender you played through (Bosses included) dance.
 
-  ▲ *Until the Farm is built, the Forest comes round again as the third area.*
-- **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!** and a Boss perk (or, the third time, Jack is home).
+- **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!** (and, the third time, Jack is home).
 - **There are no lives. Losing a drive is game over.** Four downs, and every one counts.
 - **The forest scales up as you do:** the first drive is a handful of sleepy defenders, the area III Boss is the whole forest at full strength (see *The Defense*).
 

@@ -26,7 +26,7 @@ The way home crosses three places, each with a Boss in a hat of its own: **Miste
 ## Core Fantasy
 
 - **You call the play and make the throw.** You're Jack, the pumpkin who's also the quarterback: you read the defense, pick the play, and let yourself fly at the right moment.
-- **You're getting Jack home.** Every Boss beaten is a step closer to the patch, and the first two each leave you a gift: a special perk.
+- **You're getting Jack home.** Every Boss beaten is a step closer to the patch.
 - **A plain team becomes a monster team.** You start with seven ordinary humans. By the end of a good run your lineup is a pack of misfits, each a trade-off: the Golem nobody can move, the Werewolf nobody can catch, the Ghost who catches everything.
 - **Every recruit is a little story.** The Werewolf you picked up after the second drive, who broke three tackles against Mister Frog, is *your* Werewolf.
 - **Chaos you can read.** The defense is all on show, but four downs go fast. You call the play and adapt as it falls apart.

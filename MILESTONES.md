@@ -33,7 +33,6 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [x] **Candy Kingdom:** the Safety becomes a **Witch**; the **Gingerbread Man** (a plain Cover in a new look); sidelines of gingerbread houses, candy canes and a few trees; pink-and-white turf; *(2026-10-22: built as the second area: Gumdrop Lane, Gingerbread Row, Broomstick Alley, the Queen's Court.)* **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers). *(Built 2026-10-22.)*
 - [~] **Farm:** the **Crow**; rows of Scarecrows; **the King** (a crowned scarecrow, a prop in play) and **SHOO!** (his two crows swoop at the ball every play). *(2026-10-24: all built.)*
 - [~] **Models** for the new defenders and the three Bosses, readable from the game camera. *(2026-10-22: the three Bosses are modelled at twice a player's size: `bosses/misterFrog` (a white top hat), `bosses/queen` (a witch with a broom and a crown), `bosses/king` (a scarecrow with a crown). Not yet in the game or checked from the game camera.)*
-- [ ] **Boss perks:** beating Mister Frog gives **Hot Arm** (out of TRICK OR TREAT!); the Queen gives **Gift of Foresight** (an orange ring when a throw now would really be caught, looking ahead along the flight; approximate, cheap enough for every frame).
 - [ ] **The two cutscenes:** at the start, Jack asks a football team to help him get home; at the end, everyone (your team and every defender you met, Bosses included) dances in the pumpkin patch.
 - [ ] **Difficulty targets:** a practised player who never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
 
@@ -48,7 +47,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [ ] **Sound on every contact,** the crowd, and big hits landing on the beat when they can.
 - [ ] **Haptics** on the snap, the throw, the catch and hits.
 - [ ] **No dead time:** the next down lines up in about a second.
-- [x] **The aim line stops at the first catch or block,** judged with everyone where they stand; only the receiver it stops on lights gold. *(2026-10-22. It doesn't look ahead in time, so a crossing receiver can still be gone by the time the ball arrives: Gift of Foresight is the look-ahead.)*
+- [x] **The aim line stops at the first catch or block,** judged with everyone where they stand; only the receiver it stops on lights gold. *(2026-10-22. It doesn't look ahead in time, so a crossing receiver can still be gone by the time the ball arrives.)*
 
 ## B3. Monsters and the Build
 
@@ -82,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **Boss perks cancelled:** beating a Boss gives nothing extra (Hot Arm and Gift of Foresight are dropped).
 - **2026-10-24:** **The Queen's Hex pulses:** clear for 1 s from the snap, then on for 1.5 s, over and over; her crown glows purple (and lights the field) while it's on. While on: the stub and no lights; clear: everything shows. Bots: her drive won 96% (good) / 82% (reading).
 - **2026-10-24:** **All three Bosses are end-zone props:** Mister Frog and the Queen no longer play deep (the Owl or the Witch is back), they stand guard like the King and only have their ability. **Frog Rain is one big dump:** 1.2 s into the down, the frogs all come down at once over the lane; a carrier in it is FROGGED! (tackled), anyone else flattened. Bots: the Boss drives got easier with no Boss defender (good bot about 96%, reading 79-88%); the Queen's Hex is still always on until its new design.
 - **2026-10-24:** **The same twelve drives every run:** one Gimmick per area (Bat Cave, Broomstick Alley, A Murder of Crows; Witching Hour, Scarecrow Field, Candy Cane Grove and Scarecrow Rows are gone). **Bats are zone defenders:** they loop their square but dive at a carrier that comes within 3 yards, and go back to the loop if it gets away. Bots: about the same overall (good 10.3 of 12, reading 5.3).
