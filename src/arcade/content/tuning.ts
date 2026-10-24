@@ -111,6 +111,8 @@ export const arcadeTuning = {
       { sweet: 0.075, mashPerTap: 0.088, jukeWindow: 0.48 },
       { sweet: 0.06, mashPerTap: 0.078, jukeWindow: 0.42 },
     ],
+    /** At most this many a down: the grab after that is a tackle. */
+    perDown: 2,
     /** Every extra tackler on it makes it this many times harder. */
     perExtraTackler: 0.6,
     /** "Close": this far either side of the sweet spot, a drag. */

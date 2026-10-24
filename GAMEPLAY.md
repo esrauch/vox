@@ -116,6 +116,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 - **A GREAT really breaks free:** the rest of the pile right beside the carrier is knocked back too, and for a moment (0.6 s) nobody can grab it, so it gets clear instead of being grabbed again on the spot. **A grab that follows hard on another** (within 2 seconds) gets a short countdown (half a second), so a pile-up never stalls the game.
 - **How hard the tests are depends on the zone, not on stats:** the Forest's are the easiest, the Candy Kingdom's a step harder, the Farm's harder again (sweet spot 9% → 7.5% → 6% of the bar; juke window 0.55 → 0.48 → 0.42 s). So no kind is the best at breaking tackles.
+- **Two a down at most:** a third grab in the same down is just a tackle, no test.
 - **Every extra tackler already on it** makes the test harder: a narrower sweet spot, less per tap, a shorter window. A pile is hard to escape.
 - **More Heft also means more yards on a drag.**
 

@@ -461,6 +461,19 @@ describe('the carrier, and Break it! (the bar)', () => {
     expect(ofType(r.events, 'grabbed')).toHaveLength(0);
   });
 
+  it('after two Break it!s in a down, the next grab is just a tackle', () => {
+    const s = carry(
+      playState([{ role: 'runner', pos: v(0, 2) }], [{ kind: 'cover', pos: v(0, 4) }]),
+      2,
+    );
+    s.field.lane = 0;
+    expect(untilGrabbed(s).state.phase).toBe('breakit');
+    s.field.breaks = arcadeTuning.breakit.perDown;
+    const r = run(s, 2);
+    expect(ofType(r.events, 'grabbed')).toHaveLength(0);
+    expect(ofType(r.events, 'tackled')[0]?.by).toBe(100);
+  });
+
   it('over the sideline, it is down there', () => {
     const hw = arcadeTuning.field.halfWidth;
     const s = carry(playState([{ pos: v(hw + 0.2, 0) }]), 2);

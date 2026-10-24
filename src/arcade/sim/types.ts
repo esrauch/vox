@@ -168,6 +168,8 @@ export interface Field {
   breakaway: number;
   /** When the last Break it! this down ended (sim time), or null: a grab soon after gets a short countdown. */
   lastBreak: number | null;
+  /** How many Break it!s this down has had: past `breakit.perDown`, a grab is just a tackle. */
+  breaks: number;
   /** A carrier dragging tacklers after a close Break it!: it goes down when it reaches this row. */
   drag: { readonly to: number } | null;
 }

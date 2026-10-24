@@ -89,6 +89,7 @@ export function createRun(
       lane: 0,
       breakaway: 0,
       lastBreak: null,
+      breaks: 0,
       drag: null,
     },
     snappedAt: 0,
@@ -206,6 +207,7 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     lane: 0,
     breakaway: 0,
     lastBreak: null,
+    breaks: 0,
     drag: null,
   };
   state.phase = 'setup';

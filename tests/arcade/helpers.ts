@@ -111,6 +111,7 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
     lane: 0,
     breakaway: 0,
     lastBreak: null,
+    breaks: 0,
     drag: null,
   };
   state.phase = 'play';

@@ -10,7 +10,8 @@
  *      pushed apart by weight.
  *   4. Contact: a player blocking, much heavier than the defender it's on,
  *      flattens it (a pancake); a defender grabbing the carrier starts
- *      Break it! (running into a planted Scarecrow just stops it).
+ *      Break it! (running into a planted Scarecrow just stops it; so does a
+ *      third grab in a down).
  *   5. A carrier dragging tacklers goes down when the drag runs out.
  *   6. The pocket: once its sweeps are done with the QB still holding the
  *      ball, it's a sack.
@@ -153,6 +154,13 @@ function resolveContact(state: RunState, events: ArcadeEvent[]): boolean {
     tackle(state, carrier, scarecrow.id, events);
     return true;
   }
+  // Two Break it!s a down at most: the next grab just brings it down.
+  const first = grabbing[0];
+  if (first && state.field.breaks >= arcadeTuning.breakit.perDown) {
+    tackle(state, carrier, first.id, events);
+    return true;
+  }
+  state.field.breaks++;
   startBreakIt(
     state,
     carrier,
