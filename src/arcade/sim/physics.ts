@@ -3,12 +3,14 @@
  * body accelerates toward its target at its own top speed; overlapping
  * bodies are pushed apart in proportion to their weight, so the heavier one
  * moves the lighter one. Bodies lying on the turf get nudged aside by anyone
- * standing; Scarecrows can't be moved at all. Your
+ * standing; Scarecrows can't be moved at all. On a handoff, blockers drive
+ * the defenders they're on back, faster the more Heft they have over them. Your
  * players bump each other too; they always give way to the carrier, so
  * nobody slows its run (the QB, the pumpkin, isn't a body on the turf).
  */
 import { arcadeTuning, DT } from '../content/tuning';
-import { defenderTarget, playerTarget } from './ai';
+import { defenderTarget, handedOff, playerTarget } from './ai';
+import { steps } from './bodies';
 import { clearOfProps, steerAround } from './props';
 import type { Body, RunState } from './types';
 import { add, clampLen, dist, len, norm, scale, sub, v } from './vec';
@@ -62,6 +64,7 @@ export function moveBodies(state: RunState): void {
       b.pos = v(Math.max(-field.halfWidth, Math.min(field.halfWidth, b.pos.x)), b.pos.y);
     }
   }
+  if (carrier && handedOff(state)) driveBlocks(state, carrier.id);
   for (const d of hanging) {
     if (!carrier || !d.latch) continue;
     d.pos = add(carrier.pos, d.latch);
@@ -82,6 +85,35 @@ function blockedShare(state: RunState, d: Body, carrierId: number | null): numbe
     share = Math.min(share, s);
   }
   return share;
+}
+
+/**
+ * The drive block: on a handoff, each of your players blocking (not the
+ * carrier, the QB or a decoy Catcher) shoves the defender it's touching
+ * straight away from itself, and steps after it. The heaviest shove on a
+ * defender wins.
+ */
+function driveBlocks(state: RunState, carrierId: number): void {
+  const drive = arcadeTuning.contact.drive;
+  for (const d of state.field.defenders) {
+    if (d.down > 0 || d.planted || d.latch) continue;
+    let best = 0;
+    let by: Body | null = null;
+    for (const p of state.field.players) {
+      if (p.down > 0 || p.role === 'qb' || p.role === 'catcher' || p.id === carrierId) continue;
+      if (!touching(p, d)) continue;
+      const gap = steps(p.stats.heft) - steps(d.stats.heft);
+      const rate = Math.max(drive.min, Math.min(drive.max, drive.base + drive.perHeft * gap));
+      if (rate > best) {
+        best = rate;
+        by = p;
+      }
+    }
+    if (!by) continue;
+    const shove = scale(norm(sub(d.pos, by.pos)), best * DT);
+    d.pos = add(d.pos, shove);
+    by.pos = add(by.pos, shove);
+  }
 }
 
 /** Whether two bodies collide with each other at all. */

@@ -177,7 +177,7 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
  * a defender right next to the carrier, who sees it.
  */
 /** The ball was handed off (not thrown) this down. */
-function handedOff(state: RunState): boolean {
+export function handedOff(state: RunState): boolean {
   return PLAYS[state.play.index]?.handoff !== undefined;
 }
 

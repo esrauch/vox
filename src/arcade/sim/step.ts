@@ -21,7 +21,7 @@
  * Before the snap and between drives only the Bats move.
  */
 import { arcadeTuning, DT } from '../content/tuning';
-import { carrierOf, chooseLane, qbOf } from './ai';
+import { carrierOf, chooseLane, handedOff, qbOf } from './ai';
 import { bulletEnd, flightTime, pocketTime, resolveFlight, sweepAngle } from './ball';
 import { moveBodies, separate, touching } from './physics';
 import { pushOutOfProps } from './props';
@@ -130,7 +130,8 @@ function resolveContact(state: RunState, events: ArcadeEvent[]): boolean {
     if (p.down > 0 || !blocking) continue;
     for (const d of upDefenders) {
       if (d.planted || d.down > 0 || !touching(p, d)) continue;
-      if (p.mass < contact.pancakeRatio * d.mass) continue;
+      const ratio = handedOff(state) ? contact.runPancakeRatio : contact.pancakeRatio;
+      if (p.mass < ratio * d.mass) continue;
       d.down = contact.pancakeTime;
       d.vel = scale(norm(sub(d.pos, p.pos)), 4);
       events.push({ type: 'pancake', blocker: p.id, defender: d.id });

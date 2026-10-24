@@ -46,8 +46,16 @@ export const arcadeTuning = {
   contact: {
     /** A Blocker this many times heavier than the defender it hits flattens it (3 Heft heavier)… */
     pancakeRatio: 1.9,
-    /** …for this long. */
+    /** …for this long. On a handoff it only takes this much heavier (2 Heft heavier). */
     pancakeTime: 1.2,
+    runPancakeRatio: 1.5,
+    /**
+     * The drive block: on a handoff, anyone blocking for the Runner drives
+     * the defender it's on back, away from the play, at this speed (yards a
+     * second) at an even Heft match, plus this much per step of Heft over it
+     * (within the range: a lighter blocker can only hold it).
+     */
+    drive: { base: 0.8, perHeft: 0.9, min: 0, max: 4 },
     /** A tackler shaken off in Break it! lies there this long. */
     brokenTime: 1.0,
     /** Bodies this close (beyond touching) count as contact for a tackle or a sack. */
@@ -93,31 +101,25 @@ export const arcadeTuning = {
     meterSeconds: 1.1,
     /** …and the sweet spot never starts before this share of its trip, so there's time to react. */
     earliest: 0.34,
-    /** The sweet spot's width (a share of the meter) at an even Heft match… */
-    sweet: 0.09,
-    /** …this much wider for every point of Heft the carrier has over the tackler… */
-    perHeft: 0.027,
-    /** …never narrower or wider than these… */
-    minSweet: 0.025,
-    maxSweet: 0.27,
-    /** …and this many times narrower for every extra tackler on it. */
+    /**
+     * How hard the tests are is fixed by area (Forest, Candy Kingdom, Farm),
+     * not by anyone's stats: the bar's sweet spot (a share of the meter), the
+     * mash's fill per tap, the juke's window (seconds).
+     */
+    byArea: [
+      { sweet: 0.09, mashPerTap: 0.1, jukeWindow: 0.55 },
+      { sweet: 0.075, mashPerTap: 0.088, jukeWindow: 0.48 },
+      { sweet: 0.06, mashPerTap: 0.078, jukeWindow: 0.42 },
+    ],
+    /** Every extra tackler on it makes it this many times harder. */
     perExtraTackler: 0.6,
     /** "Close": this far either side of the sweet spot, a drag. */
     near: 0.1,
-    /** Mash: this long to tap; each tap fills this share, plus this per point of Heft over the tackler (within the range). */
+    /** Mash: this long to tap. */
     mashSeconds: 1.2,
-    mashPerTap: 0.1,
-    mashPerHeft: 0.02,
-    mashMinPerTap: 0.05,
-    mashMaxPerTap: 0.3,
     /** …full breaks it at once; this full by the end drags. */
     mashDrag: 0.55,
-    /** Juke: when the countdown ends the arrow shows; then there's this long to tap its side, plus this per point of Hustle over the tackler (within the range)… */
-    jukeWindow: 0.55,
-    jukePerHustle: 0.06,
-    jukeMinWindow: 0.25,
-    jukeMaxWindow: 0.9,
-    /** …and a tap in this first share of the window breaks it (later, a drag). */
+    /** Juke: when the countdown ends the arrow shows, and a tap in this first share of the window breaks it (later, a drag). */
     jukeBreakShare: 0.5,
     /**
      * A GREAT breaks the carrier free of the pile: any other defender this close

@@ -307,7 +307,7 @@ describe('the carrier, and Break it! (the bar)', () => {
   };
 
   /** A Runner carrying on (0, 2), a gnome dead ahead on (0, 4). */
-  const grabbed = (runnerHeft = 50, extra = false) => {
+  const grabbed = (runnerHeft = 50, extra = false, area = 0) => {
     const s = carry(
       playState(
         // A quick runner, so both tacklers get there together.
@@ -320,6 +320,7 @@ describe('the carrier, and Break it! (the bar)', () => {
       2,
     );
     s.field.lane = 0;
+    s.drive = { ...s.drive, area };
     return untilGrabbed(s);
   };
 
@@ -437,12 +438,14 @@ describe('the carrier, and Break it! (the bar)', () => {
     expect([...dirs].sort()).toEqual([-1, 1]);
   });
 
-  it('more Heft widens the sweet spot; an extra tackler narrows it', () => {
-    const width = (heft: number, extra = false) => {
-      const t = bar(grabbed(heft, extra).state);
+  it('the sweet spot narrows area by area, and with an extra tackler, but not with Heft', () => {
+    const width = (heft: number, extra = false, area = 0) => {
+      const t = bar(grabbed(heft, extra, area).state);
       return t.sweet.to - t.sweet.from;
     };
-    expect(width(80)).toBeGreaterThan(width(50));
+    expect(width(80)).toBeCloseTo(width(50));
+    expect(width(50, false, 1)).toBeLessThan(width(50));
+    expect(width(50, false, 2)).toBeLessThan(width(50, false, 1));
     expect(width(50, true)).toBeLessThan(width(50));
   });
 
@@ -478,6 +481,7 @@ describe('Break it!: the mash and the juke', () => {
     kind: 'mash' | 'juke',
     stats: { heft?: number; hustle?: number } = {},
     extra = false,
+    area = 0,
   ) => {
     forceBreakKind(kind);
     const s = carry(
@@ -493,6 +497,7 @@ describe('Break it!: the mash and the juke', () => {
       2,
     );
     s.field.lane = 0;
+    s.drive = { ...s.drive, area };
     return untilGrabbed(s).state;
   };
   /** Tap on every `every`-th step until it's decided. */
@@ -549,12 +554,14 @@ describe('Break it!: the mash and the juke', () => {
     expect(ofType(mash(grabbed('mash'), 60).events, 'tackled')).toHaveLength(1);
   });
 
-  it('mash: more Heft fills it faster; an extra tackler, slower', () => {
-    const perTap = (heft: number, extra = false) => {
-      const t = grabbed('mash', { heft }, extra).tackle!;
+  it('mash: each tap fills less in later areas, and with an extra tackler, but Heft doesn\u2019t matter', () => {
+    const perTap = (heft: number, extra = false, area = 0) => {
+      const t = grabbed('mash', { heft }, extra, area).tackle!;
       return t.kind === 'mash' ? t.perTap : 0;
     };
-    expect(perTap(80)).toBeGreaterThan(perTap(50));
+    expect(perTap(80)).toBeCloseTo(perTap(50));
+    expect(perTap(50, false, 2)).toBeLessThan(perTap(50, false, 1));
+    expect(perTap(50, false, 1)).toBeLessThan(perTap(50));
     expect(perTap(50, true)).toBeLessThan(perTap(50));
   });
 
@@ -585,12 +592,14 @@ describe('Break it!: the mash and the juke', () => {
     expect(during.phase).toBe('breakit');
   });
 
-  it('juke: more Hustle gives a longer window', () => {
-    const window = (hustle: number) => {
-      const t = grabbed('juke', { hustle }).tackle!;
+  it('juke: the window shrinks in later areas, not with Hustle', () => {
+    const window = (hustle: number, area = 0) => {
+      const t = grabbed('juke', { hustle }, false, area).tackle!;
       return t.kind === 'juke' ? t.window : 0;
     };
-    expect(window(80)).toBeGreaterThan(window(50));
+    expect(window(80)).toBeCloseTo(window(50));
+    expect(window(50, 2)).toBeLessThan(window(50, 1));
+    expect(window(50, 1)).toBeLessThan(window(50));
   });
 });
 
@@ -780,6 +789,22 @@ describe('the play fake', () => {
   it('after a handoff the defense keeps playing the pass for a moment', () => {
     // Fooled, the Cover stays out with its Catcher; otherwise it comes for the carrier.
     expect(coverX(true)).toBeGreaterThan(coverX(false) + 0.5);
+  });
+
+  it('on a handoff a Blocker drives its man back, further the more Heft it has on him', () => {
+    const pushedTo = (heft: number) => {
+      const s = playState(
+        [
+          { role: 'runner', pos: v(-6, -3) },
+          { role: 'blocker', pos: v(0, 0), stats: { heft } },
+        ],
+        [{ kind: 'rusher', pos: v(0, 0.95), stats: { heft: 50 } }],
+      );
+      s.play = { index: PLAYS.findIndex((p) => p.handoff !== undefined), flipped: false };
+      return body(run(carry(s, 2), 0.6).state, 100).pos.y;
+    };
+    expect(pushedTo(60)).toBeGreaterThan(pushedTo(50) + 0.3);
+    expect(pushedTo(50)).toBeGreaterThan(pushedTo(30));
   });
 });
 

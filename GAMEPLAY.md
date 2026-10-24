@@ -108,13 +108,14 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 **When a defender grabs the carrier, the play freezes** for one of three quick tests, picked at random. **Each opens with a two-second countdown** ("GET READY TO MASH! 2… 1…"), when taps don't count, then the call ("MASH!"). Each ends the same three ways, called out big in the middle of the screen: **GREAT!** (a break: the tackler goes flying and the carrier keeps running), **OK** (a drag: the carrier hauls the tackler a few more yards, then goes down), or **BAD** (tackled).
 
-| Test | You see | You do | Sized by |
+| Test | You see | You do | Harder in later zones |
 |---|---|---|---|
-| **The bar** | A marker crossing a bar, left to right or right to left, with a green sweet spot (never in the first third of its trip) and a yellow "close" band | Tap in the green to break, in the yellow to drag | **Heft**: a wider sweet spot |
-| **MASH!** | A bar that fills as you tap | Tap as fast as you can for a second: fill it to break, half fill it to drag | **Heft**: more per tap |
-| **JUKE!** | Two big buttons, ◀ and ▶, from the start of the countdown; when it ends, the one to press lights up | Press it: quickly to break, a beat later to drag. The wrong one is a tackle | **Hustle**: a longer window |
+| **The bar** | A marker crossing a bar, left to right or right to left, with a green sweet spot (never in the first third of its trip) and a yellow "close" band | Tap in the green to break, in the yellow to drag | A narrower sweet spot |
+| **MASH!** | A bar that fills as you tap | Tap as fast as you can for a second: fill it to break, half fill it to drag | Less per tap |
+| **JUKE!** | Two big buttons, ◀ and ▶, from the start of the countdown; when it ends, the one to press lights up | Press it: quickly to break, a beat later to drag. The wrong one is a tackle | A shorter window |
 
 - **A GREAT really breaks free:** the rest of the pile right beside the carrier is knocked back too, and for a moment (0.6 s) nobody can grab it, so it gets clear instead of being grabbed again on the spot. **A grab that follows hard on another** (within 2 seconds) gets a short countdown (half a second), so a pile-up never stalls the game.
+- **How hard the tests are depends on the zone, not on stats:** the Forest's are the easiest, the Candy Kingdom's a step harder, the Farm's harder again (sweet spot 9% → 7.5% → 6% of the bar; juke window 0.55 → 0.48 → 0.42 s). So no kind is the best at breaking tackles.
 - **Every extra tackler already on it** makes the test harder: a narrower sweet spot, less per tap, a shorter window. A pile is hard to escape.
 - **More Heft also means more yards on a drag.**
 
@@ -150,7 +151,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 | Position | How many | Does | Main stat |
 |---|---|---|---|
-| **Blocker** | 2 | Holds off the rush, shoves defenders out of the carrier's way | **Heft** |
+| **Blocker** | 2 | Holds off the rush; **on a run, drives its man back** out of the carrier's way, harder the more Heft it has on him | **Heft** |
 | **Runner** | 2 | Takes handoffs; on a pass, runs a short route past the line | **Hustle** |
 | **Catcher** | 3 | Gets open, catches | **Hands** |
 
@@ -162,7 +163,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 | Stat | What it is | You see it when… |
 |---|---|---|
-| **Heft** | **Weight.** In any shove, the heavier one pushes the lighter one back; and in **Break it!**, the bigger your Heft over the tackler, the wider the sweet spot and the longer the drag. | A Blocker pancakes a beetle; a Golem carrier shrugs off a gnome. |
+| **Heft** | **Weight.** In any shove, the heavier one pushes the lighter one back. **A blocker holds a defender it's at least as heavy as**, and on a run **drives it back** (about a yard a second at an even match, a yard more for every 10 points of Heft over it), **pancaking it if it's 20 points heavier** (30 on a pass play). In **Break it!**, more Heft means a longer drag. | A Blocker pancakes a beetle; a Golem carrier shrugs off a gnome. |
 | **Hustle** | **Speed.** | A Runner pulls away from the pack; a Catcher gets a step on its Cover. |
 | **Hands** | **Reach.** A bullet passing near snaps into the hands from further away, and a contested ball goes to the better Hands. | A Catcher plucks a bullet that was going by. |
 

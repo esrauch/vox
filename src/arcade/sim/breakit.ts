@@ -2,9 +2,9 @@
  * Break it! (GAMEPLAY.md): when a defender grabs the carrier, the play
  * freezes for a quick test, picked at random: the bar (a timed tap), a mash
  * (tap fast), or a juke (react to an arrow). Each opens with a countdown
- * ("Get ready to mash…"), when taps don't count; then the test runs. Each is sized by the
- * stats: Heft for the bar and the mash, Hustle for the juke; every extra
- * tackler on it makes it harder. Each ends in a break, a drag or a tackle;
+ * ("Get ready to mash…"), when taps don't count; then the test runs. How
+ * hard it is is set by the area, not by stats; every extra tackler on it
+ * makes it harder (only the drag's yards come from Heft). Each ends in a break, a drag or a tackle;
  * step.ts carries that out.
  */
 import { arcadeTuning } from '../content/tuning';
@@ -27,11 +27,10 @@ export function startBreakIt(
   kind?: BreakKind,
 ): void {
   const grabbers = state.field.defenders.filter((d) => tacklers.includes(d.id));
-  // How many steps (10 points) the carrier has over its heaviest and its quickest tackler.
+  // How many steps (10 points) of Heft the carrier has over its heaviest tackler (for the drag).
   const step = arcadeTuning.body.statStep;
   const heftGap = (carrier.stats.heft - Math.max(...grabbers.map((d) => d.stats.heft))) / step;
-  const hustleGap =
-    (carrier.stats.hustle - Math.max(...grabbers.map((d) => d.stats.hustle))) / step;
+  const hard = b.byArea[Math.min(state.drive.area, b.byArea.length - 1)] ?? b.byArea[0];
   const pile = b.perExtraTackler ** (tacklers.length - 1);
   const rng = rngFor(state.seed, 'break', state.step);
   const last = state.field.lastBreak;
@@ -51,8 +50,7 @@ export function startBreakIt(
         ...base,
         kind: 'mash',
         fill: 0,
-        perTap:
-          clamp(b.mashPerTap + b.mashPerHeft * heftGap, b.mashMinPerTap, b.mashMaxPerTap) * pile,
+        perTap: hard.mashPerTap * pile,
       };
       break;
     case 'juke':
@@ -61,15 +59,13 @@ export function startBreakIt(
         kind: 'juke',
         showAt: state.time + ready,
         side: rng.next() < 0.5 ? -1 : 1,
-        window:
-          clamp(b.jukeWindow + b.jukePerHustle * hustleGap, b.jukeMinWindow, b.jukeMaxWindow) *
-          pile,
+        window: hard.jukeWindow * pile,
       };
       break;
     default: {
       // Where the sweet spot sits, and which way the marker runs, is a fresh surprise every time;
       // but never in the first third of the marker's trip, so there's time to see it and react.
-      const width = clamp(b.sweet + b.perHeft * heftGap, b.minSweet, b.maxSweet) * pile;
+      const width = hard.sweet * pile;
       const at = b.earliest + rng.next() * Math.max(0, 1 - b.earliest - width);
       tackle = {
         ...base,
