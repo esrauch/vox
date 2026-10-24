@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **No drive banner:** the area, drive number, kind and name no longer show at the top during play (the drives-won tally still shows at the end of a run).
 - **2026-10-24:** **The zones are renamed** Froggy's Forest, Candy Queendom and Frederick's Farm; beating a Boss pops "<zone> Cleared!" instead of TOUCHDOWN!.
 - **2026-10-24:** **Four new songs, one per stretch of the run:** Hollow Hop (intro and Forest), Sugar Coven (Candy Kingdom), Harvest Moon Hoedown (Farm), The Pumpkin Mash (win screen), all 8 bars on the shared 120 BPM grid; the song crossfades over two bars from a bar line when the area changes. Thirteen new synth voices (theremin, banjo, fiddle, calliope, glock, tuba, choir, piano, sax, clap, brush, croak, caw). The old four songs are gone. Levels: −15.6 to −16.9 dB RMS, peaks −2.3 to −4.9 dBFS, clean loop seams.
 - **2026-10-24:** **The Queen's crown glows again,** pulsing slowly, just for looks. **The King has two pairs of crows:** the second pair takes off 0.8 s after the first is shooed or misses, and needs its own tap; the button now says **SHOO CROWS!** (SHOO never counts toward the two Break it!s a down).

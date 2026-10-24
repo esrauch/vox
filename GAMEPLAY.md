@@ -251,7 +251,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Where the ball will go** | The sweeping aim line, with gold dashes, stopping at the first receiver or defender a bullet thrown now would meet. |
 | **The carrier** | Holds the ball high, with a gold ring underfoot. |
 | **What the defense will do** | Their facing: rushers toward the QB, Covers toward their Catcher. |
-| **Down and distance** | "3rd & 4" and the gold first-down line. |
+| **Down and distance** | "3rd & 4" and the gold first-down line. There's no drive name or number on screen; the run's tally of drives won shows once it's over. |
 
 **Indicators stay small:** the voxel field and the bodies flying around it are the show.
 

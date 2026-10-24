@@ -57,15 +57,7 @@ import {
   type BreakOutcome,
 } from './sim/breakit';
 import { canThrow, step } from './sim/step';
-import type {
-  Action,
-  ArcadeEvent,
-  DriveKind,
-  Player,
-  RosterPlayer,
-  RunState,
-  StepInput,
-} from './sim/types';
+import type { Action, ArcadeEvent, Player, RosterPlayer, RunState, StepInput } from './sim/types';
 import { v } from './sim/vec';
 import { ArcadeControls, type BreakView } from './ui/controls';
 import { trickOrTreatView } from './ui/trickOrTreat';
@@ -112,13 +104,6 @@ const SKY_FILL = 0.75;
 const LOOK_AHEAD = 7;
 const WIDTH_MARGIN = 1.06;
 
-const KIND_NAME: Readonly<Record<DriveKind, string>> = {
-  intro: 'Intro',
-  challenge: 'Challenge',
-  gimmick: 'Gimmick',
-  boss: 'Boss',
-};
-const AREA_NUMERAL: readonly string[] = ['I', 'II', 'III'];
 /** How a Break it! went, in one big word. */
 const BREAK_WORD: Readonly<Record<BreakOutcome, string>> = {
   break: 'GREAT!',
@@ -544,11 +529,12 @@ export class ArcadeGame {
       this.hud.setPrompt(null, null);
       return;
     }
-    const { phase, drive, drivesWon, hand, flipped, called, banned } = this.state;
+    const { phase, drivesWon, hand, flipped, called, banned } = this.state;
+    // No drive name during play: only the tally once the run is over.
     const banner =
       phase === 'over' || phase === 'won'
         ? `${drivesWon} ${drivesWon === 1 ? 'drive' : 'drives'} won`
-        : `${AREA_NUMERAL[drive.area] ?? drive.area + 1} · ${drive.index + 1}/4 ${KIND_NAME[drive.kind]}: ${drive.name}`;
+        : '';
     const live = phase === 'setup' || phase === 'play' || phase === 'breakit';
     this.hud.setTop(banner, live ? downAndDistance(this.state) : null);
     const ready = this.conductor.started && !this.paused;
