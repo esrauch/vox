@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **The first screen is just PLAY** on the purple backdrop (no title, no field behind it); it goes straight into the intro, now framed twice as far out.
 - **2026-10-24:** **The opening cutscene:** after the first PLAY (the music already going), Jack floats on the turf, three football players bounce-walk on, Jack asks "Can you help me get back to my patch?", one answers "Ok", they lift him onto a head and carry him off, and GET. / JACK. / BACK. slams in a word at a time; then the last frame crossfades into the first drive. A tap (or Space) skips it; AGAIN goes straight to the field.
 - **2026-10-24:** **The Farm's turf is a tilled field:** warm brown soil, a furrow up the field every yard, green sprouts on the ridges (the five-yard bands stay).
 - **2026-10-24:** **Boss perks cancelled:** beating a Boss gives nothing extra (Hot Arm and Gift of Foresight are dropped).

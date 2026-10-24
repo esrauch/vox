@@ -135,6 +135,8 @@ export class ArcadeGame {
   private pending: StepInput = {};
   /** TRICK OR TREAT!: the spot first tapped for a swap. */
   private swapFrom: number | null = null;
+  /** The first screen (just PLAY), until it's tapped. */
+  private readonly startScreen: HTMLElement;
   /** The opening cutscene, while it plays (after the first PLAY). */
   private intro: ArcadeIntro | null = null;
   /** Where the camera looks (field yards, smoothed). */
@@ -190,6 +192,15 @@ export class ArcadeGame {
     });
 
     document.addEventListener('keydown', (e) => this.onKey(e));
+    // The first screen: just PLAY, on the backdrop; it starts the music and the intro.
+    this.startScreen = document.createElement('div');
+    this.startScreen.className = 'start-screen interactive';
+    const play = document.createElement('button');
+    play.className = 'start-play';
+    play.textContent = 'PLAY';
+    play.addEventListener('click', () => void this.onAction());
+    this.startScreen.append(play);
+    uiRoot.append(this.startScreen);
     // A tap during the intro skips it.
     window.addEventListener('pointerdown', () => this.intro?.skip());
     document.addEventListener('visibilitychange', () => {
@@ -488,7 +499,7 @@ export class ArcadeGame {
     this.hud.setDraft(
       ready && phase === 'draft' ? trickOrTreatView(this.state, this.swapFrom) : null,
     );
-    if (!this.conductor.started) this.hud.setPrompt('Get Jack Back', 'PLAY');
+    if (!this.conductor.started) this.hud.setPrompt(null, null);
     else if (this.paused) this.hud.setPrompt('Paused', 'RESUME');
     else if (phase === 'setup')
       this.hud.setPrompt(called === null ? 'Pick a play' : null, called === null ? null : 'HIKE!');
@@ -502,6 +513,7 @@ export class ArcadeGame {
     const { phase } = this.state;
     if (!this.conductor.started) {
       // The music starts, then the intro plays (once a game: AGAIN goes straight to the field).
+      this.startScreen.remove();
       await this.conductor.start();
       this.intro = new ArcadeIntro(this.view.scene, this.uiRoot, (id) => this.conductor.play(id));
     } else if (this.paused) {

@@ -16,7 +16,7 @@ import './intro.css';
 /** Where it's staged (world): on the turf behind the start of the field. */
 const STAGE = new THREE.Vector3(0, 0, 20);
 /** The camera: in front of the stage (toward the field), a little above, looking at it. */
-const CAMERA_OFFSET = new THREE.Vector3(0, 2.4, -9);
+const CAMERA_OFFSET = new THREE.Vector3(0, 4.8, -18);
 const LOOK_HEIGHT = 1.1;
 
 /** The timeline (seconds). */
@@ -114,8 +114,8 @@ export class ArcadeIntro {
     camera.lookAt(this.look);
     camera.updateMatrixWorld();
     if (this.scene.fog instanceof THREE.Fog) {
-      this.scene.fog.near = 12;
-      this.scene.fog.far = 45;
+      this.scene.fog.near = 24;
+      this.scene.fog.far = 70;
     }
 
     // The players: on from the right, a pause, then off to the left with Jack.
