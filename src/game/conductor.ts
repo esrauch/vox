@@ -5,7 +5,7 @@
  * `setSong` switches songs: every song shares one beat grid, so the new one
  * comes in beat for beat, crossfading over two bars from the next bar line.
  * A recorded track (audio/tracks.ts, the win screen's) crossfades in at once,
- * looping, since it isn't on the beat grid.
+ * since it isn't on the beat grid, and plays once.
  * Pausing suspends the AudioContext, and the music freezes with it.
  */
 import { suspendAudio, unlockAudio } from '../audio/context';
@@ -81,7 +81,7 @@ export class Conductor {
 
   /**
    * Play `music` (a no-op if it's already playing). A song crossfades in, in
-   * time with the beat; a recorded track crossfades in at once and loops.
+   * time with the beat; a recorded track crossfades in at once and plays once.
    */
   setSong(music: Music): void {
     this.wanted = music;
@@ -127,7 +127,6 @@ export class Conductor {
     const seconds = CROSSFADE_BARS * BAR_SECONDS;
     const source = ctx.createBufferSource();
     source.buffer = decoded;
-    source.loop = true;
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, at);
     gain.gain.linearRampToValueAtTime(TRACK_LEVEL, at + seconds);

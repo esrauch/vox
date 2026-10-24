@@ -1,6 +1,6 @@
 /**
  * Recorded tracks: whole songs from an audio file (not synth data), played
- * as-is and looped. They don't sit on the shared beat grid, so switching to
+ * as-is, once. They don't sit on the shared beat grid, so switching to
  * one is a plain crossfade, not one in step with the beat.
  */
 import weGotJackBackUrl from '../../assets/music/weGotJackBack.mp3?url';
