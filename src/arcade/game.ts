@@ -506,7 +506,7 @@ export class ArcadeGame {
         case 'downEnded':
           if (e.result === 'firstDown') {
             play('touchdown');
-            // Beating a Boss clears its area: "Froggy's Forrest Cleared!".
+            // Beating a Boss clears its area: "Froggy's Forest Cleared!".
             this.hud.pop(
               prev.drive.kind === 'boss'
                 ? `${areaAt(prev.drive.area).name} Cleared!`

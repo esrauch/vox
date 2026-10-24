@@ -21,7 +21,7 @@ Inspirations: *Retro Bowl* (pocket-sized arcade football), *Crossy Road* (feel, 
 - **At the start:** Jack bounces up to a football team and asks for help getting back to his patch. A few seconds, then the first snap.
 - **At the end:** in front of the King, with the pumpkin patch behind him, your whole team (the field and the bench) dances around Jack: GOT JACK BACK.
 
-The way home crosses three places, each with a Boss in a hat of its own: **Mister Frog** (a top hat) in Froggy's Forrest, **the Queen** (a witch twice the size of any other, in a crown) in the Candy Queendom, and **the King** (a scarecrow in a crown) at Frederick's Farm, by the patch. Nobody explains why they're in the way; they just are.
+The way home crosses three places, each with a Boss in a hat of its own: **Mister Frog** (a top hat) in Froggy's Forest, **the Queen** (a witch twice the size of any other, in a crown) in the Candy Queendom, and **the King** (a scarecrow in a crown) at Frederick's Farm, by the patch. Nobody explains why they're in the way; they just are.
 
 ## Core Fantasy
 
@@ -82,9 +82,9 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 
 **The locals don't want a football team tramping through their land.** They're the defenders: wild creatures, never in helmets, always in candy purple. The Bosses are the one exception to "no hats": a top hat, a crown, a bigger crown.
 
-### Froggy's Forrest
+### Froggy's Forest
 
-| Defender job | Froggy's Forrest local | Look |
+| Defender job | Froggy's Forest local | Look |
 |---|---|---|
 | **Rusher** (the pass rush) | **Rhino Beetle** | Low, wide and horned, a little battering ram. |
 | **Cover** (man coverage) | **Garden Gnome** | A tall pointy hat, a beard, arms out. |

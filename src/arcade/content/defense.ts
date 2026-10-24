@@ -119,7 +119,7 @@ export interface ArcadeArea {
 }
 
 export const FOREST: ArcadeArea = {
-  name: "Froggy's Forrest",
+  name: "Froggy's Forest",
   biome: 'forest',
   looks: {},
   fieldProps: [

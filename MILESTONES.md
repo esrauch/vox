@@ -81,7 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
-- **2026-10-24:** **The zones are renamed** Froggy's Forrest, Candy Queendom and Frederick's Farm; beating a Boss pops "<zone> Cleared!" instead of TOUCHDOWN!.
+- **2026-10-24:** **The zones are renamed** Froggy's Forest, Candy Queendom and Frederick's Farm; beating a Boss pops "<zone> Cleared!" instead of TOUCHDOWN!.
 - **2026-10-24:** **Four new songs, one per stretch of the run:** Hollow Hop (intro and Forest), Sugar Coven (Candy Kingdom), Harvest Moon Hoedown (Farm), The Pumpkin Mash (win screen), all 8 bars on the shared 120 BPM grid; the song crossfades over two bars from a bar line when the area changes. Thirteen new synth voices (theremin, banjo, fiddle, calliope, glock, tuba, choir, piano, sax, clap, brush, croak, caw). The old four songs are gone. Levels: −15.6 to −16.9 dB RMS, peaks −2.3 to −4.9 dBFS, clean loop seams.
 - **2026-10-24:** **The Queen's crown glows again,** pulsing slowly, just for looks. **The King has two pairs of crows:** the second pair takes off 0.8 s after the first is shooed or misses, and needs its own tap; the button now says **SHOO CROWS!** (SHOO never counts toward the two Break it!s a down).
 - **2026-10-24:** **Royal Decree replaces the Queen's Hex:** each down on her drive one of the three cards is banned (greyed, a red BANNED seal; tapping it pops BY ROYAL DECREE!). The Hex (the stub aim line, no lights, the glowing crown) is gone. **Pancakes last twice as long** (2.4 s).
