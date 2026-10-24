@@ -100,9 +100,9 @@ export const biomes = {
     hemiGround: '#2c3f2f',
   },
   farm: {
-    /** Meadow greens, warmer than the Forest's (but still green, not hay), and dark tilled soil beyond. */
-    grass: '#4f9a45',
-    grassDark: '#43873b',
+    /** A tilled field: warm brown soil (darker than the team's gold and orange), dark soil beyond. */
+    grass: '#7a5536',
+    grassDark: '#6c4a2f',
     floor: '#3a2a1c',
   },
   candy: {

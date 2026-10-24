@@ -98,7 +98,7 @@ Plus the **Frog** (a Cover that crouches, then leaps) and the **Witch on a Broom
 The Queen's gingerbread realm: pink-and-white turf, gingerbread houses, candy canes and a few trees along the sidelines. **Witches take the Safety's place,** hanging deep on their brooms, and the **Gingerbread Man** is new: a flat cookie with icing eyes and smile, and the opposition's purple gumdrop buttons and bow tie. **Boss: the Queen,** a witch twice the size of any other, in a crown, whose Hex hides the aim line.
 
 ### The Farm
-Meadow green fields with dark soil beyond, fences and glowing jack-o'-lanterns along the sidelines, pumpkins and hay bales. Rows of scarecrows, and **Crows** (black, with dark purple feathers) flying lanes up and down the field. **The pumpkin patch is the last end zone**, and **the King**, a giant scarecrow in a crown, stands guard in front of it, never moving.
+A tilled farm field (brown soil, furrows running up the field, green sprouts) with dark soil beyond, fences and glowing jack-o'-lanterns along the sidelines, pumpkins and hay bales. Rows of scarecrows, and **Crows** (black, with dark purple feathers) flying lanes up and down the field. **The pumpkin patch is the last end zone**, and **the King**, a giant scarecrow in a crown, stands guard in front of it, never moving.
 
 Each area has its own locals, hazards and look, and a Boss defense at the end of its four drives. It's always the same team, growing as it goes.
 

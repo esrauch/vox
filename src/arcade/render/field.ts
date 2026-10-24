@@ -19,7 +19,8 @@ const TURF_PX = 8;
  * The turf's pixel texture, the whole long strip in one canvas: each area's
  * stretch in its own colours, a lighter or darker band every five yards,
  * mowing stripes every yard, and flecks (darker blades and lighter tufts in
- * the Forest; sprinkles in the Candy Kingdom), so it reads as grass, not sand.
+ * the Forest; sprinkles in the Candy Kingdom); the Farm is a tilled field,
+ * furrows running up it and sprouts on the ridges.
  */
 function turfTexture(rows: number): THREE.CanvasTexture {
   const w = Math.round(HALF * 2 * TURF_PX);
@@ -45,6 +46,18 @@ function turfTexture(rows: number): THREE.CanvasTexture {
       const top = i * TURF_PX;
       g.fillStyle = base;
       g.fillRect(0, top, w, TURF_PX);
+      if (biome === 'farm') {
+        // A tilled field: a furrow running up the field every yard across, sprouts on the ridges.
+        g.fillStyle = shade(band, 0.7);
+        for (let x = 0; x < w; x += TURF_PX) g.fillRect(x + TURF_PX - 2, top, 2, TURF_PX);
+        for (let x = TURF_PX / 2 - 1; x < w; x += TURF_PX) {
+          if (rng.next() < 0.45) {
+            g.fillStyle = rng.pick(['#5fa04a', '#4f8f3f', '#79b357']);
+            g.fillRect(x + rng.int(-1, 1), top + rng.int(0, TURF_PX - 2), 1, 2);
+          }
+        }
+        continue;
+      }
       // Flecks over the yard: one or two to every square yard.
       const flecks = Math.round((w / TURF_PX) * 1.5);
       for (let f = 0; f < flecks; f++) {
@@ -55,10 +68,6 @@ function turfTexture(rows: number): THREE.CanvasTexture {
           const sprinkle = rng.pick(['#fff8ee', '#7fe3c0', '#ffd23f', '#a259ff']);
           g.fillStyle = `#${new THREE.Color(band).lerp(new THREE.Color(sprinkle), 0.5).getHexString()}`;
           g.fillRect(x, y, rng.next() < 0.5 ? 2 : 1, 1);
-        } else if (biome === 'farm' && rng.next() < 0.4) {
-          // A stray bit of straw, half-blended into the grass.
-          g.fillStyle = `#${new THREE.Color(band).lerp(new THREE.Color('#e8c65a'), 0.5).getHexString()}`;
-          g.fillRect(x, y, 2, 1);
         } else if (rng.next() < 0.7) {
           g.fillStyle = shade(band, 0.825); // a darker blade, two pixels tall
           g.fillRect(x, y, 1, 2);

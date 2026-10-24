@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **The Farm's turf is a tilled field:** warm brown soil, a furrow up the field every yard, green sprouts on the ridges (the five-yard bands stay).
 - **2026-10-24:** **Boss perks cancelled:** beating a Boss gives nothing extra (Hot Arm and Gift of Foresight are dropped).
 - **2026-10-24:** **The Queen's Hex pulses:** clear for 1 s from the snap, then on for 1.5 s, over and over; her crown glows purple (and lights the field) while it's on. While on: the stub and no lights; clear: everything shows. Bots: her drive won 96% (good) / 82% (reading).
 - **2026-10-24:** **All three Bosses are end-zone props:** Mister Frog and the Queen no longer play deep (the Owl or the Witch is back), they stand guard like the King and only have their ability. **Frog Rain is one big dump:** 1.2 s into the down, the frogs all come down at once over the lane; a carrier in it is FROGGED! (tackled), anyone else flattened. Bots: the Boss drives got easier with no Boss defender (good bot about 96%, reading 79-88%); the Queen's Hex is still always on until its new design.
