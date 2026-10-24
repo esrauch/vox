@@ -99,7 +99,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 2. **The sweep.** On a pass play an **aim line sweeps from the QB**, sideline to sideline and back, like a lighthouse beam. **The line stops at the first thing a bullet thrown right now would meet:** a receiver who'd catch it (its ring lights up gold) or a defender who'd bat it down. It's judged with everyone where they stand, not where they'll be when the ball arrives, so a receiver running across the field can still be gone by then. It sweeps faster in later areas.
 3. **One button:**
    - **THROW** fires a **bullet** along the line: fast and flat. The **first one of your players it reaches** catches it (anyone within a few yards of the QB is skipped). If a defender gets to it first, it's **batted down**. If nobody's in the way, it's **incomplete**.
-4. **The pocket holds for four and a half sweeps** (the line crosses fast: 112.5° a second, so it's 4.8 seconds in the first area). If the QB still has the ball when they're done, the pocket collapses: **SACKED!** A faster sweep in later areas means a quicker pocket.
+4. **The pocket holds for four and a half sweeps** (the line crosses fast, at 112.5° a second: about 6 seconds on screen in the first area, as before). If the QB still has the ball when they're done, the pocket collapses: **SACKED!** A faster sweep in later areas means a quicker pocket.
 5. **After the catch, the carrier runs on its own:** it charges upfield and drifts toward the emptiest lane by itself. There's no steering: your skill goes into the tackles.
 6. **Break it!** (below) every time someone grabs the carrier.
 7. **The down ends with a tackle, a dead ball, a sack, or the line.**
