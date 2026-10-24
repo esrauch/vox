@@ -34,7 +34,15 @@ import { ArcadeRoutes } from './render/routes';
 import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
 import { carrierOf, qbOf } from './sim/ai';
-import { DRIVE_KINDS, createRun, dispatch, downAndDistance, startingRoster } from './sim/run';
+import {
+  DRIVE_KINDS,
+  createRun,
+  dispatch,
+  downAndDistance,
+  setUpDrive,
+  startingRoster,
+} from './sim/run';
+import { rollOffer } from './sim/team';
 import { FORM_STATS } from './content/team';
 import { plus } from './sim/stats';
 import { breakMarker, countdown, jukeShowing, mashLeft, type BreakOutcome } from './sim/breakit';
@@ -58,6 +66,8 @@ export interface ArcadeOptions {
   monsters?: boolean;
   /** Start at this area (1 the Forest, 2 the Candy Kingdom, 3 the third): ?area=2, for trying later areas. */
   area?: number;
+  /** Go straight to the win cutscene after PLAY, with a full bench: ?win=1, for looking at it. */
+  win?: boolean;
 }
 
 /** The starting team, or (with `monsters`) the same players turned into each position's monster. */
@@ -112,6 +122,8 @@ export class ArcadeGame {
   private readonly monsters: boolean;
   /** The area runs start at (0-based). */
   private readonly startArea: number;
+  /** ?win=1: PLAY goes straight to the win cutscene. */
+  private readonly jumpToWin: boolean;
   private readonly conductor = new Conductor();
   private readonly view: View;
   private readonly bodies: ArcadeBodies;
@@ -154,6 +166,7 @@ export class ArcadeGame {
     this.seed = options.seed;
     this.monsters = options.monsters ?? false;
     this.startArea = Math.max(0, (options.area ?? 1) - 1);
+    this.jumpToWin = options.win ?? false;
     this.state = createRun(this.seed, firstRoster(this.monsters), this.startArea);
     this.origin = this.startOrigin();
     this.view = new View(canvas, { fov: 50 });
@@ -539,6 +552,11 @@ export class ArcadeGame {
       // The music starts, then the intro plays (once a game: AGAIN goes straight to the field).
       this.startScreen.remove();
       await this.conductor.start();
+      if (this.jumpToWin) {
+        this.skipToWin();
+        this.syncHud();
+        return;
+      }
       this.intro = new ArcadeIntro(this.view.scene, this.uiRoot, (id) => this.conductor.play(id));
     } else if (this.paused) {
       this.paused = false;
@@ -565,6 +583,25 @@ export class ArcadeGame {
   /** Where a run's first drive sits on the long field: past the areas it skipped. */
   private startOrigin(): number {
     return this.state.drive.area * DRIVE_KINDS.length * arcadeTuning.drive.distance;
+  }
+
+  /** ?win=1: the run as if just won (on the King's drive, eleven recruits on the bench), and the win cutscene. */
+  private skipToWin(): void {
+    const s = createRun(this.seed, firstRoster(this.monsters), arcadeTuning.run.areas - 1);
+    setUpDrive(s, s.drive.area, DRIVE_KINDS.length - 1, [], true);
+    // One recruit for every TRICK OR TREAT! a full run has.
+    for (let i = 0; i < arcadeTuning.run.areas * DRIVE_KINDS.length - 1; i++) {
+      s.drivesWon = i;
+      const offer = rollOffer(s)[i % 2];
+      if (offer?.kind === 'recruit') s.bench.unshift(offer.player);
+    }
+    s.drivesWon = arcadeTuning.run.areas * DRIVE_KINDS.length;
+    s.phase = 'won';
+    this.state = s;
+    this.origin = (s.drive.area * DRIVE_KINDS.length + s.drive.index) * arcadeTuning.drive.distance;
+    this.bodies.sync(s);
+    this.fieldProps.update(s, this.origin);
+    this.startOutro();
   }
 
   /** The win: the field's cast steps aside and the whole roster dances in front of the King. */
