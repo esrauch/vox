@@ -154,6 +154,7 @@ export class Hud {
   /** The drive banner ("Drive 2 of 4 · Challenge") and down and distance ("3rd & 4"). */
   setTop(banner: string, downs: string | null): void {
     this.banner.textContent = banner;
+    this.banner.hidden = !banner;
     this.downs.textContent = downs ?? '';
     this.downs.hidden = !downs;
   }

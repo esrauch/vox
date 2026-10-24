@@ -130,6 +130,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
   - `fieldProps.ts`: the props on the field, rebuilt when a new drive lays its own; on the last drive, the pumpkin patch behind the King.
   - `royalCrows.ts`: the King's two crows: on his arms, flying at the ball, flapping over the holder.
   - `queenHex.ts`: the Queen's crown glowing purple while her Hex is on (`hexedNow` in `sim/ball.ts`).
+  - `intro.ts` / `intro.css`: the opening cutscene, staged on the turf behind the start with its own camera; speech bubbles pinned over the speakers; GET. JACK. BACK.; `finish` freezes the last frame (`canvas.toDataURL`) into an overlay that fades out over the first drive.
 - **Shared with the dev pages:** `src/render/view.ts` (renderer, scene, lights) and `src/render/scenery.ts` (`ForestScenery`: the forest floor, fog, props along the field, the tree line on the Boss drive).
 - **Mobile performance:** the pixel ratio is capped at 2; keep draw calls low (target under ~100) and don't allocate in the frame loop.
 

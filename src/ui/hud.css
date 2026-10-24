@@ -521,3 +521,7 @@ button.hud-offer:active {
 .hud-skip[hidden] {
   display: none;
 }
+
+.hud-banner[hidden] {
+  display: none;
+}

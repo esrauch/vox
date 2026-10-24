@@ -1,0 +1,95 @@
+/* The opening cutscene's overlay (render/intro.ts): speech bubbles, the title, the crossfade still. */
+.intro {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.intro-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* A pixel speech bubble, pinned by its tail to a point over the speaker's head. */
+.intro-bubble {
+  position: absolute;
+  max-width: 62vw;
+  padding: 8px 12px;
+  border: var(--edge) solid var(--ink);
+  font-size: 1.15rem;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--ink);
+  background: var(--bone);
+  box-shadow: 4px 4px 0 var(--ink);
+  translate: -50% calc(-100% - 14px);
+  opacity: 0;
+  scale: 0.6;
+  transform-origin: 50% 100%;
+  transition:
+    opacity 0.15s,
+    scale 0.2s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.intro-bubble.show {
+  opacity: 1;
+  scale: 1;
+}
+
+/* The tail: a little pixel triangle pointing down at the speaker. */
+.intro-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  translate: -50% 0;
+  border: 7px solid transparent;
+  border-top: 8px solid var(--ink);
+}
+
+.intro-answer {
+  font-size: 1.6rem;
+}
+
+/* GET. JACK. BACK.: stacked, big, each word slamming in. */
+.intro-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 26%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.intro-title span {
+  font-size: clamp(3.2rem, 19vw, 6rem);
+  letter-spacing: 0.06em;
+  color: var(--pumpkin);
+  text-shadow: var(--text-edge);
+  opacity: 0;
+  scale: 2.2;
+  transition:
+    opacity 0.08s,
+    scale 0.22s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+.intro-title span.show {
+  opacity: 1;
+  scale: 1;
+}
+
+.intro-skip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--bone);
+  opacity: 0.6;
+}

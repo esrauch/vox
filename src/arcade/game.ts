@@ -24,6 +24,7 @@ import { ArcadeBodies } from './render/bodies';
 import { ArcadeLines, createArcadeTurf } from './render/field';
 import { ArcadeFieldProps } from './render/fieldProps';
 import { ArcadeFrogRain } from './render/frogRain';
+import { ArcadeIntro } from './render/intro';
 import { ArcadeQueenHex } from './render/queenHex';
 import { ArcadeRoyalCrows } from './render/royalCrows';
 import { ArcadeWitches } from './render/witches';
@@ -81,6 +82,8 @@ const CAMERA_PITCH = 32;
  * count sim time, are unchanged).
  */
 const TIME_SCALE = 0.8;
+/** The intro's crossfade into the first drive (seconds). */
+const INTRO_FADE = 1;
 /** With the pumpkin ball as the light, the moon and the sky are only a dim fill, so the field stays readable. */
 const MOON_FILL = 0.45;
 const SKY_FILL = 0.75;
@@ -132,10 +135,16 @@ export class ArcadeGame {
   private pending: StepInput = {};
   /** TRICK OR TREAT!: the spot first tapped for a swap. */
   private swapFrom: number | null = null;
+  /** The opening cutscene, while it plays (after the first PLAY). */
+  private intro: ArcadeIntro | null = null;
   /** Where the camera looks (field yards, smoothed). */
   private focus = v(0, -4);
 
-  constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement, options: ArcadeOptions) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    private readonly uiRoot: HTMLElement,
+    options: ArcadeOptions,
+  ) {
     this.seed = options.seed;
     this.monsters = options.monsters ?? false;
     this.startArea = Math.max(0, (options.area ?? 1) - 1);
@@ -181,6 +190,8 @@ export class ArcadeGame {
     });
 
     document.addEventListener('keydown', (e) => this.onKey(e));
+    // A tap during the intro skips it.
+    window.addEventListener('pointerdown', () => this.intro?.skip());
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') this.pause();
     });
@@ -195,6 +206,17 @@ export class ArcadeGame {
   private frame(now: number): void {
     const dt = this.lastFrame === null ? 0 : Math.min(0.1, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
+    // The intro plays with the game held still; when it ends it crossfades into the first drive.
+    if (this.intro) {
+      const done = this.intro.update(dt, this.view.camera, this.view.canvas);
+      this.view.render();
+      if (done) {
+        this.intro.finish(this.view.canvas, INTRO_FADE);
+        this.intro = null;
+        this.syncHud();
+      }
+      return;
+    }
     if (this.conductor.started && !this.paused) {
       this.accumulator += dt * TIME_SCALE;
       while (this.accumulator >= DT) {
@@ -438,6 +460,14 @@ export class ArcadeGame {
   }
 
   private syncHud(): void {
+    if (this.intro) {
+      // Nothing over the intro.
+      this.hud.setTop('', null);
+      this.hud.setHand(null, null);
+      this.hud.setDraft(null);
+      this.hud.setPrompt(null, null);
+      return;
+    }
     const { phase, drive, drivesWon, hand, flipped, called } = this.state;
     const banner =
       phase === 'over' || phase === 'won'
@@ -471,7 +501,9 @@ export class ArcadeGame {
     this.conductor.play('uiClick');
     const { phase } = this.state;
     if (!this.conductor.started) {
+      // The music starts, then the intro plays (once a game: AGAIN goes straight to the field).
       await this.conductor.start();
+      this.intro = new ArcadeIntro(this.view.scene, this.uiRoot, (id) => this.conductor.play(id));
     } else if (this.paused) {
       this.paused = false;
       this.lastFrame = null;
@@ -503,6 +535,10 @@ export class ArcadeGame {
 
   private onKey(e: KeyboardEvent): void {
     if (e.repeat) return;
+    if (this.intro) {
+      if (e.code === 'Space') this.intro.skip();
+      return;
+    }
     const { phase } = this.state;
     if (e.code === 'Space') {
       e.preventDefault();

@@ -33,7 +33,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [x] **Candy Kingdom:** the Safety becomes a **Witch**; the **Gingerbread Man** (a plain Cover in a new look); sidelines of gingerbread houses, candy canes and a few trees; pink-and-white turf; *(2026-10-22: built as the second area: Gumdrop Lane, Gingerbread Row, Broomstick Alley, the Queen's Court.)* **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers). *(Built 2026-10-22.)*
 - [~] **Farm:** the **Crow**; rows of Scarecrows; **the King** (a crowned scarecrow, a prop in play) and **SHOO!** (his two crows swoop at the ball every play). *(2026-10-24: all built.)*
 - [~] **Models** for the new defenders and the three Bosses, readable from the game camera. *(2026-10-22: the three Bosses are modelled at twice a player's size: `bosses/misterFrog` (a white top hat), `bosses/queen` (a witch with a broom and a crown), `bosses/king` (a scarecrow with a crown). Not yet in the game or checked from the game camera.)*
-- [ ] **The two cutscenes:** at the start, Jack asks a football team to help him get home; at the end, everyone (your team and every defender you met, Bosses included) dances in the pumpkin patch.
+- [~] **The two cutscenes:** at the start, Jack asks a football team to help him get home; at the end, everyone (your team and every defender you met, Bosses included) dances in the pumpkin patch. *(2026-10-24: the opening is built; the ending dance is still to do.)*
 - [ ] **Difficulty targets:** a practised player who never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
 
 ## B2. Impact and Feel
@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **The opening cutscene:** after the first PLAY (the music already going), Jack floats on the turf, three football players bounce-walk on, Jack asks "Can you help me get back to my patch?", one answers "Ok", they lift him onto a head and carry him off, and GET. / JACK. / BACK. slams in a word at a time; then the last frame crossfades into the first drive. A tap (or Space) skips it; AGAIN goes straight to the field.
 - **2026-10-24:** **The Farm's turf is a tilled field:** warm brown soil, a furrow up the field every yard, green sprouts on the ridges (the five-yard bands stay).
 - **2026-10-24:** **Boss perks cancelled:** beating a Boss gives nothing extra (Hot Arm and Gift of Foresight are dropped).
 - **2026-10-24:** **The Queen's Hex pulses:** clear for 1 s from the snap, then on for 1.5 s, over and over; her crown glows purple (and lights the field) while it's on. While on: the stub and no lights; clear: everything shows. Bots: her drive won 96% (good) / 82% (reading).
