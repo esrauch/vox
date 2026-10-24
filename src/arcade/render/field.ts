@@ -51,13 +51,15 @@ function turfTexture(rows: number): THREE.CanvasTexture {
         const x = rng.int(0, w - 1);
         const y = top + rng.int(0, TURF_PX - 1);
         if (biome === 'candy') {
-          g.fillStyle = rng.pick(['#fff8ee', '#7fe3c0', '#ffd23f', '#a259ff', shade(band, 0.85)]);
+          // Sprinkles, half-blended into the pink, so they don't shout.
+          const sprinkle = rng.pick(['#fff8ee', '#7fe3c0', '#ffd23f', '#a259ff']);
+          g.fillStyle = `#${new THREE.Color(band).lerp(new THREE.Color(sprinkle), 0.5).getHexString()}`;
           g.fillRect(x, y, rng.next() < 0.5 ? 2 : 1, 1);
         } else if (rng.next() < 0.7) {
-          g.fillStyle = shade(band, 0.65); // a darker blade, two pixels tall
+          g.fillStyle = shade(band, 0.825); // a darker blade, two pixels tall
           g.fillRect(x, y, 1, 2);
         } else {
-          g.fillStyle = shade(band, 1.3); // a lighter tuft
+          g.fillStyle = shade(band, 1.15); // a lighter tuft
           g.fillRect(x, y, 1, 1);
         }
       }
