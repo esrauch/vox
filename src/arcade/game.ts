@@ -146,6 +146,8 @@ export class ArcadeGame {
   private swapFrom: number | null = null;
   /** The first screen (just PLAY), until it's tapped. */
   private readonly startScreen: HTMLElement;
+  /** PLAY was tapped and the music is getting ready (a second tap does nothing). */
+  private starting = false;
   /** The win cutscene, after the last touchdown, until AGAIN. */
   private outro: ArcadeOutro | null = null;
   /** The opening cutscene, while it plays (after the first PLAY). */
@@ -233,6 +235,8 @@ export class ArcadeGame {
     if (this.intro) {
       const done = this.intro.update(dt, this.view.camera, this.view.canvas);
       this.view.render();
+      // Its first frame is up: now the start screen can go.
+      this.startScreen.remove();
       if (done) {
         this.intro.finish(this.view.canvas, INTRO_FADE);
         this.intro = null;
@@ -570,9 +574,13 @@ export class ArcadeGame {
     const { phase } = this.state;
     if (!this.conductor.started) {
       // The music starts, then the intro plays (once a game: AGAIN goes straight to the field).
-      this.startScreen.remove();
+      // The start screen stays up until the intro has drawn its first frame, so the field
+      // never shows in between.
+      if (this.starting) return;
+      this.starting = true;
       await this.conductor.start(this.songNow());
       if (this.jumpToWin) {
+        this.startScreen.remove();
         this.skipToWin();
         this.syncHud();
         return;

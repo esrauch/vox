@@ -27,8 +27,12 @@ export class Conductor {
   private wanted: Song | null = null;
 
   constructor() {
-    // Rendering the songs and effects doesn't need a tap, so start right away.
-    for (const song of SONGS) void prepareSong(song);
+    // Rendering the songs and effects doesn't need a tap, so start right away: the first
+    // song on its own, so it's ready soonest, then the rest.
+    const [first, ...rest] = SONGS;
+    void prepareSong(first).then(() => {
+      for (const song of rest) void prepareSong(song);
+    });
     void prepareSfx(RENDER_RATE);
   }
 
