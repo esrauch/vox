@@ -10,7 +10,14 @@
 import { INSTRUMENTS, softClip, type InstrumentId } from './instruments';
 import { parseDrumBar, parseMelodicBar } from './notes';
 
-const DRUMS: ReadonlySet<InstrumentId> = new Set(['kick', 'snare', 'hat', 'clap', 'brush']);
+const DRUMS: ReadonlySet<InstrumentId> = new Set([
+  'kick',
+  'snare',
+  'hat',
+  'clap',
+  'brush',
+  'cowbell',
+]);
 const TAIL_SECONDS = 2;
 
 export interface Stem {

@@ -1,7 +1,6 @@
 /**
- * "Party at the Patch": a second candidate for the win screen (the other is
- * The Pumpkin Mash), leaning harder on the early-'60s monster-dance record,
- * played spooky: a swung doo-wop in A minor on the shared grid (120 BPM, 8
+ * "Party at the Patch": the win screen. A homage to the early-'60s
+ * monster-dance record, played spooky: a swung doo-wop in A minor on the shared grid (120 BPM, 8
  * bars), Am F Dm E, twice, with a creeping chromatic bass into each
  * turnaround. Its ingredients are the genre's, not any one song's, and the
  * tune is its own: pounding piano triplets, a horror organ holding wobbly

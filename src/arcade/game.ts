@@ -27,7 +27,7 @@ import { ArcadeFrogRain } from './render/frogRain';
 import { ArcadeIntro } from './render/intro';
 import { ArcadeOutro } from './render/outro';
 import { BOSS_SPOT } from './sim/props';
-import { AREA_SONGS, WIN_SONGS } from '../audio/songs';
+import { AREA_SONGS, FARM_SONGS, WIN_SONG } from '../audio/songs';
 import { areaAt } from './content/defense';
 import type { Song } from '../audio/synth/render';
 import { ArcadeQueenCrown } from './render/queenCrown';
@@ -69,8 +69,8 @@ export interface ArcadeOptions {
   area?: number;
   /** Go straight to the win cutscene after PLAY, with a full bench: ?win=1, for looking at it. */
   win?: boolean;
-  /** Which win-screen song candidate plays (1 The Pumpkin Mash, 2 Party at the Patch): ?winSong=2. */
-  winSong?: number;
+  /** Which Frederick's Farm song candidate plays (1 Harvest Moon Hoedown, 2 Spooky Cow): ?farmSong=2. */
+  farmSong?: number;
 }
 
 /** The starting team, or (with `monsters`) the same players turned into each position's monster. */
@@ -120,8 +120,8 @@ export class ArcadeGame {
   private readonly startArea: number;
   /** ?win=1: PLAY goes straight to the win cutscene. */
   private readonly jumpToWin: boolean;
-  /** The win screen's song (one of its candidates). */
-  private readonly winSong: Song;
+  /** Each area's song (the Farm's is one of its candidates). */
+  private readonly areaSongs: readonly Song[];
   private readonly conductor = new Conductor();
   private readonly view: View;
   private readonly bodies: ArcadeBodies;
@@ -166,7 +166,8 @@ export class ArcadeGame {
     this.monsters = options.monsters ?? false;
     this.startArea = Math.max(0, (options.area ?? 1) - 1);
     this.jumpToWin = options.win ?? false;
-    this.winSong = WIN_SONGS[(options.winSong ?? 1) - 1] ?? WIN_SONGS[0];
+    const farm = FARM_SONGS[(options.farmSong ?? 1) - 1] ?? FARM_SONGS[0];
+    this.areaSongs = [...AREA_SONGS, farm];
     this.state = createRun(this.seed, firstRoster(this.monsters), this.startArea);
     this.origin = this.startOrigin();
     this.view = new View(canvas, { fov: 50 });
@@ -564,8 +565,9 @@ export class ArcadeGame {
 
   /** The song for now: the win screen's during the win cutscene, otherwise the area's. */
   private songNow(): Song {
-    if (this.outro) return this.winSong;
-    return AREA_SONGS[Math.min(this.state.drive.area, AREA_SONGS.length - 1)] ?? this.winSong;
+    if (this.outro) return WIN_SONG;
+    const songs = this.areaSongs;
+    return songs[Math.min(this.state.drive.area, songs.length - 1)] ?? WIN_SONG;
   }
 
   private async onAction(): Promise<void> {

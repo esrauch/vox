@@ -27,7 +27,9 @@ export type InstrumentId =
   | 'caw'
   | 'creak'
   | 'bubble'
-  | 'howl';
+  | 'howl'
+  | 'cowbell'
+  | 'moo';
 
 export interface NoteArgs {
   readonly ctx: BaseAudioContext;
@@ -576,6 +578,46 @@ export const INSTRUMENTS: Record<InstrumentId, (a: NoteArgs) => void> = {
       const breath = ctx.createGain();
       breath.gain.value = 0.18;
       n.connect(bp).connect(breath).connect(env);
+    }
+  },
+
+  cowbell({ ctx, out, time, velocity }) {
+    // Two clanging squares through a hollow resonance, ringing off fast.
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 900;
+    bp.Q.value = 2.5;
+    const env = envelope(ctx, out, time, velocity * 0.45, 0.001, 0.22, 0, 0.001, 0.1);
+    bp.connect(env);
+    for (const f of [545, 815]) osc(ctx, 'square', f, time, time + 0.4).connect(bp);
+  },
+
+  moo({ ctx, out, time, duration, freqs, velocity }) {
+    // A ghostly cow: a low, nasal "mmmooo" that swells and sags in pitch.
+    for (const f of freqs) {
+      const end = time + Math.max(0.4, duration);
+      const o = osc(ctx, 'sawtooth', f * 1.12, time, end + 0.3);
+      o.frequency.exponentialRampToValueAtTime(f, time + 0.25);
+      o.frequency.exponentialRampToValueAtTime(f * 0.82, end);
+      const vib = osc(ctx, 'sine', 4.5, time, end + 0.3);
+      const depth = ctx.createGain();
+      depth.gain.value = f * 0.02;
+      vib.connect(depth).connect(o.frequency);
+      const env = envelope(ctx, out, time, velocity * 0.7, 0.12, 0.3, 0.85, end - time, 0.2);
+      // "Mm" opening into "ooo": the low formant rises a little as the mouth opens.
+      const f1 = ctx.createBiquadFilter();
+      f1.type = 'bandpass';
+      f1.Q.value = 5;
+      f1.frequency.setValueAtTime(250, time);
+      f1.frequency.linearRampToValueAtTime(420, time + 0.3);
+      const f2 = ctx.createBiquadFilter();
+      f2.type = 'bandpass';
+      f2.Q.value = 7;
+      f2.frequency.value = 850;
+      const g2 = ctx.createGain();
+      g2.gain.value = 0.4;
+      o.connect(f1).connect(env);
+      o.connect(f2).connect(g2).connect(env);
     }
   },
 
