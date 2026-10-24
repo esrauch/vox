@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **Frog Rain comes half a second later:** the frogs land 2 s into the down on screen (1.6 s of sim time), not 1.5.
 - **2026-10-24:** **PLAY goes straight to the intro:** the start screen stays up until the intro's first frame is drawn, so the field never flashes up while the music gets ready (the first song now renders before the others).
 - **2026-10-24:** **No drive banner:** the area, drive number, kind and name no longer show at the top during play (the drives-won tally still shows at the end of a run).
 - **2026-10-24:** **The zones are renamed** Froggy's Forest, Candy Queendom and Frederick's Farm; beating a Boss pops "<zone> Cleared!" instead of TOUCHDOWN!.

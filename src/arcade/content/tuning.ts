@@ -202,7 +202,7 @@ export const arcadeTuning = {
     behind: 1,
     ahead: 16,
     /** The frogs all come down at once, this long into the down (seconds of live play)… */
-    dumpAt: 1.2,
+    dumpAt: 1.6,
     /** …their shadows filling the lane this long before… */
     warn: 0.7,
     /** …and everyone in the lane is flattened for this long (a carrier in it is tackled: FROGGED!). */
