@@ -57,8 +57,11 @@ const BOT = {
   passOnly: true,
   /** Always call a handoff when there's one in the hand (for measuring the run game). */
   runOnly: false,
-  /** Of the steps where it would throw, the share it reacts on (a person isn't instant). */
-  react: 0.25,
+  /**
+   * Of the steps where it would throw, the share it reacts on (a person isn't
+   * instant). Tuned so about 20% of downs end incomplete at the sweep's speed.
+   */
+  react: 0.3,
   /** With this share of the pocket left, it gives up waiting and throws anyway. */
   panic: 0.12,
   /** Bar: it aims for the middle of the sweet spot, off by a normal error this big (a share of the meter). */
