@@ -165,8 +165,18 @@ export const arcadeTuning = {
     batLoop: 3.5,
     /** A Bat leaves its loop to dive at a carrier this close (yards), and goes back to it if the carrier gets away. */
     batDive: 3,
-    /** A Crow's lane: it flies this far up the field and back. */
+    /** A Crow's lane: it flies this far up the field and back… */
     crowLane: 8,
+    /** …and it leaves it to dive at a carrier this close (yards). */
+    crowDive: 4,
+    /**
+     * The Safeties line up this far past the line of scrimmage (and never
+     * short of just past the first-down line). Once someone has the ball, a
+     * Safety meets the carrier head on, aiming this far upfield of it. Its
+     * tackle is sure: no Break it!.
+     */
+    safetyDepth: 14,
+    safetyFront: 1.2,
     /** The play fake: after a handoff the defense keeps playing the pass this long (seconds)… */
     playFake: 0.9,
     /** …except a defender this close to the carrier (yards), who sees it. */
@@ -211,12 +221,6 @@ export const arcadeTuning = {
     warn: 0.7,
     /** …and everyone in the lane is flattened for this long (a carrier in it is tackled: FROGGED!). */
     flatTime: 1.2,
-  },
-  witch: {
-    /** Her speed across the field. */
-    speed: 3,
-    /** A pass whose path comes within this of her bounces off. */
-    radius: 1.5,
   },
 } as const;
 

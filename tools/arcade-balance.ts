@@ -288,7 +288,7 @@ function count(
         break;
       case 'batted': {
         const by = state.field.defenders.find((d) => d.id === e.by);
-        bump(t.battedBy, `${by ? by.kind : 'witch'}${e.contested ? ' (contested)' : ''}`);
+        bump(t.battedBy, `${by ? by.kind : '?'}${e.contested ? ' (contested)' : ''}`);
         break;
       }
       case 'breakResult':

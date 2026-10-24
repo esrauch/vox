@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **Crows dive** at a carrier within 4 yards. **The sky Witches are gone** (the only Witches are the Candy Queendom's Safeties). **Safeties** line up 14 yards deep, get between the carrier and the end zone, and **tackle for sure** (no Break it!); blockers can still shove and pancake them. Run-only bot: 4.9 yards a run (5.0 before; 4.1 with them at 11 yards). The practised passing bot beat the game 50% (it was 71%; measured with the Safeties at 11), mostly from the faster sweep: its throws miss their moment more (30% incomplete).
 - **2026-10-24:** **The aim line sweeps 50% faster** (112.5° a second); the pocket holds just as long as before (4.5 sweeps instead of 3).
 - **2026-10-24:** **The win screen has no AGAIN:** it's the end, and the roster dances on (a Game Over still offers AGAIN). **Two Safeties in the Candy Queendom and on Frederick's Farm,** one each side, each shadowing the deepest player on its own half.
 - **2026-10-24:** **Frog Rain comes half a second later:** the frogs land 2 s into the down on screen (1.6 s of sim time), not 1.5.

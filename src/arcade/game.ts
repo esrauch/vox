@@ -32,7 +32,6 @@ import { areaAt } from './content/defense';
 import type { Song } from '../audio/synth/render';
 import { ArcadeQueenCrown } from './render/queenCrown';
 import { ArcadeRoyalCrows } from './render/royalCrows';
-import { ArcadeWitches } from './render/witches';
 import { ArcadeRoutes } from './render/routes';
 import { ArcadeSweep, litPlayers } from './render/sweep';
 import { FIELD_AHEAD, FIELD_BEHIND, toWorld } from './render/world';
@@ -130,7 +129,6 @@ export class ArcadeGame {
   private readonly royalCrows: ArcadeRoyalCrows;
   private readonly queenCrown: ArcadeQueenCrown;
   private readonly fieldProps: ArcadeFieldProps;
-  private readonly witches: ArcadeWitches;
   private readonly hud: Hud;
   private readonly controls: ArcadeControls;
 
@@ -186,7 +184,6 @@ export class ArcadeGame {
     this.royalCrows = new ArcadeRoyalCrows(scene);
     this.queenCrown = new ArcadeQueenCrown(scene);
     this.fieldProps = new ArcadeFieldProps(scene);
-    this.witches = new ArcadeWitches(scene);
     this.bodies = new ArcadeBodies(scene);
     this.ball = new ArcadeBall(scene);
     this.sweep = new ArcadeSweep(scene);
@@ -330,7 +327,6 @@ export class ArcadeGame {
     );
     this.fieldProps.update(state, this.origin);
     this.fieldProps.animate(performance.now() / 1000);
-    this.witches.update(state, this.origin);
     this.controls.setButtons(canThrow(state) && !this.paused);
     this.controls.setBreak(this.breakView());
     this.follow(dt);

@@ -213,16 +213,15 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Rusher** | Rhino Beetle | Charges the QB. Your Blockers have to out-shove it. |
 | **Cover** | Garden Gnome | Shadows a Catcher; after the catch, chases the carrier. Small, quick, light: easy to shove, hard to shake. |
 | **Zone** | Scarecrow | Planted: its long arms reach a **wide purple ring** on the turf, and any low ball coming down inside it is contested: its Hands beat a plain Catcher's, so it's a patch of field to throw away from (a Catcher with great Hands, like a Ghost, can still win it). Running into one stops you dead. |
-| **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. *(In the Candy Queendom the Safety is a Witch.)* **Froggy's Forest has one, in the middle, shadowing your deepest player; the Candy Queendom and Frederick's Farm have two, one each side, each shadowing the deepest player on its half.** |
+| **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. *(In the Candy Queendom the Safety is a Witch.)* **Froggy's Forest has one, in the middle, shadowing your deepest player; the Candy Queendom and Frederick's Farm have two, one each side, each shadowing the deepest player on its half.** They line up deep (14 yards past the line), and once someone has the ball they **get between it and the end zone**, meeting the carrier head on. **A Safety's tackle is sure: no Break it!** Your blockers can still shove and pancake them. |
 | **Bat** | Bat | Guards its patch of air: it loops a square and swats passes that fly through it, and dives at a carrier that comes within 3 yards (back to its loop if the carrier gets away). |
 | **Frog** *(new)* | Frog | Covers like a Gnome until the carrier gets close, then crouches (the telegraph) and leaps onto it. |
 | **Gingerbread Man** *(Candy Queendom)* | Gingerbread Man | The Candy Queendom's Cover: the same rule, a new look. |
-| **Crow** *(Frederick's Farm)* | Crow | Like a Bat, it swats passes that fly through it; it flies a lane up and down the field (8 yards) instead of looping a square. |
+| **Crow** *(Frederick's Farm)* | Crow | Like a Bat, it swats passes that fly through it; it flies a lane up and down the field (8 yards) instead of looping a square, and **leaves it to dive at a carrier who comes within 4 yards** (a Bat dives from 3). |
 
 - **Each area has its own set:** Froggy's Forest adds Frogs; the Candy Queendom swaps the Owl for Witches and adds Gingerbread Men; Frederick's Farm adds Crows and rows of Scarecrows, and its props are pumpkins and hay bales. Older kinds keep their rules wherever they appear.
 - **The Bosses aren't defenders:** each stands in the middle of its drive's end zone, just past the first-down line, drawn twice a player's size, and never moves, tackles or defends (a prop). Its ability is the whole fight. Mister Frog is a Frog in a top hat, the Queen a Witch in a crown, the King a Scarecrow in a crown.
 - **Props on the field:** two or three to every 10 yards, from the area's own set (Froggy's Forest: trees, stumps and toadstools; the Candy Queendom: gumdrops, lollipops and candy canes). They're solid: everyone, yours and theirs, has to go around them, and carriers pick lanes clear of them. The ball flies over them. They never stand in the middle lane (the pumpkin's, and the handoffs'), never against a sideline, and always leave room to pass between.
-- **Hazards** stay simple patterns, like *Crossy Road*'s cars: the **Witch on a Broom** sweeps across the field and knocks down any pass she meets.
 - **Scaling, the lever behind the whole run:** the first drive of area I is **four slow defenders** (Intro 4, Challenge 5, Gimmicks 5 or 6, the Boss a full 8); every drive adds defenders or stats, and later areas bring more rushers and heavier, faster, grabbier versions of everyone. ▲ *Numbers to come from the balance runs: the target is that a team that never upgrades loses in area II, a decent build reaches the last Boss, and a strong one beats it.*
 - **The defense always shows its intent:** rushers lean toward the QB, Covers face their Catcher, the Owl tracks the ball.
 
@@ -272,7 +271,7 @@ The smallest version that proves the fun, most of it built:
 - **The QB (the pumpkin) and seven players** in three positions, starting all human.
 - **A down:** three random play cards with Flip and HIKE!, the sweep and THROW, handoffs with the play fake, Break it!.
 - **The third-person camera** behind and above the QB, following the play.
-- **The defense:** Rushers, Covers, a Safety, Scarecrows and Bats, scaling by drive and area. The Witch.
+- **The defense:** Rushers, Covers, Safeties, Scarecrows, Bats and Crows, scaling by drive and area.
 - **TRICK OR TREAT!** after each won drive: two new players to choose from, the roster and bench.
 - **Impact:** hit-pause, shake, flying bodies, the catch slow-mo, sound on every contact.
 

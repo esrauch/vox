@@ -83,8 +83,6 @@ export interface DefenseSpot {
 export interface DefenseSpec {
   readonly name: string;
   readonly defenders: readonly DefenseSpot[];
-  /** Witches sweeping across the field. */
-  readonly witches: number;
   /** Added to every defender's stats on top of the area's boost (a sleepy first drive is negative). */
   readonly boost: number;
   /** Mister Frog's Frog Rain: a lane shown before each snap, frogs falling in it during the down. */
@@ -130,13 +128,11 @@ export const FOREST: ArcadeArea = {
   ],
   intro: {
     name: 'A Quiet Clearing',
-    witches: 0,
     boost: -10,
     defenders: [d('rusher', -1.8, 1), d('cover', -6.3, 4), d('cover', 4.2, 5), owl],
   },
   challenge: {
     name: 'Gnome Country',
-    witches: 0,
     boost: 0,
     defenders: [
       d('rusher', -1.8, 1),
@@ -148,7 +144,6 @@ export const FOREST: ArcadeArea = {
   },
   gimmick: {
     name: 'Bat Cave',
-    witches: 0,
     boost: 0,
     defenders: [
       d('rusher', 1.8, 1),
@@ -163,7 +158,6 @@ export const FOREST: ArcadeArea = {
   boss: {
     name: "Mister Frog's Pond",
     boss: 'misterFrog',
-    witches: 0,
     boost: 0,
     frogRain: true,
     defenders: [
@@ -196,7 +190,6 @@ export const CANDY_KINGDOM: ArcadeArea = {
   ],
   intro: {
     name: 'Gumdrop Lane',
-    witches: 0,
     // A sleepy start, like every area's Intro.
     boost: -10,
     defenders: [
@@ -209,7 +202,6 @@ export const CANDY_KINGDOM: ArcadeArea = {
   },
   challenge: {
     name: 'Gingerbread Row',
-    witches: 0,
     boost: 0,
     defenders: [
       d('rusher', 1.8, 1),
@@ -222,7 +214,6 @@ export const CANDY_KINGDOM: ArcadeArea = {
   },
   gimmick: {
     name: 'Broomstick Alley',
-    witches: 2,
     boost: 0,
     defenders: [
       d('rusher', 1.8, 1),
@@ -237,7 +228,6 @@ export const CANDY_KINGDOM: ArcadeArea = {
   boss: {
     name: "The Queen's Court",
     boss: 'queen',
-    witches: 0,
     boost: 0,
     decree: true,
     defenders: [
@@ -270,7 +260,6 @@ export const FARM: ArcadeArea = {
   ],
   intro: {
     name: 'The Back Forty',
-    witches: 0,
     // A sleepy start, like every area's Intro.
     boost: -10,
     defenders: [
@@ -283,7 +272,6 @@ export const FARM: ArcadeArea = {
   },
   challenge: {
     name: 'The Cornrows',
-    witches: 0,
     boost: 0,
     defenders: [
       d('rusher', -1.8, 1),
@@ -297,7 +285,6 @@ export const FARM: ArcadeArea = {
   },
   gimmick: {
     name: 'A Murder of Crows',
-    witches: 0,
     boost: 0,
     defenders: [
       d('rusher', -1.8, 1),
@@ -314,7 +301,6 @@ export const FARM: ArcadeArea = {
   boss: {
     name: "The King's Patch",
     boss: 'king',
-    witches: 0,
     boost: 0,
     home: true,
     defenders: [

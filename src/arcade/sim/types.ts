@@ -75,14 +75,6 @@ export interface Defender extends BodyBase {
 
 export type Body = Player | Defender;
 
-/** A Witch sweeping across her row, wrapping at the sidelines. A pure pattern of time. */
-export interface Witch {
-  readonly id: number;
-  readonly y: number;
-  readonly startX: number;
-  readonly dir: 1 | -1;
-}
-
 export type Ball =
   | { readonly at: 'qb' }
   | {
@@ -147,7 +139,6 @@ export interface RoyalCrows {
 export interface Field {
   readonly players: Player[];
   readonly defenders: Defender[];
-  readonly witches: readonly Witch[];
   /** This drive's props on the field (and the stretches either side of it). */
   props: readonly FieldProp[];
   /**

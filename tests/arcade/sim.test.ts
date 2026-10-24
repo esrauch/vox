@@ -1114,6 +1114,53 @@ describe('Bats', () => {
   });
 });
 
+describe('Crows and Safeties', () => {
+  it('a Crow leaves its lane to dive at a carrier that comes near, and grabs it', () => {
+    const s = carry(
+      playState([{ role: 'runner', pos: v(4, 1.5) }], [{ kind: 'crow', pos: v(4, 5) }]),
+      2,
+    );
+    const crow = s.field.defenders[0]!;
+    Object.assign(crow, { patrol: [v(4, 5), v(4, 13)] });
+    s.field.lane = 4;
+    const r = untilGrabbed(s);
+    expect(ofType(r.events, 'grabbed')[0]?.by).toContain(100);
+  });
+
+  it("a Safety's tackle is sure: no Break it!", () => {
+    const s = carry(
+      playState([{ role: 'runner', pos: v(0, 2) }], [{ kind: 'safety', pos: v(0, 6) }]),
+      2,
+    );
+    s.field.lane = 0;
+    const r = run(s, 3);
+    expect(ofType(r.events, 'grabbed')).toHaveLength(0);
+    expect(ofType(r.events, 'tackled')[0]?.by).toBe(100);
+  });
+
+  it('a Safety meets the carrier head on, from upfield', () => {
+    const s = carry(
+      playState([{ role: 'runner', pos: v(-3, 2) }], [{ kind: 'safety', pos: v(3, 10) }]),
+      2,
+    );
+    s.field.lane = -3;
+    const r = run(s, 0.5);
+    const safety = body(r.state, 100);
+    const carrier = body(r.state, 2);
+    expect(safety.pos.y).toBeGreaterThan(carrier.pos.y);
+    expect(Math.abs(safety.pos.x - carrier.pos.x)).toBeLessThan(6);
+  });
+
+  it('line up deep, well past the line of scrimmage', () => {
+    for (let seed = 1; seed <= 5; seed++) {
+      const s = createRun(seed);
+      for (const d of s.field.defenders.filter((x) => x.kind === 'safety')) {
+        expect(d.pos.y - s.drive.los).toBeGreaterThanOrEqual(arcadeTuning.defense.safetyDepth);
+      }
+    }
+  });
+});
+
 describe('a handoff runs its play', () => {
   it('reads where a route is across the field at a given point upfield', () => {
     const path = [v(0, -4), v(-5, 1.5), v(-5.5, 12)];

@@ -92,7 +92,7 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 | **Safety** (the deep guard) | **Owl** | Wide-eyed, hanging deep, seeing everything. |
 | **Bat** (patrols a box of sky) | **Bat** | Hovering with its wings spread, to knock passes out of the air. |
 
-Plus the **Frog** (a Cover that crouches, then leaps) and the **Witch on a Broom** as a hazard swooping over the passing lanes. **Boss: Mister Frog,** who rains frogs down a lane.
+Plus the **Frog** (a Cover that crouches, then leaps) **Boss: Mister Frog,** who rains frogs down a lane.
 
 ### The Candy Queendom
 The Queen's gingerbread realm: pink-and-white turf, gingerbread houses, candy canes and a few trees along the sidelines. **Witches take the Safety's place,** hanging deep on their brooms, and the **Gingerbread Man** is new: a flat cookie with icing eyes and smile, and the opposition's purple gumdrop buttons and bow tie. **Boss: the Queen,** a witch twice the size of any other, in a crown, whose **Royal Decree** bans one of your play cards each down (a red wax seal stamped BANNED across it).

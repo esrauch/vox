@@ -9,11 +9,10 @@
  *     to you): then it's batted;
  *   - with only a defender reaching it, it's batted down (a Rhino Beetle
  *     locked up with one of your players can't: the ball goes past the scrum);
- *   - a Witch it passes near knocks it down;
  *   - at the end of its range with nobody there, it's incomplete.
  */
 import { arcadeTuning } from '../content/tuning';
-import type { Defender, Player, RunState, Vec, Witch } from './types';
+import type { Defender, Player, RunState, Vec } from './types';
 import { dist, lerp, v } from './vec';
 
 const { sweep, throw: t, field } = arcadeTuning;
@@ -64,13 +63,6 @@ export function flightTime(from: Vec, to: Vec, scale = 1): number {
   return Math.max(0.1, dist(from, to) / (t.speed * scale));
 }
 
-/** Where a Witch is at a moment: she sweeps across her row and wraps at the sidelines. */
-export function witchX(w: Witch, time: number): number {
-  const width = 2 * field.halfWidth;
-  const raw = w.startX + w.dir * arcadeTuning.witch.speed * time + field.halfWidth;
-  return (((raw % width) + width) % width) - field.halfWidth;
-}
-
 export type FlightOutcome =
   | { readonly kind: 'caught'; readonly by: Player; readonly contested: boolean }
   | { readonly kind: 'batted'; readonly by: number; readonly at: Vec; readonly contested: boolean }
@@ -96,12 +88,6 @@ export function contact(
   last: boolean,
   end: Vec,
 ): FlightOutcome {
-  for (const w of state.field.witches) {
-    const witch = v(witchX(w, state.time), w.y);
-    if (dist(witch, at) < arcadeTuning.witch.radius) {
-      return { kind: 'batted', by: w.id, at: witch, contested: false };
-    }
-  }
   const catcher = state.field.players
     .filter(
       (p) =>

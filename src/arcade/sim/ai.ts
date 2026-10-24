@@ -130,10 +130,12 @@ function between(d: Defender, guard: Vec, p: Player): Vec {
 
 export function defenderTarget(state: RunState, d: Defender): Vec | null {
   if (d.planted) return null;
-  // A Bat guards its patch of air: it loops, but dives at a carrier that comes within reach.
-  if (d.kind === 'bat' && state.phase === 'play') {
+  // A Bat guards its patch of air, a Crow its lane: each keeps to it, but dives at a
+  // carrier that comes within reach (a Crow from further off), and goes back if it gets away.
+  if ((d.kind === 'bat' || d.kind === 'crow') && state.phase === 'play') {
     const carrier = carrierOf(state);
-    if (carrier && dist(d.pos, carrier.pos) <= defense.batDive) {
+    const reach = d.kind === 'bat' ? defense.batDive : defense.crowDive;
+    if (carrier && dist(d.pos, carrier.pos) <= reach) {
       return add(carrier.pos, scale(carrier.vel, defense.chaseLead));
     }
   }
@@ -145,6 +147,12 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
   }
   if (state.phase !== 'play') return null;
   const carrier = carrierOf(state);
+  // A Safety is the last line: it gets between the carrier and the end zone, meeting
+  // it head on a little upfield of it (unless the carrier's already past it: then it chases).
+  if (carrier && d.kind === 'safety' && d.pos.y > carrier.pos.y) {
+    const ahead = add(carrier.pos, scale(carrier.vel, defense.chaseLead));
+    return v(ahead.x, Math.min(d.pos.y, ahead.y + defense.safetyFront));
+  }
   if (carrier && !fooled(state, d, carrier)) {
     return add(carrier.pos, scale(carrier.vel, defense.chaseLead));
   }

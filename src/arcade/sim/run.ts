@@ -20,7 +20,6 @@ import type {
   DriveKind,
   RosterPlayer,
   RunState,
-  Witch,
   FrogLane,
   RoyalCrows,
 } from './types';
@@ -79,7 +78,6 @@ export function createRun(
     field: {
       players: [],
       defenders: [],
-      witches: [],
       props: [],
       frogLane: null,
       frogDump: null,
@@ -132,24 +130,11 @@ export function setUpDrive(
   };
   state.field = {
     ...state.field,
-    witches: witches(state, spec),
     props: drivePropsWithBoss(state.seed, area, index, spec.boss),
   };
   events.push({ type: 'driveStarted', drive: index, name: spec.name });
   setUpDown(state, events);
   if (!ready) state.phase = 'draft';
-}
-
-/** A drive's Witches, each on its own row between the line and the first-down line. */
-function witches(state: RunState, spec: DefenseSpec): Witch[] {
-  const rng = rngFor(state.seed, 'witches', state.drivesWon);
-  const hw = arcadeTuning.field.halfWidth;
-  return Array.from({ length: spec.witches }, (_, i) => ({
-    id: state.nextId++,
-    y: 3 + i * 3 + rng.next() * 2,
-    startX: -hw + rng.next() * 2 * hw,
-    dir: rng.next() < 0.5 ? 1 : -1,
-  }));
 }
 
 /** Frog Rain: this down's lane, in from a sideline picked at random (never over the pumpkin), so you can Flip away from it. */
@@ -199,7 +184,6 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
   state.field = {
     players,
     defenders,
-    witches: state.field.witches,
     props: state.field.props,
     frogLane: spec.frogRain ? frogLane(state) : null,
     frogDump: null,

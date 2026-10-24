@@ -37,7 +37,7 @@ export interface DefenderSpec {
 /**
  * A down already snapped, with exactly these bodies: the QB on (0, -4) with
  * the ball, then the given players (ids 2 up) and defenders (ids 100 up).
- * Line of scrimmage 0, first-down line 10, no Witches. Players' stats default to
+ * Line of scrimmage 0, first-down line 10. Players' stats default to
  * 50 / 50 / 50, defenders' to their kind's.
  */
 export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = []): RunState {
@@ -100,7 +100,6 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
   state.field = {
     players: [qb, ...team],
     defenders: defs,
-    witches: [],
     props: [],
     frogLane: null,
     frogDump: null,
