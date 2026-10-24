@@ -113,6 +113,18 @@ export function jukeShowing(state: RunState): boolean {
   return t?.kind === 'juke' && state.time >= t.showAt;
 }
 
+/**
+ * What pressing the lit juke button would get right now: GREAT early in its
+ * window, OK later, BAD once it's over (it lingers red a moment before the
+ * tackle). Null when it isn't a juke or the arrow isn't showing yet.
+ */
+export function jukeGrade(state: RunState): 'great' | 'ok' | 'bad' | null {
+  const t = state.tackle;
+  if (t?.kind !== 'juke' || state.time < t.showAt) return null;
+  const shown = state.time - t.showAt;
+  return shown <= t.window * b.jukeBreakShare ? 'great' : shown <= t.window ? 'ok' : 'bad';
+}
+
 /** Judge this step's input (it may fill a mash). Returns the outcome once there is one. */
 export function judgeBreakIt(state: RunState, input: StepInput): BreakOutcome | null {
   const t = state.tackle;
@@ -144,7 +156,7 @@ export function judgeBreakIt(state: RunState, input: StepInput): BreakOutcome | 
             ? 'drag'
             : 'tackle';
       }
-      return shown > t.window ? 'tackle' : null;
+      return shown > t.window + b.jukeLinger ? 'tackle' : null;
     }
   }
 }

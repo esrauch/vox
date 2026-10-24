@@ -112,7 +112,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 |---|---|---|---|
 | **The bar** | A marker crossing a bar, left to right or right to left, with a green sweet spot (never in the first third of its trip) and a yellow "close" band | Tap in the green to break, in the yellow to drag | A narrower sweet spot |
 | **MASH!** | A bar that fills as you tap | Tap as fast as you can for a second: fill it to break, half fill it to drag | Less per tap |
-| **JUKE!** | Two big buttons, ◀ and ▶, from the start of the countdown; when it ends, the one to press lights up | Press it: quickly to break, a beat later to drag. The wrong one is a tackle | A shorter window |
+| **JUKE!** | Two big buttons, ◀ and ▶, from the start of the countdown; when it ends, the one to press lights up | Press it: quickly to break, a beat later to drag. The wrong one is a tackle. **The lit button's colour says what a press gets now:** green GREAT, orange OK, then red (TOO LATE!) for half a second before it's BAD | A shorter window |
 
 - **A GREAT really breaks free:** the rest of the pile right beside the carrier is knocked back too, and for a moment (0.6 s) nobody can grab it, so it gets clear instead of being grabbed again on the spot. **A grab that follows hard on another** (within 2 seconds) gets a short countdown (half a second), so a pile-up never stalls the game.
 - **How hard the tests are depends on the zone, not on stats:** the Forest's are the easiest, the Candy Kingdom's a step harder, the Farm's harder again (sweet spot 9% → 7.5% → 6% of the bar; juke window 0.55 → 0.48 → 0.42 s). So no kind is the best at breaking tackles.

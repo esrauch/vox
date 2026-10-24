@@ -19,7 +19,7 @@ import {
   setUpDrive,
   startingRoster,
 } from '../../src/arcade/sim/run';
-import { breakMarker, countdown, jukeShowing } from '../../src/arcade/sim/breakit';
+import { breakMarker, countdown, jukeGrade, jukeShowing } from '../../src/arcade/sim/breakit';
 import { canThrow, forceBreakKind, step } from '../../src/arcade/sim/step';
 import { litPlayers } from '../../src/arcade/render/sweep';
 import { pathXAt } from '../../src/arcade/sim/ai';
@@ -594,6 +594,19 @@ describe('Break it!: the mash and the juke', () => {
     const wrong = t.side === 1 ? -1 : 1;
     expect(ofType(juke(g, wrong, 0.05).events, 'tackled')).toHaveLength(1);
     expect(ofType(run(g, 4).events, 'tackled')).toHaveLength(1);
+  });
+
+  it('juke: the lit button goes GREAT, then OK, then BAD, which lingers before the tackle', () => {
+    const g = grabbed('juke');
+    const t = g.tackle!;
+    if (t.kind !== 'juke') throw new Error('not a juke');
+    const at = (sec: number) => run(g, t.showAt - g.time + sec).state;
+    expect(jukeGrade(at(0.02))).toBe('great');
+    expect(jukeGrade(at(t.window * 0.9))).toBe('ok');
+    const late = at(t.window + arcadeTuning.breakit.jukeLinger / 2);
+    expect(late.phase).toBe('breakit');
+    expect(jukeGrade(late)).toBe('bad');
+    expect(at(t.window + arcadeTuning.breakit.jukeLinger + 0.1).phase).not.toBe('breakit');
   });
 
   it('juke: presses during the countdown don\u2019t count', () => {

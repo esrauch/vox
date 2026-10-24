@@ -123,6 +123,8 @@ export const arcadeTuning = {
     mashDrag: 0.55,
     /** Juke: when the countdown ends the arrow shows, and a tap in this first share of the window breaks it (later, a drag). */
     jukeBreakShare: 0.5,
+    /** Once the window is over the button turns red and stays this long (half a second on screen) before it's a tackle. */
+    jukeLinger: 0.4,
     /**
      * A GREAT breaks the carrier free of the pile: any other defender this close
      * (yards, beyond touching) is knocked back too, down this long; and nobody can

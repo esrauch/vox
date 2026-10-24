@@ -33,8 +33,12 @@ export type BreakView = { readonly ready: number | null } & (
       readonly dir: 1 | -1;
     }
   | { readonly kind: 'mash'; readonly fill: number; readonly left: number }
-  /** The side to press, or null before it shows. */
-  | { readonly kind: 'juke'; readonly side: -1 | 1 | null }
+  /** The side to press, or null before it shows; and what pressing it now would get. */
+  | {
+      readonly kind: 'juke';
+      readonly side: -1 | 1 | null;
+      readonly grade: 'great' | 'ok' | 'bad' | null;
+    }
 );
 
 export class ArcadeControls {
@@ -165,12 +169,19 @@ export class ArcadeControls {
         if (view.ready === null) this.hint.textContent = 'TAP TAP TAP!';
         this.fill.style.width = pct(view.fill);
         break;
-      case 'juke':
-        // Both buttons through the countdown; then the one to press lights up.
-        this.jukeLeft.className = `arc-juke-btn arc-juke-left${view.side === -1 ? ' go' : view.side === 1 ? ' dim' : ''}`;
-        this.jukeRight.className = `arc-juke-btn arc-juke-right${view.side === 1 ? ' go' : view.side === -1 ? ' dim' : ''}`;
-        if (view.ready === null) this.hint.textContent = view.side === -1 ? 'LEFT!' : 'RIGHT!';
+      case 'juke': {
+        // Both buttons through the countdown; then the one to press lights up, its colour
+        // saying what a press gets now: green GREAT, orange OK, red BAD (it's too late).
+        const lit = (side: -1 | 1): string =>
+          view.side === side ? ` go ${view.grade ?? 'great'}` : view.side !== null ? ' dim' : '';
+        this.jukeLeft.className = `arc-juke-btn arc-juke-left${lit(-1)}`;
+        this.jukeRight.className = `arc-juke-btn arc-juke-right${lit(1)}`;
+        if (view.ready === null) {
+          this.hint.textContent =
+            view.grade === 'bad' ? 'TOO LATE!' : view.side === -1 ? 'LEFT!' : 'RIGHT!';
+        }
         break;
+      }
     }
   }
 }

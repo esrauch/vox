@@ -45,7 +45,14 @@ import {
 import { rollOffer } from './sim/team';
 import { FORM_STATS } from './content/team';
 import { plus } from './sim/stats';
-import { breakMarker, countdown, jukeShowing, mashLeft, type BreakOutcome } from './sim/breakit';
+import {
+  breakMarker,
+  countdown,
+  jukeGrade,
+  jukeShowing,
+  mashLeft,
+  type BreakOutcome,
+} from './sim/breakit';
 import { canThrow, step } from './sim/step';
 import type {
   Action,
@@ -358,7 +365,12 @@ export class ArcadeGame {
       case 'mash':
         return { kind: 'mash', ready, fill: t.fill, left: mashLeft(state) ?? 0 };
       case 'juke':
-        return { kind: 'juke', ready, side: jukeShowing(state) ? t.side : null };
+        return {
+          kind: 'juke',
+          ready,
+          side: jukeShowing(state) ? t.side : null,
+          grade: jukeGrade(state),
+        };
     }
   }
 

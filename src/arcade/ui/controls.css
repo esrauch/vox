@@ -166,6 +166,17 @@
   scale: 1.08;
 }
 
+/* The lit button's colour is what a press gets now: green GREAT, orange OK, red BAD. */
+.arc-juke-btn.go.ok {
+  background: var(--pumpkin);
+}
+
+.arc-juke-btn.go.bad {
+  color: var(--bone);
+  background: var(--danger);
+  scale: 1;
+}
+
 .arc-juke-btn.dim {
   opacity: 0.35;
 }
