@@ -151,6 +151,8 @@ export const arcadeTuning = {
     chaseLead: 0.3,
     /** A Bat's loop: a square this wide. */
     batLoop: 3.5,
+    /** A Bat leaves its loop to dive at a carrier this close (yards), and goes back to it if the carrier gets away. */
+    batDive: 3,
     /** A Crow's lane: it flies this far up the field and back. */
     crowLane: 8,
     /** The play fake: after a handoff the defense keeps playing the pass this long (seconds)… */

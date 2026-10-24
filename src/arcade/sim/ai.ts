@@ -10,7 +10,8 @@
  *   itself (chooseLane).
  * - **Rushers** charge the QB. **Covers** trail their mark. **Scarecrows** are
  *   planted. **The Owl** hangs deep, level with your deepest player, and
- *   comes down to meet the carrier. **Bats** loop their square. After the
+ *   comes down to meet the carrier. **Bats** loop their square, diving at a
+ *   carrier that comes close; **Crows** fly their lane. After the
  *   catch, everyone who moves chases the carrier; after a handoff, once the
  *   play fake wears off (fooled).
  */
@@ -129,6 +130,13 @@ function between(d: Defender, guard: Vec, p: Player): Vec {
 
 export function defenderTarget(state: RunState, d: Defender): Vec | null {
   if (d.planted) return null;
+  // A Bat guards its patch of air: it loops, but dives at a carrier that comes within reach.
+  if (d.kind === 'bat' && state.phase === 'play') {
+    const carrier = carrierOf(state);
+    if (carrier && dist(d.pos, carrier.pos) <= defense.batDive) {
+      return add(carrier.pos, scale(carrier.vel, defense.chaseLead));
+    }
+  }
   if (d.kind === 'bat' || d.kind === 'crow') {
     const corner = d.patrol?.[d.patrolIndex];
     if (!corner || !d.patrol) return null;

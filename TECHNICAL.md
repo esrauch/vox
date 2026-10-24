@@ -191,7 +191,7 @@ src/content/
 
 ## 10. Drives and the Defense
 
-- **Each area is data** in `content/defense.ts`: `FOREST`, `CANDY_KINGDOM` and `FARM`, listed in play order in `AREAS` (`areaAt(n)`). An area has an Intro, a Challenge, Gimmicks (a seeded pick) and a Boss, each a set of defenders at spots relative to the line of scrimmage, plus Witches, and flags for its Boss's gimmick (`frogRain`, `hex`). Every area adds `defense.perArea` to every defender's stats.
+- **Each area is data** in `content/defense.ts`: `FOREST`, `CANDY_KINGDOM` and `FARM`, listed in play order in `AREAS` (`areaAt(n)`). An area has an Intro, a Challenge, a Gimmick and a Boss (the same twelve drives every run), each a set of defenders at spots relative to the line of scrimmage, plus Witches, and flags for its Boss's gimmick (`frogRain`, `hex`). Every area adds `defense.perArea` to every defender's stats.
 - **An area's look:** its `biome` (`forest`, `candy` or `farm`) picks the turf colours (`render/field.ts`), the floor and the sideline props (`render/scenery.ts`), each along the area's own stretch of the long field (`biomeAtYard`); its `looks` give a kind of defender its own model there (the Candy Kingdom's Covers are Gingerbread Men, its Safeties Witches), with the kind's rule unchanged.
 - **The King** isn't a defender: on the run's last drive (`home`) he's a prop (`KING` in `sim/props.ts`), and `render/fieldProps.ts` lays the pumpkin patch behind him.
 - **A new defender kind** is an entry in `DEFENDERS`, a case in `ai.ts`'s `defenderTarget` if it moves in a new way, a model in `render/bodies.ts`'s `DEFENDER_MODEL`, and a balance check.

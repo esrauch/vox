@@ -39,7 +39,7 @@ export function defenseFor(seed: number, area: number, index: number): DefenseSp
     case 'challenge':
       return a.challenge;
     case 'gimmick':
-      return rngFor(seed, 'gimmick', area).pick(a.gimmicks);
+      return a.gimmick;
     default:
       return a.boss;
   }

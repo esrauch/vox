@@ -130,7 +130,8 @@ export interface ArcadeArea {
   readonly looks: Partial<Record<DefenderKind, string>>;
   readonly intro: DefenseSpec;
   readonly challenge: DefenseSpec;
-  readonly gimmicks: readonly DefenseSpec[];
+  /** Its Gimmick drive: the same every run. */
+  readonly gimmick: DefenseSpec;
   readonly boss: DefenseSpec;
 }
 
@@ -162,46 +163,20 @@ export const FOREST: ArcadeArea = {
       owl,
     ],
   },
-  gimmicks: [
-    {
-      name: 'Witching Hour',
-      witches: 2,
-      boost: 0,
-      defenders: [
-        d('rusher', -1.8, 1),
-        d('cover', -6.3, 4),
-        d('cover', 5.6, 6),
-        d('cover', 3.5, 4),
-        owl,
-      ],
-    },
-    {
-      name: 'Bat Cave',
-      witches: 0,
-      boost: 0,
-      defenders: [
-        d('rusher', 1.8, 1),
-        d('cover', -6.3, 4),
-        d('cover', 6.3, 4),
-        d('bat', 2.1, 5),
-        d('bat', 4.2, 11),
-        owl,
-      ],
-    },
-    {
-      name: 'Scarecrow Field',
-      witches: 0,
-      boost: 0,
-      defenders: [
-        d('rusher', -1.8, 1),
-        d('cover', 6.3, 4),
-        d('cover', -6.3, 5),
-        d('zone', -4.2, 6),
-        d('zone', -1.4, 10),
-        owl,
-      ],
-    },
-  ],
+  gimmick: {
+    name: 'Bat Cave',
+    witches: 0,
+    boost: 0,
+    defenders: [
+      d('rusher', 1.8, 1),
+      d('cover', -6.3, 4),
+      d('cover', 6.3, 4),
+      d('bat', 2.1, 5),
+      d('bat', 4.2, 11),
+      owl,
+    ],
+  },
+
   boss: {
     name: "Mister Frog's Pond",
     witches: 0,
@@ -254,33 +229,19 @@ export const CANDY_KINGDOM: ArcadeArea = {
       d('safety', 0, 12),
     ],
   },
-  gimmicks: [
-    {
-      name: 'Broomstick Alley',
-      witches: 2,
-      boost: 0,
-      defenders: [
-        d('rusher', 1.8, 1),
-        d('cover', 6.3, 4),
-        d('cover', -5.6, 6),
-        d('cover', -3.5, 4),
-        d('safety', 0, 12),
-      ],
-    },
-    {
-      name: 'Candy Cane Grove',
-      witches: 0,
-      boost: 0,
-      defenders: [
-        d('rusher', -1.8, 1),
-        d('cover', -6.3, 4),
-        d('cover', 6.3, 5),
-        d('zone', 4.2, 6),
-        d('zone', 1.4, 10),
-        d('safety', 0, 12),
-      ],
-    },
-  ],
+  gimmick: {
+    name: 'Broomstick Alley',
+    witches: 2,
+    boost: 0,
+    defenders: [
+      d('rusher', 1.8, 1),
+      d('cover', 6.3, 4),
+      d('cover', -5.6, 6),
+      d('cover', -3.5, 4),
+      d('safety', 0, 12),
+    ],
+  },
+
   boss: {
     name: "The Queen's Court",
     witches: 0,
@@ -334,36 +295,21 @@ export const FARM: ArcadeArea = {
       d('safety', 0, 12),
     ],
   },
-  gimmicks: [
-    {
-      name: 'Scarecrow Rows',
-      witches: 0,
-      boost: 0,
-      defenders: [
-        d('rusher', 1.8, 1),
-        d('cover', -6.3, 4),
-        d('cover', 6.3, 4),
-        d('zone', -4.2, 6),
-        d('zone', 2.8, 8),
-        d('zone', -1.4, 11),
-        d('safety', 0, 12),
-      ],
-    },
-    {
-      name: 'A Murder of Crows',
-      witches: 0,
-      boost: 0,
-      defenders: [
-        d('rusher', -1.8, 1),
-        d('cover', -6.3, 4),
-        d('cover', 6.3, 5),
-        d('crow', -3.5, 3),
-        d('crow', 1.4, 5),
-        d('crow', 5.6, 3),
-        d('safety', 0, 12),
-      ],
-    },
-  ],
+  gimmick: {
+    name: 'A Murder of Crows',
+    witches: 0,
+    boost: 0,
+    defenders: [
+      d('rusher', -1.8, 1),
+      d('cover', -6.3, 4),
+      d('cover', 6.3, 5),
+      d('crow', -3.5, 3),
+      d('crow', 1.4, 5),
+      d('crow', 5.6, 3),
+      d('safety', 0, 12),
+    ],
+  },
+
   boss: {
     name: "The King's Patch",
     witches: 0,

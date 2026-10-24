@@ -38,7 +38,13 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## The Run: Areas of Four Drives
 
-- **A run is a series of themed areas** (the Haunted Forest first). **Each area is four drives**, *Balatro*-style: **Intro**, **Challenge**, **Gimmick** (a twist: Witches overhead, Bats everywhere) and **Boss**.
+- **A run is a series of themed areas** (the Haunted Forest first). **Each area is four drives**, *Balatro*-style: **Intro**, **Challenge**, **Gimmick** (a twist) and **Boss**. **Every run is the same twelve drives:**
+
+  | | Intro | Challenge | Gimmick | Boss |
+  |---|---|---|---|---|
+  | **The Forest** | A Quiet Clearing | Gnome Country | Bat Cave | Mister Frog's Pond |
+  | **The Candy Kingdom** | Gumdrop Lane | Gingerbread Row | Broomstick Alley | The Queen's Court |
+  | **The Farm** | The Back Forty | The Cornrows | A Murder of Crows | The King's Patch |
 - **The main game is three areas: 12 drives and three Bosses**, on the way to Jack's pumpkin patch (THEME.md). **Each Boss has one gimmick that attacks one thing you do, and the first two leave a special perk behind:**
 
   | Area | Boss | Gimmick | Attacks |
@@ -212,7 +218,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Cover** | Garden Gnome | Shadows a Catcher; after the catch, chases the carrier. Small, quick, light: easy to shove, hard to shake. |
 | **Zone** | Scarecrow | Planted: its long arms reach a **wide purple ring** on the turf, and any low ball coming down inside it is contested: its Hands beat a plain Catcher's, so it's a patch of field to throw away from (a Catcher with great Hands, like a Ghost, can still win it). Running into one stops you dead. |
 | **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. *(In the Candy Kingdom the Safety is a Witch.)* |
-| **Bat** | Bat | Patrols a fixed loop and swats passes that fly through it. |
+| **Bat** | Bat | Guards its patch of air: it loops a square and swats passes that fly through it, and dives at a carrier that comes within 3 yards (back to its loop if the carrier gets away). |
 | **Frog** *(new)* | Frog | Covers like a Gnome until the carrier gets close, then crouches (the telegraph) and leaps onto it. |
 | **Gingerbread Man** *(Candy Kingdom)* | Gingerbread Man | The Candy Kingdom's Cover: the same rule, a new look. |
 | **Crow** *(Farm)* | Crow | Like a Bat, it swats passes that fly through it; it flies a lane up and down the field (8 yards) instead of looping a square. |

@@ -967,3 +967,26 @@ describe("the King's crows (SHOO!)", () => {
     return st;
   }
 });
+
+describe('Bats', () => {
+  it('loop their square while nobody comes near', () => {
+    const s = playState([{ pos: v(-6, 2), job: stand(v(-6, 2)) }], [{ kind: 'bat', pos: v(4, 6) }]);
+    const bat = s.field.defenders[0]!;
+    Object.assign(bat, { patrol: [v(4, 6), v(7.5, 6), v(7.5, 9.5), v(4, 9.5)] });
+    const r = run(s, 1);
+    expect(body(r.state, 100).pos.x).toBeGreaterThan(4.5);
+    expect(ofType(r.events, 'grabbed')).toHaveLength(0);
+  });
+
+  it('dive at a carrier that comes close, and grab it', () => {
+    const s = carry(
+      playState([{ role: 'runner', pos: v(4, 3) }], [{ kind: 'bat', pos: v(4, 6) }]),
+      2,
+    );
+    const bat = s.field.defenders[0]!;
+    Object.assign(bat, { patrol: [v(4, 6), v(7.5, 6), v(7.5, 9.5), v(4, 9.5)] });
+    s.field.lane = 4;
+    const r = untilGrabbed(s);
+    expect(ofType(r.events, 'grabbed')[0]?.by).toContain(100);
+  });
+});
