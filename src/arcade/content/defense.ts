@@ -181,8 +181,9 @@ export const FOREST: ArcadeArea = {
 
 /**
  * The Candy Kingdom: the Queen's gingerbread realm. The rules are the same
- * kinds as the Forest's; Covers are Gingerbread Men and the Safety is a Witch
- * on her broom. Its Boss is the Queen, whose Hex hides the aim line.
+ * kinds as the Forest's; Covers are Gingerbread Men and the Safeties are
+ * Witches on brooms (two, one each side, here and on the Farm). Its Boss is
+ * the Queen, whose Royal Decree bans a card each down.
  */
 export const CANDY_KINGDOM: ArcadeArea = {
   name: 'Candy Queendom',
@@ -198,7 +199,13 @@ export const CANDY_KINGDOM: ArcadeArea = {
     witches: 0,
     // A sleepy start, like every area's Intro.
     boost: -10,
-    defenders: [d('rusher', 1.8, 1), d('cover', -6.3, 4), d('cover', 4.2, 5), d('safety', 0, 12)],
+    defenders: [
+      d('rusher', 1.8, 1),
+      d('cover', -6.3, 4),
+      d('cover', 4.2, 5),
+      d('safety', -3.5, 12),
+      d('safety', 3.5, 12),
+    ],
   },
   challenge: {
     name: 'Gingerbread Row',
@@ -209,7 +216,8 @@ export const CANDY_KINGDOM: ArcadeArea = {
       d('cover', -6.3, 4),
       d('cover', 6.3, 5),
       d('cover', -3.5, 6),
-      d('safety', 0, 12),
+      d('safety', -3.5, 12),
+      d('safety', 3.5, 12),
     ],
   },
   gimmick: {
@@ -221,7 +229,8 @@ export const CANDY_KINGDOM: ArcadeArea = {
       d('cover', 6.3, 4),
       d('cover', -5.6, 6),
       d('cover', -3.5, 4),
-      d('safety', 0, 12),
+      d('safety', -3.5, 12),
+      d('safety', 3.5, 12),
     ],
   },
 
@@ -239,7 +248,8 @@ export const CANDY_KINGDOM: ArcadeArea = {
       d('cover', -3.5, 6),
       d('zone', 2.8, 9),
       d('bat', -1.4, 7),
-      d('safety', 0, 12),
+      d('safety', -3.5, 12),
+      d('safety', 3.5, 12),
     ],
   },
 };
@@ -263,7 +273,13 @@ export const FARM: ArcadeArea = {
     witches: 0,
     // A sleepy start, like every area's Intro.
     boost: -10,
-    defenders: [d('rusher', -1.8, 1), d('cover', 6.3, 4), d('cover', -4.2, 5), d('safety', 0, 12)],
+    defenders: [
+      d('rusher', -1.8, 1),
+      d('cover', 6.3, 4),
+      d('cover', -4.2, 5),
+      d('safety', -3.5, 12),
+      d('safety', 3.5, 12),
+    ],
   },
   challenge: {
     name: 'The Cornrows',
@@ -275,7 +291,8 @@ export const FARM: ArcadeArea = {
       d('cover', 6.3, 5),
       d('zone', -2.8, 7),
       d('crow', 3.5, 4),
-      d('safety', 0, 12),
+      d('safety', -3.5, 12),
+      d('safety', 3.5, 12),
     ],
   },
   gimmick: {
@@ -289,7 +306,8 @@ export const FARM: ArcadeArea = {
       d('crow', -3.5, 3),
       d('crow', 1.4, 5),
       d('crow', 5.6, 3),
-      d('safety', 0, 12),
+      d('safety', -3.5, 12),
+      d('safety', 3.5, 12),
     ],
   },
 
@@ -307,7 +325,8 @@ export const FARM: ArcadeArea = {
       d('zone', -3.5, 8),
       d('zone', 3.5, 8),
       d('crow', -1.4, 5),
-      d('safety', 0, 12),
+      d('safety', -3.5, 12),
+      d('safety', 3.5, 12),
     ],
   },
 };

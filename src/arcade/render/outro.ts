@@ -3,8 +3,8 @@
  * front of the King, with Jack's pumpkin patch behind him, the whole roster
  * (the seven on the field and everyone on the bench) dances in rows around
  * Jack (throwing embers, a splash each time he lands, a burst with each
- * word), and GOT / JACK / BACK slams in a word at a time. It goes on until
- * AGAIN.
+ * word), and GOT / JACK / BACK slams in a word at a time. It's the end:
+ * it dances on for good, with no AGAIN.
  */
 import * as THREE from 'three';
 import type { Form } from '../sim/types';
@@ -22,9 +22,8 @@ const FRONT = 2.5;
 const ROW_GAP = 1.5;
 const PER_ROW = 6;
 const SPACING = 1.5;
-/** The words land at these times (seconds); then AGAIN can show. */
+/** The words land at these times (seconds). */
 const WORDS = [0.6, 1.2, 1.8];
-const READY = 2.6;
 
 interface Dancer {
   readonly mesh: THREE.Mesh;
@@ -87,11 +86,6 @@ export class ArcadeOutro {
     ui.append(this.root);
     this.words = [...this.root.querySelectorAll<HTMLElement>('.intro-title span')];
     this.look.set(king.x, LOOK_HEIGHT, front);
-  }
-
-  /** The words have all landed: time to offer AGAIN. */
-  get ready(): boolean {
-    return this.t >= READY;
   }
 
   update(dt: number, camera: THREE.PerspectiveCamera): void {

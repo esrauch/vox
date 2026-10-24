@@ -161,8 +161,11 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
       return add(mark.pos, scale(behind, defense.coverTrail));
     }
     case 'safety': {
+      // A lone Safety (in the middle) shadows your deepest player; with two, each
+      // takes its own half of the field, shadowing the deepest one there.
+      const side = Math.sign(d.home.x);
       const deepest = state.field.players
-        .filter((p) => p.role !== 'qb')
+        .filter((p) => p.role !== 'qb' && (side === 0 || Math.sign(p.pos.x) !== -side))
         .sort((a, b) => b.pos.y - a.pos.y || a.id - b.id)[0];
       return v(deepest ? deepest.pos.x : d.home.x, d.home.y);
     }

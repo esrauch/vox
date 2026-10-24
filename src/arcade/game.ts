@@ -148,7 +148,7 @@ export class ArcadeGame {
   private readonly startScreen: HTMLElement;
   /** PLAY was tapped and the music is getting ready (a second tap does nothing). */
   private starting = false;
-  /** The win cutscene, after the last touchdown, until AGAIN. */
+  /** The win cutscene, after the last Boss: the end (it dances on, with no AGAIN). */
   private outro: ArcadeOutro | null = null;
   /** The opening cutscene, while it plays (after the first PLAY). */
   private intro: ArcadeIntro | null = null;
@@ -244,12 +244,10 @@ export class ArcadeGame {
       }
       return;
     }
-    // The win cutscene: dancing until AGAIN (offered once the words have landed).
+    // The win cutscene: the end. It dances on for good.
     if (this.outro) {
-      const wasReady = this.outro.ready;
       this.outro.update(dt, this.view.camera);
       this.view.render();
-      if (this.outro.ready !== wasReady) this.syncHud();
       return;
     }
     if (this.conductor.started && !this.paused) {
@@ -518,11 +516,11 @@ export class ArcadeGame {
 
   private syncHud(): void {
     if (this.outro) {
-      // Over the win: just AGAIN, once the words are in.
+      // Nothing over the win: it's the end.
       this.hud.setTop('', null);
       this.hud.setHand(null, null);
       this.hud.setDraft(null);
-      this.hud.setPrompt(null, this.outro.ready ? 'AGAIN' : null);
+      this.hud.setPrompt(null, null);
       return;
     }
     if (this.intro) {
@@ -559,7 +557,7 @@ export class ArcadeGame {
     else if (phase === 'setup')
       this.hud.setPrompt(called === null ? 'Pick a play' : null, called === null ? null : 'HIKE!');
     else if (phase === 'over') this.hud.setPrompt('Game Over!', 'AGAIN');
-    else if (phase === 'won') this.hud.setPrompt('Jack is home!', 'AGAIN');
+    else if (phase === 'won') this.hud.setPrompt(null, null);
     else this.hud.setPrompt(null, null);
   }
 
@@ -592,13 +590,8 @@ export class ArcadeGame {
       await this.conductor.resume();
     } else if (phase === 'setup') {
       this.act({ type: 'hike' });
-    } else if (phase === 'over' || phase === 'won') {
-      if (this.outro) {
-        this.outro.dispose();
-        this.outro = null;
-        this.bodies.setVisible(true);
-        this.ball.setVisible(true);
-      }
+    } else if (phase === 'over') {
+      // AGAIN after a Game Over (a win is the end: there's no AGAIN).
       this.seed++;
       this.state = createRun(this.seed, firstRoster(this.monsters), this.startArea);
       this.origin = this.startOrigin();
