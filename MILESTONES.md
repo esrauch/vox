@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **Mister Frog hops** on the spot (a squat, a stretch up, a landing). **Bigger embers:** more of them, larger (one in five a flame chunk), white-hot at birth, living longer, bigger bursts; and in both cutscenes (off Jack, a burst when he's picked up, behind each title word, and a splash at each of his bounces in the win dance).
 - **2026-10-24:** **The intro can't be skipped any more** (it's short): no tap or Space to skip, no hint.
 - **2026-10-24:** **JUKE! colours:** the lit button is green while a press is GREAT, orange while it's OK, then red (TOO LATE!) for half a second before the BAD.
 - **2026-10-24:** **Two Break it!s a down at most:** a third grab is a tackle. It rarely comes up: with the practised bot, balance is unchanged.

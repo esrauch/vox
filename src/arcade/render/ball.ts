@@ -114,8 +114,8 @@ export class ArcadeBall {
     this.light.position.copy(this.ball.position).add(new THREE.Vector3(0, LIGHT_LIFT, 0));
     // Embers all the time: a steady drift off it, and a trail of sparks while it flies.
     const glow = this.ball.position.clone().add(new THREE.Vector3(0, 0.6, 0));
-    if (ball.at === 'flight') this.embers.stream(glow, 160, dt, 1.2, 0.3);
-    else this.embers.stream(glow, 40, dt);
+    if (ball.at === 'flight') this.embers.stream(glow, 300, dt, 1.6, 0.45);
+    else this.embers.stream(glow, 90, dt, 0.9, 0.5);
     this.embers.update(dt);
     // A little flicker, like a candle.
     this.light.intensity =

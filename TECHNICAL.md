@@ -122,7 +122,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
   - `world.ts`: yards → world (one unit a yard).
   - `field.ts`: the turf strip and the drive's lines (scrimmage, the gold first-down line).
   - `bodies.ts`: every player (its kind's model in the team helmet; Golems stretched wide and low, the one linebacker build; Ghosts hovering) and defender, turning to face where they're going and tipping over when down; the rings: gold under the carrier, each receiver's catch range (green open, red covered, gold when the aim line stops on it), and every defender's purple reach.
-  - `ball.ts`, `embers.ts`: the pumpkin (it is the QB: there's no QB model), its light, and an instanced pool of embers that drift off it, trail it in flight and burst on throws and catches.
+  - `ball.ts`, `embers.ts`: the pumpkin (it is the QB: there's no QB model), its light, and an instanced pool of embers that drift off it, trail it in flight and burst on throws and catches (the intro and outro each make their own `Embers` around their own Jack).
   - `sweep.ts`: the sweeping aim line, stopping at the first catch or block a throw now would meet (`aimNow`, from the sim's `aimContact`), and the receiver it stops on (`litPlayers`).
   - `routes.ts`: the called play's routes before the snap.
   - `frogRain.ts`: Mister Frog's lane on the turf, its shadows filling in, and the shower of frogs.

@@ -74,7 +74,7 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 
 ### The ball
 
-**Jack, a jack-o'-lantern.** A round pumpkin with a glowing carved face: the team's ball, the game's hero and its icon. **There's no quarterback: the pumpkin throws itself.** It floats behind the line, bobbing, its face always turned to you, and fires itself off as a bullet. Embers drift off it, trail behind it in flight, and burst out when it's thrown, caught or knocked down. **It's also the field's light:** a warm lamp burns inside it, lighting everyone around it and throwing their shadows, so the shadows swing as it flies and pool around whoever is carrying it. The moon is only a dim fill.
+**Jack, a jack-o'-lantern.** A round pumpkin with a glowing carved face: the team's ball, the game's hero and its icon. **There's no quarterback: the pumpkin throws itself.** It floats behind the line, bobbing, its face always turned to you, and fires itself off as a bullet. Embers pour off it (sparks and bigger flame chunks, flashing white-hot and cooling to red), trail behind it in flight, and burst out when it's thrown, caught or knocked down; in both cutscenes too. **It's also the field's light:** a warm lamp burns inside it, lighting everyone around it and throwing their shadows, so the shadows swing as it flies and pool around whoever is carrying it. The moon is only a dim fill.
 
 ---
 

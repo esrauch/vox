@@ -2,11 +2,13 @@
  * The win cutscene (THEME.md, The Story), after the last touchdown: in
  * front of the King, with Jack's pumpkin patch behind him, the whole roster
  * (the seven on the field and everyone on the bench) dances in rows around
- * Jack, and GOT / JACK / BACK slams in a word at a time. It goes on until
+ * Jack (throwing embers, a splash each time he lands, a burst with each
+ * word), and GOT / JACK / BACK slams in a word at a time. It goes on until
  * AGAIN.
  */
 import * as THREE from 'three';
 import type { Form } from '../sim/types';
+import { Embers } from './embers';
 import { getGeometry } from '../../voxel/models';
 import { playerMesh } from './bodies';
 import './intro.css';
@@ -41,8 +43,11 @@ export class ArcadeOutro {
   private readonly root: HTMLElement;
   private readonly words: HTMLElement[];
   private readonly look = new THREE.Vector3();
+  private readonly embers: Embers;
   private t = 0;
   private spoken = 0;
+  /** Which of Jack's bounces he last landed (each landing throws embers). */
+  private bounce = 0;
 
   /** `king`: where the King stands (world). The cast: every kind on the roster, field and bench. */
   constructor(
@@ -74,6 +79,7 @@ export class ArcadeOutro {
     this.jackHome = new THREE.Vector3(king.x, 0.4, front + 3.2);
     this.group.add(this.jack, this.light);
     scene.add(this.group);
+    this.embers = new Embers(scene);
 
     this.root = document.createElement('div');
     this.root.className = 'intro';
@@ -118,17 +124,28 @@ export class ArcadeOutro {
     }
     this.jack.position.copy(this.jackHome).setY(this.jackHome.y + 0.5 * Math.abs(Math.sin(t * 5)));
     this.light.position.copy(this.jack.position).setY(this.jack.position.y + 0.6);
+    // Embers off Jack all the while, a splash each time he lands, a burst with each word.
+    const glow = this.jack.position.clone().setY(this.jack.position.y + 0.6);
+    this.embers.stream(glow, 110, dt, 1, 0.5);
+    const bounce = Math.floor((t * 5) / Math.PI);
+    if (bounce > this.bounce) {
+      this.bounce = bounce;
+      this.embers.burst(this.jack.position.clone().setY(0.3), 30, 3.5);
+    }
 
     const landed = WORDS.filter((w) => t >= w).length;
     this.words.forEach((w, i) => w.classList.toggle('show', i < landed));
     if (landed > this.spoken) {
       this.spoken = landed;
       this.sound('burst');
+      this.embers.burst(glow.clone().setY(glow.y + 1.5), 110, 7);
     }
+    this.embers.update(dt);
   }
 
   dispose(): void {
     this.scene.remove(this.group);
+    this.embers.dispose();
     this.root.remove();
   }
 }

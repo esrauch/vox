@@ -4,6 +4,8 @@
  * behind the start of the field; three football players bounce-walk on;
  * Jack asks "Can you help me get back to my patch?", one answers "Ok"; they
  * pick him up and carry him off; then GET JACK BACK, one word at a time.
+ * Embers drift off Jack the whole time, burst when he's picked up, and
+ * burst behind each word of the title.
  * The game then crossfades into the first drive (game.ts). It can't be skipped (it's short).
  *
  * It's staged on the turf behind the start, with its own camera looking
@@ -11,6 +13,7 @@
  */
 import * as THREE from 'three';
 import { getGeometry, voxelMaterial } from '../../voxel/models';
+import { Embers } from './embers';
 import './intro.css';
 
 /** Where it's staged (world): on the turf behind the start of the field. */
@@ -58,8 +61,10 @@ export class ArcadeIntro {
   private readonly answer: HTMLElement;
   private readonly words: HTMLElement[];
   private readonly look = new THREE.Vector3();
+  private readonly embers: Embers;
   private t = 0;
   private spoken = 0;
+  private lifted = false;
 
   constructor(
     private readonly scene: THREE.Scene,
@@ -81,6 +86,7 @@ export class ArcadeIntro {
     this.jack.rotation.y = Math.PI;
     this.group.add(this.jack, this.light, ...this.players);
     scene.add(this.group);
+    this.embers = new Embers(scene);
 
     this.root = document.createElement('div');
     this.root.className = 'intro';
@@ -140,6 +146,14 @@ export class ArcadeIntro {
     }
     this.light.position.copy(this.jack.position).setY(this.jack.position.y + 0.6);
 
+    // Embers off Jack all the while; a burst as he's lifted.
+    const glow = this.jack.position.clone().setY(this.jack.position.y + 0.6);
+    if (t < T.gone) this.embers.stream(glow, 90, dt, 0.9, 0.5);
+    if (!this.lifted && t >= T.pickUp) {
+      this.lifted = true;
+      this.embers.burst(glow, 80, 5);
+    }
+
     // The speech bubbles, over the speakers' heads.
     this.place(this.ask, this.jack.position, 1.5, camera, canvas, t >= T.ask && t < T.answer);
     if (carrier) {
@@ -151,8 +165,13 @@ export class ArcadeIntro {
     this.words.forEach((w, i) => w.classList.toggle('show', i < landed));
     if (landed > this.spoken) {
       this.spoken = landed;
-      if (t < T.end) this.sound('burst');
+      if (t < T.end) {
+        this.sound('burst');
+        // A burst of embers behind each word as it lands, a little lower each time.
+        this.embers.burst(new THREE.Vector3(STAGE.x, 3.4 - landed * 0.7, STAGE.z), 90, 6);
+      }
     }
+    this.embers.update(dt);
     return t >= T.end;
   }
 
@@ -181,6 +200,7 @@ export class ArcadeIntro {
    */
   finish(canvas: HTMLCanvasElement, fadeSeconds: number): void {
     this.scene.remove(this.group);
+    this.embers.dispose();
     const still = document.createElement('img');
     still.className = 'intro-still';
     still.src = canvas.toDataURL();

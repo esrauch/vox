@@ -1,13 +1,16 @@
 /**
  * Embers: glowing cubes that drift up off the pumpkin ball, trail behind it
  * in flight, and burst out when it's thrown, caught or knocked down. One
- * instanced mesh of tiny unlit cubes, pooled: each lives a moment, rising,
- * shrinking and cooling from yellow through orange to a dark red.
+ * instanced mesh of small unlit cubes, pooled: each lives a moment, rising,
+ * shrinking and cooling from white-hot through yellow and orange to a dark
+ * red; one in five is a big flame chunk, so they read from the game camera.
+ * The cutscenes each have their own (around their own Jack).
  */
 import * as THREE from 'three';
 
-const MAX = 500;
-const HOT = new THREE.Color(0xffe27a);
+const MAX = 1500;
+const WHITE = new THREE.Color(0xfff6d0);
+const HOT = new THREE.Color(0xffd23f);
 const WARM = new THREE.Color(0xff8a1f);
 const COOL = new THREE.Color(0x8e2a12);
 
@@ -32,7 +35,7 @@ export class Embers {
     this.mesh.visible = visible;
   }
 
-  constructor(scene: THREE.Scene) {
+  constructor(private readonly scene: THREE.Scene) {
     this.mesh = new THREE.InstancedMesh(
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({ toneMapped: false }),
@@ -43,18 +46,24 @@ export class Embers {
     scene.add(this.mesh);
   }
 
+  /** Take them off the scene for good (a cutscene's own, when it ends). */
+  dispose(): void {
+    this.scene.remove(this.mesh);
+    this.mesh.dispose();
+  }
+
   /** A steady stream from `at`: `rate` embers a second, flung out at up to `speed`. */
   stream(at: THREE.Vector3, rate: number, dt: number, speed = 0.6, spread = 0.35): void {
     this.owed += rate * dt;
     while (this.owed >= 1) {
       this.owed -= 1;
-      this.spawn(at, speed, spread, 0.5 + Math.random() * 0.5);
+      this.spawn(at, speed, spread, 0.7 + Math.random() * 0.7);
     }
   }
 
   /** A burst of `count` embers from `at`, flung out at up to `speed`. */
   burst(at: THREE.Vector3, count: number, speed = 4): void {
-    for (let i = 0; i < count; i++) this.spawn(at, speed, 0.2, 0.5 + Math.random() * 0.6);
+    for (let i = 0; i < count; i++) this.spawn(at, speed, 0.3, 0.7 + Math.random() * 0.8);
   }
 
   update(dt: number): void {
@@ -67,17 +76,19 @@ export class Embers {
         continue;
       }
       // Embers rise, and slow as they cool.
-      e.vel.multiplyScalar(Math.max(0, 1 - 2.5 * dt));
-      e.vel.y += 1.6 * dt;
+      e.vel.multiplyScalar(Math.max(0, 1 - 2.2 * dt));
+      e.vel.y += 2.4 * dt;
       e.pos.addScaledVector(e.vel, dt);
     }
     this.live.forEach((e, i) => {
       const t = 1 - e.life / e.span;
-      const s = e.size * (1 - t * 0.8);
+      // A pop of white heat at birth, then it shrinks as it cools.
+      const s = e.size * (t < 0.1 ? 0.7 + 3 * t : 1 - (t - 0.1) * 0.85);
       this.matrix.makeScale(s, s, s).setPosition(e.pos);
       this.mesh.setMatrixAt(i, this.matrix);
-      if (t < 0.4) this.color.copy(HOT).lerp(WARM, t / 0.4);
-      else this.color.copy(WARM).lerp(COOL, (t - 0.4) / 0.6);
+      if (t < 0.15) this.color.copy(WHITE).lerp(HOT, t / 0.15);
+      else if (t < 0.5) this.color.copy(HOT).lerp(WARM, (t - 0.15) / 0.35);
+      else this.color.copy(WARM).lerp(COOL, (t - 0.5) / 0.5);
       this.mesh.setColorAt(i, this.color);
     });
     this.mesh.count = this.live.length;
@@ -105,7 +116,8 @@ export class Embers {
       vel: dir.multiplyScalar(speed * (0.3 + Math.random() * 0.7)),
       life: span,
       span,
-      size: 0.06 + Math.random() * 0.07,
+      // Mostly sparks, and every so often a big flame chunk.
+      size: Math.random() < 0.2 ? 0.2 + Math.random() * 0.12 : 0.09 + Math.random() * 0.09,
     });
   }
 }

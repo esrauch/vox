@@ -335,6 +335,7 @@ export class ArcadeGame {
     this.queenHex.update(state, this.origin, dt);
     this.controls.setShoo(state.phase === 'play' && state.field.crows?.phase === 'shoo');
     this.fieldProps.update(state, this.origin);
+    this.fieldProps.animate(performance.now() / 1000);
     this.witches.update(state, this.origin);
     this.controls.setButtons(canThrow(state) && !this.paused);
     this.controls.setBreak(this.breakView());
@@ -429,18 +430,18 @@ export class ArcadeGame {
           break;
         case 'thrown':
           play('throw');
-          this.ball.burst(40, 5);
+          this.ball.burst(90, 6);
           break;
         case 'handoff':
           play('catch');
           break;
         case 'caught':
-          this.ball.burst(30, 3);
+          this.ball.burst(70, 4.5);
           play(e.contested ? 'cleanCatch' : 'catch');
           this.hud.pop(e.contested ? 'CAUGHT IT!' : 'GOT IT!', 'good');
           break;
         case 'batted':
-          this.ball.burst(50, 6);
+          this.ball.burst(120, 7);
           play('fumble');
           play('chant');
           this.hud.pop(e.contested ? 'DROPPED!' : 'BLOCKED!', 'bad');
