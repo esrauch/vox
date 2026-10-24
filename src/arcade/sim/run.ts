@@ -84,6 +84,8 @@ export function createRun(
       hex: false,
       ball: { at: 'qb' },
       lane: 0,
+      breakaway: 0,
+      lastBreak: null,
       drag: null,
     },
     snappedAt: 0,
@@ -207,6 +209,8 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     hex: spec.hex ?? false,
     ball: { at: 'qb' },
     lane: 0,
+    breakaway: 0,
+    lastBreak: null,
     drag: null,
   };
   state.phase = 'setup';

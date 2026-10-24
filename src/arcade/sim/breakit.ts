@@ -34,8 +34,12 @@ export function startBreakIt(
     (carrier.stats.hustle - Math.max(...grabbers.map((d) => d.stats.hustle))) / step;
   const pile = b.perExtraTackler ** (tacklers.length - 1);
   const rng = rngFor(state.seed, 'break', state.step);
+  const last = state.field.lastBreak;
+  const chained = last !== null && state.time - last <= b.chainWindow;
+  const ready = chained ? b.chainReady : b.ready;
   const base = {
     startedAt: state.time,
+    ready,
     tacklers,
     dragYards: clamp(b.dragYards + b.dragPerHeft * heftGap, b.minDrag, b.maxDrag),
   };
@@ -55,7 +59,7 @@ export function startBreakIt(
       tackle = {
         ...base,
         kind: 'juke',
-        showAt: state.time + b.ready,
+        showAt: state.time + ready,
         side: rng.next() < 0.5 ? -1 : 1,
         window:
           clamp(b.jukeWindow + b.jukePerHustle * hustleGap, b.jukeMinWindow, b.jukeMaxWindow) *
@@ -83,13 +87,14 @@ export function startBreakIt(
 /** Seconds since the countdown ended (negative during it), or null outside Break it!. */
 export function sinceGo(state: RunState): number | null {
   const t = state.tackle;
-  return t ? state.time - (t.startedAt + b.ready) : null;
+  return t ? state.time - (t.startedAt + t.ready) : null;
 }
 
 /** How far through the countdown it is (0 to 1), or null once it's over (or outside Break it!). */
 export function countdown(state: RunState): number | null {
   const since = sinceGo(state);
-  return since === null || since >= 0 ? null : 1 + since / b.ready;
+  const t = state.tackle;
+  return since === null || since >= 0 || !t ? null : 1 + since / t.ready;
 }
 
 /** The bar's marker along its trip (0 to 1; 0 through the countdown), or null when it isn't a bar. */

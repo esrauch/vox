@@ -144,6 +144,10 @@ export interface Field {
   ball: Ball;
   /** The carrier's lane: the x it runs for (it picks the emptiest one itself, every moment). */
   lane: number;
+  /** After a GREAT: seconds of live play left in which nobody can grab the carrier (it's breaking free). */
+  breakaway: number;
+  /** When the last Break it! this down ended (sim time), or null: a grab soon after gets a short countdown. */
+  lastBreak: number | null;
   /** A carrier dragging tacklers after a close Break it!: it goes down when it reaches this row. */
   drag: { readonly to: number } | null;
 }
@@ -162,10 +166,13 @@ export interface Field {
  *   `side`; tap that side within `window` (the first half breaks, the rest
  *   drags). The wrong side, or too late, is a tackle.
  *
- * Each opens with a countdown (tuning.breakit.ready), when taps don't count.
+ * Each opens with a countdown, when taps don't count: `ready` long (shorter
+ * when it follows hard on another Break it!).
  */
 export type Tackle = {
   readonly startedAt: number;
+  /** The countdown's length (sim seconds). */
+  readonly ready: number;
   readonly tacklers: readonly number[];
   /** Yards a drag gets. */
   readonly dragYards: number;

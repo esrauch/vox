@@ -302,6 +302,40 @@ describe('the carrier, and Break it! (the bar)', () => {
     expect(body(frozen, 2).pos).toEqual(body(r.state, 2).pos);
   });
 
+  it('a GREAT breaks it free: the pile scatters, and nobody grabs it for a moment', () => {
+    const s = carry(
+      playState(
+        [{ role: 'runner', pos: v(0, 2) }],
+        [
+          { kind: 'cover', pos: v(0, 4) },
+          { kind: 'cover', pos: v(1.6, 3.2) },
+        ],
+      ),
+      2,
+    );
+    s.field.lane = 0;
+    const g = untilGrabbed(s).state;
+    const t = bar(g);
+    const r = tapAt(g, (t.sweet.from + t.sweet.to) / 2);
+    expect(ofType(r.events, 'breakResult')[0]?.outcome).toBe('break');
+    // Both covers are down (the tackler, and the one beside it), and no grab for the breakaway.
+    expect(r.state.field.defenders.every((d) => d.down > 0)).toBe(true);
+    const next = run(r.state, arcadeTuning.breakit.breakaway - 0.05);
+    expect(ofType(next.events, 'grabbed')).toHaveLength(0);
+  });
+
+  it('a Break it! hard on the heels of another has a short countdown', () => {
+    const g = grabbed().state;
+    expect(g.tackle?.ready).toBe(arcadeTuning.breakit.ready);
+    const s = carry(
+      playState([{ role: 'runner', pos: v(0, 2) }], [{ kind: 'cover', pos: v(0, 4) }]),
+      2,
+    );
+    s.field.lane = 0;
+    s.field.lastBreak = s.time - 0.5;
+    expect(untilGrabbed(s).state.tackle?.ready).toBe(arcadeTuning.breakit.chainReady);
+  });
+
   it('it opens with a countdown, when taps don\u2019t count; then the marker runs', () => {
     const g = grabbed().state;
     const ready = arcadeTuning.breakit.ready;

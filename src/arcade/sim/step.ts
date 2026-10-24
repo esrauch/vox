@@ -130,7 +130,12 @@ function resolveContact(state: RunState, events: ArcadeEvent[]): boolean {
 
   // Already dragging tacklers: it's going down, nobody new needs to grab it.
   if (!carrier || state.field.drag) return false;
-  const grabbing = upDefenders.filter((d) => d.down <= 0 && !d.latch && touching(carrier, d));
+  // Just broken free (a GREAT): only a planted Scarecrow can stop it for a moment.
+  const free = state.field.breakaway > 0;
+  if (free) state.field.breakaway = Math.max(0, state.field.breakaway - DT);
+  const grabbing = upDefenders.filter(
+    (d) => d.down <= 0 && !d.latch && touching(carrier, d) && (!free || d.planted),
+  );
   if (grabbing.length === 0) return false;
   // Running into a planted Scarecrow stops you dead.
   const scarecrow = grabbing.find((d) => d.planted);
@@ -165,6 +170,7 @@ function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void
     outcome = 'drag';
   }
   events.push({ type: 'breakResult', outcome });
+  state.field.lastBreak = state.time;
   const tacklers = state.field.defenders.filter((d) => t.tacklers.includes(d.id));
   state.tackle = null;
   state.phase = 'play';
@@ -175,6 +181,15 @@ function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void
       d.vel = scale(norm(sub(d.pos, carrier.pos)), 5);
       events.push({ type: 'brokeTackle', id: carrier.id, defender: d.id });
     }
+    // The rest of the pile is knocked back too, and nobody can grab it for a moment: it breaks free.
+    const b = arcadeTuning.breakit;
+    for (const d of state.field.defenders) {
+      if (tacklers.includes(d) || d.planted || d.down > 0) continue;
+      if (dist(d.pos, carrier.pos) > carrier.radius + d.radius + b.scatter) continue;
+      d.down = b.scatterDown;
+      d.vel = scale(norm(sub(d.pos, carrier.pos)), 4);
+    }
+    state.field.breakaway = b.breakaway;
     return;
   }
   if (outcome === 'drag') {

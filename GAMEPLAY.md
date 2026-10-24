@@ -114,6 +114,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **MASH!** | A bar that fills as you tap | Tap as fast as you can for a second: fill it to break, half fill it to drag | **Heft**: more per tap |
 | **JUKE!** | Two big buttons, ◀ and ▶, from the start of the countdown; when it ends, the one to press lights up | Press it: quickly to break, a beat later to drag. The wrong one is a tackle | **Hustle**: a longer window |
 
+- **A GREAT really breaks free:** the rest of the pile right beside the carrier is knocked back too, and for a moment (0.6 s) nobody can grab it, so it gets clear instead of being grabbed again on the spot. **A grab that follows hard on another** (within 2 seconds) gets a short countdown (half a second), so a pile-up never stalls the game.
 - **Every extra tackler already on it** makes the test harder: a narrower sweet spot, less per tap, a shorter window. A pile is hard to escape.
 - **More Heft also means more yards on a drag.**
 

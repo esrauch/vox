@@ -272,7 +272,7 @@ export class ArcadeGame {
     if (!t || state.phase !== 'breakit') return null;
     // The countdown's seconds left, on screen (sim time runs slower than real time).
     const cd = countdown(state);
-    const ready = cd === null ? null : ((1 - cd) * arcadeTuning.breakit.ready) / TIME_SCALE;
+    const ready = cd === null ? null : ((1 - cd) * t.ready) / TIME_SCALE;
     switch (t.kind) {
       case 'bar':
         return {

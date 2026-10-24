@@ -107,6 +107,8 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
     hex: false,
     ball: { at: 'qb' },
     lane: 0,
+    breakaway: 0,
+    lastBreak: null,
     drag: null,
   };
   state.phase = 'play';

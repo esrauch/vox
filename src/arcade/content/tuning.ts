@@ -86,6 +86,9 @@ export const arcadeTuning = {
      * during it don't count.
      */
     ready: 1.6,
+    /** …but only this long when it starts within `chainWindow` of the last one ending (no dead time in a pile-up). */
+    chainReady: 0.5,
+    chainWindow: 2,
     /** The marker crosses the meter once, in this long… */
     meterSeconds: 1.1,
     /** …and the sweet spot never starts before this share of its trip, so there's time to react. */
@@ -116,6 +119,15 @@ export const arcadeTuning = {
     jukeMaxWindow: 0.9,
     /** …and a tap in this first share of the window breaks it (later, a drag). */
     jukeBreakShare: 0.5,
+    /**
+     * A GREAT breaks the carrier free of the pile: any other defender this close
+     * (yards, beyond touching) is knocked back too, down this long; and nobody can
+     * grab it for this long after (seconds of live play), so it gets clear instead
+     * of being grabbed again at once.
+     */
+    scatter: 1.2,
+    scatterDown: 0.6,
+    breakaway: 0.6,
     /** A drag gets this many yards, plus this many for every point of Heft over the tackler (within the range). */
     dragYards: 1.5,
     dragPerHeft: 0.5,
