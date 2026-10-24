@@ -14,7 +14,7 @@
 import { areaAt } from '../content/defense';
 import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
-import type { Body, FieldProp, RunState, Vec } from './types';
+import type { Body, FieldProp, PropKind, RunState, Vec } from './types';
 import { add, dist, len, norm, scale, sub, v } from './vec';
 
 const { fieldProps: tuning, field, drive: driveTuning } = arcadeTuning;
@@ -37,6 +37,30 @@ export function propsForDrive(seed: number, area: number, index: number): FieldP
     }
   }
   return out;
+}
+
+/**
+ * The King: a giant scarecrow in a crown, standing guard just past the
+ * first-down line of the run's last drive, in front of the patch. In play
+ * he's only a prop (drawn twice his model's size, render/fieldProps.ts).
+ */
+export const KING: PropKind = { model: 'bosses/king', radius: 1.45, scale: 1, facing: true };
+
+/** The props of a drive, the King among them on the last one. */
+export function drivePropsWithKing(
+  seed: number,
+  area: number,
+  index: number,
+  home: boolean,
+): FieldProp[] {
+  const props = propsForDrive(seed, area, index);
+  if (!home) return props;
+  const y = driveTuning.distance + tuning.kingBeyond;
+  // Make room for him: no other prop where he stands.
+  const clear = props.filter(
+    (p) => dist(v(p.x, p.y), v(0, y)) > p.radius + KING.radius + tuning.gap,
+  );
+  return [...clear, { id: -1, x: 0, y, ...KING }];
 }
 
 /** One 10-yard stretch's props (y from 0 to 10 within it), the same every time for this seed. */

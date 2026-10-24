@@ -110,11 +110,12 @@ export function lineUpDefense(
   const loop = arcadeTuning.defense.batLoop;
   return spec.defenders.map((spot, i): Defender => {
     const def = DEFENDERS[spot.kind];
-    const deep = spot.kind === 'safety' || spot.kind === 'misterFrog' || spot.kind === 'queen';
+    const deep = ['safety', 'misterFrog', 'queen'].includes(spot.kind);
     let y = deep ? Math.max(los + 8, firstDown + 1) : los + spot.y;
     if (kind === 'boss') y = Math.min(y, firstDown + 9);
     const home = v(spot.x, y);
     const stats = plus(def.stats, even(boost));
+    // A Bat loops a square; a Crow flies a lane up and down the field.
     const patrol =
       spot.kind === 'bat'
         ? [
@@ -123,7 +124,9 @@ export function lineUpDefense(
             v(home.x + loop, home.y + loop),
             v(home.x, home.y + loop),
           ]
-        : null;
+        : spot.kind === 'crow'
+          ? [home, v(home.x, home.y + arcadeTuning.defense.crowLane)]
+          : null;
     return {
       id: firstId + i,
       side: 'defense',

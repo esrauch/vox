@@ -45,7 +45,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   |---|---|---|---|
   | **The Forest** | **Mister Frog** (top hat) | **Frog Rain:** before the snap a lane lights up on the turf; during the down, frogs fall in it one by one (each shows a shadow first) and flatten whoever is under them. You see the lane while choosing a card, so you pick a play, or **Flip** it, to keep your routes out. | Where your routes go |
   | **The Candy Kingdom** | **The Queen** (a witch, double size, in a crown) | **The Hex:** the aim line shrinks to a short stub by the pumpkin, and receivers stop lighting up. The sweep still runs at full speed: you extrapolate. | Your timing |
-  | **The Farm** | **The King** (a scarecrow in a crown) *(beating him gets Jack home: the end)* | **The Two-Part Grab:** when he grabs the carrier it's two Break it! tests back to back, and the second comes only if you pass the first. | The team you've built |
+  | **The Farm** | **The King** (a giant scarecrow in a crown) *(beating his drive gets Jack home: the end)* | **His QTE on every play** ▲ *(to design)*. In play he's only a prop: he stands guard, still, just past the first-down line in front of the pumpkin patch, and never tackles or defends. | ▲ |
 
 - **Boss perks:** beating a Boss gives its special perk, on top of that drive's TRICK OR TREAT!. They're the only perks there are.
 
@@ -214,10 +214,10 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Bat** | Bat | Patrols a fixed loop and swats passes that fly through it. |
 | **Frog** *(new)* | Frog | Covers like a Gnome until the carrier gets close, then crouches (the telegraph) and leaps onto it. |
 | **Gingerbread Man** *(Candy Kingdom)* | Gingerbread Man | The Candy Kingdom's Cover: the same rule, a new look. |
-| **Crow** *(new, Farm)* | Crow | A Bat that swoops down a lane instead of looping. |
+| **Crow** *(Farm)* | Crow | Like a Bat, it swats passes that fly through it; it flies a lane up and down the field (8 yards) instead of looping a square. |
 
-- **Each area has its own set:** the Forest adds Frogs; the Candy Kingdom swaps the Owl for Witches and adds Gingerbread Men; the Farm adds Crows and rows of Scarecrows. Older kinds keep their rules wherever they appear.
-- **The Bosses:** Mister Frog is a Frog in a top hat; the Queen is a Witch twice the size, with the stats to match; the King is a Scarecrow in a crown.
+- **Each area has its own set:** the Forest adds Frogs; the Candy Kingdom swaps the Owl for Witches and adds Gingerbread Men; the Farm adds Crows and rows of Scarecrows, and its props are pumpkins and hay bales. Older kinds keep their rules wherever they appear.
+- **The Bosses:** Mister Frog is a Frog in a top hat and the Queen a Witch in a crown, each drawn twice a player's size and playing deep; the King is a giant Scarecrow in a crown who never moves (a prop).
 - **Props on the field:** two or three to every 10 yards, from the area's own set (the Forest: trees, stumps and toadstools; the Candy Kingdom: gumdrops, lollipops and candy canes). They're solid: everyone, yours and theirs, has to go around them, and carriers pick lanes clear of them. The ball flies over them. They never stand in the middle lane (the pumpkin's, and the handoffs'), never against a sideline, and always leave room to pass between.
 - **Hazards** stay simple patterns, like *Crossy Road*'s cars: the **Witch on a Broom** sweeps across the field and knocks down any pass she meets.
 - **Scaling, the lever behind the whole run:** the first drive of area I is **four slow defenders** (Intro 4, Challenge 5, Gimmicks 5 or 6, the Boss a full 8); every drive adds defenders or stats, and later areas bring more rushers and heavier, faster, grabbier versions of everyone. ▲ *Numbers to come from the balance runs: the target is that a team that never upgrades loses in area II, a decent build reaches the last Boss, and a strong one beats it.*

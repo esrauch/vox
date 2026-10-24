@@ -151,6 +151,8 @@ export const arcadeTuning = {
     chaseLead: 0.3,
     /** A Bat's loop: a square this wide. */
     batLoop: 3.5,
+    /** A Crow's lane: it flies this far up the field and back. */
+    crowLane: 8,
     /** The play fake: after a handoff the defense keeps playing the pass this long (seconds)… */
     playFake: 0.9,
     /** …except a defender this close to the carrier (yards), who sees it. */
@@ -168,6 +170,8 @@ export const arcadeTuning = {
     /** A body looks this far ahead for a prop in its way, and passes it with this much room. */
     lookAhead: 2.5,
     margin: 0.25,
+    /** The King stands this far past the first-down line of the last drive, in front of the patch. */
+    kingBeyond: 2.5,
   },
   hex: {
     /** The Queen's Hex: the aim line shows only this much of itself (yards from the pumpkin). */

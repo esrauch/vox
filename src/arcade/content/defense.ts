@@ -82,6 +82,15 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     planted: false,
     reachBonus: 1.0,
   },
+  crow: {
+    name: 'Crow',
+    creature: 'Crow',
+    // Like a Bat (it swats passes that fly through it), but it patrols a lane up and down the field.
+    stats: { hustle: 50, hands: 60, heft: 30 },
+    radius: 0.4,
+    planted: false,
+    reachBonus: 0.3,
+  },
 };
 
 export interface DefenseSpot {
@@ -101,6 +110,8 @@ export interface DefenseSpec {
   readonly frogRain?: boolean;
   /** The Queen's Hex: the aim line shows only a short stub by the pumpkin, and receivers don't light up. */
   readonly hex?: boolean;
+  /** The last drive of the run: the end zone is Jack's pumpkin patch, and the King stands guard. */
+  readonly home?: boolean;
 }
 
 const d = (kind: DefenderKind, x: number, y: number): DefenseSpot => ({ kind, x, y });
@@ -108,7 +119,7 @@ const d = (kind: DefenderKind, x: number, y: number): DefenseSpot => ({ kind, x,
 const owl = d('safety', 0, 12);
 
 /** How an area looks: its turf, floor and sideline props (render/scenery.ts, render/field.ts). */
-export type Biome = 'forest' | 'candy';
+export type Biome = 'forest' | 'candy' | 'farm';
 
 export interface ArcadeArea {
   readonly name: string;
@@ -221,7 +232,7 @@ export const CANDY_KINGDOM: ArcadeArea = {
   looks: { cover: 'candy/gingerbreadMan', safety: 'forest/witch' },
   fieldProps: [
     { model: 'candyProps/gumdrop', radius: 0.5, scale: 1 },
-    { model: 'candyProps/lollipop', radius: 0.35, scale: 1 },
+    { model: 'candyProps/lollipop', radius: 0.35, scale: 1, facing: true },
     { model: 'candyProps/candyCane', radius: 0.3, scale: 0.8 },
   ],
   intro: {
@@ -289,8 +300,90 @@ export const CANDY_KINGDOM: ArcadeArea = {
   },
 };
 
-/** The run's areas in order. ▲ The Farm comes third; until it's built, the Forest comes round again. */
-export const AREAS: readonly ArcadeArea[] = [FOREST, CANDY_KINGDOM, FOREST];
+/**
+ * The Farm, by Jack's pumpkin patch: rows of Scarecrows and Crows patrolling
+ * lanes up and down the field. Its last end zone is the patch: home. The
+ * King, a giant scarecrow in a crown, stands guard in front of it: in play
+ * he's only a prop (sim/props.ts, KING).
+ */
+export const FARM: ArcadeArea = {
+  name: 'The Farm',
+  biome: 'farm',
+  looks: {},
+  fieldProps: [
+    { model: 'forestProps/pumpkin', radius: 0.45, scale: 1 },
+    { model: 'farmProps/hayBale', radius: 0.5, scale: 1 },
+  ],
+  intro: {
+    name: 'The Back Forty',
+    witches: 0,
+    // A sleepy start, like every area's Intro.
+    boost: -10,
+    defenders: [d('rusher', -1.8, 1), d('cover', 6.3, 4), d('cover', -4.2, 5), d('safety', 0, 12)],
+  },
+  challenge: {
+    name: 'The Cornrows',
+    witches: 0,
+    boost: 0,
+    defenders: [
+      d('rusher', -1.8, 1),
+      d('cover', -6.3, 4),
+      d('cover', 6.3, 5),
+      d('zone', -2.8, 7),
+      d('crow', 3.5, 4),
+      d('safety', 0, 12),
+    ],
+  },
+  gimmicks: [
+    {
+      name: 'Scarecrow Rows',
+      witches: 0,
+      boost: 0,
+      defenders: [
+        d('rusher', 1.8, 1),
+        d('cover', -6.3, 4),
+        d('cover', 6.3, 4),
+        d('zone', -4.2, 6),
+        d('zone', 2.8, 8),
+        d('zone', -1.4, 11),
+        d('safety', 0, 12),
+      ],
+    },
+    {
+      name: 'A Murder of Crows',
+      witches: 0,
+      boost: 0,
+      defenders: [
+        d('rusher', -1.8, 1),
+        d('cover', -6.3, 4),
+        d('cover', 6.3, 5),
+        d('crow', -3.5, 3),
+        d('crow', 1.4, 5),
+        d('crow', 5.6, 3),
+        d('safety', 0, 12),
+      ],
+    },
+  ],
+  boss: {
+    name: "The King's Patch",
+    witches: 0,
+    boost: 0,
+    home: true,
+    defenders: [
+      d('rusher', -1.8, 1),
+      d('rusher', 1.8, 1),
+      d('cover', -6.3, 4),
+      d('cover', 6.3, 4),
+      d('zone', -3.5, 8),
+      d('zone', 3.5, 8),
+      d('crow', -1.4, 5),
+      d('safety', 0, 12),
+    ],
+  },
+};
+
+/** The run's areas in order: the Forest, the Candy Kingdom, the Farm. */
+export const AREAS: readonly ArcadeArea[] = [FOREST, CANDY_KINGDOM, FARM];
 
 /** An area by its number (the last one for any beyond). */
 export const areaAt = (area: number): ArcadeArea =>

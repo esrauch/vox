@@ -99,6 +99,12 @@ export const biomes = {
     hemiSky: '#c5b3ff',
     hemiGround: '#2c3f2f',
   },
+  farm: {
+    /** Meadow greens, warmer than the Forest's (but still green, not hay), and dark tilled soil beyond. */
+    grass: '#4f9a45',
+    grassDark: '#43873b',
+    floor: '#3a2a1c',
+  },
   candy: {
     /** Pink-and-white checker turf, a berry floor beyond it. */
     grass: '#f2a3c6',

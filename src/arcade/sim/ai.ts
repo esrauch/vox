@@ -129,7 +129,7 @@ function between(d: Defender, guard: Vec, p: Player): Vec {
 
 export function defenderTarget(state: RunState, d: Defender): Vec | null {
   if (d.planted) return null;
-  if (d.kind === 'bat') {
+  if (d.kind === 'bat' || d.kind === 'crow') {
     const corner = d.patrol?.[d.patrolIndex];
     if (!corner || !d.patrol) return null;
     if (dist(d.pos, corner) < 0.3) d.patrolIndex = (d.patrolIndex + 1) % d.patrol.length;

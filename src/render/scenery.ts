@@ -40,7 +40,8 @@ export interface Mood {
 }
 
 /**
- * The scenery around the long field, each area's along its own stretch.
+ * The scenery around the long field, each area's along its own stretch
+ * (the Forest, the Candy Kingdom, the Farm).
  * The Forest: toadstools, stumps and trees along the
  * sidelines the whole way, and on the Boss drive a tree line closing the
  * field off behind the end zone. (The 'beyond' part, shown only while
@@ -84,13 +85,19 @@ function createForestScenery(
 
   const group = new THREE.Group();
   group.add(forestFloor(palette.floor, layout), parts.beyond, parts.treeLine);
-  // The Candy Kingdom's stretch of the field has its own floor laid over the forest's.
-  for (const band of biomeBands(layout, 'candy')) group.add(candyFloor(layout, band));
+  // The Candy Kingdom's and the Farm's stretches of the field have their own floors laid over the forest's.
+  for (const band of biomeBands(layout, 'candy')) {
+    group.add(bandFloor(layout, band, biomes.candy.floor, SPRINKLES, 11));
+  }
+  for (const band of biomeBands(layout, 'farm')) {
+    group.add(bandFloor(layout, band, biomes.farm.floor, SOIL, 13));
+  }
   const into: Readonly<Record<Part, THREE.Group>> = { always: group, ...parts };
   // Each area's props only along its own stretch of the field.
   const all = [
     ...forestPlacements(layout).filter((p) => biomeAtZ(p.z) === 'forest'),
     ...candyPlacements(layout).filter((p) => biomeAtZ(p.z) === 'candy'),
+    ...farmPlacements(layout).filter((p) => biomeAtZ(p.z) === 'farm'),
   ];
   for (const part of ['always', 'beyond', 'treeLine'] as const) {
     for (const [model, placements] of groupBy(all.filter((p) => p.part === part))) {
@@ -155,19 +162,28 @@ function biomeBands(layout: FieldLayout, biome: Biome): { near: number; far: num
   return bands.map((b) => ({ near: b.near, far: b.far - 1 }));
 }
 
-/** The Candy Kingdom's floor: a berry ground with sprinkles, over its stretch of the field. */
-function candyFloor(layout: FieldLayout, band: { near: number; far: number }): THREE.Mesh {
+/** The Candy Kingdom's sprinkles, and the Farm's furrows and straw. */
+const SPRINKLES = ['#ff8fc7', '#7fe3c0', '#fff8ee', '#ffd23f', '#a259ff'];
+const SOIL = ['#2e2116', '#4a3624', '#4a3624', '#c9a646', '#e8c65a'];
+
+/** An area's own floor over its stretch of the field: a ground colour with flecks. */
+function bandFloor(
+  layout: FieldLayout,
+  band: { near: number; far: number },
+  base: Hex,
+  flecks: readonly string[],
+  seed: number,
+): THREE.Mesh {
   const size = 64;
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   const g = canvas.getContext('2d');
   if (g) {
-    g.fillStyle = biomes.candy.floor;
+    g.fillStyle = base;
     g.fillRect(0, 0, size, size);
-    const rng = createRng(11);
-    const sprinkles = ['#ff8fc7', '#7fe3c0', '#fff8ee', '#ffd23f', '#a259ff'];
+    const rng = createRng(seed);
     for (let i = 0; i < 70; i++) {
-      g.fillStyle = rng.pick(sprinkles);
+      g.fillStyle = rng.pick(flecks);
       g.fillRect(rng.int(0, size - 1), rng.int(0, size - 1), rng.int(1, 2), 1);
     }
   }
@@ -229,6 +245,72 @@ function candyPlacements(layout: FieldLayout): Placement[] {
   scatter('candyProps/candyCane', n(12), 0.4, 1.0, 3.2, false, () => 0.9 + rng.next() * 0.4);
   scatter('candyProps/gingerbreadHouse', n(5), 1.6, 3.5, 7.5, true, () => 0.9 + rng.next() * 0.3);
   scatter('forestProps/pine', n(4), 1.1, 6, 10, false, () => 0.9 + rng.next() * 0.4);
+  return out;
+}
+
+/**
+ * The Farm's props along the sidelines: a fence on each side with a glowing
+ * jack-o'-lantern every few yards, pumpkin patches and hay bales behind it,
+ * and a few bare trees at the back. Laid along the whole field, then kept
+ * only on the Farm's stretch.
+ */
+function farmPlacements(layout: FieldLayout): Placement[] {
+  const { halfWidth, nearZ, farZ } = layout;
+  const rng = createRng(1313);
+  const out: Placement[] = [];
+  const taken: { x: number; z: number; r: number }[] = [];
+  for (const sign of [-1, 1]) {
+    for (let z = nearZ; z > farZ; z -= 1.15) {
+      out.push({
+        part: 'always',
+        model: 'forestProps/fence',
+        x: sign * (halfWidth + 0.35),
+        z,
+        rotation: Math.PI / 2,
+        scale: 1,
+      });
+    }
+    for (let z = nearZ - 1.5; z > farZ; z -= 3) {
+      out.push({
+        part: 'always',
+        model: 'forestProps/lantern',
+        x: sign * (halfWidth + 1.1),
+        z,
+        rotation: 0,
+        scale: 1,
+      });
+      taken.push({ x: sign * (halfWidth + 1.1), z, r: 0.6 });
+    }
+  }
+  const scatter = (
+    model: string,
+    count: number,
+    radius: number,
+    min: number,
+    max: number,
+    scale = () => 1,
+  ): void => {
+    for (let placed = 0, tries = 0; placed < count && tries < count * 30; tries++) {
+      const x = (rng.next() < 0.5 ? -1 : 1) * (halfWidth + min + rng.next() * (max - min));
+      const z = nearZ - rng.next() * (nearZ - farZ);
+      if (taken.some((t) => Math.hypot(t.x - x, t.z - z) < t.r + radius)) continue;
+      taken.push({ x, z, r: radius });
+      out.push({
+        part: 'always',
+        model,
+        x,
+        z,
+        rotation: rng.int(0, 3) * (Math.PI / 2),
+        scale: scale(),
+      });
+      placed++;
+    }
+  };
+  const long = (nearZ - farZ) / 40;
+  const n = (count: number): number => Math.round(count * long);
+  scatter('forestProps/pumpkin', n(16), 0.55, 1.8, 4.5);
+  scatter('farmProps/hayBale', n(6), 0.7, 2.5, 6);
+  scatter('forestProps/deadTree', n(3), 0.9, 6, 10, () => 1 + rng.next() * 0.3);
   return out;
 }
 

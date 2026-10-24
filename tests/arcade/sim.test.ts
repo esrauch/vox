@@ -889,3 +889,34 @@ describe('props on the field', () => {
     expect(body(r.state, 2).pos.y).toBeGreaterThan(6);
   });
 });
+
+describe('the Farm', () => {
+  it('is the third area, and the run ends on its last drive', () => {
+    const s = createRun(5, startingRoster(), 2);
+    expect(s.drive.name).toBe('The Back Forty');
+    setUpDrive(s, 2, 3, [], true);
+    expect(s.drive.name).toBe("The King's Patch");
+  });
+
+  it('the King stands guard on the last drive: a prop, not a defender, past the first-down line', () => {
+    const s = createRun(5, startingRoster(), 2);
+    setUpDrive(s, 2, 3, [], true);
+    const king = s.field.props.find((p) => p.model === 'bosses/king');
+    expect(king).toBeDefined();
+    expect(king!.x).toBe(0);
+    expect(king!.y).toBeGreaterThan(s.drive.firstDown);
+    expect(s.field.defenders.some((d) => (d.kind as string) === 'king')).toBe(false);
+    // Only on the last drive.
+    setUpDrive(s, 2, 2, [], true);
+    expect(s.field.props.some((p) => p.model === 'bosses/king')).toBe(false);
+  });
+
+  it('a Crow patrols a lane up and down the field', () => {
+    const s = createRun(5, startingRoster(), 2);
+    setUpDrive(s, 2, 1, [], true);
+    const crow = s.field.defenders.find((d) => d.kind === 'crow')!;
+    expect(crow.patrol).toHaveLength(2);
+    expect(crow.patrol![1]!.x).toBe(crow.patrol![0]!.x);
+    expect(crow.patrol![1]!.y - crow.patrol![0]!.y).toBe(arcadeTuning.defense.crowLane);
+  });
+});

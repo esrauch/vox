@@ -32,6 +32,7 @@ const DEFENDER_MODEL: Readonly<Record<DefenderKind, string>> = {
   bat: 'forest/picker',
   misterFrog: 'bosses/misterFrog',
   queen: 'bosses/queen',
+  crow: 'farm/crow',
 };
 
 /** The Bosses are drawn this many times their model's size (their bodies in the sim match). */

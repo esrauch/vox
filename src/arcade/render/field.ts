@@ -55,6 +55,10 @@ function turfTexture(rows: number): THREE.CanvasTexture {
           const sprinkle = rng.pick(['#fff8ee', '#7fe3c0', '#ffd23f', '#a259ff']);
           g.fillStyle = `#${new THREE.Color(band).lerp(new THREE.Color(sprinkle), 0.5).getHexString()}`;
           g.fillRect(x, y, rng.next() < 0.5 ? 2 : 1, 1);
+        } else if (biome === 'farm' && rng.next() < 0.4) {
+          // A stray bit of straw, half-blended into the grass.
+          g.fillStyle = `#${new THREE.Color(band).lerp(new THREE.Color('#e8c65a'), 0.5).getHexString()}`;
+          g.fillRect(x, y, 2, 1);
         } else if (rng.next() < 0.7) {
           g.fillStyle = shade(band, 0.825); // a darker blade, two pixels tall
           g.fillRect(x, y, 1, 2);

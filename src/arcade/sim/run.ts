@@ -8,7 +8,7 @@ import { PLAYS } from '../content/plays';
 import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
 import { assignMarks } from './ai';
-import { propsForDrive } from './props';
+import { drivePropsWithKing } from './props';
 import { lineUpDefense, lineUpTeam } from './bodies';
 import { applyPerk, atSpot, bestSpot, noPerks, rollOffer, setSpot, startingRoster } from './team';
 import type {
@@ -129,7 +129,7 @@ export function setUpDrive(
   state.field = {
     ...state.field,
     witches: witches(state, spec),
-    props: propsForDrive(state.seed, area, index),
+    props: drivePropsWithKing(state.seed, area, index, spec.home ?? false),
   };
   events.push({ type: 'driveStarted', drive: index, name: spec.name });
   setUpDown(state, events);

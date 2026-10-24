@@ -1,0 +1,57 @@
+# Farm prop: a hay bale, tied round with two bands of twine.
+# Built from simple shapes by a generator.
+size 10 6 7
+voxel 0.1
+colors
+  y straw
+  Y #c9a646
+  t acornStem
+slice 0
+  YYtyyyytYY
+  yytyyYytyy
+  yytyyyytyY
+  yytyyyYtyy
+  yytYyyytyy
+  Yytyyyytyy
+slice 1
+  yytYyyYtyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+slice 2
+  Yytyyyytyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+slice 3
+  yytyyyYtyY
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+slice 4
+  YytYyyytyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+slice 5
+  yytyyyytyY
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+  yyyyyyyyyy
+slice 6
+  yytYyyYtyy
+  yytyyyytyy
+  yytyyyytyy
+  yytyyyytyy
+  yytyyyytyy
+  yytyyyytyy

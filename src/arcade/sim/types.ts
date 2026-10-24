@@ -23,8 +23,9 @@ export interface Stats {
 
 export type Role = 'qb' | 'blocker' | 'runner' | 'catcher';
 export type Form = 'human' | 'golem' | 'werewolf' | 'ghost';
-/** The defenders; `misterFrog` and `queen` are Bosses (they play deep, like the Owl). */
-export type DefenderKind = 'rusher' | 'cover' | 'zone' | 'safety' | 'bat' | 'misterFrog' | 'queen';
+/** The defenders; `misterFrog` and `queen` are Bosses (they play deep, like the Owl). The King isn't one: he's a prop. */
+export type DefenderKind =
+  'rusher' | 'cover' | 'zone' | 'safety' | 'bat' | 'crow' | 'misterFrog' | 'queen';
 
 /** Everything that moves and collides: a circle with stats turned into physics. */
 interface BodyBase {
@@ -103,6 +104,8 @@ export interface PropKind {
   readonly model: string;
   readonly radius: number;
   readonly scale: number;
+  /** Always faces you (not turned at random): a character like the King. */
+  readonly facing?: boolean;
 }
 
 /** A prop on the field (sim/props.ts): a solid circle everyone goes around; the ball flies over. */

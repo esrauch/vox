@@ -168,6 +168,18 @@
       "source": "Original voxel model (Candy Kingdom field prop: lollipop), written by Claude",
       "author": "Claude",
       "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/farm/crow.voxt",
+      "source": "Original voxel model (Farm defender: Crow), written by Claude",
+      "author": "Claude",
+      "license": "original"
+    },
+    {
+      "path": "assets-src/voxels/farmProps/hayBale.voxt",
+      "source": "Original voxel model (Farm prop: hay bale), written by Claude",
+      "author": "Claude",
+      "license": "original"
     }
   ]
 }
