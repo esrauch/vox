@@ -27,7 +27,6 @@ import { ArcadeFrogRain } from './render/frogRain';
 import { ArcadeIntro } from './render/intro';
 import { ArcadeOutro } from './render/outro';
 import { BOSS_SPOT } from './sim/props';
-import { ArcadeQueenHex } from './render/queenHex';
 import { ArcadeRoyalCrows } from './render/royalCrows';
 import { ArcadeWitches } from './render/witches';
 import { ArcadeRoutes } from './render/routes';
@@ -140,7 +139,6 @@ export class ArcadeGame {
   private readonly routes: ArcadeRoutes;
   private readonly frogRain: ArcadeFrogRain;
   private readonly royalCrows: ArcadeRoyalCrows;
-  private readonly queenHex: ArcadeQueenHex;
   private readonly fieldProps: ArcadeFieldProps;
   private readonly witches: ArcadeWitches;
   private readonly hud: Hud;
@@ -194,7 +192,6 @@ export class ArcadeGame {
     this.routes = new ArcadeRoutes(scene);
     this.frogRain = new ArcadeFrogRain(scene);
     this.royalCrows = new ArcadeRoyalCrows(scene);
-    this.queenHex = new ArcadeQueenHex(scene);
     this.fieldProps = new ArcadeFieldProps(scene);
     this.witches = new ArcadeWitches(scene);
     this.bodies = new ArcadeBodies(scene);
@@ -332,7 +329,6 @@ export class ArcadeGame {
     this.sweep.update(state, this.origin);
     this.frogRain.update(state, this.origin);
     this.royalCrows.update(state, this.origin);
-    this.queenHex.update(state, this.origin, dt);
     this.controls.setShoo(state.phase === 'play' && state.field.crows?.phase === 'shoo');
     this.fieldProps.update(state, this.origin);
     this.fieldProps.animate(performance.now() / 1000);
@@ -425,6 +421,10 @@ export class ArcadeGame {
     const play = (id: Parameters<Conductor['play']>[0]): void => this.conductor.play(id);
     for (const e of events) {
       switch (e.type) {
+        case 'banned':
+          play('fumble');
+          this.hud.pop('BY ROYAL DECREE!', 'bad');
+          break;
         case 'snapped':
           this.hud.pop(`${(PLAYS[this.state.play.index]?.name ?? '').toUpperCase()}!`, 'good');
           break;
@@ -527,7 +527,7 @@ export class ArcadeGame {
       this.hud.setPrompt(null, null);
       return;
     }
-    const { phase, drive, drivesWon, hand, flipped, called } = this.state;
+    const { phase, drive, drivesWon, hand, flipped, called, banned } = this.state;
     const banner =
       phase === 'over' || phase === 'won'
         ? `${drivesWon} ${drivesWon === 1 ? 'drive' : 'drives'} won`
@@ -542,7 +542,7 @@ export class ArcadeGame {
             return { name: p?.name ?? '?', blurb: p?.handoff !== undefined ? 'Run' : 'Pass' };
           })
         : null;
-    this.hud.setHand(cards, called, flipped);
+    this.hud.setHand(cards, called, flipped, banned);
     if (phase !== 'draft') this.swapFrom = null;
     this.hud.setDraft(
       ready && phase === 'draft' ? trickOrTreatView(this.state, this.swapFrom) : null,

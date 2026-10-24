@@ -89,8 +89,8 @@ export interface DefenseSpec {
   readonly boost: number;
   /** Mister Frog's Frog Rain: a lane shown before each snap, frogs falling in it during the down. */
   readonly frogRain?: boolean;
-  /** The Queen's Hex: the aim line shows only a short stub by the pumpkin, and receivers don't light up. */
-  readonly hex?: boolean;
+  /** The Queen's Royal Decree: each down one of the three cards is banned (it can't be called). */
+  readonly decree?: boolean;
   /** A Boss drive: the Boss who stands in its end zone, a prop (sim/props.ts, BOSSES). */
   readonly boss?: BossName;
   /** The last drive of the run: the end zone is Jack's pumpkin patch. */
@@ -230,7 +230,7 @@ export const CANDY_KINGDOM: ArcadeArea = {
     boss: 'queen',
     witches: 0,
     boost: 0,
-    hex: true,
+    decree: true,
     defenders: [
       d('rusher', -1.8, 1),
       d('rusher', 1.8, 1),

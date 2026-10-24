@@ -104,7 +104,6 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
     props: [],
     frogLane: null,
     frogDump: null,
-    hex: false,
     crows: null,
     ball: { at: 'qb' },
     runPath: null,

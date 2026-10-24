@@ -59,18 +59,6 @@ export function bulletEnd(state: RunState, from: Vec, angle: number): Vec {
   return v(from.x + dx * length, from.y + dy * length);
 }
 
-/**
- * The Queen's Hex, on her drive: it pulses from the snap, clear for a
- * moment, then on for a moment, over and over. While it's on, the aim line
- * is only a stub and nobody lights up (render/sweep.ts).
- */
-export function hexedNow(state: RunState): boolean {
-  if (!state.field.hex || state.phase === 'setup') return false;
-  const { clear, on } = arcadeTuning.hex;
-  const t = (state.time - state.snappedAt) % (clear + on);
-  return t >= clear;
-}
-
 /** How long a bullet takes to get from `from` to `to` (`scale` is Hot Arm's, a perk). */
 export function flightTime(from: Vec, to: Vec, scale = 1): number {
   return Math.max(0.1, dist(from, to) / (t.speed * scale));

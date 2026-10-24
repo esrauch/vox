@@ -173,19 +173,30 @@ export class Hud {
     called: number | null,
     /** Flip is on (shown once a card is called). */
     flipped = false,
+    /** The card the Queen's Royal Decree bans this down (stamped with her seal), or null. */
+    banned: number | null = null,
   ): void {
     this.flipButton.hidden = !cards || called === null;
     this.flipButton.classList.toggle('on', flipped);
-    const key = cards ? `${cards.map((c) => c.name + c.blurb).join('|')}#${called}` : '';
+    const key = cards ? `${cards.map((c) => c.name + c.blurb).join('|')}#${called}#${banned}` : '';
     if (key === this.handKey) return;
     this.handKey = key;
     this.hand.classList.toggle('show', !!cards);
     this.hand.replaceChildren(
-      ...(cards ?? []).map((c, i) =>
-        cardButton(c, `hud-card interactive${i === called ? ' called' : ''}`, () =>
-          this.handlers.onCard(i),
-        ),
-      ),
+      ...(cards ?? []).map((c, i) => {
+        const b = cardButton(
+          c,
+          `hud-card interactive${i === called ? ' called' : ''}${i === banned ? ' banned' : ''}`,
+          () => this.handlers.onCard(i),
+        );
+        if (i === banned) {
+          const seal = document.createElement('em');
+          seal.className = 'hud-seal';
+          seal.textContent = 'BANNED';
+          b.append(seal);
+        }
+        return b;
+      }),
     );
   }
 

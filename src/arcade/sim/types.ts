@@ -155,8 +155,6 @@ export interface Field {
    */
   frogLane: FrogLane | null;
   frogDump: number | null;
-  /** The Queen's Hex (her drive): it pulses (sim/ball.ts, hexedNow); while on, the aim line is a stub and nobody lights up. */
-  hex: boolean;
   /** The King's crows (his drive), or null. */
   crows: RoyalCrows | null;
   ball: Ball;
@@ -312,6 +310,8 @@ export interface RunState {
   /** The three play cards on offer this down (indices into PLAYS), which one is called (null until one is), and whether Flip is on. */
   hand: number[];
   called: number | null;
+  /** The Queen's Royal Decree (her drive): the card in the hand that's banned this down, or null. */
+  banned: number | null;
   flipped: boolean;
   /** The play called (or, before the call, the first card's), and whether it's mirrored. */
   play: { readonly index: number; readonly flipped: boolean };
@@ -365,6 +365,8 @@ export type Action =
 export type ArcadeEvent =
   | { readonly type: 'downStarted'; readonly down: number; readonly toGo: number }
   | { readonly type: 'called'; readonly play: string; readonly flipped: boolean }
+  /** A card banned by the Queen's Royal Decree was tapped: it can't be called. */
+  | { readonly type: 'banned' }
   | { readonly type: 'snapped' }
   | { readonly type: 'handoff'; readonly id: number }
   | { readonly type: 'thrown'; readonly target: Vec; readonly landsAt: number }

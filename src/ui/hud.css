@@ -144,6 +144,35 @@
   translate: 0 -4px;
 }
 
+/* The Queen's Royal Decree: a banned card, greyed, stamped with her wax seal. */
+.hud-card.banned {
+  position: relative;
+  background: color-mix(in srgb, var(--bone) 55%, var(--ink));
+}
+
+.hud-card.banned strong,
+.hud-card.banned span {
+  opacity: 0.45;
+}
+
+.hud-seal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  rotate: -14deg;
+  padding: 3px 8px;
+  border: 3px solid var(--ink);
+  font-style: normal;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: var(--bone);
+  background: var(--danger);
+  box-shadow: 3px 3px 0 var(--ink);
+  pointer-events: none;
+}
+
 .hud-controls {
   height: 72px;
   display: flex;

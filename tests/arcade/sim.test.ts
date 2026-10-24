@@ -1,14 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PLAYS } from '../../src/arcade/content/plays';
 import { arcadeTuning } from '../../src/arcade/content/tuning';
-import {
-  aimContact,
-  hexedNow,
-  pocketTime,
-  scanTime,
-  sweepAngle,
-  sweepSpeed,
-} from '../../src/arcade/sim/ball';
+import { aimContact, pocketTime, sweepAngle, sweepSpeed } from '../../src/arcade/sim/ball';
 import { physicsOf } from '../../src/arcade/sim/bodies';
 import {
   createRun,
@@ -21,7 +14,6 @@ import {
 } from '../../src/arcade/sim/run';
 import { breakMarker, countdown, jukeGrade, jukeShowing } from '../../src/arcade/sim/breakit';
 import { canThrow, forceBreakKind, step } from '../../src/arcade/sim/step';
-import { litPlayers } from '../../src/arcade/render/sweep';
 import { pathXAt } from '../../src/arcade/sim/ai';
 import { propsForDrive } from '../../src/arcade/sim/props';
 import { DT } from '../../src/arcade/content/tuning';
@@ -930,46 +922,23 @@ describe('the Candy Kingdom', () => {
     setUpDrive(s, 1, 3, [], true);
     expect(s.drive.name).toBe("The Queen's Court");
     expect(s.field.props.some((p) => p.model === 'bosses/queen')).toBe(true);
-    expect(s.field.hex).toBe(true);
+    expect(s.banned).not.toBeNull();
     expect(s.field.frogLane).toBeNull();
-    // The Forest's Boss drive has no Hex.
+    // The Forest's Boss drive has no Decree.
     setUpDrive(s, 0, 3, [], true);
-    expect(s.field.hex).toBe(false);
+    expect(s.banned).toBeNull();
   });
 
-  it("the Queen's Hex pulses from the snap: clear, then on, over and over", () => {
-    const s = playState([]);
-    s.field.hex = true;
-    const at = (t: number) => {
-      const st = structuredClone(s);
-      st.time = st.snappedAt + t;
-      return hexedNow(st);
-    };
-    const { clear, on } = arcadeTuning.hex;
-    expect(at(clear / 2)).toBe(false);
-    expect(at(clear + on / 2)).toBe(true);
-    expect(at(clear + on + clear / 2)).toBe(false);
-    s.field.hex = false;
-    expect(at(clear + on / 2)).toBe(false);
-  });
-
-  it('while the Hex is on nobody lights up, even a receiver a throw would reach', () => {
-    const s = playState([{ pos: v(0, 8), job: stand(v(0, 8)) }]);
-    s.field.hex = true;
-    // Point the line at the receiver, at a moment the Hex is clear and at one it's on
-    // (the sweep repeats every two passes, so shift the snap by whole cycles).
-    const lit = (wantHexed: boolean) => {
-      for (let k = 0; k < 12; k++) {
-        const st = structuredClone(s);
-        throwAt(st, v(0, 8));
-        st.snappedAt -= k * 2 * scanTime(st);
-        const next = step(st).state;
-        if (hexedNow(next) === wantHexed) return litPlayers(next).size;
-      }
-      throw new Error('no such moment');
-    };
-    expect(lit(false)).toBe(1);
-    expect(lit(true)).toBe(0);
+  it("the Queen's Royal Decree bans a card each down: tapping it calls nothing", () => {
+    const s = createRun(3);
+    setUpDrive(s, 1, 3, [], true);
+    const banned = s.banned!;
+    expect(PLAYS[s.play.index]).toBe(PLAYS[s.hand[banned === 0 ? 1 : 0]!]);
+    const r = dispatch(s, { type: 'call', hand: banned });
+    expect(r.state.called).toBeNull();
+    expect(ofType(r.events, 'banned')).toHaveLength(1);
+    const other = banned === 0 ? 1 : 0;
+    expect(dispatch(s, { type: 'call', hand: other }).state.called).toBe(other);
   });
 });
 

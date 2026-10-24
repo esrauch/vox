@@ -68,6 +68,7 @@ export function createRun(
     drive: { area: 0, index: 0, kind: 'intro', name: '', start: 0, firstDown: 0, down: 1, los: 0 },
     hand: [],
     called: null,
+    banned: null,
     flipped: false,
     play: { index: 0, flipped: false },
     tackle: null,
@@ -82,7 +83,6 @@ export function createRun(
       props: [],
       frogLane: null,
       frogDump: null,
-      hex: false,
       crows: null,
       ball: { at: 'qb' },
       runPath: null,
@@ -184,12 +184,15 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     state.hand.push(deck.splice(rng.int(0, deck.length - 1), 1)[0] ?? 0);
   }
   state.called = null;
-  state.play = { index: state.hand[0] ?? 0, flipped: state.flipped };
+  const spec = defenseFor(state.seed, drive.area, drive.index);
+  // The Queen's Royal Decree: one card of the three is banned this down.
+  state.banned = spec.decree ? rng.int(0, state.hand.length - 1) : null;
+  const first = state.banned === 0 ? 1 : 0;
+  state.play = { index: state.hand[first] ?? 0, flipped: state.flipped };
   const play = PLAYS[state.play.index] ?? PLAYS[0];
   if (!play) throw new Error('No plays defined');
   const players = lineUpTeam(state, play, state.flipped, drive.los, state.nextId);
   state.nextId += players.length;
-  const spec = defenseFor(state.seed, drive.area, drive.index);
   const boost = defenseBoost(drive.area, drive.kind, spec);
   const defenders = lineUpDefense(spec, drive, boost, state.nextId);
   state.nextId += defenders.length;
@@ -200,7 +203,6 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     props: state.field.props,
     frogLane: spec.frogRain ? frogLane(state) : null,
     frogDump: null,
-    hex: spec.hex ?? false,
     crows: spec.boss === 'king' ? perchedCrows() : null,
     ball: { at: 'qb' },
     runPath: null,
@@ -249,12 +251,17 @@ export function dispatch(prev: RunState, action: Action): ArcadeResult {
 /**
  * Call a play card (mirrored if Flip is on): your players take its
  * assignments where they stand, so its routes show on the field. Another
- * card can still be called instead, until the hike.
+ * card can still be called instead, until the hike. A card banned by the
+ * Queen's Royal Decree can't be called.
  */
 function call(state: RunState, hand: number, events: ArcadeEvent[]): void {
   const index = state.hand[hand];
   const play = index === undefined ? undefined : PLAYS[index];
   if (state.phase !== 'setup' || index === undefined || !play) return;
+  if (hand === state.banned) {
+    events.push({ type: 'banned' });
+    return;
+  }
   state.called = hand;
   state.play = { index, flipped: state.flipped };
   const firstId = state.field.players[0]?.id ?? state.nextId;

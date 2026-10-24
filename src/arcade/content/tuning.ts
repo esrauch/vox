@@ -47,7 +47,7 @@ export const arcadeTuning = {
     /** A Blocker this many times heavier than the defender it hits flattens it (3 Heft heavier)… */
     pancakeRatio: 1.9,
     /** …for this long. On a handoff it only takes this much heavier (2 Heft heavier). */
-    pancakeTime: 1.2,
+    pancakeTime: 2.4,
     runPancakeRatio: 1.5,
     /**
      * The drive block: on a handoff, anyone blocking for the Runner drives
@@ -192,13 +192,6 @@ export const arcadeTuning = {
     reach: 0.8,
     /** …and SHOO! has this long before they knock it down. */
     window: 0.6,
-  },
-  hex: {
-    /** The Queen's Hex: while it's on, the aim line shows only this much of itself (yards from the pumpkin)… */
-    stub: 3,
-    /** …and it pulses from the snap: clear this long, then hexed this long, over and over (sim seconds). */
-    clear: 1,
-    on: 1.5,
   },
   frogRain: {
     /** The lane runs in from one sideline (either, at random) this share of the way across: never over the pumpkin, so Flip matters. */

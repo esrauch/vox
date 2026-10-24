@@ -370,16 +370,16 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
       if (rng.next() < 0.5) state = dispatch(state, { type: 'flip' }).state;
       const runs = state.hand
         .map((c, i) => ({ c, i }))
-        .filter(({ c }) => PLAYS[c]?.handoff !== undefined);
+        .filter(({ c, i }) => PLAYS[c]?.handoff !== undefined && i !== state.banned);
       const passes = state.hand
         .map((c, i) => ({ c, i }))
-        .filter(({ c }) => PLAYS[c]?.handoff === undefined);
+        .filter(({ c, i }) => PLAYS[c]?.handoff === undefined && i !== state.banned);
       const hand =
         BOT.runOnly && runs.length > 0
           ? (rng.pick(runs)?.i ?? 0)
           : BOT.passOnly && passes.length > 0
             ? (rng.pick(passes)?.i ?? 0)
-            : rng.int(0, state.hand.length - 1);
+            : (rng.pick([...runs, ...passes])?.i ?? 0);
       const called = dispatch(state, { type: 'call', hand }).state;
       const hiked = dispatch(called, { type: 'hike' });
       count(t, hiked.events, state, ran);
