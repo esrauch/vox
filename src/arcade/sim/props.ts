@@ -14,7 +14,7 @@
 import { areaAt } from '../content/defense';
 import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
-import type { Body, FieldProp, PropKind, RunState, Vec } from './types';
+import type { Body, BossName, FieldProp, PropKind, RunState, Vec } from './types';
 import { add, dist, len, norm, scale, sub, v } from './vec';
 
 const { fieldProps: tuning, field, drive: driveTuning } = arcadeTuning;
@@ -40,30 +40,37 @@ export function propsForDrive(seed: number, area: number, index: number): FieldP
 }
 
 /**
- * The King: a giant scarecrow in a crown, standing guard just past the
- * first-down line of the run's last drive, in front of the patch. In play
- * he's only a prop (drawn twice his model's size, render/fieldProps.ts).
+ * The Bosses: each stands guard in the middle of its drive's end zone, just
+ * past the first-down line, drawn twice its model's size
+ * (render/fieldProps.ts). In play each is only a prop: it never moves,
+ * tackles or defends; its ability is the whole fight.
  */
-export const KING: PropKind = { model: 'bosses/king', radius: 1.45, scale: 1, facing: true };
+export const BOSSES: Readonly<Record<BossName, PropKind>> = {
+  misterFrog: { model: 'bosses/misterFrog', radius: 1.45, scale: 1, facing: true },
+  queen: { model: 'bosses/queen', radius: 1.45, scale: 1, facing: true },
+  king: { model: 'bosses/king', radius: 1.45, scale: 1, facing: true },
+};
+export const KING = BOSSES.king;
 
-/** Where the King stands on his drive (its own coordinates): in the middle, just past the first-down line. */
-export const KING_SPOT: Vec = v(0, driveTuning.distance + tuning.kingBeyond);
+/** Where a Boss stands on its drive (the drive's own coordinates): in the middle, just past the first-down line. */
+export const BOSS_SPOT: Vec = v(0, driveTuning.distance + tuning.bossBeyond);
 
-/** The props of a drive, the King among them on the last one. */
-export function drivePropsWithKing(
+/** The props of a drive, its Boss among them on a Boss drive. */
+export function drivePropsWithBoss(
   seed: number,
   area: number,
   index: number,
-  home: boolean,
+  boss: BossName | undefined,
 ): FieldProp[] {
   const props = propsForDrive(seed, area, index);
-  if (!home) return props;
-  const { x, y } = KING_SPOT;
-  // Make room for him: no other prop where he stands.
+  if (!boss) return props;
+  const kind = BOSSES[boss];
+  const { x, y } = BOSS_SPOT;
+  // Make room: no other prop where the Boss stands.
   const clear = props.filter(
-    (p) => dist(v(p.x, p.y), KING_SPOT) > p.radius + KING.radius + tuning.gap,
+    (p) => dist(v(p.x, p.y), BOSS_SPOT) > p.radius + kind.radius + tuning.gap,
   );
-  return [...clear, { id: -1, x, y, ...KING }];
+  return [...clear, { id: -1, x, y, ...kind }];
 }
 
 /** One 10-yard stretch's props (y from 0 to 10 within it), the same every time for this seed. */

@@ -405,16 +405,12 @@ export class ArcadeGame {
           play('burst');
           this.hud.big('CROWS!', 'bad');
           break;
-        case 'frogLanded':
+        case 'frogRain':
+          play('burst');
           play('hop');
-          if (e.flattened.length > 0) {
-            // Good when it squashes the defense, bad when it squashes your own.
-            const ours = e.flattened.some((id) =>
-              this.state.field.players.some((p) => p.id === id),
-            );
-            play('burst');
-            this.hud.pop('SPLAT!', ours ? 'bad' : 'good');
-          }
+          break;
+        case 'frogged':
+          this.hud.big('FROGGED!', 'bad');
           break;
         case 'outOfBounds':
           this.hud.pop('OUT OF BOUNDS', 'bad');

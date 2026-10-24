@@ -4,7 +4,7 @@
  * upfield). The first drive is a handful of sleepy defenders; the Boss
  * brings the whole forest. Every area adds to every defender's stats.
  */
-import type { DefenderKind, PropKind, Stats } from '../sim/types';
+import type { BossName, DefenderKind, PropKind, Stats } from '../sim/types';
 
 export interface DefenderDef {
   readonly name: string;
@@ -62,26 +62,7 @@ export const DEFENDERS: Readonly<Record<DefenderKind, DefenderDef>> = {
     planted: false,
     reachBonus: 0.3,
   },
-  misterFrog: {
-    name: 'Mister Frog',
-    creature: 'Frog in a top hat',
-    // The Forest's Boss: twice a player's size, heavy and grabby, and slow off the mark.
-    stats: { hustle: 50, hands: 70, heft: 90 },
-    // Drawn twice its model's size (render/bodies.ts): its body is as wide as it looks.
-    radius: 1.45,
-    planted: false,
-    reachBonus: 0.6,
-  },
-  queen: {
-    name: 'The Queen',
-    creature: 'Witch in a crown',
-    // The Candy Kingdom's Boss: twice a player's size, quick and with a long reach for the ball.
-    stats: { hustle: 60, hands: 90, heft: 70 },
-    // Drawn twice its model's size (render/bodies.ts): its body is as wide as it looks.
-    radius: 1.45,
-    planted: false,
-    reachBonus: 1.0,
-  },
+
   crow: {
     name: 'Crow',
     creature: 'Crow',
@@ -110,7 +91,9 @@ export interface DefenseSpec {
   readonly frogRain?: boolean;
   /** The Queen's Hex: the aim line shows only a short stub by the pumpkin, and receivers don't light up. */
   readonly hex?: boolean;
-  /** The last drive of the run: the end zone is Jack's pumpkin patch, and the King stands guard. */
+  /** A Boss drive: the Boss who stands in its end zone, a prop (sim/props.ts, BOSSES). */
+  readonly boss?: BossName;
+  /** The last drive of the run: the end zone is Jack's pumpkin patch. */
   readonly home?: boolean;
 }
 
@@ -179,6 +162,7 @@ export const FOREST: ArcadeArea = {
 
   boss: {
     name: "Mister Frog's Pond",
+    boss: 'misterFrog',
     witches: 0,
     boost: 0,
     frogRain: true,
@@ -190,8 +174,7 @@ export const FOREST: ArcadeArea = {
       d('cover', 3.5, 6),
       d('zone', -2.8, 9),
       d('bat', 1.4, 7),
-      // Mister Frog plays deep, like the Owl.
-      d('misterFrog', 0, 12),
+      d('safety', 0, 12),
     ],
   },
 };
@@ -244,6 +227,7 @@ export const CANDY_KINGDOM: ArcadeArea = {
 
   boss: {
     name: "The Queen's Court",
+    boss: 'queen',
     witches: 0,
     boost: 0,
     hex: true,
@@ -255,8 +239,7 @@ export const CANDY_KINGDOM: ArcadeArea = {
       d('cover', -3.5, 6),
       d('zone', 2.8, 9),
       d('bat', -1.4, 7),
-      // The Queen plays deep, like the Owl.
-      d('queen', 0, 12),
+      d('safety', 0, 12),
     ],
   },
 };
@@ -312,6 +295,7 @@ export const FARM: ArcadeArea = {
 
   boss: {
     name: "The King's Patch",
+    boss: 'king',
     witches: 0,
     boost: 0,
     home: true,

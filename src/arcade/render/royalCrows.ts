@@ -5,7 +5,7 @@
  * they're shooed or have struck.
  */
 import * as THREE from 'three';
-import { KING_SPOT } from '../sim/props';
+import { BOSS_SPOT } from '../sim/props';
 import type { RunState } from '../sim/types';
 import { add, v } from '../sim/vec';
 import { getGeometry, voxelMaterial } from '../../voxel/models';
@@ -40,7 +40,7 @@ export class ArcadeRoyalCrows {
       const side = i === 0 ? -1 : 1;
       const flap = Math.sin(state.time * (c.phase === 'perched' ? 2 : 14) + i * 1.7);
       if (c.phase === 'perched') {
-        crow.position.copy(toWorld(add(KING_SPOT, v(side * ARM_X, 0)), origin, ARM_HEIGHT));
+        crow.position.copy(toWorld(add(BOSS_SPOT, v(side * ARM_X, 0)), origin, ARM_HEIGHT));
         crow.scale.set(1, 1 + 0.03 * flap, 1);
       } else {
         // Flying at the ball, or flapping over whoever they've landed on.

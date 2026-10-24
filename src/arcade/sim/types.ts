@@ -23,9 +23,8 @@ export interface Stats {
 
 export type Role = 'qb' | 'blocker' | 'runner' | 'catcher';
 export type Form = 'human' | 'golem' | 'werewolf' | 'ghost';
-/** The defenders; `misterFrog` and `queen` are Bosses (they play deep, like the Owl). The King isn't one: he's a prop. */
-export type DefenderKind =
-  'rusher' | 'cover' | 'zone' | 'safety' | 'bat' | 'crow' | 'misterFrog' | 'queen';
+/** The defenders. (The Bosses aren't defenders: each stands in its end zone as a prop, sim/props.ts.) */
+export type DefenderKind = 'rusher' | 'cover' | 'zone' | 'safety' | 'bat' | 'crow';
 
 /** Everything that moves and collides: a circle with stats turned into physics. */
 interface BodyBase {
@@ -99,6 +98,9 @@ export type Ball =
 
 export type DeadBall = 'batted' | 'incomplete' | 'sacked' | 'tackled';
 
+/** The three Bosses (each a prop in its end zone). */
+export type BossName = 'misterFrog' | 'queen' | 'king';
+
 /** A kind of prop on the field: its model, how big it is to bump into (yards), and how big it's drawn. */
 export interface PropKind {
   readonly model: string;
@@ -125,14 +127,6 @@ export interface FrogLane {
   readonly to: number;
 }
 
-/** One falling frog: where it lands, and the seconds of live play until it does (below 0: landed). */
-export interface FrogDrop {
-  readonly id: number;
-  readonly x: number;
-  readonly y: number;
-  left: number;
-}
-
 /**
  * The King's crows (his drive): they sit on his arms, swoop at whoever has
  * the ball shortly after the snap, and land on them for the SHOO! test.
@@ -154,9 +148,13 @@ export interface Field {
   readonly witches: readonly Witch[];
   /** This drive's props on the field (and the stretches either side of it). */
   props: readonly FieldProp[];
-  /** Frog Rain (Mister Frog's drive): this down's lane, and the frogs falling in it once it's snapped. */
+  /**
+   * Frog Rain (Mister Frog's drive): this down's lane, and once it's snapped,
+   * the seconds of live play until the frogs all come down in it (negative
+   * after, for the show), or null.
+   */
   frogLane: FrogLane | null;
-  frogs: FrogDrop[];
+  frogDump: number | null;
   /** The Queen's Hex (her drive): the aim line shows only a stub, and receivers don't light up. */
   hex: boolean;
   /** The King's crows (his drive), or null. */
@@ -397,13 +395,10 @@ export type ArcadeEvent =
       readonly slot: number;
       readonly replaced: string | null;
     }
-  /** A frog landed (Frog Rain); `flattened` are the bodies it knocked down. */
-  | {
-      readonly type: 'frogLanded';
-      readonly x: number;
-      readonly y: number;
-      readonly flattened: readonly number[];
-    }
+  /** The frogs came down (Frog Rain): `flattened` are the bodies in the lane they knocked down. */
+  | { readonly type: 'frogRain'; readonly flattened: readonly number[] }
+  /** …and the carrier was in it: tackled there. */
+  | { readonly type: 'frogged'; readonly id: number }
   | { readonly type: 'driveStarted'; readonly drive: number; readonly name: string }
   | { readonly type: 'areaCleared'; readonly area: number }
   | { readonly type: 'gameOver'; readonly drivesWon: number; readonly yards: number };

@@ -172,8 +172,8 @@ export const arcadeTuning = {
     /** A body looks this far ahead for a prop in its way, and passes it with this much room. */
     lookAhead: 2.5,
     margin: 0.25,
-    /** The King stands this far past the first-down line of the last drive, in front of the patch. */
-    kingBeyond: 2.5,
+    /** A Boss stands this far past its drive's first-down line, in the middle of the end zone. */
+    bossBeyond: 2.5,
   },
   crows: {
     /** The King's crows take off this long after the snap (seconds of live play)… */
@@ -195,16 +195,11 @@ export const arcadeTuning = {
     /** It runs from just behind the line of scrimmage to this far upfield. */
     behind: 1,
     ahead: 16,
-    /** The first frog lands this long into the down, then one every so often (seconds of live play)… */
-    first: 0.6,
-    every: 0.15,
-    /** …for this long. */
-    lasts: 9,
-    /** Its shadow shows this long before it lands. */
+    /** The frogs all come down at once, this long into the down (seconds of live play)… */
+    dumpAt: 1.2,
+    /** …their shadows filling the lane this long before… */
     warn: 0.7,
-    /** It flattens anyone this close to where it lands (plus their own size)… */
-    radius: 0.6,
-    /** …for this long (a carrier it lands on is tackled). */
+    /** …and everyone in the lane is flattened for this long (a carrier in it is tackled: FROGGED!). */
     flatTime: 1.2,
   },
   witch: {

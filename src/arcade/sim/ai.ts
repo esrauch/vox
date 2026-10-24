@@ -160,9 +160,7 @@ export function defenderTarget(state: RunState, d: Defender): Vec | null {
       const behind = heading.x === 0 && heading.y === 0 ? v(0, -1) : scale(heading, -1);
       return add(mark.pos, scale(behind, defense.coverTrail));
     }
-    case 'safety':
-    case 'misterFrog':
-    case 'queen': {
+    case 'safety': {
       const deepest = state.field.players
         .filter((p) => p.role !== 'qb')
         .sort((a, b) => b.pos.y - a.pos.y || a.id - b.id)[0];
@@ -231,7 +229,8 @@ export function chooseLane(state: RunState, carrier: Player): number {
     const frogs = state.field.frogLane;
     const inRain =
       frogs !== null &&
-      state.field.frogs.some((f) => f.left > 0) &&
+      state.field.frogDump !== null &&
+      state.field.frogDump > 0 &&
       carrier.pos.y < frogs.to &&
       Math.abs(x - frogs.x) < frogs.half + carrier.radius;
     const score = room - 0.15 * Math.abs(x - carrier.pos.x) - (inRain ? 4 : 0);

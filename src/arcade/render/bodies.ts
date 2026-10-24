@@ -30,13 +30,8 @@ const DEFENDER_MODEL: Readonly<Record<DefenderKind, string>> = {
   zone: 'forest/waller',
   safety: 'forest/safety',
   bat: 'forest/picker',
-  misterFrog: 'bosses/misterFrog',
-  queen: 'bosses/queen',
   crow: 'farm/crow',
 };
-
-/** The Bosses are drawn this many times their model's size (their bodies in the sim match). */
-const BOSS_SCALE = 2;
 
 /** A Witch on her broom (the Candy Kingdom's Safety) rides a little above the turf. */
 const WITCH_HOVER = 0.5;
@@ -188,9 +183,6 @@ export class ArcadeBodies {
     const ghost = b.side === 'team' && b.form === 'ghost';
     const body = new THREE.Mesh(getGeometry(model), ghost ? GHOST_MATERIAL : voxelMaterial);
     body.castShadow = true;
-    if (b.side === 'defense' && (b.kind === 'misterFrog' || b.kind === 'queen')) {
-      body.scale.setScalar(BOSS_SCALE);
-    }
     if (b.side === 'team' && b.form === 'golem') {
       body.scale.set(GOLEM_SHAPE.wide, GOLEM_SHAPE.tall, GOLEM_SHAPE.wide);
     }

@@ -8,7 +8,7 @@ import { PLAYS } from '../content/plays';
 import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
 import { assignMarks } from './ai';
-import { KING_SPOT, drivePropsWithKing } from './props';
+import { BOSS_SPOT, drivePropsWithBoss } from './props';
 import { lineUpDefense, lineUpTeam } from './bodies';
 import { applyPerk, atSpot, bestSpot, noPerks, rollOffer, setSpot, startingRoster } from './team';
 import type {
@@ -20,7 +20,6 @@ import type {
   RosterPlayer,
   RunState,
   Witch,
-  FrogDrop,
   FrogLane,
   RoyalCrows,
 } from './types';
@@ -81,7 +80,7 @@ export function createRun(
       witches: [],
       props: [],
       frogLane: null,
-      frogs: [],
+      frogDump: null,
       hex: false,
       crows: null,
       ball: { at: 'qb' },
@@ -131,7 +130,7 @@ export function setUpDrive(
   state.field = {
     ...state.field,
     witches: witches(state, spec),
-    props: drivePropsWithKing(state.seed, area, index, spec.home ?? false),
+    props: drivePropsWithBoss(state.seed, area, index, spec.boss),
   };
   events.push({ type: 'driveStarted', drive: index, name: spec.name });
   setUpDown(state, events);
@@ -161,24 +160,9 @@ function frogLane(state: RunState): FrogLane {
   return { x: side * (hw - half), half, from: los - f.behind, to: los + f.ahead };
 }
 
-/** Frog Rain at the snap: when and where each frog will land, along the lane. */
-function frogDrops(state: RunState): FrogDrop[] {
-  const lane = state.field.frogLane;
-  if (!lane) return [];
-  const f = arcadeTuning.frogRain;
-  const rng = rngFor(state.seed, 'frogs', state.drivesWon, state.drive.down, state.nextId);
-  const count = Math.floor((f.lasts - f.first) / f.every) + 1;
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    x: lane.x + (2 * rng.next() - 1) * lane.half * 0.8,
-    y: lane.from + rng.next() * (lane.to - lane.from),
-    left: f.first + i * f.every,
-  }));
-}
-
-/** The King's crows, back on his arms for a new down (he stands at KING_SPOT). */
+/** The King's crows, back on his arms for a new down (he stands at BOSS_SPOT). */
 function perchedCrows(): RoyalCrows {
-  return { phase: 'perched', pos: KING_SPOT, left: 0, on: null };
+  return { phase: 'perched', pos: BOSS_SPOT, left: 0, on: null };
 }
 
 /** How many play cards are dealt each down. */
@@ -212,9 +196,9 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     witches: state.field.witches,
     props: state.field.props,
     frogLane: spec.frogRain ? frogLane(state) : null,
-    frogs: [],
+    frogDump: null,
     hex: spec.hex ?? false,
-    crows: spec.home ? perchedCrows() : null,
+    crows: spec.boss === 'king' ? perchedCrows() : null,
     ball: { at: 'qb' },
     lane: 0,
     breakaway: 0,
@@ -283,7 +267,8 @@ function hike(state: RunState, events: ArcadeEvent[]): void {
   if (state.phase !== 'setup' || state.called === null || !play) return;
   state.phase = 'play';
   state.snappedAt = state.time;
-  state.field.frogs = frogDrops(state);
+  // Frog Rain: the frogs are on their way.
+  state.field.frogDump = state.field.frogLane ? arcadeTuning.frogRain.dumpAt : null;
   assignMarks(state);
   events.push({ type: 'snapped' });
   const runner =

@@ -27,7 +27,15 @@ import { moveBodies, separate, touching } from './physics';
 import { pushOutOfProps } from './props';
 import { judgeBreakIt, startBreakIt } from './breakit';
 import { endDown, nextDown } from './run';
-import type { ArcadeEvent, ArcadeResult, BreakKind, Player, RunState, StepInput } from './types';
+import type {
+  ArcadeEvent,
+  ArcadeResult,
+  Body,
+  BreakKind,
+  Player,
+  RunState,
+  StepInput,
+} from './types';
 import { add, dist, len, norm, scale, sub, v } from './vec';
 
 const { contact, field } = arcadeTuning;
@@ -206,38 +214,40 @@ function breakIt(state: RunState, input: StepInput, events: ArcadeEvent[]): void
 }
 
 /**
- * Frog Rain (Mister Frog): each frog's countdown runs only while the play is
- * live; when one lands it flattens whoever is under it, and a carrier it lands
- * on is tackled there. Landed frogs hop off after a moment.
+ * Frog Rain (Mister Frog): the frogs all come down in the lane at once, a
+ * moment into the down (the countdown runs only while the play is live).
+ * Everyone in the lane is flattened, and a carrier in it is tackled there:
+ * FROGGED! Once a down.
  */
 function frogRain(state: RunState, events: ArcadeEvent[]): boolean {
-  const f = arcadeTuning.frogRain;
-  const frogs = state.field.frogs;
-  if (frogs.length === 0) return false;
-  const carrier = carrierOf(state);
-  let tackled = false;
-  for (const frog of frogs) {
-    const before = frog.left;
-    frog.left -= DT;
-    if (before <= 0 || frog.left > 0) continue;
-    const at = v(frog.x, frog.y);
-    const under = [...state.field.players, ...state.field.defenders].filter(
-      (b) =>
-        b.down <= 0 &&
-        !(b.side === 'team' && b.role === 'qb') &&
-        !(b.side === 'defense' && (b.planted || b.kind === 'misterFrog' || b.kind === 'queen')) &&
-        dist(b.pos, at) <= f.radius + b.radius,
-    );
-    for (const b of under) {
-      b.down = f.flatTime;
-      b.vel = v(0, 0);
-      if (b.side === 'defense') b.latch = null;
-    }
-    events.push({ type: 'frogLanded', x: frog.x, y: frog.y, flattened: under.map((b) => b.id) });
-    if (carrier && under.includes(carrier)) tackled = true;
+  const lane = state.field.frogLane;
+  const dump = state.field.frogDump;
+  if (!lane || dump === null) return false;
+  const next = dump - DT;
+  // Keep counting past it (to −1 s) for the show, then stop.
+  state.field.frogDump = next < -1 ? null : next;
+  if (dump <= 0 || next > 0) return false;
+  const inLane = (b: Body): boolean =>
+    Math.abs(b.pos.x - lane.x) <= lane.half + b.radius &&
+    b.pos.y >= lane.from - b.radius &&
+    b.pos.y <= lane.to + b.radius;
+  const under = [...state.field.players, ...state.field.defenders].filter(
+    (b) =>
+      b.down <= 0 &&
+      !(b.side === 'team' && b.role === 'qb') &&
+      !(b.side === 'defense' && b.planted) &&
+      inLane(b),
+  );
+  const flat = arcadeTuning.frogRain.flatTime;
+  for (const b of under) {
+    b.down = flat;
+    b.vel = v(0, 0);
+    if (b.side === 'defense') b.latch = null;
   }
-  state.field.frogs = frogs.filter((frog) => frog.left > -0.6);
-  if (tackled && carrier) {
+  events.push({ type: 'frogRain', flattened: under.map((b) => b.id) });
+  const carrier = carrierOf(state);
+  if (carrier && under.includes(carrier)) {
+    events.push({ type: 'frogged', id: carrier.id });
     tackle(state, carrier, -1, events);
     return true;
   }

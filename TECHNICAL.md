@@ -85,7 +85,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 1. **THROW** fires a bullet along the sweeping aim line.
 2. The carrier picks the emptiest lane every so often (`ai.ts`, `chooseLane`).
 3. Everyone moves toward their target (`ai.ts`) at their own speed; overlaps are pushed apart by weight (`physics.ts`).
-4. **Frog Rain** (Mister Frog's drive): falling frogs count down (only while the play is live) and flatten whoever they land on; a carrier hit is tackled. **The King's crows** (his drive, `royalCrows`): they fly at the ball, land on its holder, and strike (a sack or a tackle) unless SHOO! comes first.
+4. **Frog Rain** (Mister Frog's drive): the frogs come down once a down (the countdown runs only while the play is live), flattening everyone in the lane; a carrier in it is FROGGED (tackled). **The King's crows** (his drive, `royalCrows`): they fly at the ball, land on its holder, and strike (a sack or a tackle) unless SHOO! comes first.
 5. **Contact:** a much heavier blocker pancakes the defender it's on; a defender touching the carrier starts **Break it!**; running into a planted Scarecrow is a tackle.
 6. A carrier dragging tacklers goes down when the drag runs out.
 7. **The pocket:** once its sweeps are done with the ball still at the QB, it's a sack.
@@ -125,7 +125,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
   - `ball.ts`, `embers.ts`: the pumpkin (it is the QB: there's no QB model), its light, and an instanced pool of embers that drift off it, trail it in flight and burst on throws and catches.
   - `sweep.ts`: the sweeping aim line, stopping at the first catch or block a throw now would meet (`aimNow`, from the sim's `aimContact`), and the receiver it stops on (`litPlayers`).
   - `routes.ts`: the called play's routes before the snap.
-  - `frogRain.ts`: Mister Frog's lane on the turf, each frog's shadow, and the frogs falling onto it.
+  - `frogRain.ts`: Mister Frog's lane on the turf, its shadows filling in, and the shower of frogs.
   - `witches.ts`: each Witch on a Broom flying her row, facing her way, with her shadow.
   - `fieldProps.ts`: the props on the field, rebuilt when a new drive lays its own; on the last drive, the pumpkin patch behind the King.
   - `royalCrows.ts`: the King's two crows: on his arms, flying at the ball, flapping over the holder.
@@ -193,7 +193,7 @@ src/content/
 
 - **Each area is data** in `content/defense.ts`: `FOREST`, `CANDY_KINGDOM` and `FARM`, listed in play order in `AREAS` (`areaAt(n)`). An area has an Intro, a Challenge, a Gimmick and a Boss (the same twelve drives every run), each a set of defenders at spots relative to the line of scrimmage, plus Witches, and flags for its Boss's gimmick (`frogRain`, `hex`). Every area adds `defense.perArea` to every defender's stats.
 - **An area's look:** its `biome` (`forest`, `candy` or `farm`) picks the turf colours (`render/field.ts`), the floor and the sideline props (`render/scenery.ts`), each along the area's own stretch of the long field (`biomeAtYard`); its `looks` give a kind of defender its own model there (the Candy Kingdom's Covers are Gingerbread Men, its Safeties Witches), with the kind's rule unchanged.
-- **The King** isn't a defender: on the run's last drive (`home`) he's a prop (`KING` in `sim/props.ts`), and `render/fieldProps.ts` lays the pumpkin patch behind him.
+- **The Bosses** aren't defenders: on its drive (`boss`) each is a prop in the middle of the end zone (`BOSSES`, `BOSS_SPOT` in `sim/props.ts`); on the run's last drive (`home`) `render/fieldProps.ts` lays the pumpkin patch behind the King.
 - **A new defender kind** is an entry in `DEFENDERS`, a case in `ai.ts`'s `defenderTarget` if it moves in a new way, a model in `render/bodies.ts`'s `DEFENDER_MODEL`, and a balance check.
 
 ---
