@@ -83,7 +83,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 
 **One step in play** (the order is in `step.ts`'s header):
 1. **THROW** fires a bullet along the sweeping aim line.
-2. The carrier picks the emptiest lane every so often (`ai.ts`, `chooseLane`).
+2. The carrier picks the emptiest lane every so often (`ai.ts`, `chooseLane`); on a handoff it leans toward its planned route (`field.runPath`, `carrier.pathPull`).
 3. Everyone moves toward their target (`ai.ts`) at their own speed; overlaps are pushed apart by weight (`physics.ts`).
 4. **Frog Rain** (Mister Frog's drive): the frogs come down once a down (the countdown runs only while the play is live), flattening everyone in the lane; a carrier in it is FROGGED (tackled). **The King's crows** (his drive, `royalCrows`): they fly at the ball, land on its holder, and strike (a sack or a tackle) unless SHOO! comes first.
 5. **Contact:** a much heavier blocker pancakes the defender it's on; a defender touching the carrier starts **Break it!**; running into a planted Scarecrow is a tackle.
