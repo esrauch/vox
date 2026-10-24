@@ -24,6 +24,7 @@ import { ArcadeBodies } from './render/bodies';
 import { ArcadeLines, createArcadeTurf } from './render/field';
 import { ArcadeFieldProps } from './render/fieldProps';
 import { ArcadeFrogRain } from './render/frogRain';
+import { ArcadeQueenHex } from './render/queenHex';
 import { ArcadeRoyalCrows } from './render/royalCrows';
 import { ArcadeWitches } from './render/witches';
 import { ArcadeRoutes } from './render/routes';
@@ -115,6 +116,7 @@ export class ArcadeGame {
   private readonly routes: ArcadeRoutes;
   private readonly frogRain: ArcadeFrogRain;
   private readonly royalCrows: ArcadeRoyalCrows;
+  private readonly queenHex: ArcadeQueenHex;
   private readonly fieldProps: ArcadeFieldProps;
   private readonly witches: ArcadeWitches;
   private readonly hud: Hud;
@@ -157,6 +159,7 @@ export class ArcadeGame {
     this.routes = new ArcadeRoutes(scene);
     this.frogRain = new ArcadeFrogRain(scene);
     this.royalCrows = new ArcadeRoyalCrows(scene);
+    this.queenHex = new ArcadeQueenHex(scene);
     this.fieldProps = new ArcadeFieldProps(scene);
     this.witches = new ArcadeWitches(scene);
     this.bodies = new ArcadeBodies(scene);
@@ -262,6 +265,7 @@ export class ArcadeGame {
     this.sweep.update(state, this.origin);
     this.frogRain.update(state, this.origin);
     this.royalCrows.update(state, this.origin);
+    this.queenHex.update(state, this.origin, dt);
     this.controls.setShoo(state.phase === 'play' && state.field.crows?.phase === 'shoo');
     this.fieldProps.update(state, this.origin);
     this.witches.update(state, this.origin);

@@ -155,7 +155,7 @@ export interface Field {
    */
   frogLane: FrogLane | null;
   frogDump: number | null;
-  /** The Queen's Hex (her drive): the aim line shows only a stub, and receivers don't light up. */
+  /** The Queen's Hex (her drive): it pulses (sim/ball.ts, hexedNow); while on, the aim line is a stub and nobody lights up. */
   hex: boolean;
   /** The King's crows (his drive), or null. */
   crows: RoyalCrows | null;

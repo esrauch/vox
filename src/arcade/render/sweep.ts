@@ -4,12 +4,12 @@
  * now would first be caught or batted down (everyone where they stand: it
  * doesn't look ahead in time), or at the bullet's range. The receiver it
  * stops on lights up. It shows only while the QB has the ball on a pass play.
- * The Queen's Hex cuts it to a short purple stub, and nobody lights up.
+ * While the Queen's Hex is on (it pulses), it's a short purple stub and nobody lights up.
  */
 import * as THREE from 'three';
 import { common, hexToNumber, team } from '../../content/palettes';
 import { arcadeTuning } from '../content/tuning';
-import { aimContact, bulletEnd, sweepAngle } from '../sim/ball';
+import { aimContact, bulletEnd, hexedNow, sweepAngle } from '../sim/ball';
 import { qbOf } from '../sim/ai';
 import { canThrow } from '../sim/step';
 import type { RunState } from '../sim/types';
@@ -48,7 +48,7 @@ export class ArcadeSweep {
     // The line stops where a bullet thrown now would first be caught or batted (or at its range);
     // under the Queen's Hex it's only a short purple stub, and you judge the rest yourself.
     const full = aimNow(state)?.at ?? bulletEnd(state, qb.pos, angle);
-    const hexed = state.field.hex;
+    const hexed = hexedNow(state);
     const end = hexed
       ? lerp(qb.pos, full, Math.min(1, arcadeTuning.hex.stub / Math.max(1e-6, dist(qb.pos, full))))
       : full;
@@ -75,7 +75,7 @@ export function aimNow(state: RunState): ReturnType<typeof aimContact> | null {
 /** The receiver who'd catch a bullet thrown right now, with everyone where they stand: it lights up. */
 export function litPlayers(state: RunState): Set<number> {
   // The Queen's Hex hides it.
-  if (state.field.hex) return new Set();
+  if (hexedNow(state)) return new Set();
   const aim = aimNow(state);
   return new Set(aim?.outcome.kind === 'caught' ? [aim.outcome.by.id] : []);
 }

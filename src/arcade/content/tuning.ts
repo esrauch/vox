@@ -186,8 +186,11 @@ export const arcadeTuning = {
     window: 0.6,
   },
   hex: {
-    /** The Queen's Hex: the aim line shows only this much of itself (yards from the pumpkin). */
+    /** The Queen's Hex: while it's on, the aim line shows only this much of itself (yards from the pumpkin)… */
     stub: 3,
+    /** …and it pulses from the snap: clear this long, then hexed this long, over and over (sim seconds). */
+    clear: 1,
+    on: 1.5,
   },
   frogRain: {
     /** The lane runs in from one sideline (either, at random) this share of the way across: never over the pumpkin, so Flip matters. */

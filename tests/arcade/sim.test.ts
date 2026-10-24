@@ -1,7 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PLAYS } from '../../src/arcade/content/plays';
 import { arcadeTuning } from '../../src/arcade/content/tuning';
-import { aimContact, pocketTime, sweepAngle, sweepSpeed } from '../../src/arcade/sim/ball';
+import {
+  aimContact,
+  hexedNow,
+  pocketTime,
+  scanTime,
+  sweepAngle,
+  sweepSpeed,
+} from '../../src/arcade/sim/ball';
 import { physicsOf } from '../../src/arcade/sim/bodies';
 import {
   createRun,
@@ -848,17 +855,39 @@ describe('the Candy Kingdom', () => {
     expect(s.field.hex).toBe(false);
   });
 
-  it("the Queen's Hex: nobody lights up, even a receiver a throw would reach", () => {
-    const s = playState([{ pos: v(0, 8), job: stand(v(0, 8)) }]);
-    const lit = (st: RunState) => {
-      // Point the line straight at the receiver.
-      throwAt(st, v(0, 8));
-      return litPlayers(step(st).state);
+  it("the Queen's Hex pulses from the snap: clear, then on, over and over", () => {
+    const s = playState([]);
+    s.field.hex = true;
+    const at = (t: number) => {
+      const st = structuredClone(s);
+      st.time = st.snappedAt + t;
+      return hexedNow(st);
     };
-    expect(lit(structuredClone(s)).size).toBe(1);
-    const hexed = structuredClone(s);
-    hexed.field.hex = true;
-    expect(lit(hexed).size).toBe(0);
+    const { clear, on } = arcadeTuning.hex;
+    expect(at(clear / 2)).toBe(false);
+    expect(at(clear + on / 2)).toBe(true);
+    expect(at(clear + on + clear / 2)).toBe(false);
+    s.field.hex = false;
+    expect(at(clear + on / 2)).toBe(false);
+  });
+
+  it('while the Hex is on nobody lights up, even a receiver a throw would reach', () => {
+    const s = playState([{ pos: v(0, 8), job: stand(v(0, 8)) }]);
+    s.field.hex = true;
+    // Point the line at the receiver, at a moment the Hex is clear and at one it's on
+    // (the sweep repeats every two passes, so shift the snap by whole cycles).
+    const lit = (wantHexed: boolean) => {
+      for (let k = 0; k < 12; k++) {
+        const st = structuredClone(s);
+        throwAt(st, v(0, 8));
+        st.snappedAt -= k * 2 * scanTime(st);
+        const next = step(st).state;
+        if (hexedNow(next) === wantHexed) return litPlayers(next).size;
+      }
+      throw new Error('no such moment');
+    };
+    expect(lit(false)).toBe(1);
+    expect(lit(true)).toBe(0);
   });
 });
 
