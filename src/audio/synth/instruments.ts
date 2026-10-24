@@ -26,7 +26,8 @@ export type InstrumentId =
   | 'croak'
   | 'caw'
   | 'creak'
-  | 'bubble';
+  | 'bubble'
+  | 'howl';
 
 export interface NoteArgs {
   readonly ctx: BaseAudioContext;
@@ -547,6 +548,34 @@ export const INSTRUMENTS: Record<InstrumentId, (a: NoteArgs) => void> = {
       const o = osc(ctx, 'sine', f, time, time + 0.12);
       o.frequency.exponentialRampToValueAtTime(f * 2.6, time + 0.07);
       o.connect(envelope(ctx, out, time, velocity * 0.4, 0.004, 0.05, 0, 0.001, 0.03));
+    }
+  },
+
+  howl({ ctx, out, time, duration, freqs, velocity }) {
+    // A wolf howl: a breathy tone that swoops up, holds wavering, and sags away.
+    for (const f of freqs) {
+      const end = time + Math.max(0.3, duration);
+      const o = osc(ctx, 'sine', f * 0.8, time, end + 0.3);
+      o.frequency.exponentialRampToValueAtTime(f * 1.5, time + (end - time) * 0.35);
+      o.frequency.setValueAtTime(f * 1.5, time + (end - time) * 0.6);
+      o.frequency.exponentialRampToValueAtTime(f * 0.9, end);
+      const vib = osc(ctx, 'sine', 5, time, end + 0.3);
+      const depth = ctx.createGain();
+      depth.gain.value = f * 0.025;
+      vib.connect(depth).connect(o.frequency);
+      const env = envelope(ctx, out, time, velocity * 0.4, 0.15, 0.3, 0.8, end - time, 0.25);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 2200;
+      o.connect(lp).connect(env);
+      const n = noiseSource(ctx, time, end + 0.3);
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = f * 1.5;
+      bp.Q.value = 3;
+      const breath = ctx.createGain();
+      breath.gain.value = 0.18;
+      n.connect(bp).connect(breath).connect(env);
     }
   },
 
