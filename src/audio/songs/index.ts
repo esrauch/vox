@@ -14,5 +14,5 @@ export const SONGS = [hollowHop, sugarCoven, harvestHoedown, partyAtThePatch, sp
 export const AREA_SONGS = [hollowHop, sugarCoven] as const;
 /** Frederick's Farm's candidates, being auditioned (?farmSong=2 plays the second in the game). */
 export const FARM_SONGS = [harvestHoedown, spookyCow] as const;
-/** The win screen's song. */
-export const WIN_SONG = partyAtThePatch;
+/** Every song the game plays (the others are only on the dev audio board). */
+export const GAME_SONGS = [...AREA_SONGS, ...FARM_SONGS] as const;
