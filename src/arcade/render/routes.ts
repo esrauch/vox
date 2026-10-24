@@ -8,6 +8,7 @@
 import * as THREE from 'three';
 import { common, hexToNumber, team } from '../../content/palettes';
 import { PLAYS } from '../content/plays';
+import { playSlot } from '../content/team';
 import type { Player, RunState, Vec } from '../sim/types';
 import { dist, lerp } from '../sim/vec';
 import { toWorld } from './world';
@@ -56,7 +57,7 @@ export class ArcadeRoutes {
     const handoff = PLAYS[state.play.index]?.handoff;
     for (const p of players) {
       if (p.job.kind !== 'route') continue;
-      const carries = handoff !== undefined && p.slot === handoff;
+      const carries = handoff !== undefined && p.slot === playSlot(handoff, state.play.flipped);
       const material = carries ? this.carry : p.role === 'runner' ? this.run : this.pass;
       const dotGeo = carries ? this.bigDotGeo : this.dotGeo;
       if (carries) {

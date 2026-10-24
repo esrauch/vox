@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **Flip keeps the roster left to right:** mirror partners (the Blockers, the Runners, the outside Catchers) swap assignments, so a flipped handoff goes to the other Runner (before, the first Runner always got it).
 - **2026-10-24:** **Handoffs run their play:** before the snap the Runner who'll take the ball has its route drawn bigger in pumpkin orange, with a ring at its feet; after the handoff the carrier leans toward that route when it picks its lane (it still dodges defenders and props). Running bot with new players: 5.8 yards a run (5.4 without the lean).
 - **2026-10-24:** **The win cutscene:** after the last touchdown, the camera settles on the King with the pumpkin patch behind him; the whole roster, field and bench, dances in staggered rows around Jack (bounces, shuffles and spins), GOT / JACK / BACK slams in, then AGAIN. The intro's title loses its periods (GET JACK BACK). Winning the last drive no longer slides the field origin on (the King and the patch stay put).
 - **2026-10-24:** **The first screen is just PLAY** on the purple backdrop (no title, no field behind it); it goes straight into the intro, now framed twice as far out.

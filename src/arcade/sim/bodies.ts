@@ -11,6 +11,7 @@ import {
   QB_DEPTH,
   ROLE_RADIUS,
   ROSTER_ROLES,
+  playSlot,
 } from '../content/team';
 import { even, plus } from './stats';
 import { playerStats } from './team';
@@ -41,7 +42,8 @@ export function defenderPhysics(stats: Stats, reachBonus: number): ReturnType<ty
 
 /**
  * Your team for a down: the QB behind the line of scrimmage, and the seven
- * lined up with the play's assignments (mirrored if `flipped`). Route
+ * lined up with the play's assignments (mirrored if `flipped`, mirror
+ * partners swapping, so the roster still lines up left to right). Route
  * waypoints become field positions.
  */
 export function lineUpTeam(
@@ -70,9 +72,10 @@ export function lineUpTeam(
   const seven = state.roster.map((p, slot): Player => {
     // The slot decides the position it plays; its stats come with it (and the perks).
     const role = ROSTER_ROLES[slot] ?? p.preferred;
-    const spot = LINEUP[slot] ?? v(0, 0);
+    const k = playSlot(slot, flipped);
+    const spot = LINEUP[k] ?? v(0, 0);
     const start = v(spot.x * mirror, los + spot.y);
-    const a = play.slots[slot] ?? { kind: 'block' };
+    const a = play.slots[k] ?? { kind: 'block' };
     const stats = playerStats(state, slot);
     return {
       id: firstId + 1 + slot,

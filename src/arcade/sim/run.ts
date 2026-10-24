@@ -5,6 +5,7 @@
  */
 import { areaAt, type DefenseSpec } from '../content/defense';
 import { PLAYS } from '../content/plays';
+import { playSlot } from '../content/team';
 import { arcadeTuning } from '../content/tuning';
 import { rngFor } from './random';
 import { assignMarks } from './ai';
@@ -276,7 +277,9 @@ function hike(state: RunState, events: ArcadeEvent[]): void {
   const runner =
     play.handoff === undefined
       ? undefined
-      : state.field.players.find((p) => p.slot === play.handoff);
+      : state.field.players.find(
+          (p) => p.slot === playSlot(play.handoff ?? -1, state.play.flipped),
+        );
   if (!runner) return;
   const hole = runner.job.kind === 'route' ? runner.job.to[runner.job.to.length - 1] : undefined;
   // It keeps its planned route in mind: it leans toward it when it picks its lane (ai.ts).

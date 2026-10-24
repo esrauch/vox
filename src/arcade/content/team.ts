@@ -26,6 +26,17 @@ export const LINEUP: readonly { readonly x: number; readonly y: number }[] = [
   { x: 4.2, y: -1.2 },
 ];
 
+/**
+ * Flip mirrors the play, and mirror partners (the two Blockers, the two
+ * Runners, the two outside Catchers) swap assignments, so the roster still
+ * lines up left to right: on a flipped play, roster slot `slot` runs the
+ * play's assignment for this slot (and the other way round).
+ */
+const PARTNER: readonly number[] = [1, 0, 3, 2, 5, 4, 6];
+export function playSlot(slot: number, flipped: boolean): number {
+  return flipped ? (PARTNER[slot] ?? slot) : slot;
+}
+
 /** The QB lines up this far behind the line of scrimmage. */
 export const QB_DEPTH = 4;
 

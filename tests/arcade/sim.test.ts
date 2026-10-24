@@ -102,7 +102,37 @@ describe('a run', () => {
       st.field.players.flatMap((p) =>
         p.job.kind === 'route' ? [p.job.to[p.job.to.length - 1]!.x] : [],
       );
-    expect(routeEnds(flipped)).toEqual(routeEnds(called).map((x) => -x));
+    const sorted = (xs: number[]) => [...xs].sort((a, b) => a - b);
+    expect(sorted(routeEnds(flipped))).toEqual(sorted(routeEnds(called).map((x) => -x)));
+    // The roster still lines up left to right: the mirror pairs keep their sides
+    // (only the slot Catcher, who has no partner, crosses over).
+    for (const p of flipped.field.players.filter((q) => q.slot >= 0 && q.slot < 6)) {
+      const before = called.field.players.find((q) => q.slot === p.slot)!;
+      expect(p.pos.x).toBeCloseTo(before.pos.x);
+    }
+  });
+
+  it('Flip hands the ball to the other Runner', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      const s = createRun(seed);
+      const card = runCard(s);
+      if (card < 0) continue;
+      const called = dispatch(s, { type: 'call', hand: card }).state;
+      const carrierSlot = (st: RunState) => {
+        const r = dispatch(st, { type: 'hike' }).state;
+        const ball = r.field.ball;
+        return ball.at === 'carried'
+          ? r.field.players.find((p) => p.id === ball.by)?.slot
+          : undefined;
+      };
+      const plain = carrierSlot(called);
+      const flipped = carrierSlot(dispatch(called, { type: 'flip' }).state);
+      expect(plain).toBeDefined();
+      expect(flipped).toBeDefined();
+      expect(flipped).not.toBe(plain);
+      return;
+    }
+    throw new Error('no handoff card dealt');
   });
 
   it('a handoff card gives its Runner the ball at the hike', () => {

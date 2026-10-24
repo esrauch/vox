@@ -81,7 +81,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 **Every input is timing, never aiming.** Pick a play, then one tap at the right moment, then one more when you're grabbed.
 
-1. **Call a play: three cards, drawn at random** from the playbook. **Tap a card** and its routes are drawn on the field (tap another to switch); **Flip** mirrors it toward the other side (the defenses are lopsided). Then **HIKE!** starts the play.
+1. **Call a play: three cards, drawn at random** from the playbook. **Tap a card** and its routes are drawn on the field (tap another to switch); **Flip** mirrors it toward the other side (the defenses are lopsided). Your roster still lines up left to right: the two Blockers, the two Runners and the two outside Catchers swap jobs, so on a flipped handoff the other Runner takes the ball. Then **HIKE!** starts the play.
 
    | Play | What happens |
    |---|---|
