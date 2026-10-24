@@ -43,9 +43,14 @@ export class MusicPlayer {
 
   /**
    * Start every stem so that `beatInLoop` beats into the song lands exactly at
-   * context time `time`.
+   * context time `time`; with `fadeIn`, silent until `fadeIn.at`, then
+   * rising to full over `fadeIn.seconds`.
    */
-  start(time: number, beatInLoop = 0): void {
+  start(
+    time: number,
+    beatInLoop = 0,
+    fadeIn?: { readonly at: number; readonly seconds: number },
+  ): void {
     this.stop();
     const loop = loopSeconds(this.song);
     const offset = ((((beatInLoop * 60) / this.song.bpm) % loop) + loop) % loop;
@@ -56,10 +61,25 @@ export class MusicPlayer {
       source.buffer = buffer;
       source.loop = true;
       const gain = this.ctx.createGain();
+      if (fadeIn) {
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.setValueAtTime(0, fadeIn.at);
+        gain.gain.linearRampToValueAtTime(1, fadeIn.at + fadeIn.seconds);
+      }
       source.connect(gain).connect(this.mixer.music);
       source.start(time, offset);
       this.voices.push({ stem: id, source, gain });
     }
+  }
+
+  /** Fade every stem out over `seconds` from context time `at`, then stop (a crossfade's other half). */
+  fadeOut(at: number, seconds: number): void {
+    for (const v of this.voices) {
+      v.gain.gain.setValueAtTime(1, at);
+      v.gain.gain.linearRampToValueAtTime(0, at + seconds);
+      v.source.stop(at + seconds + 0.05);
+    }
+    this.voices = [];
   }
 
   stop(fade = 0): void {

@@ -27,6 +27,8 @@ import { ArcadeFrogRain } from './render/frogRain';
 import { ArcadeIntro } from './render/intro';
 import { ArcadeOutro } from './render/outro';
 import { BOSS_SPOT } from './sim/props';
+import { AREA_SONGS, WIN_SONG } from '../audio/songs';
+import type { Song } from '../audio/synth/render';
 import { ArcadeQueenCrown } from './render/queenCrown';
 import { ArcadeRoyalCrows } from './render/royalCrows';
 import { ArcadeWitches } from './render/witches';
@@ -239,6 +241,8 @@ export class ArcadeGame {
   private frame(now: number): void {
     const dt = this.lastFrame === null ? 0 : Math.min(0.1, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
+    // Each area has its song (the intro plays the first's), and the win screen its own.
+    this.conductor.setSong(this.songNow());
     // The intro plays with the game held still; when it ends it crossfades into the first drive.
     if (this.intro) {
       const done = this.intro.update(dt, this.view.camera, this.view.canvas);
@@ -562,13 +566,19 @@ export class ArcadeGame {
     else this.hud.setPrompt(null, null);
   }
 
+  /** The song for now: the win screen's during the win cutscene, otherwise the area's. */
+  private songNow(): Song {
+    if (this.outro) return WIN_SONG;
+    return AREA_SONGS[Math.min(this.state.drive.area, AREA_SONGS.length - 1)] ?? WIN_SONG;
+  }
+
   private async onAction(): Promise<void> {
     this.conductor.play('uiClick');
     const { phase } = this.state;
     if (!this.conductor.started) {
       // The music starts, then the intro plays (once a game: AGAIN goes straight to the field).
       this.startScreen.remove();
-      await this.conductor.start();
+      await this.conductor.start(this.songNow());
       if (this.jumpToWin) {
         this.skipToWin();
         this.syncHud();

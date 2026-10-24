@@ -238,6 +238,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **Squash and stretch** on everything; the ball spins; dust and leaves kick up.
 - **Sound on every contact:** crunches, squeaks, rattles, howls, and the crowd reacting.
 - **Haptics** on the snap, the throw, the catch and every hit.
+- **Four songs, one per stretch of the run,** all on the same beat so each crossfades into the next in time: **Hollow Hop** (spooky campfire folk: a picked guitar, a theremin, a music box, a frog) for the intro and the Forest; **Sugar Coven** (a twisted carnival: calliope, oom-pah tuba, harpsichord) in the Candy Kingdom; **Harvest Moon Hoedown** (spooky bluegrass: banjo rolls, a fiddle, stomps and claps, a crow) on the Farm; and **The Pumpkin Mash** (a '60s doo-wop monster-dance homage: piano triplets, an "ooh-wah" choir, a honking sax) for the win screen. The song changes when a new area starts, crossfading over two bars from a bar line.
 - **The music is the soundtrack, and juice:** big hits and celebrations land on the beat when they can, the crowd claps along. **There's no rhythm gameplay**: nothing you do has to be on the beat.
 
 ## Reading the Field

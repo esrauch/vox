@@ -4,7 +4,27 @@
  * audio context (usually an OfflineAudioContext while rendering a stem).
  */
 
-export type InstrumentId = 'kick' | 'snare' | 'hat' | 'bass' | 'organ' | 'lead' | 'pluck';
+export type InstrumentId =
+  | 'kick'
+  | 'snare'
+  | 'hat'
+  | 'clap'
+  | 'brush'
+  | 'bass'
+  | 'organ'
+  | 'lead'
+  | 'pluck'
+  | 'theremin'
+  | 'banjo'
+  | 'fiddle'
+  | 'calliope'
+  | 'glock'
+  | 'tuba'
+  | 'choir'
+  | 'piano'
+  | 'sax'
+  | 'croak'
+  | 'caw';
 
 export interface NoteArgs {
   readonly ctx: BaseAudioContext;
@@ -200,6 +220,321 @@ export const INSTRUMENTS: Record<InstrumentId, (a: NoteArgs) => void> = {
     for (const f of freqs) {
       const o = osc(ctx, 'triangle', f, time, time + duration + 0.3);
       o.connect(envelope(ctx, out, time, velocity * 0.4, 0.002, 0.18, 0.2, duration * 0.6, 0.1));
+    }
+  },
+
+  clap({ ctx, out, time, velocity }) {
+    // Three quick noise slaps and a short room tail.
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 1300;
+    bp.Q.value = 1.2;
+    bp.connect(out);
+    for (const [at, level, decay] of [
+      [0, 0.8, 0.01],
+      [0.011, 0.7, 0.01],
+      [0.022, 1, 0.12],
+    ] as const) {
+      const n = noiseSource(ctx, time + at, time + at + 0.3);
+      n.connect(envelope(ctx, bp, time + at, velocity * level, 0.001, decay, 0, 0.001, decay));
+    }
+  },
+
+  brush({ ctx, out, time, velocity }) {
+    // A brushed snare: a soft swish of filtered noise. An accent (X) is a longer sweep.
+    const long = velocity >= 1;
+    const n = noiseSource(ctx, time, time + 0.5);
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(2600, time);
+    bp.frequency.linearRampToValueAtTime(4200, time + (long ? 0.25 : 0.08));
+    bp.Q.value = 0.7;
+    n.connect(bp).connect(
+      envelope(
+        ctx,
+        out,
+        time,
+        velocity * 0.45,
+        long ? 0.04 : 0.006,
+        long ? 0.25 : 0.09,
+        0,
+        0.001,
+        0.08,
+      ),
+    );
+  },
+
+  theremin({ ctx, out, time, duration, freqs, velocity }) {
+    // A sine with a wide, slow-blooming vibrato and a soft swell: the B-movie wail.
+    for (const f of freqs) {
+      const o = osc(ctx, 'sine', f, time, time + duration + 0.5);
+      const o2 = osc(ctx, 'triangle', f * 2, time, time + duration + 0.5);
+      const vib = osc(ctx, 'sine', 5.2, time, time + duration + 0.5);
+      const depth = ctx.createGain();
+      depth.gain.setValueAtTime(f * 0.004, time);
+      depth.gain.linearRampToValueAtTime(f * 0.022, time + Math.min(0.5, duration));
+      vib.connect(depth);
+      depth.connect(o.frequency);
+      const d2 = ctx.createGain();
+      d2.gain.value = 2;
+      depth.connect(d2).connect(o2.frequency);
+      const env = envelope(ctx, out, time, velocity * 0.42, 0.07, 0.2, 0.85, duration * 0.95, 0.18);
+      o.connect(env);
+      const soft = ctx.createGain();
+      soft.gain.value = 0.12;
+      o2.connect(soft).connect(env);
+    }
+  },
+
+  banjo({ ctx, out, time, duration, freqs, velocity }) {
+    // A bright, nasal pluck that dies fast: a sawtooth through a snapping filter.
+    for (const f of freqs) {
+      const o = osc(ctx, 'sawtooth', f, time, time + duration + 0.3);
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.Q.value = 1.4;
+      bp.frequency.setValueAtTime(Math.min(9000, f * 6), time);
+      bp.frequency.setTargetAtTime(f * 2, time, 0.05);
+      o.connect(bp).connect(
+        envelope(ctx, out, time, velocity * 0.55, 0.001, 0.12, 0.08, 0.05, 0.1),
+      );
+    }
+  },
+
+  fiddle({ ctx, out, time, duration, freqs, velocity }) {
+    // A bowed string: a slurred attack, a rich sawtooth through a body resonance, and vibrato.
+    for (const f of freqs) {
+      const vib = osc(ctx, 'sine', 6.3, time, time + duration + 0.3);
+      const depth = ctx.createGain();
+      depth.gain.setValueAtTime(0, time);
+      depth.gain.linearRampToValueAtTime(f * 0.009, time + Math.min(0.25, duration));
+      vib.connect(depth);
+      const body = ctx.createBiquadFilter();
+      body.type = 'peaking';
+      body.frequency.value = 2400;
+      body.gain.value = 6;
+      body.Q.value = 1.5;
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 5200;
+      body
+        .connect(lp)
+        .connect(envelope(ctx, out, time, velocity * 0.24, 0.035, 0.1, 0.8, duration * 0.92, 0.08));
+      for (const detune of [-5, 5]) {
+        const o = osc(ctx, 'sawtooth', f, time, time + duration + 0.3);
+        o.detune.value = detune;
+        depth.connect(o.frequency);
+        o.connect(body);
+      }
+    }
+  },
+
+  calliope({ ctx, out, time, duration, freqs, velocity }) {
+    // A steam whistle: a breathy, fluttering flute tone with its octave on top.
+    for (const f of freqs) {
+      const vib = osc(ctx, 'sine', 7.5, time, time + duration + 0.3);
+      const depth = ctx.createGain();
+      depth.gain.value = f * 0.008;
+      vib.connect(depth);
+      const env = envelope(
+        ctx,
+        out,
+        time,
+        (velocity * 0.3) / Math.sqrt(freqs.length),
+        0.015,
+        0.08,
+        0.75,
+        duration * 0.85,
+        0.06,
+      );
+      for (const [mult, level] of [
+        [1, 1],
+        [2, 0.35],
+        [3, 0.12],
+      ] as const) {
+        const o = osc(ctx, 'sine', f * mult, time, time + duration + 0.3);
+        depth.connect(o.frequency);
+        const g = ctx.createGain();
+        g.gain.value = level;
+        o.connect(g).connect(env);
+      }
+      const n = noiseSource(ctx, time, time + duration + 0.3);
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = f * 2;
+      bp.Q.value = 4;
+      const breath = ctx.createGain();
+      breath.gain.value = 0.25;
+      n.connect(bp).connect(breath).connect(env);
+    }
+  },
+
+  glock({ ctx, out, time, freqs, velocity }) {
+    // A struck bar: a pure tone with a bright, inharmonic ping that rings off.
+    for (const f of freqs) {
+      osc(ctx, 'sine', f, time, time + 1.6).connect(
+        envelope(ctx, out, time, velocity * 0.3, 0.001, 1.2, 0, 0.001, 0.4),
+      );
+      osc(ctx, 'sine', f * 2.76, time, time + 0.5).connect(
+        envelope(ctx, out, time, velocity * 0.12, 0.001, 0.25, 0, 0.001, 0.1),
+      );
+      osc(ctx, 'sine', f * 5.4, time, time + 0.2).connect(
+        envelope(ctx, out, time, velocity * 0.05, 0.001, 0.08, 0, 0.001, 0.05),
+      );
+    }
+  },
+
+  tuba({ ctx, out, time, duration, freqs, velocity }) {
+    // A round brass bass: a soft square, filtered dark, with a little lip at the start.
+    for (const f of freqs) {
+      const o = osc(ctx, 'square', f, time, time + duration + 0.3);
+      o.frequency.setValueAtTime(f * 0.97, time);
+      o.frequency.linearRampToValueAtTime(f, time + 0.04);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.Q.value = 1;
+      lp.frequency.setValueAtTime(380, time);
+      lp.frequency.linearRampToValueAtTime(900, time + 0.05);
+      lp.frequency.setTargetAtTime(500, time + 0.05, 0.1);
+      o.connect(lp).connect(
+        envelope(ctx, out, time, velocity * 0.6, 0.02, 0.12, 0.7, duration * 0.8, 0.07),
+      );
+    }
+  },
+
+  choir({ ctx, out, time, duration, freqs, velocity }) {
+    // "Ooh": detuned sawtooths through two vowel formants, swelling in slowly.
+    for (const f of freqs) {
+      const env = envelope(
+        ctx,
+        out,
+        time,
+        (velocity * 0.5) / Math.sqrt(freqs.length),
+        0.12,
+        0.3,
+        0.85,
+        duration * 0.95,
+        0.25,
+      );
+      const formants = [
+        [380, 6, 1],
+        [900, 8, 0.45],
+      ] as const;
+      const mix = ctx.createGain();
+      mix.gain.value = 1;
+      for (const [freq, q, level] of formants) {
+        const bp = ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = freq;
+        bp.Q.value = q;
+        const g = ctx.createGain();
+        g.gain.value = level;
+        mix.connect(bp).connect(g).connect(env);
+      }
+      for (const detune of [-9, 0, 9]) {
+        const o = osc(ctx, 'sawtooth', f, time, time + duration + 0.5);
+        o.detune.value = detune;
+        o.connect(mix);
+      }
+    }
+  },
+
+  piano({ ctx, out, time, duration, freqs, velocity }) {
+    // A honky-tonk upright: two slightly detuned bright tones with a hammer's decay.
+    for (const f of freqs) {
+      const env = envelope(
+        ctx,
+        out,
+        time,
+        (velocity * 0.32) / Math.sqrt(freqs.length),
+        0.002,
+        0.5,
+        0.15,
+        duration * 0.9,
+        0.15,
+      );
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.setValueAtTime(Math.min(10000, f * 8), time);
+      lp.frequency.setTargetAtTime(f * 3, time, 0.2);
+      lp.connect(env);
+      for (const [type, detune] of [
+        ['triangle', -7],
+        ['sawtooth', 7],
+      ] as const) {
+        const o = osc(ctx, type, f, time, time + duration + 0.4);
+        o.detune.value = detune;
+        const g = ctx.createGain();
+        g.gain.value = type === 'sawtooth' ? 0.35 : 1;
+        o.connect(g).connect(lp);
+      }
+    }
+  },
+
+  sax({ ctx, out, time, duration, freqs, velocity }) {
+    // A honking tenor: a reedy square with a bit of growl, a nasal formant and a late vibrato.
+    for (const f of freqs) {
+      const vib = osc(ctx, 'sine', 5.5, time, time + duration + 0.3);
+      const depth = ctx.createGain();
+      depth.gain.setValueAtTime(0, time);
+      depth.gain.setValueAtTime(0, time + Math.min(0.2, duration * 0.5));
+      depth.gain.linearRampToValueAtTime(f * 0.01, time + Math.min(0.45, duration));
+      vib.connect(depth);
+      const o = osc(ctx, 'square', f, time, time + duration + 0.3);
+      o.frequency.setValueAtTime(f * 0.94, time);
+      o.frequency.linearRampToValueAtTime(f, time + 0.05);
+      depth.connect(o.frequency);
+      const growl = osc(ctx, 'sawtooth', f * 0.5, time, time + duration + 0.3);
+      const growlLevel = ctx.createGain();
+      growlLevel.gain.value = 0.2;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1150;
+      bp.Q.value = 0.9;
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 3800;
+      o.connect(bp);
+      growl.connect(growlLevel).connect(bp);
+      bp.connect(lp).connect(
+        envelope(ctx, out, time, velocity * 0.5, 0.02, 0.15, 0.75, duration * 0.9, 0.07),
+      );
+    }
+  },
+
+  croak({ ctx, out, time, freqs, velocity }) {
+    // A frog: a buzzy blip that drops in pitch, ribbit-ribbit (two quick pulses).
+    for (const f of freqs) {
+      for (const at of [0, 0.07]) {
+        const o = osc(ctx, 'square', f * 1.6, time + at, time + at + 0.09);
+        o.frequency.exponentialRampToValueAtTime(f, time + at + 0.06);
+        const lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.value = 900;
+        lp.Q.value = 5;
+        o.connect(lp).connect(
+          envelope(ctx, out, time + at, velocity * 0.5, 0.003, 0.05, 0, 0.001, 0.03),
+        );
+      }
+    }
+  },
+
+  caw({ ctx, out, time, freqs, velocity }) {
+    // A crow: a raspy, falling squawk.
+    for (const f of freqs) {
+      const o = osc(ctx, 'sawtooth', f, time, time + 0.35);
+      o.frequency.setValueAtTime(f * 1.15, time);
+      o.frequency.exponentialRampToValueAtTime(f * 0.75, time + 0.28);
+      const n = noiseSource(ctx, time, time + 0.35);
+      const rasp = ctx.createGain();
+      rasp.gain.value = 0.5;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1500;
+      bp.Q.value = 2.5;
+      o.connect(bp);
+      n.connect(rasp).connect(bp);
+      bp.connect(envelope(ctx, out, time, velocity * 0.55, 0.01, 0.12, 0.6, 0.18, 0.06));
     }
   },
 };

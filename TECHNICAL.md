@@ -164,7 +164,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 
 Everything goes through **one `AudioContext`**, with a small mixer: `master → (music bus, SFX bus, UI bus)`, each with its own gain and a light compressor on the master (`audio/mixer.ts`, levels in `src/content/tuning.ts`).
 
-- **The music is the soundtrack and juice, never a clock.** `Conductor` (`src/game/conductor.ts`) starts the song on the PLAY tap (browsers only start audio from a gesture) and loops it; nothing in play waits for the beat. Pausing suspends the context; RESUME carries on.
+- **The music is the soundtrack and juice, never a clock.** `Conductor` (`src/game/conductor.ts`) starts a song on the PLAY tap (browsers only start audio from a gesture) and loops it; nothing in play waits for the beat. `setSong` switches songs: the game asks every frame for the area's song (`AREA_SONGS`) or, in the win cutscene, `WIN_SONG`; a new one starts in step with the beat clock, silent, and the two crossfade over two bars from the next bar line (`MusicPlayer.start`'s `fadeIn`, `fadeOut`). Pausing suspends the context; RESUME carries on.
 - **Songs are data,** not audio files: patterns per stem in a compact notation (`audio/synth/notes.ts`), rendered to `AudioBuffer`s with an `OfflineAudioContext` at load and played as seamless loops. All songs share one grid (`SONG_GRID`: 120 BPM, 8-bar loops, A minor), so any two can crossfade at any moment.
 - **Sound effects** are sfxr-style parameter sets (`audio/sfx.ts`), rendered at load, with voice limits and small random pitch variation. The game plays them through `Conductor.play(id)` from its event handler.
 - **Samples** (public-domain or CC0) are allowed for things synthesis does badly: crowds, cheers, voices.
@@ -403,7 +403,7 @@ Everything a future session (human or Claude) needs to carry on without the orig
 
 ### How to make audio
 
-- **Songs** are TypeScript data (`src/audio/songs/*.ts`), one string per bar per stem: melodic tokens (`A3`, `A3+C4+E4`, `-` hold, `.` rest) or drum steps (`x`, `X` accent, `.`). `steps` per bar is 8 or 16 (**12 for a triplet swing**). `validateSong` reports errors by stem and bar. Every song shares `SONG_GRID` (120 BPM, 4/4, 8 bars) in A minor, so any two crossfade at any moment; keep new songs near the others' loudness (about −17 to −14 dB RMS).
+- **Songs** are TypeScript data (`src/audio/songs/*.ts`), one string per bar per stem: melodic tokens (`A3`, `A3+C4+E4`, `-` hold, `.` rest) or drum steps (`x`, `X` accent, `.`). `steps` per bar is 8 or 16 (**12 for a triplet swing**). `validateSong` reports errors by stem and bar. Every song shares `SONG_GRID` (120 BPM, 4/4, 8 bars) in A minor (The Pumpkin Mash is in A major: same root), so any two crossfade at any moment; the synth's voices include a theremin, banjo, fiddle, calliope, glockenspiel, tuba, choir, piano, sax, clap, brushes, a frog croak and a crow caw; keep new songs near the others' loudness (about −17 to −14 dB RMS).
 - **SFX** are entries in `SFX` (`src/audio/sfx.ts`): wave or noise, frequency slide, attack/decay, an optional filter sweep, arpeggio notes, `maxVoices`, `jitter`.
 - **Check** with `npm run render-audio`: songs peak around −3 dBFS with a clean loop seam; effects roughly −7 to −16 dBFS peak. **A human must listen** before calling anything done.
 

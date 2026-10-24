@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { noteToFreq, parseDrumBar, parseMelodicBar, rep } from '../../src/audio/synth/notes';
-import { SONGS, SONG_GRID, spookySurf } from '../../src/audio/songs';
+import { SONGS, SONG_GRID, hollowHop } from '../../src/audio/songs';
 import { validateSong } from '../../src/audio/synth/render';
 import { encodeWav, levels } from '../../src/audio/wav';
 
@@ -82,8 +82,8 @@ describe('songs', () => {
 
   it('catches a bar with the wrong number of steps', () => {
     const broken = {
-      ...spookySurf,
-      stems: [{ ...spookySurf.stems[0]!, bars: ['x...', ...spookySurf.stems[0]!.bars.slice(1)] }],
+      ...hollowHop,
+      stems: [{ ...hollowHop.stems[0]!, bars: ['x...', ...hollowHop.stems[0]!.bars.slice(1)] }],
       layers: { setup: [], play: [] },
     };
     expect(() => validateSong(broken)).toThrow(/kick bar 1/);

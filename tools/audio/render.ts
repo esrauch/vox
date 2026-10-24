@@ -4,7 +4,7 @@
  * (TECHNICAL.md §13). A human still listens before anything ships.
  *
  *   npm run render-audio                     the full mix of every song, and every sfx
- *   npm run render-audio -- song:spookySurf stem:spookySurf/lead sfx:chant
+ *   npm run render-audio -- song:hollowHop stem:hollowHop/theremin sfx:chant
  *
  * Writes previews/audio/<name>.wav and .png. Uses the system Chrome through
  * playwright-core (OfflineAudioContext only exists in browsers).

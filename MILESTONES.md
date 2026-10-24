@@ -19,7 +19,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [x] **Your team:** humans 50 / 50 / 50; Golem, Werewolf and Ghost as stat trades, each with its model; Golems the only linebacker build; pixel portraits.
 - [x] **Rendering:** the third-person follow camera that always fits both sidelines; the pumpkin ball as QB and light, with embers; catch-range and reach rings; the forest scenery.
 - [x] **UI:** the retro pixel HUD and controls, the self-hosted Creepster font.
-- [x] **Audio:** the synth, the mixer, the sound effects, four song loops on one shared grid (Spooky Surf is in the game).
+- [x] **Audio:** the synth, the mixer, the sound effects, four song loops on one shared grid, one per area plus the win screen (2026-10-24).
 - [x] **Balance runs:** `npm run balance:arcade` with a practised bot (passing well, BAD in Break it! about one time in ten).
 
 ---
@@ -73,7 +73,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Loose Ends
 
-- [ ] **Listen to the three waiting song loops** (Graveyard Shuffle, Midnight Chase, Skeleton Stomp) and decide which to keep.
+- [ ] **Listen to the four songs** (Hollow Hop, Sugar Coven, Harvest Moon Hoedown, The Pumpkin Mash) and the crossfades between them.
 - [ ] **Push** `main` (the user pushes), and delete the merged branches `design/arcade` and `design/roster-stats`.
 - [ ] **The refactors** listed in TECHNICAL.md §22.
 
@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **Four new songs, one per stretch of the run:** Hollow Hop (intro and Forest), Sugar Coven (Candy Kingdom), Harvest Moon Hoedown (Farm), The Pumpkin Mash (win screen), all 8 bars on the shared 120 BPM grid; the song crossfades over two bars from a bar line when the area changes. Thirteen new synth voices (theremin, banjo, fiddle, calliope, glock, tuba, choir, piano, sax, clap, brush, croak, caw). The old four songs are gone. Levels: −15.6 to −16.9 dB RMS, peaks −2.3 to −4.9 dBFS, clean loop seams.
 - **2026-10-24:** **The Queen's crown glows again,** pulsing slowly, just for looks. **The King has two pairs of crows:** the second pair takes off 0.8 s after the first is shooed or misses, and needs its own tap; the button now says **SHOO CROWS!** (SHOO never counts toward the two Break it!s a down).
 - **2026-10-24:** **Royal Decree replaces the Queen's Hex:** each down on her drive one of the three cards is banned (greyed, a red BANNED seal; tapping it pops BY ROYAL DECREE!). The Hex (the stub aim line, no lights, the glowing crown) is gone. **Pancakes last twice as long** (2.4 s).
 - **2026-10-24:** **Mister Frog hops** on the spot (a squat, a stretch up, a landing). **Bigger embers:** more of them, larger (one in five a flame chunk), white-hot at birth, living longer, bigger bursts; and in both cutscenes (off Jack, a burst when he's picked up, behind each title word, and a splash at each of his bounces in the win dance).
