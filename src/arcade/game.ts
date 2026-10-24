@@ -25,6 +25,8 @@ import { ArcadeLines, createArcadeTurf } from './render/field';
 import { ArcadeFieldProps } from './render/fieldProps';
 import { ArcadeFrogRain } from './render/frogRain';
 import { ArcadeIntro } from './render/intro';
+import { ArcadeOutro } from './render/outro';
+import { BOSS_SPOT } from './sim/props';
 import { ArcadeQueenHex } from './render/queenHex';
 import { ArcadeRoyalCrows } from './render/royalCrows';
 import { ArcadeWitches } from './render/witches';
@@ -137,6 +139,8 @@ export class ArcadeGame {
   private swapFrom: number | null = null;
   /** The first screen (just PLAY), until it's tapped. */
   private readonly startScreen: HTMLElement;
+  /** The win cutscene, after the last touchdown, until AGAIN. */
+  private outro: ArcadeOutro | null = null;
   /** The opening cutscene, while it plays (after the first PLAY). */
   private intro: ArcadeIntro | null = null;
   /** Where the camera looks (field yards, smoothed). */
@@ -228,6 +232,14 @@ export class ArcadeGame {
       }
       return;
     }
+    // The win cutscene: dancing until AGAIN (offered once the words have landed).
+    if (this.outro) {
+      const wasReady = this.outro.ready;
+      this.outro.update(dt, this.view.camera);
+      this.view.render();
+      if (this.outro.ready !== wasReady) this.syncHud();
+      return;
+    }
     if (this.conductor.started && !this.paused) {
       this.accumulator += dt * TIME_SCALE;
       while (this.accumulator >= DT) {
@@ -282,7 +294,11 @@ export class ArcadeGame {
 
   private after(events: readonly ArcadeEvent[], prev: RunState): void {
     // A won drive marches on: the new drive's 0 is the old one's first-down line.
-    if (events.some((e) => e.type === 'driveWon')) this.origin += prev.drive.firstDown;
+    // A won drive marches on: the new drive's 0 is the old one's first-down line (not after the last).
+    if (events.some((e) => e.type === 'driveWon') && this.state.phase !== 'won') {
+      this.origin += prev.drive.firstDown;
+    }
+    if (this.state.phase === 'won' && !this.outro) this.startOutro();
     this.react(events, prev);
     if (events.length > 0 || this.state.phase !== prev.phase) this.syncHud();
   }
@@ -471,6 +487,14 @@ export class ArcadeGame {
   }
 
   private syncHud(): void {
+    if (this.outro) {
+      // Over the win: just AGAIN, once the words are in.
+      this.hud.setTop('', null);
+      this.hud.setHand(null, null);
+      this.hud.setDraft(null);
+      this.hud.setPrompt(null, this.outro.ready ? 'AGAIN' : null);
+      return;
+    }
     if (this.intro) {
       // Nothing over the intro.
       this.hud.setTop('', null);
@@ -523,6 +547,12 @@ export class ArcadeGame {
     } else if (phase === 'setup') {
       this.act({ type: 'hike' });
     } else if (phase === 'over' || phase === 'won') {
+      if (this.outro) {
+        this.outro.dispose();
+        this.outro = null;
+        this.bodies.setVisible(true);
+        this.ball.setVisible(true);
+      }
       this.seed++;
       this.state = createRun(this.seed, firstRoster(this.monsters), this.startArea);
       this.origin = this.startOrigin();
@@ -535,6 +565,17 @@ export class ArcadeGame {
   /** Where a run's first drive sits on the long field: past the areas it skipped. */
   private startOrigin(): number {
     return this.state.drive.area * DRIVE_KINDS.length * arcadeTuning.drive.distance;
+  }
+
+  /** The win: the field's cast steps aside and the whole roster dances in front of the King. */
+  private startOutro(): void {
+    const king = toWorld(BOSS_SPOT, this.origin);
+    const cast = [...this.state.roster, ...this.state.bench].map((p) => p.kind);
+    this.bodies.setVisible(false);
+    this.ball.setVisible(false);
+    this.outro = new ArcadeOutro(this.view.scene, this.uiRoot, king, cast, (id) =>
+      this.conductor.play(id),
+    );
   }
 
   private pause(): void {

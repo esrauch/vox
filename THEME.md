@@ -19,7 +19,7 @@ Inspirations: *Retro Bowl* (pocket-sized arcade football), *Crossy Road* (feel, 
 **Jack is the pumpkin ball,** and he wants to go home to his patch. That's all the plot there is, and it's told in two tiny cutscenes:
 
 - **At the start:** Jack bounces up to a football team and asks for help getting back to his patch. A few seconds, then the first snap.
-- **At the end:** in the pumpkin patch, everyone dances: your team, Jack, and every defender you played through, Bosses included.
+- **At the end:** in front of the King, with the pumpkin patch behind him, your whole team (the field and the bench) dances around Jack: GOT JACK BACK.
 
 The way home crosses three places, each with a Boss in a hat of its own: **Mister Frog** (a top hat) in the Forest, **the Queen** (a witch twice the size of any other, in a crown) in the Candy Kingdom, and **the King** (a scarecrow in a crown) at the Farm, by the patch. Nobody explains why they're in the way; they just are.
 

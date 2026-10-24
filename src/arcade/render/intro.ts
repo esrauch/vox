@@ -3,7 +3,7 @@
  * PLAY with the music already going: Jack (the pumpkin) waits on the turf
  * behind the start of the field; three football players bounce-walk on;
  * Jack asks "Can you help me get back to my patch?", one answers "Ok"; they
- * pick him up and carry him off; then GET. JACK. BACK., one word at a time.
+ * pick him up and carry him off; then GET JACK BACK, one word at a time.
  * The game then crossfades into the first drive (game.ts). A tap skips it.
  *
  * It's staged on the turf behind the start, with its own camera looking
@@ -87,7 +87,7 @@ export class ArcadeIntro {
     this.root.innerHTML = `
       <div class="intro-bubble intro-ask">Can you help me get back to my patch?</div>
       <div class="intro-bubble intro-answer">Ok</div>
-      <div class="intro-title"><span>GET.</span><span>JACK.</span><span>BACK.</span></div>
+      <div class="intro-title"><span>GET</span><span>JACK</span><span>BACK</span></div>
       <div class="intro-skip">tap to skip</div>`;
     ui.append(this.root);
     const q = (sel: string): HTMLElement => {
@@ -152,7 +152,7 @@ export class ArcadeIntro {
       this.place(this.answer, carrier.position, 1.9, camera, canvas, t >= T.answer && t < T.pickUp);
     }
 
-    // GET. JACK. BACK.: each word lands with a thump.
+    // GET JACK BACK: each word lands with a thump.
     const landed = T.words.filter((w) => t >= w).length;
     this.words.forEach((w, i) => w.classList.toggle('show', i < landed));
     if (landed > this.spoken) {

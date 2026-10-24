@@ -48,6 +48,17 @@ const KIND_MODEL: Readonly<Record<Form, string>> = {
 };
 /** A Ghost's look: its model's own colours (a white sheet, the team helmet), unlit. */
 const GHOST_MATERIAL = new THREE.MeshBasicMaterial({ vertexColors: true });
+
+/** A player of this kind as it's drawn on the field: its model (a Ghost unlit, a Golem built wide), facing +z. */
+export function playerMesh(kind: Form): THREE.Mesh {
+  const mesh = new THREE.Mesh(
+    getGeometry(KIND_MODEL[kind]),
+    kind === 'ghost' ? GHOST_MATERIAL : voxelMaterial,
+  );
+  mesh.castShadow = true;
+  if (kind === 'golem') mesh.scale.set(GOLEM_SHAPE.wide, GOLEM_SHAPE.tall, GOLEM_SHAPE.wide);
+  return mesh;
+}
 /** Ghosts float a little off the turf. */
 const GHOST_HOVER = 0.18;
 
@@ -170,6 +181,15 @@ export class ArcadeBodies {
     const v = this.views.get(id);
     if (!v) return null;
     return v.root.position.clone().setY(WALK_ON_HEIGHT * v.body.scale.y + 0.15);
+  }
+
+  /** Show or hide everyone (the win cutscene has its own cast). */
+  setVisible(visible: boolean): void {
+    for (const v of this.views.values()) {
+      v.root.visible = visible;
+      v.ring.visible = visible && v.ring.visible;
+      if (v.reach) v.reach.visible = visible && v.reach.visible;
+    }
   }
 
   /** Everything drawn (for the crossfade between drives, render/crossfade.ts). */

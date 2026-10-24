@@ -33,7 +33,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 - [x] **Candy Kingdom:** the Safety becomes a **Witch**; the **Gingerbread Man** (a plain Cover in a new look); sidelines of gingerbread houses, candy canes and a few trees; pink-and-white turf; *(2026-10-22: built as the second area: Gumdrop Lane, Gingerbread Row, Broomstick Alley, the Queen's Court.)* **the Queen** (a witch twice the size, crowned) and **the Hex** (a short aim stub, no gold lights on receivers). *(Built 2026-10-22.)*
 - [~] **Farm:** the **Crow**; rows of Scarecrows; **the King** (a crowned scarecrow, a prop in play) and **SHOO!** (his two crows swoop at the ball every play). *(2026-10-24: all built.)*
 - [~] **Models** for the new defenders and the three Bosses, readable from the game camera. *(2026-10-22: the three Bosses are modelled at twice a player's size: `bosses/misterFrog` (a white top hat), `bosses/queen` (a witch with a broom and a crown), `bosses/king` (a scarecrow with a crown). Not yet in the game or checked from the game camera.)*
-- [~] **The two cutscenes:** at the start, Jack asks a football team to help him get home; at the end, everyone (your team and every defender you met, Bosses included) dances in the pumpkin patch. *(2026-10-24: the opening is built; the ending dance is still to do.)*
+- [x] **The two cutscenes:** at the start, Jack asks a football team to help him get home (GET JACK BACK); at the end, the whole roster dances around Jack in front of the King (GOT JACK BACK). *(2026-10-24.)*
 - [ ] **Difficulty targets:** a practised player who never upgrades loses in area II; a decent build reaches the last Boss; a strong one beats it.
 
 ## B2. Impact and Feel
@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **The win cutscene:** after the last touchdown, the camera settles on the King with the pumpkin patch behind him; the whole roster, field and bench, dances in staggered rows around Jack (bounces, shuffles and spins), GOT / JACK / BACK slams in, then AGAIN. The intro's title loses its periods (GET JACK BACK). Winning the last drive no longer slides the field origin on (the King and the patch stay put).
 - **2026-10-24:** **The first screen is just PLAY** on the purple backdrop (no title, no field behind it); it goes straight into the intro, now framed twice as far out.
 - **2026-10-24:** **The opening cutscene:** after the first PLAY (the music already going), Jack floats on the turf, three football players bounce-walk on, Jack asks "Can you help me get back to my patch?", one answers "Ok", they lift him onto a head and carry him off, and GET. / JACK. / BACK. slams in a word at a time; then the last frame crossfades into the first drive. A tap (or Space) skips it; AGAIN goes straight to the field.
 - **2026-10-24:** **The Farm's turf is a tilled field:** warm brown soil, a furrow up the field every yard, green sprouts on the ridges (the five-yard bands stay).

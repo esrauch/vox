@@ -27,6 +27,11 @@ export class Embers {
   /** Fractional embers owed by `emit` rates between frames. */
   private owed = 0;
 
+  /** Show or hide them all (the win cutscene). */
+  setVisible(visible: boolean): void {
+    this.mesh.visible = visible;
+  }
+
   constructor(scene: THREE.Scene) {
     this.mesh = new THREE.InstancedMesh(
       new THREE.BoxGeometry(1, 1, 1),

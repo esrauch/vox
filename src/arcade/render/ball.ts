@@ -69,6 +69,13 @@ export class ArcadeBall {
    * bob, the flicker and the embers never freeze while the sim waits (play
    * selection, the title, a pause).
    */
+  /** Show or hide the ball, its light and its embers (the win cutscene has its own Jack). */
+  setVisible(visible: boolean): void {
+    this.ball.visible = visible;
+    this.light.visible = visible;
+    this.embers.setVisible(visible);
+  }
+
   update(state: RunState, origin: number, bodies: ArcadeBodies, dt: number, clock: number): void {
     const ball = state.field.ball;
     this.landing.visible = false;
