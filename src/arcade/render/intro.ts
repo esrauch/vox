@@ -4,7 +4,7 @@
  * behind the start of the field; three football players bounce-walk on;
  * Jack asks "Can you help me get back to my patch?", one answers "Ok"; they
  * pick him up and carry him off; then GET JACK BACK, one word at a time.
- * The game then crossfades into the first drive (game.ts). A tap skips it.
+ * The game then crossfades into the first drive (game.ts). It can't be skipped (it's short).
  *
  * It's staged on the turf behind the start, with its own camera looking
  * away from the field, so the first drive waiting there stays out of view.
@@ -87,8 +87,7 @@ export class ArcadeIntro {
     this.root.innerHTML = `
       <div class="intro-bubble intro-ask">Can you help me get back to my patch?</div>
       <div class="intro-bubble intro-answer">Ok</div>
-      <div class="intro-title"><span>GET</span><span>JACK</span><span>BACK</span></div>
-      <div class="intro-skip">tap to skip</div>`;
+      <div class="intro-title"><span>GET</span><span>JACK</span><span>BACK</span></div>`;
     ui.append(this.root);
     const q = (sel: string): HTMLElement => {
       const el = this.root.querySelector<HTMLElement>(sel);
@@ -98,11 +97,6 @@ export class ArcadeIntro {
     this.ask = q('.intro-ask');
     this.answer = q('.intro-answer');
     this.words = [...this.root.querySelectorAll<HTMLElement>('.intro-title span')];
-  }
-
-  /** Skip to the end (a tap). */
-  skip(): void {
-    this.t = Math.max(this.t, T.end);
   }
 
   /** Advance and pose everything; true once it's over (time to crossfade). */
@@ -191,7 +185,6 @@ export class ArcadeIntro {
     still.className = 'intro-still';
     still.src = canvas.toDataURL();
     this.root.prepend(still);
-    this.root.querySelector('.intro-skip')?.remove();
     this.ask.classList.remove('show');
     this.answer.classList.remove('show');
     this.root.style.transition = `opacity ${fadeSeconds}s ease`;

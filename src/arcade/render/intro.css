@@ -82,14 +82,3 @@
   opacity: 1;
   scale: 1;
 }
-
-.intro-skip {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(18px + env(safe-area-inset-bottom));
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--bone);
-  opacity: 0.6;
-}

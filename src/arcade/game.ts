@@ -225,8 +225,6 @@ export class ArcadeGame {
     play.addEventListener('click', () => void this.onAction());
     this.startScreen.append(play);
     uiRoot.append(this.startScreen);
-    // A tap during the intro skips it.
-    window.addEventListener('pointerdown', () => this.intro?.skip());
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') this.pause();
     });
@@ -637,10 +635,8 @@ export class ArcadeGame {
 
   private onKey(e: KeyboardEvent): void {
     if (e.repeat) return;
-    if (this.intro) {
-      if (e.code === 'Space') this.intro.skip();
-      return;
-    }
+    // The intro plays through (it's short): keys wait for it.
+    if (this.intro) return;
     const { phase } = this.state;
     if (e.code === 'Space') {
       e.preventDefault();

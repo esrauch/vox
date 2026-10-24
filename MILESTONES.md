@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **The intro can't be skipped any more** (it's short): no tap or Space to skip, no hint.
 - **2026-10-24:** **JUKE! colours:** the lit button is green while a press is GREAT, orange while it's OK, then red (TOO LATE!) for half a second before the BAD.
 - **2026-10-24:** **Two Break it!s a down at most:** a third grab is a tackle. It rarely comes up: with the practised bot, balance is unchanged.
 - **2026-10-24:** **Break it! by zone, and drive blocks:** how hard Break it! is no longer depends on stats (that made Golems the best runners): it's fixed by zone, the Forest as before at an even match, the Candy Kingdom and the Farm each a step harder. On a run, blockers drive their man back at a speed set by the Heft gap and pancake at 2 Heft heavier (3 on a pass). Practised bot with new players: Break it! breaks 51% → 24%, run-play pancakes 28 → 54 a run, yards a run 5.2 → 5.0, beat the game 71% → 67%.
