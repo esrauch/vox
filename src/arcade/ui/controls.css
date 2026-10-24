@@ -169,3 +169,43 @@
 .arc-juke-btn.dim {
   opacity: 0.35;
 }
+
+/* SHOO!: big, right in the middle, while the King's crows are on the ball's holder. */
+.arc-shoo {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  translate: -50% -50%;
+  padding: 18px 36px;
+  border: var(--edge) solid var(--ink);
+  font: inherit;
+  font-size: 2.6rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  background: var(--slime-green);
+  text-shadow: 2px 2px 0 rgb(255 255 255 / 0.5);
+  box-shadow:
+    inset 0 4px 0 rgb(255 255 255 / 0.45),
+    inset 0 -6px 0 rgb(0 0 0 / 0.2),
+    6px 6px 0 var(--ink);
+  pointer-events: auto;
+  touch-action: none;
+  animation: arc-shoo-pulse 0.3s ease-in-out infinite alternate;
+}
+
+.arc-shoo[hidden] {
+  display: none;
+}
+
+.arc-shoo:active {
+  translate: calc(-50% + 4px) calc(-50% + 4px);
+}
+
+@keyframes arc-shoo-pulse {
+  from {
+    scale: 1;
+  }
+  to {
+    scale: 1.08;
+  }
+}

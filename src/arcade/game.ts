@@ -10,7 +10,7 @@
  * - **In Break it!:** taps, anywhere (for a juke, on the arrow's side).
  *
  * Keys for a desktop: 1–3 call a card, F flips, Space hikes (then throws,
- * and taps the bar and the mash), ← and → juke. The music is the soundtrack only: nothing waits for the beat.
+ * and taps the bar and the mash), ← and → juke, S shoos the King's crows. The music is the soundtrack only: nothing waits for the beat.
  */
 import * as THREE from 'three';
 import { Conductor } from '../game/conductor';
@@ -24,6 +24,7 @@ import { ArcadeBodies } from './render/bodies';
 import { ArcadeLines, createArcadeTurf } from './render/field';
 import { ArcadeFieldProps } from './render/fieldProps';
 import { ArcadeFrogRain } from './render/frogRain';
+import { ArcadeRoyalCrows } from './render/royalCrows';
 import { ArcadeWitches } from './render/witches';
 import { ArcadeRoutes } from './render/routes';
 import { ArcadeSweep, litPlayers } from './render/sweep';
@@ -113,6 +114,7 @@ export class ArcadeGame {
   private readonly lines: ArcadeLines;
   private readonly routes: ArcadeRoutes;
   private readonly frogRain: ArcadeFrogRain;
+  private readonly royalCrows: ArcadeRoyalCrows;
   private readonly fieldProps: ArcadeFieldProps;
   private readonly witches: ArcadeWitches;
   private readonly hud: Hud;
@@ -154,6 +156,7 @@ export class ArcadeGame {
     this.lines = new ArcadeLines(scene);
     this.routes = new ArcadeRoutes(scene);
     this.frogRain = new ArcadeFrogRain(scene);
+    this.royalCrows = new ArcadeRoyalCrows(scene);
     this.fieldProps = new ArcadeFieldProps(scene);
     this.witches = new ArcadeWitches(scene);
     this.bodies = new ArcadeBodies(scene);
@@ -171,6 +174,7 @@ export class ArcadeGame {
       onThrow: () => this.press({ throw: true }),
       onBreakTap: () => this.press({ breakTap: true }),
       onJuke: (side) => this.press({ juke: side }),
+      onShoo: () => this.press({ shoo: true }),
     });
 
     document.addEventListener('keydown', (e) => this.onKey(e));
@@ -257,6 +261,8 @@ export class ArcadeGame {
     this.ball.update(state, this.origin, this.bodies, dt, performance.now() / 1000);
     this.sweep.update(state, this.origin);
     this.frogRain.update(state, this.origin);
+    this.royalCrows.update(state, this.origin);
+    this.controls.setShoo(state.phase === 'play' && state.field.crows?.phase === 'shoo');
     this.fieldProps.update(state, this.origin);
     this.witches.update(state, this.origin);
     this.controls.setButtons(canThrow(state) && !this.paused);
@@ -388,6 +394,17 @@ export class ArcadeGame {
         case 'dragged':
           play('burst');
           break;
+        case 'crowsLanded':
+          play('hop');
+          break;
+        case 'crowsShooed':
+          play('burst');
+          this.hud.big('SHOOED!', 'good');
+          break;
+        case 'crowsStruck':
+          play('burst');
+          this.hud.big('CROWS!', 'bad');
+          break;
         case 'frogLanded':
           play('hop');
           if (e.flattened.length > 0) {
@@ -494,7 +511,8 @@ export class ArcadeGame {
       else this.press({ throw: true });
     } else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
       if (phase === 'breakit') this.press({ juke: e.code === 'ArrowLeft' ? -1 : 1 });
-    } else if (e.code === 'KeyF' && phase === 'setup') this.act({ type: 'flip' });
+    } else if (e.code === 'KeyS' && phase === 'play') this.press({ shoo: true });
+    else if (e.code === 'KeyF' && phase === 'setup') this.act({ type: 'flip' });
     else if (phase === 'setup' && ['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {
       this.call(Number(e.code.slice(-1)) - 1);
     }

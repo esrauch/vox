@@ -85,7 +85,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 1. **THROW** fires a bullet along the sweeping aim line.
 2. The carrier picks the emptiest lane every so often (`ai.ts`, `chooseLane`).
 3. Everyone moves toward their target (`ai.ts`) at their own speed; overlaps are pushed apart by weight (`physics.ts`).
-4. **Frog Rain** (Mister Frog's drive): falling frogs count down (only while the play is live) and flatten whoever they land on; a carrier hit is tackled.
+4. **Frog Rain** (Mister Frog's drive): falling frogs count down (only while the play is live) and flatten whoever they land on; a carrier hit is tackled. **The King's crows** (his drive, `royalCrows`): they fly at the ball, land on its holder, and strike (a sack or a tackle) unless SHOO! comes first.
 5. **Contact:** a much heavier blocker pancakes the defender it's on; a defender touching the carrier starts **Break it!**; running into a planted Scarecrow is a tackle.
 6. A carrier dragging tacklers goes down when the drag runs out.
 7. **The pocket:** once its sweeps are done with the ball still at the QB, it's a sack.
@@ -127,7 +127,8 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
   - `routes.ts`: the called play's routes before the snap.
   - `frogRain.ts`: Mister Frog's lane on the turf, each frog's shadow, and the frogs falling onto it.
   - `witches.ts`: each Witch on a Broom flying her row, facing her way, with her shadow.
-  - `fieldProps.ts`: the props on the field, rebuilt when a new drive lays its own.
+  - `fieldProps.ts`: the props on the field, rebuilt when a new drive lays its own; on the last drive, the pumpkin patch behind the King.
+  - `royalCrows.ts`: the King's two crows: on his arms, flying at the ball, flapping over the holder.
 - **Shared with the dev pages:** `src/render/view.ts` (renderer, scene, lights) and `src/render/scenery.ts` (`ForestScenery`: the forest floor, fog, props along the field, the tree line on the Boss drive).
 - **Mobile performance:** the pixel ratio is capped at 2; keep draw calls low (target under ~100) and don't allocate in the frame loop.
 
@@ -138,7 +139,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 **Plain DOM and CSS, layered over the WebGL canvas.** The canvas fills the screen and a DOM root sits over it; the overlay doesn't block taps by default (`pointer-events: none`), and only real controls accept them.
 
 - **`src/ui/hud.ts`** (`Hud`): the drive banner and down and distance at the top; the prompt and the context button (PLAY, HIKE!, RESUME, AGAIN); the hand of three play cards and Flip; `pop()` for results and `big()` for Break it!'s GREAT / OK / BAD; and the **TRICK OR TREAT!** overlay: the two New Player! cards (each a player card), and the roster with the field down the left by position and the bench (no limit, newest first) down the right, each player a photo box, stat bars and a note.
-- **`src/arcade/ui/controls.ts`**: THROW, and the Break it! panel (the countdown, the bar, the mash meter, the juke buttons).
+- **`src/arcade/ui/controls.ts`**: THROW, SHOO!, and the Break it! panel (the countdown, the bar, the mash meter, the juke buttons).
 - **`src/arcade/ui/trickOrTreat.ts`**: turns the run state into what the overlay shows (the two New Player! cards as player cards, the roster rows, the ★ on a preferred position). **`kindIcons.ts`**: each kind's 12×12 pixel portrait as inline SVG.
 - **The look is retro pixel:** square corners, hard ink outlines, flat offset shadows, outlined text, segmented bars, scanlines on dark panels; the tokens are at the top of `src/ui/base.css` (`--edge`, `--text-edge`, `--scanlines`). Animations stay smooth.
 - **Font:** Creepster (OFL, self-hosted in `assets/fonts`), loaded before the game is built so no text ever shows in a fallback font.
@@ -150,7 +151,7 @@ The scale is sixteen-odd circle bodies on one field, so plain typed objects and 
 ## 7. Input and Haptics
 
 - **Every input is a tap on a DOM control:** a card, Flip, HIKE!, THROW, the Break it! panel (anywhere on it; the juke's ◀ and ▶), the offer, the roster.
-- **Keys for a desktop:** 1–3 call a card, F flips, Space hikes (then throws, and taps the bar and the mash), ← and → juke.
+- **Keys for a desktop:** 1–3 call a card, F flips, Space hikes (then throws, and taps the bar and the mash), ← and → juke, S shoos the King's crows.
 - **Stopping browser gestures:** `touch-action: none` on the game surface, and no double-tap zoom, pull-to-refresh, text selection or long-press menu.
 - **Haptics** (`navigator.vibrate`) are planned for the snap, throws, catches and hits. iOS Safari doesn't support vibration, so nothing may depend on it.
 

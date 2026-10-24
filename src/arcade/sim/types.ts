@@ -133,6 +133,21 @@ export interface FrogDrop {
   left: number;
 }
 
+/**
+ * The King's crows (his drive): they sit on his arms, swoop at whoever has
+ * the ball shortly after the snap, and land on them for the SHOO! test.
+ * Once a down.
+ */
+export interface RoyalCrows {
+  /** On his arms; flying at the ball; on the holder (SHOO!); gone for the down. */
+  phase: 'perched' | 'flying' | 'shoo' | 'gone';
+  pos: Vec;
+  /** SHOO!: seconds of live play left to shoo them off. */
+  left: number;
+  /** Who they've landed on (a body id). */
+  on: number | null;
+}
+
 export interface Field {
   readonly players: Player[];
   readonly defenders: Defender[];
@@ -144,6 +159,8 @@ export interface Field {
   frogs: FrogDrop[];
   /** The Queen's Hex (her drive): the aim line shows only a stub, and receivers don't light up. */
   hex: boolean;
+  /** The King's crows (his drive), or null. */
+  crows: RoyalCrows | null;
   ball: Ball;
   /** The carrier's lane: the x it runs for (it picks the emptiest one itself, every moment). */
   lane: number;
@@ -326,6 +343,8 @@ export interface StepInput {
   readonly breakTap?: boolean;
   /** A juke: a tap on the left (-1) or right (+1) side of the screen. */
   readonly juke?: -1 | 1;
+  /** SHOO!: drive the King's crows off whoever they've landed on. */
+  readonly shoo?: boolean;
 }
 
 export type Action =
@@ -363,6 +382,10 @@ export type ArcadeEvent =
   | { readonly type: 'tackled'; readonly id: number; readonly by: number }
   /** The pocket collapsed (after its sweeps) with the QB still holding the ball. */
   | { readonly type: 'sacked' }
+  /** The King's crows landed on the ball's holder (SHOO! now); were shooed off; or knocked it down. */
+  | { readonly type: 'crowsLanded'; readonly on: number }
+  | { readonly type: 'crowsShooed' }
+  | { readonly type: 'crowsStruck'; readonly on: number }
   | { readonly type: 'outOfBounds'; readonly id: number }
   | { readonly type: 'downEnded'; readonly result: DownResult; readonly gained: number }
   | { readonly type: 'driveWon'; readonly drive: number }

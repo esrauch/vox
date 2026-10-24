@@ -173,6 +173,16 @@ export const arcadeTuning = {
     /** The King stands this far past the first-down line of the last drive, in front of the patch. */
     kingBeyond: 2.5,
   },
+  crows: {
+    /** The King's crows take off this long after the snap (seconds of live play)… */
+    takeoff: 0.5,
+    /** …fly at the ball this fast (yards a second: slower than a bullet, so a quick deep pass leaves them behind)… */
+    speed: 12,
+    /** …land on its holder from this close… */
+    reach: 0.8,
+    /** …and SHOO! has this long before they knock it down. */
+    window: 0.6,
+  },
   hex: {
     /** The Queen's Hex: the aim line shows only this much of itself (yards from the pumpkin). */
     stub: 3,

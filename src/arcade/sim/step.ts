@@ -28,7 +28,7 @@ import { pushOutOfProps } from './props';
 import { judgeBreakIt, startBreakIt } from './breakit';
 import { endDown, nextDown } from './run';
 import type { ArcadeEvent, ArcadeResult, BreakKind, Player, RunState, StepInput } from './types';
-import { dist, norm, scale, sub, v } from './vec';
+import { add, dist, len, norm, scale, sub, v } from './vec';
 
 const { contact, field } = arcadeTuning;
 
@@ -73,6 +73,7 @@ export function step(prev: RunState, input: StepInput = {}): ArcadeResult {
   separate(state);
   pushOutOfProps(state);
   if (frogRain(state, events)) return { state, events };
+  if (royalCrows(state, input, events)) return { state, events };
   if (resolveContact(state, events)) return { state, events };
   if (dragDone(state, events)) return { state, events };
   if (pocket(state, events)) return { state, events };
@@ -269,10 +270,71 @@ function pocket(state: RunState, events: ArcadeEvent[]): boolean {
   const qb = qbOf(state);
   if (!qb || state.field.ball.at !== 'qb') return false;
   if (state.time - state.snappedAt < pocketTime(state)) return false;
+  sack(state, qb, events);
+  return true;
+}
+
+/** The QB goes down with the ball: a sack, the line of scrimmage pushed back. */
+function sack(state: RunState, qb: Player, events: ArcadeEvent[]): void {
   events.push({ type: 'sacked' });
   qb.down = 1;
   state.field.ball = { at: 'dead', pos: qb.pos, how: 'sacked' };
   endDown(state, 'sacked', state.drive.los - arcadeTuning.drive.sackLoss, events);
+}
+
+/**
+ * The King's crows (his drive): shortly after the snap they leave his arms
+ * and fly at whoever has the ball (while a pass is in the air, at where it's
+ * going); when they reach the holder they land on it, and SHOO! has a moment
+ * to drive them off. Too late, and they knock it down: a sack if the QB
+ * still has it, a tackle if a carrier does. If the ball leaves the holder
+ * first (a throw), they miss. Once a down.
+ */
+function royalCrows(state: RunState, input: StepInput, events: ArcadeEvent[]): boolean {
+  const c = state.field.crows;
+  if (!c || c.phase === 'gone') return false;
+  const t = arcadeTuning.crows;
+  if (c.phase === 'perched') {
+    if (state.time - state.snappedAt < t.takeoff) return false;
+    c.phase = 'flying';
+  }
+  const ball = state.field.ball;
+  const holder = ball.at === 'qb' ? qbOf(state) : ball.at === 'carried' ? carrierOf(state) : null;
+  if (c.phase === 'flying') {
+    const goal = holder ? holder.pos : ball.at === 'flight' ? ball.target : null;
+    if (!goal) {
+      c.phase = 'gone';
+      return false;
+    }
+    const to = sub(goal, c.pos);
+    const step = t.speed * DT;
+    c.pos = len(to) <= step ? goal : add(c.pos, scale(norm(to), step));
+    if (holder && dist(c.pos, holder.pos) <= t.reach) {
+      c.phase = 'shoo';
+      c.on = holder.id;
+      c.left = t.window;
+      events.push({ type: 'crowsLanded', on: holder.id });
+    }
+    return false;
+  }
+  // SHOO!: on the holder until shooed, or until they strike.
+  const on = holder && holder.id === c.on ? holder : null;
+  if (!on) {
+    c.phase = 'gone';
+    return false;
+  }
+  c.pos = on.pos;
+  if (input.shoo) {
+    c.phase = 'gone';
+    events.push({ type: 'crowsShooed' });
+    return false;
+  }
+  c.left -= DT;
+  if (c.left > 0) return false;
+  c.phase = 'gone';
+  events.push({ type: 'crowsStruck', on: on.id });
+  if (ball.at === 'qb') sack(state, on, events);
+  else tackle(state, on, -1, events);
   return true;
 }
 

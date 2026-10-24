@@ -105,6 +105,7 @@ export function playState(players: PlayerSpec[], defenders: DefenderSpec[] = [])
     frogLane: null,
     frogs: [],
     hex: false,
+    crows: null,
     ball: { at: 'qb' },
     lane: 0,
     breakaway: 0,

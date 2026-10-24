@@ -1,6 +1,7 @@
 /**
  * The arcade game's own controls over the canvas (GAMEPLAY.md, Controls):
- * the THROW button on a pass play, and the Break it! panel, one of
+ * the THROW button on a pass play, SHOO! when the King's crows land on the
+ * ball's holder (his drive), and the Break it! panel, one of
  * three: the bar (a sweet spot and "close" band, and a marker crossing it),
  * MASH! (a filling bar), or JUKE! (two buttons, one lighting up). Each
  * opens with a countdown ("GET READY TO MASH! 2"). For the bar and the mash
@@ -15,6 +16,8 @@ export interface ControlHandlers {
   onBreakTap(): void;
   /** A juke button: left (-1) or right (+1). */
   onJuke(side: -1 | 1): void;
+  /** SHOO!: drive the King's crows off. */
+  onShoo(): void;
 }
 
 /**
@@ -48,6 +51,7 @@ export class ArcadeControls {
   private readonly jukeButtons: HTMLElement;
   private readonly jukeLeft: HTMLElement;
   private readonly jukeRight: HTMLElement;
+  private readonly shoo: HTMLElement;
   private breaking = false;
   private juking = false;
 
@@ -58,6 +62,7 @@ export class ArcadeControls {
       <div class="arc-buttons" hidden>
         <button class="arc-btn arc-throw interactive">THROW</button>
       </div>
+      <button class="arc-shoo interactive" hidden>SHOO!</button>
       <div class="arc-meter interactive" hidden>
         <div class="arc-meter-title">BREAK IT!</div>
         <div class="arc-meter-bar">
@@ -96,12 +101,19 @@ export class ArcadeControls {
         fn();
       });
     press(q('.arc-throw'), () => handlers.onThrow());
+    this.shoo = q('.arc-shoo');
+    press(this.shoo, () => handlers.onShoo());
     press(this.jukeLeft, () => handlers.onJuke(-1));
     press(this.jukeRight, () => handlers.onJuke(1));
     // For the bar and the mash, a tap anywhere on the screen counts.
     window.addEventListener('pointerdown', () => {
       if (this.breaking && !this.juking) handlers.onBreakTap();
     });
+  }
+
+  /** Show SHOO! (the King's crows have landed on the ball's holder). */
+  setShoo(show: boolean): void {
+    this.shoo.hidden = !show;
   }
 
   /** Show THROW (on a pass play, while the QB has the ball). */

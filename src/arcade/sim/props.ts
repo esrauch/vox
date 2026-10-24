@@ -46,6 +46,9 @@ export function propsForDrive(seed: number, area: number, index: number): FieldP
  */
 export const KING: PropKind = { model: 'bosses/king', radius: 1.45, scale: 1, facing: true };
 
+/** Where the King stands on his drive (its own coordinates): in the middle, just past the first-down line. */
+export const KING_SPOT: Vec = v(0, driveTuning.distance + tuning.kingBeyond);
+
 /** The props of a drive, the King among them on the last one. */
 export function drivePropsWithKing(
   seed: number,
@@ -55,12 +58,12 @@ export function drivePropsWithKing(
 ): FieldProp[] {
   const props = propsForDrive(seed, area, index);
   if (!home) return props;
-  const y = driveTuning.distance + tuning.kingBeyond;
+  const { x, y } = KING_SPOT;
   // Make room for him: no other prop where he stands.
   const clear = props.filter(
-    (p) => dist(v(p.x, p.y), v(0, y)) > p.radius + KING.radius + tuning.gap,
+    (p) => dist(v(p.x, p.y), KING_SPOT) > p.radius + KING.radius + tuning.gap,
   );
-  return [...clear, { id: -1, x: 0, y, ...KING }];
+  return [...clear, { id: -1, x, y, ...KING }];
 }
 
 /** One 10-yard stretch's props (y from 0 to 10 within it), the same every time for this seed. */

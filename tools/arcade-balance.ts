@@ -145,6 +145,9 @@ interface Plan {
   sawAt: number | null;
   side: -1 | 1;
   reaction: number;
+  /** SHOO!: when it saw the crows land, and how long it'll take to tap. */
+  shooSaw: number | null;
+  shooReaction: number;
 }
 
 /** A standard normal draw (Box-Muller). */
@@ -222,6 +225,17 @@ function botInput(state: RunState, rng: Rng, plan: Plan): StepInput {
         }
         return state.time - plan.sawAt >= plan.reaction ? { juke: plan.side } : {};
     }
+  }
+  // SHOO!: the King's crows have landed; it reacts like it does to a juke's arrow.
+  const crows = state.field.crows;
+  if (crows?.phase === 'shoo') {
+    if (plan.shooSaw === null) {
+      plan.shooSaw = state.time;
+      plan.shooReaction = Math.max(0.1, BOT.jukeReaction + BOT.jukeSpread * normal(rng));
+    }
+    if (state.time - plan.shooSaw >= plan.shooReaction) return { shoo: true };
+  } else {
+    plan.shooSaw = null;
   }
   if (!canThrow(state)) return {};
   const left = 1 - (state.time - state.snappedAt) / pocketTime(state);
@@ -331,7 +345,15 @@ function playRun(seed: number, scenario: Scenario, t: Tally): void {
     return { ...p, kind, stats: plus(plus(p.stats, FORM_STATS[kind]), extra) };
   });
   let state = createRun(seed, roster);
-  const plan: Plan = { tackleAt: -1, tapAt: 1, sawAt: null, side: 1, reaction: 0.3 };
+  const plan: Plan = {
+    tackleAt: -1,
+    tapAt: 1,
+    sawAt: null,
+    side: 1,
+    reaction: 0.3,
+    shooSaw: null,
+    shooReaction: 0.3,
+  };
   const ran = { now: false, grabbed: false };
   let driveKey = '';
   for (let guard = 0; guard < 200000 && state.phase !== 'over' && state.phase !== 'won'; guard++) {

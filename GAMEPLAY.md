@@ -45,7 +45,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
   |---|---|---|---|
   | **The Forest** | **Mister Frog** (top hat) | **Frog Rain:** before the snap a lane lights up on the turf; during the down, frogs fall in it one by one (each shows a shadow first) and flatten whoever is under them. You see the lane while choosing a card, so you pick a play, or **Flip** it, to keep your routes out. | Where your routes go |
   | **The Candy Kingdom** | **The Queen** (a witch, double size, in a crown) | **The Hex:** the aim line shrinks to a short stub by the pumpkin, and receivers stop lighting up. The sweep still runs at full speed: you extrapolate. | Your timing |
-  | **The Farm** | **The King** (a giant scarecrow in a crown) *(beating his drive gets Jack home: the end)* | **His QTE on every play** ▲ *(to design)*. In play he's only a prop: he stands guard, still, just past the first-down line in front of the pumpkin patch, and never tackles or defends. | ▲ |
+  | **The Farm** | **The King** (a giant scarecrow in a crown) *(beating his drive gets Jack home: the end)* | **SHOO!** Two crows sit on his arms. Half a second after the snap they swoop at whoever has the ball (while a pass is in the air, at where it's going), at half a bullet's speed. When they land on the holder a big **SHOO!** button pops up, with no freeze: tap it within about half a second and they're gone for the down; too late and they knock the holder down (a sack if Jack still has it, a tackle if a carrier does). If the ball leaves the holder first they miss, so **a quick deep pass leaves them behind**. Once a play. The King himself is only a prop: he stands guard, still, just past the first-down line in front of the pumpkin patch. | Your nerve: hold the ball and they come for it |
 
 - **Boss perks:** beating a Boss gives its special perk, on top of that drive's TRICK OR TREAT!. They're the only perks there are.
 
@@ -136,6 +136,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Before the snap** | **HIKE!** | Start the called play. |
 | **Pass play** | **THROW** | Fire a bullet along the sweeping line. |
 | **Grabbed** | **Tap** anywhere (a juke: its ◀ or ▶ button) | Break it! |
+| **The King's crows land** | **SHOO!** | Drive them off. |
 | **Between drives** | **Tap a card** | Take one of the two new players. |
 | **Between drives** | **Tap two players** | Swap them, field or bench. |
 
