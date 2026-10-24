@@ -91,6 +91,8 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
    | **Dive** *(handoff)* | A Runner takes it straight up the middle, the other leading through the hole; the Catchers run off, dragging their Covers away. |
    | **Sweep** *(handoff)* | A Runner takes it wide toward the sideline and turns upfield behind the other Runner; the Catchers run short decoy routes. |
 
+   **On a handoff card, the Runner who'll take the ball is marked:** its route is drawn bigger and pumpkin-orange, with a ring at its feet. **After the handoff it runs its play:** it still picks its own lane and dodges whoever's in the way, but it leans toward its planned route.
+
    **Every Runner gets out past the line of scrimmage** (only the Blockers stay home), and no route runs deeper than a throw can reach. A curl can end coming back. **Choosing a handoff card is choosing to run.**
 
    **Runs are the safe call, passes the gamble.** A handoff is almost always a couple of yards; a pass is less likely to work but worth more when it does. On a run only the Blockers and the other Runner block; **the Catchers keep running their routes as decoys**, pulling their Covers away (after a catch, everyone blocks for the carrier). What makes a run safe is **the play fake**: for about a second after the handoff, the defense keeps playing the pass (except anyone right next to the carrier). The yards after the grab still come from Break it!: an OK one drags the pile forward, a GREAT one can break it long, a BAD one goes down where it stands. *(Balance runs, 2026-10-22, with a bot that gets BAD about one time in ten: runs average 4.1 yards and gain nothing 5% of the time; a good passer averages 5.4 a pass, with 25% gaining nothing.)*

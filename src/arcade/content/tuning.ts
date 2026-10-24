@@ -137,8 +137,10 @@ export const arcadeTuning = {
   carrier: {
     /** The carrier aims this far ahead of itself, in its lane… */
     lookAhead: 3,
-    /** …and picks the emptiest lane again this often (seconds). */
+    /** …and picks the emptiest lane again this often (seconds)… */
     laneEvery: 0.25,
+    /** …leaning toward its planned route on a handoff: this much less room per yard away from it. */
+    pathPull: 0.35,
   },
   defense: {
     /** Added to every defender's stats each area after the first… */

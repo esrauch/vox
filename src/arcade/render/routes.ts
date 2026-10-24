@@ -1,10 +1,13 @@
 /**
  * The called play's routes, drawn on the turf until the hike (GAMEPLAY.md,
  * A Down): a dotted path from each receiver through its
- * waypoints, with an arrowhead where it's going; gold for the Runners.
+ * waypoints, with an arrowhead where it's going; gold for the Runners. On a
+ * handoff, the Runner who'll take the ball has a bigger pumpkin-orange route
+ * and a ring at its feet, so you know who's running it.
  */
 import * as THREE from 'three';
-import { hexToNumber, team } from '../../content/palettes';
+import { common, hexToNumber, team } from '../../content/palettes';
+import { PLAYS } from '../content/plays';
 import type { Player, RunState, Vec } from '../sim/types';
 import { dist, lerp } from '../sim/vec';
 import { toWorld } from './world';
@@ -26,6 +29,14 @@ export class ArcadeRoutes {
     transparent: true,
     opacity: 0.9,
   });
+  private readonly carry = new THREE.MeshBasicMaterial({
+    color: hexToNumber(common.pumpkin),
+    transparent: true,
+    opacity: 0.95,
+  });
+  private readonly bigDotGeo = new THREE.CircleGeometry(0.16, 12).rotateX(-Math.PI / 2);
+  private readonly bigArrowGeo = new THREE.ConeGeometry(0.42, 0.8, 3).rotateX(-Math.PI / 2);
+  private readonly ringGeo = new THREE.RingGeometry(0.55, 0.75, 28).rotateX(-Math.PI / 2);
   private key = '';
 
   constructor(scene: THREE.Scene) {
@@ -42,9 +53,17 @@ export class ArcadeRoutes {
     if (key === this.key) return;
     this.key = key;
     this.group.clear();
+    const handoff = PLAYS[state.play.index]?.handoff;
     for (const p of players) {
       if (p.job.kind !== 'route') continue;
-      const material = p.role === 'runner' ? this.run : this.pass;
+      const carries = handoff !== undefined && p.slot === handoff;
+      const material = carries ? this.carry : p.role === 'runner' ? this.run : this.pass;
+      const dotGeo = carries ? this.bigDotGeo : this.dotGeo;
+      if (carries) {
+        const ring = new THREE.Mesh(this.ringGeo, this.carry);
+        ring.position.copy(toWorld(p.pos, origin, 0.035));
+        this.group.add(ring);
+      }
       const path: Vec[] = [p.pos, ...p.job.to];
       for (let i = 1; i < path.length; i++) {
         const a = path[i - 1];
@@ -52,7 +71,7 @@ export class ArcadeRoutes {
         if (!a || !b) continue;
         const n = Math.max(1, Math.floor(dist(a, b) / SPACING));
         for (let k = 1; k <= n; k++) {
-          const dot = new THREE.Mesh(this.dotGeo, material);
+          const dot = new THREE.Mesh(dotGeo, material);
           dot.position.copy(toWorld(lerp(a, b, k / n), origin, 0.03));
           this.group.add(dot);
         }
@@ -60,7 +79,7 @@ export class ArcadeRoutes {
       const end = path[path.length - 1];
       const before = path[path.length - 2];
       if (end && before) {
-        const arrow = new THREE.Mesh(this.arrowGeo, material);
+        const arrow = new THREE.Mesh(carries ? this.bigArrowGeo : this.arrowGeo, material);
         arrow.position.copy(toWorld(end, origin, 0.04));
         // The cone points along -z in world when unrotated; turn it to the last leg's direction.
         arrow.rotation.y = Math.atan2(-(end.x - before.x), end.y - before.y);

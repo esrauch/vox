@@ -160,6 +160,8 @@ export interface Field {
   /** The King's crows (his drive), or null. */
   crows: RoyalCrows | null;
   ball: Ball;
+  /** On a handoff, the Runner's planned route (it leans toward it when it picks its lane), or null. */
+  runPath: readonly Vec[] | null;
   /** The carrier's lane: the x it runs for (it picks the emptiest one itself, every moment). */
   lane: number;
   /** After a GREAT: seconds of live play left in which nobody can grab the carrier (it's breaking free). */

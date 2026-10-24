@@ -84,6 +84,7 @@ export function createRun(
       hex: false,
       crows: null,
       ball: { at: 'qb' },
+      runPath: null,
       lane: 0,
       breakaway: 0,
       lastBreak: null,
@@ -200,6 +201,7 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     hex: spec.hex ?? false,
     crows: spec.boss === 'king' ? perchedCrows() : null,
     ball: { at: 'qb' },
+    runPath: null,
     lane: 0,
     breakaway: 0,
     lastBreak: null,
@@ -277,6 +279,8 @@ function hike(state: RunState, events: ArcadeEvent[]): void {
       : state.field.players.find((p) => p.slot === play.handoff);
   if (!runner) return;
   const hole = runner.job.kind === 'route' ? runner.job.to[runner.job.to.length - 1] : undefined;
+  // It keeps its planned route in mind: it leans toward it when it picks its lane (ai.ts).
+  state.field.runPath = runner.job.kind === 'route' ? [runner.pos, ...runner.job.to] : null;
   runner.job = { kind: 'carry' };
   state.field.ball = { at: 'carried', by: runner.id };
   state.field.lane = hole?.x ?? runner.pos.x;

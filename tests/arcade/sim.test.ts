@@ -22,6 +22,7 @@ import {
 import { breakMarker, countdown, jukeShowing } from '../../src/arcade/sim/breakit';
 import { canThrow, forceBreakKind, step } from '../../src/arcade/sim/step';
 import { litPlayers } from '../../src/arcade/render/sweep';
+import { pathXAt } from '../../src/arcade/sim/ai';
 import { propsForDrive } from '../../src/arcade/sim/props';
 import { DT } from '../../src/arcade/content/tuning';
 import type { ArcadeEvent, RunState } from '../../src/arcade/sim/types';
@@ -1040,5 +1041,29 @@ describe('Bats', () => {
     s.field.lane = 4;
     const r = untilGrabbed(s);
     expect(ofType(r.events, 'grabbed')[0]?.by).toContain(100);
+  });
+});
+
+describe('a handoff runs its play', () => {
+  it('reads where a route is across the field at a given point upfield', () => {
+    const path = [v(0, -4), v(-5, 1.5), v(-5.5, 12)];
+    expect(pathXAt(path, -10)).toBe(0);
+    expect(pathXAt(path, 1.5)).toBeCloseTo(-5);
+    expect(pathXAt(path, 6.75)).toBeCloseTo(-5.25);
+    expect(pathXAt(path, 30)).toBe(-5.5);
+  });
+
+  it('the carrier leans toward its planned route: a Sweep goes wide even with room in the middle', () => {
+    let s = createRun(3);
+    const sweep = PLAYS.findIndex((p) => p.id === 'sweep');
+    s.hand = [sweep, 0, 1];
+    s = dispatch(dispatch(s, { type: 'call', hand: 0 }).state, { type: 'hike' }).state;
+    // Nobody to dodge: just the route to follow.
+    s.field.defenders.splice(0);
+    s.field.props = [];
+    expect(s.field.runPath).not.toBeNull();
+    const r = run(s, 2.5);
+    const carrier = r.state.field.players.find((p) => p.slot === 2)!;
+    expect(carrier.pos.x).toBeLessThan(-3.5);
   });
 });

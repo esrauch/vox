@@ -210,6 +210,21 @@ export function assignMarks(state: RunState): void {
  * defenders still up in front, preferring to stay near where it is. The QB
  * running it does the same: it drifts to the open side.
  */
+/** Where a route is across the field at this far upfield (its first or last x beyond its ends). */
+export function pathXAt(path: readonly Vec[], y: number): number {
+  let x = path[0]?.x ?? 0;
+  for (let i = 1; i < path.length; i++) {
+    const a = path[i - 1];
+    const b = path[i];
+    if (!a || !b) continue;
+    const lo = Math.min(a.y, b.y);
+    const hi = Math.max(a.y, b.y);
+    if (y >= hi) x = b.x;
+    else if (y >= lo && hi > lo) x = a.x + ((b.x - a.x) * (y - a.y)) / (b.y - a.y);
+  }
+  return x;
+}
+
 export function chooseLane(state: RunState, carrier: Player): number {
   const hw = arcadeTuning.field.halfWidth - 0.8;
   // Defenders still up in front, and props in the way, all take room.
@@ -217,6 +232,8 @@ export function chooseLane(state: RunState, carrier: Player): number {
     ...state.field.defenders.filter((d) => up(d)).map((d) => d.pos),
     ...state.field.props.map((p) => v(p.x, p.y)),
   ].filter((pos) => pos.y > carrier.pos.y - 0.5 && pos.y < carrier.pos.y + 9);
+  const path = state.field.runPath;
+  const planned = path ? pathXAt(path, carrier.pos.y + carrierTuning.lookAhead) : null;
   let best = carrier.pos.x;
   let bestScore = -Infinity;
   for (let x = -hw; x <= hw + 1e-6; x += 0.5) {
@@ -233,7 +250,9 @@ export function chooseLane(state: RunState, carrier: Player): number {
       state.field.frogDump > 0 &&
       carrier.pos.y < frogs.to &&
       Math.abs(x - frogs.x) < frogs.half + carrier.radius;
-    const score = room - 0.15 * Math.abs(x - carrier.pos.x) - (inRain ? 4 : 0);
+    // A handoff runs its play: lean toward where the planned route goes, a little way ahead.
+    const pull = planned === null ? 0 : carrierTuning.pathPull * Math.abs(x - planned);
+    const score = room - 0.15 * Math.abs(x - carrier.pos.x) - pull - (inRain ? 4 : 0);
     if (score > bestScore) {
       bestScore = score;
       best = x;
