@@ -29,7 +29,7 @@ function turfTexture(rows: number): THREE.CanvasTexture {
   canvas.height = h;
   const g = canvas.getContext('2d');
   const rng = createRng(31);
-  // Scales the colour in linear light (so 0.86 is a visible, not a huge, step on screen).
+  // Scales the colour in linear light (so 0.93 is a gentle step on screen).
   const shade = (hex: string, k: number): string => {
     const c = new THREE.Color(hex).multiplyScalar(k);
     return `#${c.getHexString()}`;
@@ -41,12 +41,12 @@ function turfTexture(rows: number): THREE.CanvasTexture {
       const biome = biomeAtYard(yard);
       const palette = biomes[biome];
       const band = Math.floor(yard / 5) % 2 === 0 ? palette.grass : palette.grassDark;
-      const base = shade(band, yard % 2 === 0 ? 1 : 0.86);
+      const base = shade(band, yard % 2 === 0 ? 1 : 0.93);
       const top = i * TURF_PX;
       g.fillStyle = base;
       g.fillRect(0, top, w, TURF_PX);
-      // Flecks over the yard: a few to every square yard.
-      const flecks = Math.round((w / TURF_PX) * 3);
+      // Flecks over the yard: one or two to every square yard.
+      const flecks = Math.round((w / TURF_PX) * 1.5);
       for (let f = 0; f < flecks; f++) {
         const x = rng.int(0, w - 1);
         const y = top + rng.int(0, TURF_PX - 1);
