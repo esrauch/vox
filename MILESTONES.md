@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **A second Candy Queendom song candidate: Crazy Candy Carnival,** a manic circus galop (oom-pah in eighths, a calliope racing through chromatic sixteenths, a slide whistle; a new `slide` voice). Sugar Coven stays the default; `?candy=2` plays the new one in the game. To decide.
 - **2026-10-24:** **The balance bot is retuned for the faster sweep** (it reacts on 30% of its throwing moments, was 25%), so about 20% of its downs end incomplete. With it: drives won 11.1 of 12, beat the game 78%, 5.9 yards a pass play.
 - **2026-10-24:** **Crows dive** at a carrier within 4 yards. **The sky Witches are gone** (the only Witches are the Candy Queendom's Safeties). **Safeties** line up 14 yards deep, get between the carrier and the end zone, and **tackle for sure** (no Break it!); blockers can still shove and pancake them. Run-only bot: 4.9 yards a run (5.0 before; 4.1 with them at 11 yards). The practised passing bot beat the game 50% (it was 71%; measured with the Safeties at 11), mostly from the faster sweep: its throws miss their moment more (30% incomplete).
 - **2026-10-24:** **The aim line sweeps 50% faster** (112.5° a second); the pocket holds just as long as before (4.5 sweeps instead of 3).

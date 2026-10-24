@@ -24,7 +24,8 @@ export type InstrumentId =
   | 'piano'
   | 'sax'
   | 'croak'
-  | 'caw';
+  | 'caw'
+  | 'slide';
 
 export interface NoteArgs {
   readonly ctx: BaseAudioContext;
@@ -516,6 +517,25 @@ export const INSTRUMENTS: Record<InstrumentId, (a: NoteArgs) => void> = {
           envelope(ctx, out, time + at, velocity * 0.5, 0.003, 0.05, 0, 0.001, 0.03),
         );
       }
+    }
+  },
+
+  slide({ ctx, out, time, duration, freqs, velocity }) {
+    // A slide whistle: a pure, breathy whistle swooping up an octave over the note.
+    for (const f of freqs) {
+      const o = osc(ctx, 'sine', f, time, time + duration + 0.2);
+      o.frequency.exponentialRampToValueAtTime(f * 2, time + Math.max(0.05, duration));
+      const env = envelope(ctx, out, time, velocity * 0.35, 0.02, 0.1, 0.85, duration, 0.05);
+      o.connect(env);
+      const n = noiseSource(ctx, time, time + duration + 0.2);
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(f, time);
+      bp.frequency.exponentialRampToValueAtTime(f * 2, time + Math.max(0.05, duration));
+      bp.Q.value = 6;
+      const breath = ctx.createGain();
+      breath.gain.value = 0.3;
+      n.connect(bp).connect(breath).connect(env);
     }
   },
 
