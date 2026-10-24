@@ -25,7 +25,8 @@ export type InstrumentId =
   | 'sax'
   | 'croak'
   | 'caw'
-  | 'slide';
+  | 'creak'
+  | 'bubble';
 
 export interface NoteArgs {
   readonly ctx: BaseAudioContext;
@@ -520,22 +521,32 @@ export const INSTRUMENTS: Record<InstrumentId, (a: NoteArgs) => void> = {
     }
   },
 
-  slide({ ctx, out, time, duration, freqs, velocity }) {
-    // A slide whistle: a pure, breathy whistle swooping up an octave over the note.
+  creak({ ctx, out, time, duration, velocity }) {
+    // A coffin lid creaking open: slow, uneven clicks of wood through a narrow resonance,
+    // the clicks speeding up and the pitch rising as it opens.
+    const o = osc(ctx, 'sawtooth', 18, time, time + duration + 0.2);
+    o.frequency.linearRampToValueAtTime(42, time + duration * 0.7);
+    o.frequency.linearRampToValueAtTime(26, time + duration);
+    const wobble = osc(ctx, 'sine', 3.3, time, time + duration + 0.2);
+    const depth = ctx.createGain();
+    depth.gain.value = 7;
+    wobble.connect(depth).connect(o.frequency);
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 14;
+    bp.frequency.setValueAtTime(700, time);
+    bp.frequency.linearRampToValueAtTime(1300, time + duration);
+    o.connect(bp).connect(
+      envelope(ctx, out, time, velocity * 0.9, 0.08, 0.2, 0.9, duration * 0.9, 0.15),
+    );
+  },
+
+  bubble({ ctx, out, time, freqs, velocity }) {
+    // A cauldron bubble: a quick sine blip that pops upward.
     for (const f of freqs) {
-      const o = osc(ctx, 'sine', f, time, time + duration + 0.2);
-      o.frequency.exponentialRampToValueAtTime(f * 2, time + Math.max(0.05, duration));
-      const env = envelope(ctx, out, time, velocity * 0.35, 0.02, 0.1, 0.85, duration, 0.05);
-      o.connect(env);
-      const n = noiseSource(ctx, time, time + duration + 0.2);
-      const bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.setValueAtTime(f, time);
-      bp.frequency.exponentialRampToValueAtTime(f * 2, time + Math.max(0.05, duration));
-      bp.Q.value = 6;
-      const breath = ctx.createGain();
-      breath.gain.value = 0.3;
-      n.connect(bp).connect(breath).connect(env);
+      const o = osc(ctx, 'sine', f, time, time + 0.12);
+      o.frequency.exponentialRampToValueAtTime(f * 2.6, time + 0.07);
+      o.connect(envelope(ctx, out, time, velocity * 0.4, 0.004, 0.05, 0, 0.001, 0.03));
     }
   },
 
