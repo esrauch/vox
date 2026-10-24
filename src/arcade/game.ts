@@ -28,6 +28,7 @@ import { ArcadeIntro } from './render/intro';
 import { ArcadeOutro } from './render/outro';
 import { BOSS_SPOT } from './sim/props';
 import { AREA_SONGS, WIN_SONG } from '../audio/songs';
+import { areaAt } from './content/defense';
 import type { Song } from '../audio/synth/render';
 import { ArcadeQueenCrown } from './render/queenCrown';
 import { ArcadeRoyalCrows } from './render/royalCrows';
@@ -505,7 +506,13 @@ export class ArcadeGame {
         case 'downEnded':
           if (e.result === 'firstDown') {
             play('touchdown');
-            this.hud.pop(prev.drive.kind === 'boss' ? 'TOUCHDOWN!' : 'FIRST DOWN!', 'good');
+            // Beating a Boss clears its area: "Froggy's Forrest Cleared!".
+            this.hud.pop(
+              prev.drive.kind === 'boss'
+                ? `${areaAt(prev.drive.area).name} Cleared!`
+                : 'FIRST DOWN!',
+              'good',
+            );
           } else if (e.result === 'tackled' || e.result === 'outOfBounds') {
             const yards = Math.round(e.gained);
             this.hud.pop(

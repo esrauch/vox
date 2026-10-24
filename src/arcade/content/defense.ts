@@ -119,7 +119,7 @@ export interface ArcadeArea {
 }
 
 export const FOREST: ArcadeArea = {
-  name: 'The Haunted Forest',
+  name: "Froggy's Forrest",
   biome: 'forest',
   looks: {},
   fieldProps: [
@@ -185,7 +185,7 @@ export const FOREST: ArcadeArea = {
  * on her broom. Its Boss is the Queen, whose Hex hides the aim line.
  */
 export const CANDY_KINGDOM: ArcadeArea = {
-  name: 'The Candy Kingdom',
+  name: 'Candy Queendom',
   biome: 'candy',
   looks: { cover: 'candy/gingerbreadMan', safety: 'forest/witch' },
   fieldProps: [
@@ -251,7 +251,7 @@ export const CANDY_KINGDOM: ArcadeArea = {
  * he's only a prop (sim/props.ts, KING).
  */
 export const FARM: ArcadeArea = {
-  name: 'The Farm',
+  name: "Frederick's Farm",
   biome: 'farm',
   looks: {},
   fieldProps: [

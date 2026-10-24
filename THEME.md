@@ -21,7 +21,7 @@ Inspirations: *Retro Bowl* (pocket-sized arcade football), *Crossy Road* (feel, 
 - **At the start:** Jack bounces up to a football team and asks for help getting back to his patch. A few seconds, then the first snap.
 - **At the end:** in front of the King, with the pumpkin patch behind him, your whole team (the field and the bench) dances around Jack: GOT JACK BACK.
 
-The way home crosses three places, each with a Boss in a hat of its own: **Mister Frog** (a top hat) in the Forest, **the Queen** (a witch twice the size of any other, in a crown) in the Candy Kingdom, and **the King** (a scarecrow in a crown) at the Farm, by the patch. Nobody explains why they're in the way; they just are.
+The way home crosses three places, each with a Boss in a hat of its own: **Mister Frog** (a top hat) in Froggy's Forrest, **the Queen** (a witch twice the size of any other, in a crown) in the Candy Queendom, and **the King** (a scarecrow in a crown) at Frederick's Farm, by the patch. Nobody explains why they're in the way; they just are.
 
 ## Core Fantasy
 
@@ -82,9 +82,9 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 
 **The locals don't want a football team tramping through their land.** They're the defenders: wild creatures, never in helmets, always in candy purple. The Bosses are the one exception to "no hats": a top hat, a crown, a bigger crown.
 
-### The Haunted Forest
+### Froggy's Forrest
 
-| Defender job | Forest local | Look |
+| Defender job | Froggy's Forrest local | Look |
 |---|---|---|
 | **Rusher** (the pass rush) | **Rhino Beetle** | Low, wide and horned, a little battering ram. |
 | **Cover** (man coverage) | **Garden Gnome** | A tall pointy hat, a beard, arms out. |
@@ -94,10 +94,10 @@ Later candidates: the Skeleton, the Mummy, the Pumpkin-head, the Black Cat, Fran
 
 Plus the **Frog** (a Cover that crouches, then leaps) and the **Witch on a Broom** as a hazard swooping over the passing lanes. **Boss: Mister Frog,** who rains frogs down a lane.
 
-### The Candy Kingdom
+### The Candy Queendom
 The Queen's gingerbread realm: pink-and-white turf, gingerbread houses, candy canes and a few trees along the sidelines. **Witches take the Safety's place,** hanging deep on their brooms, and the **Gingerbread Man** is new: a flat cookie with icing eyes and smile, and the opposition's purple gumdrop buttons and bow tie. **Boss: the Queen,** a witch twice the size of any other, in a crown, whose **Royal Decree** bans one of your play cards each down (a red wax seal stamped BANNED across it).
 
-### The Farm
+### Frederick's Farm
 A tilled farm field (brown soil, furrows running up the field, green sprouts) with dark soil beyond, fences and glowing jack-o'-lanterns along the sidelines, pumpkins and hay bales. Rows of scarecrows, and **Crows** (black, with dark purple feathers) flying lanes up and down the field. **The pumpkin patch is the last end zone**, and **the King**, a giant scarecrow in a crown, stands guard in front of it, never moving.
 
 Each area has its own locals, hazards and look, and a Boss defense at the end of its four drives. It's always the same team, growing as it goes.

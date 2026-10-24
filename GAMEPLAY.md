@@ -7,7 +7,7 @@ This doc covers what the player *does*: the pillars, the run, a down, the contro
 Items marked **▲** are recommendations or details still open to change. Every number is a starting value, to tune by playtesting and by the headless balance runs (TECHNICAL.md).
 
 **Words used here:**
-- **Area:** a themed place (the Haunted Forest first). Each area is four drives.
+- **Area:** a themed place (Froggy's Forrest first). Each area is four drives.
 - **Drive:** four downs to gain 10 yards. **Down:** one play, a few seconds long.
 - **Line of scrimmage:** where the current down starts. **First-down line:** 10 yards past where the drive started.
 - **Your team:** **eight on the field**: the QB plus seven players, each a **Blocker**, a **Runner** or a **Catcher**. *The QB is the pumpkin ball itself, **Jack**: there's no QB player on the field, Jack throws himself (THEME.md, The ball).*
@@ -38,24 +38,24 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## The Run: Areas of Four Drives
 
-- **A run is a series of themed areas** (the Haunted Forest first). **Each area is four drives**, *Balatro*-style: **Intro**, **Challenge**, **Gimmick** (a twist) and **Boss**. **Every run is the same twelve drives:**
+- **A run is a series of themed areas** (Froggy's Forrest first). **Each area is four drives**, *Balatro*-style: **Intro**, **Challenge**, **Gimmick** (a twist) and **Boss**. **Every run is the same twelve drives:**
 
   | | Intro | Challenge | Gimmick | Boss |
   |---|---|---|---|---|
-  | **The Forest** | A Quiet Clearing | Gnome Country | Bat Cave | Mister Frog's Pond |
-  | **The Candy Kingdom** | Gumdrop Lane | Gingerbread Row | Broomstick Alley | The Queen's Court |
-  | **The Farm** | The Back Forty | The Cornrows | A Murder of Crows | The King's Patch |
+  | **Froggy's Forrest** | A Quiet Clearing | Gnome Country | Bat Cave | Mister Frog's Pond |
+  | **The Candy Queendom** | Gumdrop Lane | Gingerbread Row | Broomstick Alley | The Queen's Court |
+  | **Frederick's Farm** | The Back Forty | The Cornrows | A Murder of Crows | The King's Patch |
 - **The main game is three areas: 12 drives and three Bosses**, on the way to Jack's pumpkin patch (THEME.md). **Each Boss has one gimmick that attacks one thing you do:**
 
   | Area | Boss | Gimmick | Attacks |
   |---|---|---|---|
-  | **The Forest** | **Mister Frog** (top hat) | **Frog Rain:** before the snap a lane lights up on the turf, in from one sideline 40% of the way across. A moment into the down (1.2 s) its shadows fill in and **the frogs all come down at once**, a shower over the whole lane: a carrier in it is tackled there (**FROGGED!**), anyone else in it is flattened for a moment. Once a down. You see the lane while choosing a card, so you pick a play, or **Flip** it, to keep your routes out. | Where your routes go |
-  | **The Candy Kingdom** | **The Queen** (a witch, double size, in a crown) | **Royal Decree:** each down one of your three play cards, at random, is stamped **BANNED** with her red seal, and can't be called (tapping it: BY ROYAL DECREE!). You make do with the other two. | Your play call |
-  | **The Farm** | **The King** (a giant scarecrow in a crown) *(beating his drive gets Jack home: the end)* | **SHOO CROWS!** Two pairs of crows sit on him, one on his arms, one on his shoulders. Half a second after the snap the first pair swoops at whoever has the ball (while a pass is in the air, at where it's going), at half a bullet's speed. When they land on the holder a big **SHOO CROWS!** button pops up, with no freeze: tap it within about half a second and they're gone; too late and they knock the holder down (a sack if Jack still has it, a tackle if a carrier does). If the ball leaves the holder first they miss, so **a quick deep pass leaves them behind**. **A moment after the first pair is done** (shooed or missed), **the second pair comes**, the same way. SHOO isn't a Break it!: it doesn't count toward the two a down. The King himself is only a prop: he stands guard, still, just past the first-down line in front of the pumpkin patch. | Your nerve: hold the ball and they come for it |
+  | **Froggy's Forrest** | **Mister Frog** (top hat) | **Frog Rain:** before the snap a lane lights up on the turf, in from one sideline 40% of the way across. A moment into the down (1.2 s) its shadows fill in and **the frogs all come down at once**, a shower over the whole lane: a carrier in it is tackled there (**FROGGED!**), anyone else in it is flattened for a moment. Once a down. You see the lane while choosing a card, so you pick a play, or **Flip** it, to keep your routes out. | Where your routes go |
+  | **The Candy Queendom** | **The Queen** (a witch, double size, in a crown) | **Royal Decree:** each down one of your three play cards, at random, is stamped **BANNED** with her red seal, and can't be called (tapping it: BY ROYAL DECREE!). You make do with the other two. | Your play call |
+  | **Frederick's Farm** | **The King** (a giant scarecrow in a crown) *(beating his drive gets Jack home: the end)* | **SHOO CROWS!** Two pairs of crows sit on him, one on his arms, one on his shoulders. Half a second after the snap the first pair swoops at whoever has the ball (while a pass is in the air, at where it's going), at half a bullet's speed. When they land on the holder a big **SHOO CROWS!** button pops up, with no freeze: tap it within about half a second and they're gone; too late and they knock the holder down (a sack if Jack still has it, a tackle if a carrier does). If the ball leaves the holder first they miss, so **a quick deep pass leaves them behind**. **A moment after the first pair is done** (shooed or missed), **the second pair comes**, the same way. SHOO isn't a Break it!: it doesn't count toward the two a down. The King himself is only a prop: he stands guard, still, just past the first-down line in front of the pumpkin patch. | Your nerve: hold the ball and they come for it |
 
 - **The story is two tiny cutscenes:** at the start (after PLAY, with the music already going), Jack asks a football team "Can you help me get back to my patch?", one says "Ok", they carry him off, and the title slams in: GET JACK BACK (it plays through: it's short); at the end, in front of the King and the patch, your whole roster (field and bench) dances around Jack: GOT JACK BACK.
 
-- **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone: a **TOUCHDOWN!** (and, the third time, Jack is home).
+- **The four drives are one continuous march up the field**, with no break between them: the camera follows the play up to the next defense, TRICK OR TREAT! takes a moment, and play carries on. The Boss drive goes for the end zone, and getting there clears the area: **Froggy's Forrest Cleared!** (and, the third time, Jack is home).
 - **There are no lives. Losing a drive is game over.** Four downs, and every one counts.
 - **The forest scales up as you do:** the first drive is a handful of sleepy defenders, the area III Boss is the whole forest at full strength (see *The Defense*).
 
@@ -115,7 +115,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **JUKE!** | Two big buttons, ◀ and ▶, from the start of the countdown; when it ends, the one to press lights up | Press it: quickly to break, a beat later to drag. The wrong one is a tackle. **The lit button's colour says what a press gets now:** green GREAT, orange OK, then red (TOO LATE!) for half a second before it's BAD | A shorter window |
 
 - **A GREAT really breaks free:** the rest of the pile right beside the carrier is knocked back too, and for a moment (0.6 s) nobody can grab it, so it gets clear instead of being grabbed again on the spot. **A grab that follows hard on another** (within 2 seconds) gets a short countdown (half a second), so a pile-up never stalls the game.
-- **How hard the tests are depends on the zone, not on stats:** the Forest's are the easiest, the Candy Kingdom's a step harder, the Farm's harder again (sweet spot 9% → 7.5% → 6% of the bar; juke window 0.55 → 0.48 → 0.42 s). So no kind is the best at breaking tackles.
+- **How hard the tests are depends on the zone, not on stats:** Froggy's Forrest's are the easiest, the Candy Queendom's a step harder, Frederick's Farm's harder again (sweet spot 9% → 7.5% → 6% of the bar; juke window 0.55 → 0.48 → 0.42 s). So no kind is the best at breaking tackles.
 - **Two a down at most:** a third grab in the same down is just a tackle, no test.
 - **Every extra tackler already on it** makes the test harder: a narrower sweet spot, less per tap, a shorter window. A pile is hard to escape.
 - **More Heft also means more yards on a drag.**
@@ -193,14 +193,14 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 **Two new players, never of the same kind, and you take one:** there's no skipping (a new player can always sit on the bench). Each card is the player itself, drawn like a roster card: its photo, name and kind, its **Heft / Hustle / Hands** bars, and its **preferred position** (the one its best stat suits: Heft → Blocker, Hustle → Runner, Hands → Catcher).
 
-**A new player's stats add up to the zone's total:** **200** in the Forest, **250** in the Candy Kingdom, **300** on the Farm, shared out in its kind's shape (a Ghost mostly Hands, a Golem mostly Heft, a Human evenly) and nudged a little, so no two are alike. The zone is the one of the drive about to be played, so the offer after the Forest's Boss is already the Candy Kingdom's.
+**A new player's stats add up to the zone's total:** **200** in Froggy's Forrest, **250** in the Candy Queendom, **300** on Frederick's Farm, shared out in its kind's shape (a Ghost mostly Hands, a Golem mostly Heft, a Human evenly) and nudged a little, so no two are alike. The zone is the one of the drive about to be played, so the offer after Froggy's Forrest's Boss is already the Candy Queendom's.
 
 **Take one and it goes straight in:** into the field slot whose player it beats by the most total stats (on a tie, a slot of the position it prefers), and whoever was there sits on the bench. If it beats nobody, it sits on the bench itself. Then the roster stays open to rearrange (any two swap), and **Done** plays on. Only the seven on the field play.
 
 **The bench has no limit:** the newest sit at the top, and a full run ends with eleven players on it (one for each TRICK OR TREAT!).
 
 > **Howlin' Hal** · Werewolf · *prefers Runner*
-> Heft 65 · Hands 40 · Hustle 95 *(a Forest recruit: 200 in all)*
+> Heft 65 · Hands 40 · Hustle 95 *(a Froggy's Forrest recruit: 200 in all)*
 
 ---
 
@@ -213,15 +213,15 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Rusher** | Rhino Beetle | Charges the QB. Your Blockers have to out-shove it. |
 | **Cover** | Garden Gnome | Shadows a Catcher; after the catch, chases the carrier. Small, quick, light: easy to shove, hard to shake. |
 | **Zone** | Scarecrow | Planted: its long arms reach a **wide purple ring** on the turf, and any low ball coming down inside it is contested: its Hands beat a plain Catcher's, so it's a patch of field to throw away from (a Catcher with great Hands, like a Ghost, can still win it). Running into one stops you dead. |
-| **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. *(In the Candy Kingdom the Safety is a Witch.)* |
+| **Safety** | Owl | Hangs deep, between the ball and the first-down line, and comes down to meet the carrier. *(In the Candy Queendom the Safety is a Witch.)* |
 | **Bat** | Bat | Guards its patch of air: it loops a square and swats passes that fly through it, and dives at a carrier that comes within 3 yards (back to its loop if the carrier gets away). |
 | **Frog** *(new)* | Frog | Covers like a Gnome until the carrier gets close, then crouches (the telegraph) and leaps onto it. |
-| **Gingerbread Man** *(Candy Kingdom)* | Gingerbread Man | The Candy Kingdom's Cover: the same rule, a new look. |
-| **Crow** *(Farm)* | Crow | Like a Bat, it swats passes that fly through it; it flies a lane up and down the field (8 yards) instead of looping a square. |
+| **Gingerbread Man** *(Candy Queendom)* | Gingerbread Man | The Candy Queendom's Cover: the same rule, a new look. |
+| **Crow** *(Frederick's Farm)* | Crow | Like a Bat, it swats passes that fly through it; it flies a lane up and down the field (8 yards) instead of looping a square. |
 
-- **Each area has its own set:** the Forest adds Frogs; the Candy Kingdom swaps the Owl for Witches and adds Gingerbread Men; the Farm adds Crows and rows of Scarecrows, and its props are pumpkins and hay bales. Older kinds keep their rules wherever they appear.
+- **Each area has its own set:** Froggy's Forrest adds Frogs; the Candy Queendom swaps the Owl for Witches and adds Gingerbread Men; Frederick's Farm adds Crows and rows of Scarecrows, and its props are pumpkins and hay bales. Older kinds keep their rules wherever they appear.
 - **The Bosses aren't defenders:** each stands in the middle of its drive's end zone, just past the first-down line, drawn twice a player's size, and never moves, tackles or defends (a prop). Its ability is the whole fight. Mister Frog is a Frog in a top hat, the Queen a Witch in a crown, the King a Scarecrow in a crown.
-- **Props on the field:** two or three to every 10 yards, from the area's own set (the Forest: trees, stumps and toadstools; the Candy Kingdom: gumdrops, lollipops and candy canes). They're solid: everyone, yours and theirs, has to go around them, and carriers pick lanes clear of them. The ball flies over them. They never stand in the middle lane (the pumpkin's, and the handoffs'), never against a sideline, and always leave room to pass between.
+- **Props on the field:** two or three to every 10 yards, from the area's own set (Froggy's Forrest: trees, stumps and toadstools; the Candy Queendom: gumdrops, lollipops and candy canes). They're solid: everyone, yours and theirs, has to go around them, and carriers pick lanes clear of them. The ball flies over them. They never stand in the middle lane (the pumpkin's, and the handoffs'), never against a sideline, and always leave room to pass between.
 - **Hazards** stay simple patterns, like *Crossy Road*'s cars: the **Witch on a Broom** sweeps across the field and knocks down any pass she meets.
 - **Scaling, the lever behind the whole run:** the first drive of area I is **four slow defenders** (Intro 4, Challenge 5, Gimmicks 5 or 6, the Boss a full 8); every drive adds defenders or stats, and later areas bring more rushers and heavier, faster, grabbier versions of everyone. ▲ *Numbers to come from the balance runs: the target is that a team that never upgrades loses in area II, a decent build reaches the last Boss, and a strong one beats it.*
 - **The defense always shows its intent:** rushers lean toward the QB, Covers face their Catcher, the Owl tracks the ball.
@@ -238,7 +238,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 - **Squash and stretch** on everything; the ball spins; dust and leaves kick up.
 - **Sound on every contact:** crunches, squeaks, rattles, howls, and the crowd reacting.
 - **Haptics** on the snap, the throw, the catch and every hit.
-- **Four songs, one per stretch of the run,** all on the same beat so each crossfades into the next in time: **Hollow Hop** (spooky campfire folk: a picked guitar, a theremin, a music box, a frog) for the intro and the Forest; **Sugar Coven** (a twisted carnival: calliope, oom-pah tuba, harpsichord) in the Candy Kingdom; **Harvest Moon Hoedown** (spooky bluegrass: banjo rolls, a fiddle, stomps and claps, a crow) on the Farm; and **The Pumpkin Mash** (a '60s doo-wop monster-dance homage: piano triplets, an "ooh-wah" choir, a honking sax) for the win screen. The song changes when a new area starts, crossfading over two bars from a bar line.
+- **Four songs, one per stretch of the run,** all on the same beat so each crossfades into the next in time: **Hollow Hop** (spooky campfire folk: a picked guitar, a theremin, a music box, a frog) for the intro and Froggy's Forrest; **Sugar Coven** (a twisted carnival: calliope, oom-pah tuba, harpsichord) in the Candy Queendom; **Harvest Moon Hoedown** (spooky bluegrass: banjo rolls, a fiddle, stomps and claps, a crow) on Frederick's Farm; and **The Pumpkin Mash** (a '60s doo-wop monster-dance homage: piano triplets, an "ooh-wah" choir, a honking sax) for the win screen. The song changes when a new area starts, crossfading over two bars from a bar line.
 - **The music is the soundtrack, and juice:** big hits and celebrations land on the beat when they can, the crowd claps along. **There's no rhythm gameplay**: nothing you do has to be on the beat.
 
 ## Reading the Field
