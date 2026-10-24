@@ -21,6 +21,7 @@ export default defineConfig({
               devBeat: resolve(import.meta.dirname, 'dev/beat.html'),
               devModels: resolve(import.meta.dirname, 'dev/models.html'),
               devAudio: resolve(import.meta.dirname, 'dev/audio.html'),
+              devLyrics: resolve(import.meta.dirname, 'dev/lyrics.html'),
             }),
       },
     },

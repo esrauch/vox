@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lyric Timer · Dev</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0.75rem 1rem 3rem;
+        font-family: system-ui, sans-serif;
+        background: #2b2140;
+        color: #f7f1e3;
+      }
+      a {
+        color: #8fd3ff;
+      }
+      h1 {
+        font-family: 'Creepster', system-ui, sans-serif;
+        font-weight: normal;
+        margin: 0.2rem 0 0.5rem;
+      }
+      .help {
+        max-width: 60rem;
+        line-height: 1.45;
+        opacity: 0.85;
+      }
+      kbd {
+        padding: 0 0.35em;
+        border: 1px solid #f7f1e3;
+        border-radius: 3px;
+        font-size: 0.85em;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        margin: 0.75rem 0;
+      }
+      audio {
+        width: min(40rem, 100%);
+      }
+      button {
+        font: inherit;
+        padding: 0.35rem 0.8rem;
+        border: 2px solid #f7f1e3;
+        border-radius: 0;
+        color: #2b2140;
+        background: #f7f1e3;
+        cursor: pointer;
+      }
+      .preview {
+        min-height: 5.5rem;
+        margin: 0.5rem 0 1rem;
+        padding: 0.75rem;
+        text-align: center;
+        background: #1a1428;
+      }
+      .preview .now {
+        font-family: 'Creepster', system-ui, sans-serif;
+        font-size: 2rem;
+        color: #ff8a1f;
+      }
+      .preview .next {
+        font-size: 1rem;
+        opacity: 0.6;
+      }
+      ol {
+        padding-left: 2.5rem;
+        max-width: 60rem;
+      }
+      li {
+        padding: 0.15rem 0.4rem;
+        cursor: pointer;
+      }
+      li .t {
+        display: inline-block;
+        width: 9rem;
+        font-variant-numeric: tabular-nums;
+        opacity: 0.7;
+      }
+      li .sec {
+        opacity: 0.45;
+        font-size: 0.8em;
+        margin-left: 0.5rem;
+      }
+      li.done .t {
+        color: #9cff2e;
+        opacity: 1;
+      }
+      li.cursor {
+        outline: 2px solid #ff8a1f;
+      }
+      li.singing {
+        background: #4a3870;
+      }
+      textarea {
+        width: min(60rem, 100%);
+        height: 10rem;
+        font: 0.8rem monospace;
+      }
+    </style>
+    <link rel="stylesheet" href="/src/ui/fonts.css" />
+  </head>
+  <body>
+    <a href="index.html">← Dev tools</a>
+    <h1>Lyric timer: We Got Jack Back</h1>
+    <p class="help">
+      Play the song and press <kbd>Space</kbd> the moment each line starts being sung: it stamps the
+      line under the orange box and moves on. Press <kbd>Enter</kbd> when a line finishes and
+      there's a gap before the next (an instrumental bit), so the screen goes blank there.
+      <kbd>Backspace</kbd> undoes the last stamp (and jumps back a few seconds), <kbd>←</kbd>/<kbd
+        >→</kbd
+      >
+      skip 5 seconds, <kbd>P</kbd> plays or pauses. Click a line to put the box on it (and jump to
+      just before it, if it's stamped) to redo from there. Your work saves itself in this browser.
+      When it's done, press <b>Download</b> (or copy the text at the bottom) and send it to Claude.
+    </p>
+    <div class="bar">
+      <audio controls preload="auto"></audio>
+      <button class="download">Download timings</button>
+      <button class="reset">Clear all</button>
+    </div>
+    <div class="preview">
+      <div class="now"></div>
+      <div class="next"></div>
+    </div>
+    <ol class="lines"></ol>
+    <textarea class="out" readonly></textarea>
+    <script type="module" src="/src/dev/lyricTimer.ts"></script>
+  </body>
+</html>

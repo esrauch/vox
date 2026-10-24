@@ -257,6 +257,7 @@ slice 0
 
 - **How Claude checks audio:** `npm run render-audio` (`tools/audio/render.ts`) renders a song, stem or SFX to WAV with a waveform PNG, and reports peak and loudness and a loop-seam check. **A human listens before anything ships.**
 - **`/dev/audio.html`** plays every SFX and every song stem, and crossfades between songs.
+- **`/dev/lyrics.html`** times the lyrics of a recorded track by tapping along (for the sing-along video): Space stamps each line's start, Enter a gap's start, Backspace undoes; it saves in localStorage and downloads `weGotJackBack.timings.json`.
 
 ---
 
