@@ -71,6 +71,8 @@ const browser = await chromium.launch({
 try {
   const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
   page.on('pageerror', (e) => console.error(`page error: ${e.message}`));
+  // tsx names the functions in code passed to page.evaluate with a __name helper the page lacks.
+  await page.addInitScript('window.__name = (f) => f');
   await page.goto(`http://localhost:${port}/?win=1&video=1&seed=7`);
   await page.locator('.start-play').click();
   await page.waitForFunction(() => '__videoStep' in window, undefined, { timeout: 120_000 });
