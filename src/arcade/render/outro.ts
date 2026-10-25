@@ -5,9 +5,14 @@
  * Jack (throwing embers, a splash each time he lands, a burst with each
  * word), and GOT / JACK / BACK slams in a word at a time. It's the end:
  * it dances on for good, with no AGAIN.
+ *
+ * The dance is on the win track's beat (its tempo and first beat), and every
+ * move repeats every LOOP_BEATS beats, so a clip of that many beats loops
+ * seamlessly (the sing-along video, tools/video/).
  */
 import * as THREE from 'three';
 import type { Form } from '../sim/types';
+import { LOOP_BEATS, type DanceBeat } from '../content/dance';
 import { Embers } from './embers';
 import { getGeometry } from '../../voxel/models';
 import { playerMesh } from './bodies';
@@ -55,6 +60,9 @@ export class ArcadeOutro {
     king: THREE.Vector3,
     cast: readonly Form[],
     private readonly sound: (id: 'burst') => void,
+    private readonly beat: DanceBeat,
+    /** Show GOT / JACK / BACK (the sing-along video has lyrics instead). */
+    private readonly title = true,
   ) {
     // The rows run across the field in front of the King (the camera's side is +z).
     const front = king.z + FRONT;
@@ -68,7 +76,7 @@ export class ArcadeOutro {
       const mesh = playerMesh(kind);
       mesh.position.copy(home);
       this.group.add(mesh);
-      this.dancers.push({ mesh, home, move: i % 3, phase: i * 0.7 });
+      this.dancers.push({ mesh, home, move: i % 3, phase: (i % 4) * 0.12 });
     });
     // Jack bounces in front of them all, glowing.
     this.jack = new THREE.Mesh(
@@ -99,35 +107,42 @@ export class ArcadeOutro {
       this.scene.fog.far = CAMERA_BACK + 40;
     }
 
-    // Three dances: a bounce, a side-to-side shuffle, and a spin. Each to its own beat.
+    // Beats since the music's first beat: everyone lands on the beat.
+    const b = ((t - this.beat.firstBeat) * this.beat.bpm) / 60;
+    // Three dances: a bounce, a side-to-side shuffle (over four beats), and a spin (a
+    // full turn every LOOP_BEATS). Each dancer a little off the others, like a crowd.
     for (const d of this.dancers) {
-      const beat = t * 7 + d.phase;
-      const hop = Math.abs(Math.sin(beat));
+      const at = b + d.phase;
+      const hop = Math.abs(Math.sin(Math.PI * at));
+      const sway = Math.sin((Math.PI * at) / 2);
       d.mesh.position.copy(d.home);
       d.mesh.rotation.set(0, 0, 0);
       if (d.move === 0) {
         d.mesh.position.y = 0.35 * hop;
       } else if (d.move === 1) {
-        d.mesh.position.x = d.home.x + 0.35 * Math.sin(beat / 2);
+        d.mesh.position.x = d.home.x + 0.35 * sway;
         d.mesh.position.y = 0.15 * hop;
-        d.mesh.rotation.z = 0.2 * Math.sin(beat / 2);
+        d.mesh.rotation.z = 0.2 * sway;
       } else {
-        d.mesh.rotation.y = beat * 0.6;
+        d.mesh.rotation.y = (2 * Math.PI * at) / LOOP_BEATS;
         d.mesh.position.y = 0.2 * hop;
       }
     }
-    this.jack.position.copy(this.jackHome).setY(this.jackHome.y + 0.5 * Math.abs(Math.sin(t * 5)));
+    // Jack hops once a beat.
+    this.jack.position
+      .copy(this.jackHome)
+      .setY(this.jackHome.y + 0.5 * Math.abs(Math.sin(Math.PI * b)));
     this.light.position.copy(this.jack.position).setY(this.jack.position.y + 0.6);
     // Embers off Jack all the while, a splash each time he lands, a burst with each word.
     const glow = this.jack.position.clone().setY(this.jack.position.y + 0.6);
     this.embers.stream(glow, 110, dt, 1, 0.5);
-    const bounce = Math.floor((t * 5) / Math.PI);
+    const bounce = Math.floor(b);
     if (bounce > this.bounce) {
       this.bounce = bounce;
       this.embers.burst(this.jack.position.clone().setY(0.3), 30, 3.5);
     }
 
-    const landed = WORDS.filter((w) => t >= w).length;
+    const landed = this.title ? WORDS.filter((w) => t >= w).length : 0;
     this.words.forEach((w, i) => w.classList.toggle('show', i < landed));
     if (landed > this.spoken) {
       this.spoken = landed;

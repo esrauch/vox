@@ -257,6 +257,7 @@ slice 0
 
 - **How Claude checks audio:** `npm run render-audio` (`tools/audio/render.ts`) renders a song, stem or SFX to WAV with a waveform PNG, and reports peak and loudness and a loop-seam check. **A human listens before anything ships.**
 - **`/dev/audio.html`** plays every SFX and every song stem, and crossfades between songs.
+- **The sing-along video:** `npx tsx tools/video/render.ts` → `previews/video/weGotJackBack.mp4` (1920×1080, H.264/AAC). It runs the game in video mode (`?win=1&video=1`: the win dance with no title, stepped by `window.__videoStep(dt)`), captures one `LOOP_BEATS` loop of it (crossfading a few extra frames over the first, so the seam doesn't jump), draws each lyric line onto a transparent strip in the game's font, and has ffmpeg repeat the loop under the song (offset so its downbeat lands on the song's first beat), with the strips over it at their times. `npx tsx tools/video/tempo.ts` measures a track's tempo and first beat (`content/dance.ts`, `WIN_TRACK_BEAT`).
 - **`/dev/lyrics.html`** times the lyrics of a recorded track by tapping along (for the sing-along video): Space stamps each line's start, Enter a gap's start, Backspace undoes; it saves in localStorage and downloads `weGotJackBack.timings.json`.
 
 ---

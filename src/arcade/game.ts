@@ -29,6 +29,7 @@ import { ArcadeOutro } from './render/outro';
 import { BOSS_SPOT } from './sim/props';
 import { AREA_SONGS, FARM_SONGS, hollowHop } from '../audio/songs';
 import { WIN_TRACK } from '../audio/tracks';
+import { WIN_TRACK_BEAT } from './content/dance';
 import type { Music } from '../game/conductor';
 import { areaAt } from './content/defense';
 import type { Song } from '../audio/synth/render';
@@ -71,6 +72,12 @@ export interface ArcadeOptions {
   area?: number;
   /** Go straight to the win cutscene after PLAY, with a full bench: ?win=1, for looking at it. */
   win?: boolean;
+  /**
+   * Video mode (?video=1, with ?win=1): the win dance without the title, held
+   * still until `window.__videoStep(dt)` moves it on a frame, so a script can
+   * capture evenly spaced frames (tools/video/).
+   */
+  video?: boolean;
   /** Which Frederick's Farm song candidate plays (1 Harvest Moon Hoedown, 2 Spooky Cow): ?farmSong=2. */
   farmSong?: number;
 }
@@ -122,6 +129,7 @@ export class ArcadeGame {
   private readonly startArea: number;
   /** ?win=1: PLAY goes straight to the win cutscene. */
   private readonly jumpToWin: boolean;
+  private readonly video: boolean;
   /** Each area's song (the Farm's is one of its candidates). */
   private readonly areaSongs: readonly Song[];
   private readonly conductor = new Conductor();
@@ -168,6 +176,7 @@ export class ArcadeGame {
     this.monsters = options.monsters ?? false;
     this.startArea = Math.max(0, (options.area ?? 1) - 1);
     this.jumpToWin = options.win ?? false;
+    this.video = options.video ?? false;
     const farm = FARM_SONGS[(options.farmSong ?? 1) - 1] ?? FARM_SONGS[0];
     this.areaSongs = [...AREA_SONGS, farm];
     this.state = createRun(this.seed, firstRoster(this.monsters), this.startArea);
@@ -249,7 +258,9 @@ export class ArcadeGame {
       }
       return;
     }
-    // The win cutscene: the end. It dances on for good.
+    // The win cutscene: the end. It dances on for good (in video mode, a frame at a time
+    // when the capture script asks).
+    if (this.outro && this.video) return;
     if (this.outro) {
       this.outro.update(dt, this.view.camera);
       this.view.render();
@@ -640,9 +651,25 @@ export class ArcadeGame {
     const cast = [...this.state.roster, ...this.state.bench].map((p) => p.kind);
     this.bodies.setVisible(false);
     this.ball.setVisible(false);
-    this.outro = new ArcadeOutro(this.view.scene, this.uiRoot, king, cast, (id) =>
-      this.conductor.play(id),
+    // The dance keeps the win track's beat (it starts as the cutscene does).
+    this.outro = new ArcadeOutro(
+      this.view.scene,
+      this.uiRoot,
+      king,
+      cast,
+      (id) => this.conductor.play(id),
+      WIN_TRACK_BEAT,
+      !this.video,
     );
+    if (this.video) {
+      const outro = this.outro;
+      Object.assign(window, {
+        __videoStep: (dt: number): void => {
+          outro.update(dt, this.view.camera);
+          this.view.render();
+        },
+      });
+    }
   }
 
   private pause(): void {
