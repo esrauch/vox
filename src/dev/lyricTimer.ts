@@ -3,7 +3,7 @@
  * stamp when each line starts (and, for a gap, ends), for the sing-along
  * video. Saves itself in localStorage; the result downloads as JSON.
  */
-import songUrl from '../../assets/music/weGotJackBack.mp3?url';
+import songUrl from '../../media/weGotJackBack.mp3?url';
 import { WE_GOT_JACK_BACK_LYRICS } from '../content/lyrics/weGotJackBack';
 
 interface Timing {

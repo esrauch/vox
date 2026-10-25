@@ -10,7 +10,7 @@
  *    of the track), plus a little more: the extra frames are crossfaded over
  *    the first few, so the loop's seam doesn't jump (the embers are random).
  * 2. Lyrics: each line drawn in the game's font onto a transparent strip, in
- *    the browser, timed by assets/music/weGotJackBack.timings.json (made on
+ *    the browser, timed by media/weGotJackBack.timings.json (made on
  *    /dev/lyrics.html).
  * 3. Encode (needs ffmpeg): the loop repeated for the song's length, offset so
  *    the dancers land on the song's beats, the lyric strips over it at their
@@ -27,8 +27,8 @@ const ROOT = new URL('../..', import.meta.url).pathname;
 const OUT = join(ROOT, 'previews/video');
 const FRAMES = join(OUT, 'frames');
 const LYRICS = join(OUT, 'lyrics');
-const SONG = join(ROOT, 'assets/music/weGotJackBack.mp3');
-const TIMINGS = join(ROOT, 'assets/music/weGotJackBack.timings.json');
+const SONG = join(ROOT, 'media/weGotJackBack.mp3');
+const TIMINGS = join(ROOT, 'media/weGotJackBack.timings.json');
 const W = 1920;
 const H = 1080;
 /** The lyric strip at the bottom. */

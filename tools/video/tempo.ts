@@ -3,13 +3,13 @@
  * sing-along video's dance): decodes it in headless Chrome, takes an onset
  * envelope (rises in loudness, 10 ms frames), and finds the tempo between 80
  * and 160 BPM whose beat grid lines up best with it, and that grid's phase.
- *   npx tsx tools/video/tempo.ts [assets/music/weGotJackBack.mp3]
+ *   npx tsx tools/video/tempo.ts [media/weGotJackBack.mp3]
  */
 import { chromium } from 'playwright-core';
 import { createServer } from 'vite';
 
 const ROOT = new URL('../..', import.meta.url).pathname;
-const file = process.argv[2] ?? 'assets/music/weGotJackBack.mp3';
+const file = process.argv[2] ?? 'media/weGotJackBack.mp3';
 
 export interface Tempo {
   readonly bpm: number;

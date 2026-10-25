@@ -1,5 +1,5 @@
 /**
- * "We Got Jack Back" (assets/music/weGotJackBack.mp3): the lyrics as sung,
+ * "We Got Jack Back" (media/weGotJackBack.mp3): the lyrics as sung,
  * one entry per sung line, for the sing-along video. Stage directions
  * (the bracketed sections' notes in parentheses) are left out; a line's own
  * backing shouts, like "(WOOO!)", stay in. When each line starts is timed by
