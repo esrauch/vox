@@ -28,9 +28,7 @@ import { ArcadeIntro } from './render/intro';
 import { ArcadeOutro } from './render/outro';
 import { BOSS_SPOT } from './sim/props';
 import { AREA_SONGS, FARM_SONGS, hollowHop } from '../audio/songs';
-import { WIN_TRACK } from '../audio/tracks';
 import { WIN_TRACK_BEAT } from './content/dance';
-import type { Music } from '../game/conductor';
 import { areaAt } from './content/defense';
 import type { Song } from '../audio/synth/render';
 import { ArcadeQueenCrown } from './render/queenCrown';
@@ -112,6 +110,10 @@ const INTRO_FADE = 1;
 const MOON_FILL = 0.45;
 const SKY_FILL = 0.75;
 const LOOK_AHEAD = 7;
+/** The win song's sing-along video: the win screen goes there. */
+const WIN_SONG_URL = 'https://www.youtube.com/watch?v=7A2Udh11ASo';
+/** If the redirect hasn't taken the page away by now, it was blocked: show the button. */
+const SONG_LINK_DELAY_MS = 3000;
 const WIDTH_MARGIN = 1.06;
 
 /** How a Break it! went, in one big word. */
@@ -243,8 +245,8 @@ export class ArcadeGame {
   private frame(now: number): void {
     const dt = this.lastFrame === null ? 0 : Math.min(0.1, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
-    // Each area has its song (the intro plays the first's), and the win screen its track.
-    this.conductor.setSong(this.songNow());
+    // Each area has its song (the intro plays the first's; the win screen keeps the last).
+    this.conductor.setSong(this.areaSong());
     // The intro plays with the game held still; when it ends it crossfades into the first drive.
     if (this.intro) {
       const done = this.intro.update(dt, this.view.camera, this.view.canvas);
@@ -576,11 +578,6 @@ export class ArcadeGame {
     else this.hud.setPrompt(null, null);
   }
 
-  /** The music for now: the win screen's track during the win cutscene, otherwise the area's song. */
-  private songNow(): Music {
-    return this.outro ? WIN_TRACK : this.areaSong();
-  }
-
   /** The area's song (the intro plays the first area's). */
   private areaSong(): Song {
     const songs = this.areaSongs;
@@ -651,7 +648,7 @@ export class ArcadeGame {
     const cast = [...this.state.roster, ...this.state.bench].map((p) => p.kind);
     this.bodies.setVisible(false);
     this.ball.setVisible(false);
-    // The dance keeps the win track's beat (it starts as the cutscene does).
+    // The dance keeps the beat of the win song (We Got Jack Back, the sing-along video's).
     this.outro = new ArcadeOutro(
       this.view.scene,
       this.uiRoot,
@@ -669,7 +666,30 @@ export class ArcadeGame {
           this.view.render();
         },
       });
+    } else {
+      this.toTheSong();
     }
+  }
+
+  /**
+   * The win song lives on YouTube: go straight there. If the page is still
+   * here a moment later (the redirect was blocked), show a button for it.
+   */
+  private toTheSong(): void {
+    const link = document.createElement('a');
+    link.className = 'song-link interactive';
+    link.href = WIN_SONG_URL;
+    link.textContent = "Listen to 'We Got Jack Back' on YouTube";
+    link.hidden = true;
+    this.uiRoot.append(link);
+    try {
+      window.location.assign(WIN_SONG_URL);
+    } catch {
+      // Blocked: the button's there for it.
+    }
+    window.setTimeout(() => {
+      if (document.visibilityState === 'visible') link.hidden = false;
+    }, SONG_LINK_DELAY_MS);
   }
 
   private pause(): void {

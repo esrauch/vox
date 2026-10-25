@@ -589,3 +589,28 @@ button.hud-offer:active {
     inset 0 -6px 0 rgb(0 0 0 / 0.25),
     2px 2px 0 var(--ink);
 }
+
+/* The win screen's way to the song on YouTube: only shown if the redirect there was blocked. */
+.song-link {
+  position: absolute;
+  left: 50%;
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  translate: -50% 0;
+  max-width: 90vw;
+  padding: 14px 22px;
+  border: var(--edge) solid var(--ink);
+  font-size: 1.4rem;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  background: var(--danger);
+  text-shadow: 2px 2px 0 var(--ink);
+  box-shadow:
+    inset 0 4px 0 rgb(255 255 255 / 0.35),
+    inset 0 -6px 0 rgb(0 0 0 / 0.25),
+    5px 5px 0 var(--ink);
+}
+
+.song-link[hidden] {
+  display: none;
+}
