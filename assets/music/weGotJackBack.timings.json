@@ -20,7 +20,11 @@
     { "text": "Shake your bones 'til the sun comes up outside,", "start": 76.799885, "end": null },
     { "text": "We got Jack back! (Oh yeah!)", "start": 80.349542, "end": null },
     { "text": "We got Jack... BACK!", "start": 83.040286, "end": null },
-    { "text": "Alright everybody, it's time to do... the Pumpkin Roll!", "start": 90.841144, "end": null },
+    {
+      "text": "Alright everybody, it's time to do... the Pumpkin Roll!",
+      "start": 90.841144,
+      "end": null
+    },
     { "text": "Step to the left! (Step!)", "start": 96.097594, "end": null },
     { "text": "Step to the right! (Step!)", "start": 97.637818, "end": null },
     { "text": "Rattle your bones! (Rattle rattle!)", "start": 99.080941, "end": null },
@@ -33,10 +37,18 @@
     { "text": "Light him up! (Light him up!)", "start": 115.778539, "end": null },
     { "text": "LIGHT... HIM... UP!", "start": 117.785541, "end": 127.509634 },
     { "text": "We got Jack back! (He's back! He's back!)", "start": 135.251229, "end": null },
-    { "text": "Pumpkin on the patch, now he's glowin' like that!", "start": 138.548843, "end": null },
+    {
+      "text": "Pumpkin on the patch, now he's glowin' like that!",
+      "start": 138.548843,
+      "end": null
+    },
     { "text": "We got Jack back! (Say what? Say what?)", "start": 142.15123, "end": null },
     { "text": "Carried him home in a big ol' sack!", "start": 145.411744, "end": null },
-    { "text": "Throw your claws up high, wave 'em side to side,", "start": 149.220318, "end": null },
+    {
+      "text": "Throw your claws up high, wave 'em side to side,",
+      "start": 149.220318,
+      "end": null
+    },
     { "text": "Shake your bones 'til the sun comes up outside,", "start": 152.637349, "end": null },
     { "text": "We got Jack back! (Oh yeah!)", "start": 156.152292, "end": null },
     { "text": "We got Jack... BACK!", "start": 159.515824, "end": 166.993639 },
