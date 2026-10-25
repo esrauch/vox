@@ -289,7 +289,8 @@ function hike(state: RunState, events: ArcadeEvent[]): void {
  * Take a new player on offer. It goes straight into the field slot it
  * improves most (bestSpot), and whoever was there sits on the bench; if it
  * beats nobody, it sits on the bench itself. The bench has no limit and the
- * newest sit at the top. The roster stays open to rearrange, then Done.
+ * newest sit at the top. With `trickOrTreat.setLineup` on, the roster then
+ * stays open to rearrange, then Done; otherwise play goes straight on.
  * (Any other perk, a Boss's, applies and play goes on.)
  */
 function pick(state: RunState, index: number, events: ArcadeEvent[]): void {
@@ -314,13 +315,15 @@ function pick(state: RunState, index: number, events: ArcadeEvent[]): void {
   });
   state.bench.unshift(replaced ?? recruit);
   relineTeam(state);
+  if (!arcadeTuning.trickOrTreat.setLineup) leaveDraft(state);
 }
 
 /** Swap two players' spots, field or bench (any player can play any position). */
 function swap(state: RunState, a: number, b: number): void {
   const pa = atSpot(state, a);
   const pb = atSpot(state, b);
-  if (state.phase !== 'draft' || !pa || !pb || a === b) return;
+  if (state.phase !== 'draft' || !arcadeTuning.trickOrTreat.setLineup) return;
+  if (!pa || !pb || a === b) return;
   setSpot(state, a, pb);
   setSpot(state, b, pa);
   relineTeam(state);

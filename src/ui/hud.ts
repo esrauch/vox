@@ -73,8 +73,10 @@ export interface OfferCard {
 
 /** What TRICK OR TREAT! shows: the offer, your roster and bench, and what to do. */
 export interface DraftView {
-  /** The heading over the offer. */
+  /** The heading over the offer… */
   readonly title: string;
+  /** …and a plain line under it saying what to do, or null. */
+  readonly lead: string | null;
   readonly offer: readonly OfferCard[];
   /** The players on the field, in lineup order… */
   readonly roster: readonly RosterRow[];
@@ -84,6 +86,8 @@ export interface DraftView {
   readonly hand: string | null;
   /** The button that moves on (e.g. "Done"); none while there's a choice to make. */
   readonly skip?: string;
+  /** Whether tapping players swaps them (setting the lineup); otherwise the team is only shown. */
+  readonly swappable: boolean;
 }
 
 /** What a card face shows. */
@@ -219,7 +223,8 @@ export class Hud {
     offer.className = 'hud-draft-row';
     offer.append(...draft.offer.map((c, i) => offerButton(c, () => this.handlers.onDraft(i))));
     const onRoster = this.handlers.onRoster;
-    const tap = (row: RosterRow) => (onRoster ? () => onRoster(row.spot) : undefined);
+    const tap = (row: RosterRow) =>
+      onRoster && draft.swappable ? () => onRoster(row.spot) : undefined;
     // Left: the field, one group per position in lineup order. Right: the bench.
     const field = document.createElement('div');
     field.className = 'hud-roster-col';
@@ -268,8 +273,16 @@ export class Hud {
     skip.hidden = !draft.skip;
     skip.addEventListener('click', () => this.handlers.onSkip());
     const top: HTMLElement[] = draft.offer.length > 0 ? [offer] : [];
+    const lead: HTMLElement[] = [];
+    if (draft.lead) {
+      const p = document.createElement('p');
+      p.className = 'hud-draft-lead';
+      p.textContent = draft.lead;
+      lead.push(p);
+    }
     this.draft.replaceChildren(
       heading(draft.title),
+      ...lead,
       ...top,
       skip,
       heading('Your team'),

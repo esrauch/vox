@@ -4,6 +4,7 @@
  * to rearrange once one joins. The field is on the left
  * by position, the bench on the right; any two swap.
  */
+import { arcadeTuning } from '../content/tuning';
 import { POSITION_STAT, ROSTER_ROLES } from '../content/team';
 import { BENCH_START, atSpot, fieldedStats, playerStats } from '../sim/team';
 import { kindIcon } from './kindIcons';
@@ -54,7 +55,10 @@ function offerCard(state: RunState, perk: Perk): OfferCard | null {
   };
 }
 
-/** The TRICK OR TREAT! screen: two new players to choose from, then the lineup to set. */
+/**
+ * The TRICK OR TREAT! screen: two new players to choose from, over your team
+ * (field and bench); then, if `trickOrTreat.setLineup` is on, the lineup to set.
+ */
 export function trickOrTreatView(state: RunState, selected: number | null): DraftView {
   // ★ on the position heading the tapped player prefers.
   const starred = (selected === null ? undefined : atSpot(state, selected))?.preferred;
@@ -89,17 +93,31 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
     row(p, BENCH_START + seat, 'Bench', fieldedStats(state, p)),
   );
   const from = selected === null ? null : atSpot(state, selected);
-  const hand = from
-    ? `Now tap who ${from.name} swaps with (or ${from.name} again to cancel).`
-    : 'Tap any two players to swap them, field or bench.';
+  const swappable = arcadeTuning.trickOrTreat.setLineup;
+  const hand = !swappable
+    ? null
+    : from
+      ? `Now tap who ${from.name} swaps with (or ${from.name} again to cancel).`
+      : 'Tap any two players to swap them, field or bench.';
   if (state.offer.length === 0) {
-    return { title: 'Set your lineup', offer: [], roster, bench, hand, skip: 'Done' };
+    return {
+      title: 'Set your lineup',
+      lead: null,
+      offer: [],
+      roster,
+      bench,
+      hand,
+      skip: 'Done',
+      swappable,
+    };
   }
   return {
     title: 'TRICK OR TREAT!',
+    lead: 'Choose a player to join your team',
     offer: state.offer.map((p) => offerCard(state, p)).filter((c): c is OfferCard => c !== null),
     roster,
     bench,
     hand,
+    swappable,
   };
 }

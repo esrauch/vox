@@ -220,6 +220,16 @@
   font-size: 1.1rem;
 }
 
+/* What to do on TRICK OR TREAT!, big and plain under its heading. */
+.hud-draft-lead {
+  margin: 2px 0 6px;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--pumpkin);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
 .hud-draft-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

@@ -123,6 +123,18 @@ describe('TRICK OR TREAT!', () => {
     expect(seen).toBeGreaterThan(5);
   });
 
+  /** Run `f` with TRICK OR TREAT!'s lineup setting turned on (it's off for now). */
+  const withSetLineup = (f: () => void): void => {
+    const flags = arcadeTuning.trickOrTreat as { setLineup: boolean };
+    const was = flags.setLineup;
+    flags.setLineup = true;
+    try {
+      f();
+    } finally {
+      flags.setLineup = was;
+    }
+  };
+
   const take = (player: typeof boo) =>
     dispatch(offering({ rarity: 'common', kind: 'recruit', player }), { type: 'pick', offer: 0 });
 
@@ -134,11 +146,18 @@ describe('TRICK OR TREAT!', () => {
     expect(ROSTER_ROLES[slot]).toBe('catcher');
     expect(r.state.bench).toHaveLength(1);
     expect(ofType(r.events, 'joined')[0]).toMatchObject({ slot, replaced: r.state.bench[0]!.name });
-    // The roster stays open to rearrange, then Done.
-    expect(r.state.phase).toBe('draft');
+    // Play goes straight on (the lineup is set for you).
+    expect(r.state.phase).toBe('setup');
     expect(r.state.offer).toEqual([]);
     expect(r.state.field.players.some((p) => p.form === 'ghost')).toBe(true);
-    expect(dispatch(r.state, { type: 'skipDraft' }).state.phase).toBe('setup');
+  });
+
+  it('with setting the lineup turned on, the roster stays open to rearrange, then Done', () => {
+    withSetLineup(() => {
+      const r = take({ ...boo, stats: { hustle: 60, hands: 100, heft: 40 } });
+      expect(r.state.phase).toBe('draft');
+      expect(dispatch(r.state, { type: 'skipDraft' }).state.phase).toBe('setup');
+    });
   });
 
   it('it goes in for the weakest player, wherever it plays', () => {
@@ -178,16 +197,26 @@ describe('TRICK OR TREAT!', () => {
     ]);
   });
 
-  it('any player can play any position: two swap slots', () => {
+  it('with setting the lineup turned on, any player can play any position: two swap slots', () => {
+    withSetLineup(() => {
+      const s = atDraft();
+      const [a, b] = [s.roster[0]!.name, s.roster[4]!.name];
+      const swapped = dispatch(s, { type: 'swap', a: 0, b: 4 }).state;
+      expect(swapped.roster[0]!.name).toBe(b);
+      expect(swapped.roster[4]!.name).toBe(a);
+      // The Catcher now in a Blocker slot plays Blocker, with its own stats.
+      const blocker = swapped.field.players.find((p) => p.slot === 0)!;
+      expect(blocker.role).toBe('blocker');
+      expect(blocker.stats).toEqual(playerStats(swapped, 0));
+    });
+  });
+
+  it('with it off (for now), tapping players swaps nobody', () => {
     const s = atDraft();
-    const [a, b] = [s.roster[0]!.name, s.roster[4]!.name];
-    const swapped = dispatch(s, { type: 'swap', a: 0, b: 4 }).state;
-    expect(swapped.roster[0]!.name).toBe(b);
-    expect(swapped.roster[4]!.name).toBe(a);
-    // The Catcher now in a Blocker slot plays Blocker, with its own stats.
-    const blocker = swapped.field.players.find((p) => p.slot === 0)!;
-    expect(blocker.role).toBe('blocker');
-    expect(blocker.stats).toEqual(playerStats(swapped, 0));
+    const names = s.roster.map((p) => p.name);
+    expect(dispatch(s, { type: 'swap', a: 0, b: 4 }).state.roster.map((p) => p.name)).toEqual(
+      names,
+    );
   });
 
   it('skipping takes nothing and moves on', () => {

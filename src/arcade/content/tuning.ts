@@ -144,6 +144,14 @@ export const arcadeTuning = {
     minDrag: 0.5,
     maxDrag: 4,
   },
+  trickOrTreat: {
+    /**
+     * After taking a recruit, set your lineup (tap any two players to swap
+     * them, then Done). Off for now: the recruit goes where it helps most
+     * (bestSpot), and play goes straight on. The code stays, behind this.
+     */
+    setLineup: false,
+  },
   carrier: {
     /** The carrier aims this far ahead of itself, in its lane… */
     lookAhead: 3,

@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-24:** **TRICK OR TREAT! is just the choice:** "Choose a player to join your team" under the heading, the roster and bench shown below (not tappable), and taking a player plays straight on. The "Set your lineup" step (swaps, Done) stays in the code behind `trickOrTreat.setLineup`, off.
 - **2026-10-24:** **The win song moved to `media/`** (with its timings): it's for the lyric timer and the video tool, not shipped in the game, and its license (Suno's terms) isn't on the asset list's allowed ones, so it's kept out of `assets/` and the asset check (`media/README.md`). The deployed build still carries it for the dev lyric timer; `build:release` doesn't.
 - **2026-10-24:** **Winning goes to the song on YouTube:** the win screen redirects straight to the sing-along video (https://www.youtube.com/watch?v=7A2Udh11ASo); if the page is still there 3 s later (the redirect was blocked), a **Listen to 'We Got Jack Back' on YouTube** button shows. The game no longer plays the MP3 (it stays in `media/` for the lyric timer and the video tool); the Farm's song carries on under the dance.
 - **2026-10-24:** **The sing-along video is made:** `previews/video/weGotJackBack.mp4`, 1920×1080, 3:02, H.264/AAC, 80 MB, with the lyric timings (`media/weGotJackBack.timings.json`) tapped on the timer. Rebuild with `npx tsx tools/video/render.ts`.

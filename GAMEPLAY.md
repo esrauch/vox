@@ -140,7 +140,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 | **Grabbed** | **Tap** anywhere (a juke: its ◀ or ▶ button) | Break it! |
 | **The King's crows land** | **SHOO CROWS!** | Drive them off. |
 | **Between drives** | **Tap a card** | Take one of the two new players. |
-| **Between drives** | **Tap two players** | Swap them, field or bench. |
+| **Between drives** | **Tap a New Player! card** | Take that player (it goes where it helps most). |
 
 **One thumb, portrait, no aiming.** Everything is a tap at the right moment.
 
@@ -187,7 +187,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 ## Building Up: TRICK OR TREAT!
 
-**After every won drive: TRICK OR TREAT!** Two **New Player!** cards are offered; take one, set your lineup, and tap **Done**. **On the same screen is your roster: the seven on the field down the left, by position, and the bench down the right. Tap any two players to swap them, field or bench.** Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
+**After every won drive: TRICK OR TREAT!** Under the heading it says plainly **"Choose a player to join your team"**, over two **New Player!** cards: take one and play goes straight on. **On the same screen is your roster, to look at: the seven on the field down the left, by position, and the bench down the right.** *(Setting the lineup yourself, tapping any two players to swap them and then Done, is built but turned off for now: `trickOrTreat.setLineup`.)* Every player has a photo box: a pixel portrait of its kind. **There's no draft before the first drive**: you start with what you've got.
 
 ### The offer
 
@@ -195,7 +195,7 @@ The test for any feature: **does it make a run faster, funnier, more readable, o
 
 **A new player's stats add up to the zone's total:** **200** in Froggy's Forest, **250** in the Candy Queendom, **300** on Frederick's Farm, shared out in its kind's shape (a Ghost mostly Hands, a Golem mostly Heft, a Human evenly) and nudged a little, so no two are alike. The zone is the one of the drive about to be played, so the offer after Froggy's Forest's Boss is already the Candy Queendom's.
 
-**Take one and it goes straight in:** into the field slot whose player it beats by the most total stats (on a tie, a slot of the position it prefers), and whoever was there sits on the bench. If it beats nobody, it sits on the bench itself. Then the roster stays open to rearrange (any two swap), and **Done** plays on. Only the seven on the field play.
+**Take one and it goes straight in:** into the field slot whose player it beats by the most total stats (on a tie, a slot of the position it prefers), and whoever was there sits on the bench. If it beats nobody, it sits on the bench itself. Positions are picked for you, and play goes on. Only the seven on the field play.
 
 **The bench has no limit:** the newest sit at the top, and a full run ends with eleven players on it (one for each TRICK OR TREAT!).
 
