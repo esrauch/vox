@@ -81,6 +81,7 @@ This is a **living plan** for the game in [GAMEPLAY.md](GAMEPLAY.md). We work th
 
 ## Changelog
 
+- **2026-10-27:** **Two-tap lobs are easier:** a 3-yard catch circle, drawn round the marker; your nearest player in it runs under the lob and catches it (unless a defender who can reach the spot is nearer).
 - **2026-10-27:** **Two options: hard mode (`?hard=1`) and two-tap throwing (`?aim=2`).** Hard mode goes round the three zones for ever until you lose, two more defenders each zone (alternately a Cover and a Bat), recruits +30 a zone with Hands growing like a square root, the sweep no faster after the third zone, and the lineup step on. Two-tap throwing: the first tap stops the line, a marker slides out along it and back, the second tap lobs the ball there, over everyone in between. Neither has been balance-tested (the bot plays neither yet).
 - **2026-10-24:** **TRICK OR TREAT! is just the choice:** "Choose a player to join your team" under the heading, the roster and bench shown below (not tappable), and taking a player plays straight on. The "Set your lineup" step (swaps, Done) stays in the code behind `trickOrTreat.setLineup`, off.
 - **2026-10-24:** **The win song moved to `media/`** (with its timings): it's for the lyric timer and the video tool, not shipped in the game, and its license (Suno's terms) isn't on the asset list's allowed ones, so it's kept out of `assets/` and the asset check (`media/README.md`). The deployed build still carries it for the dev lyric timer; `build:release` doesn't.

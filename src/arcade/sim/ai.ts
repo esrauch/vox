@@ -17,6 +17,7 @@
  */
 import { PLAYS } from '../content/plays';
 import { arcadeTuning } from '../content/tuning';
+import { lobReceivers } from './ball';
 import type { Defender, Player, RunState, Vec } from './types';
 import { clearOfProps } from './props';
 import { add, dist, norm, scale, sub, v } from './vec';
@@ -46,6 +47,16 @@ export function playerTarget(state: RunState, p: Player): Vec | null {
     case 'block':
       return blockTarget(state, p, carrier);
     case 'route': {
+      // A lob in the air (two-tap throwing): your player nearest where it's coming down,
+      // within the catch circle, runs to meet it.
+      const ball = state.field.ball;
+      if (
+        ball.at === 'flight' &&
+        ball.lob &&
+        lobReceivers(state, ball.from, ball.target)[0]?.id === p.id
+      ) {
+        return ball.target;
+      }
       // After a catch everyone blocks for the carrier; on a handoff the Catchers keep running
       // their routes as decoys, pulling their Covers away (only the Runners and Blockers block).
       if (carrier && (p.role !== 'catcher' || !handedOff(state))) {

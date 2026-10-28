@@ -79,8 +79,10 @@ export const arcadeTuning = {
   twoTap: {
     /** …at this speed (yards a second)… */
     markerSpeed: 14,
-    /** …and the lob flies there at this speed (yards a second; slower than a bullet, so defenders close in). */
+    /** …and the lob flies there at this speed (yards a second; slower than a bullet, so defenders close in)… */
     lobSpeed: 15,
+    /** …and your player nearest where it comes down, within this (yards), catches it (they run to it as it flies). */
+    catchRadius: 3,
   },
   sweep: {
     /** The aim line sweeps this far either side of straight upfield (degrees)… */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { arcadeTuning } from '../../src/arcade/content/tuning';
-import { sweepSpeed } from '../../src/arcade/sim/ball';
+import { lobLanding, sweepSpeed } from '../../src/arcade/sim/ball';
 import {
   DRIVE_KINDS,
   createRun,
@@ -114,5 +114,28 @@ describe('two-tap throwing (?aim=2)', () => {
     const r = run(ready, 2, { throw: true });
     expect(ofType(r.events, 'batted')).toHaveLength(0);
     expect(ofType(r.events, 'caught')[0]?.id).toBe(2);
+  });
+
+  it('a lob is caught by your nearest player within the big catch circle, who runs to it', () => {
+    const s = twoTap(
+      playState([
+        { pos: v(2.4, 10), job: stand(v(2.4, 10)) },
+        { pos: v(-2.6, 10.5), job: stand(v(-2.6, 10.5)) },
+      ]),
+    );
+    expect(lobLanding(s, v(0, -4), v(0.4, 10))).toMatchObject({ kind: 'caught', by: { id: 2 } });
+    // Thrown there, the nearer one runs under it and catches it.
+    s.field.ball = {
+      at: 'flight',
+      from: v(0, -4),
+      target: v(0.4, 10),
+      thrownAt: s.time,
+      landsAt: s.time + 1,
+      lob: true,
+    };
+    const r = run(s, 1.5);
+    expect(ofType(r.events, 'caught')[0]?.id).toBe(2);
+    // Nobody within the circle: incomplete.
+    expect(lobLanding(s, v(0, -4), v(0, 20))?.kind).toBe('incomplete');
   });
 });

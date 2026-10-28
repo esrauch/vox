@@ -76,6 +76,38 @@ export function lobTarget(state: RunState, from: Vec): Vec | null {
   return v(from.x + Math.sin(aim.angle) * d, from.y + Math.cos(aim.angle) * d);
 }
 
+/** Your players who could catch a lob coming down at `at` (thrown from `from`), nearest first. */
+export function lobReceivers(state: RunState, from: Vec, at: Vec): Player[] {
+  return state.field.players
+    .filter(
+      (p) =>
+        p.role !== 'qb' &&
+        p.role !== 'blocker' &&
+        p.down <= 0 &&
+        dist(p.pos, from) >= t.minDistance &&
+        dist(p.pos, at) <= arcadeTuning.twoTap.catchRadius,
+    )
+    .sort((a, b) => dist(a.pos, at) - dist(b.pos, at) || a.id - b.id);
+}
+
+/**
+ * Where a lob comes down (two-tap throwing): your player nearest the spot,
+ * within the catch circle, catches it, unless a defender who can reach the
+ * spot is nearer it (then it's batted down). Nobody there: incomplete.
+ */
+export function lobLanding(state: RunState, from: Vec, at: Vec): FlightOutcome {
+  const receiver = lobReceivers(state, from, at)[0];
+  const defender = state.field.defenders
+    .filter((d) => d.down <= 0 && !engaged(state, d) && dist(d.pos, at) <= d.reach)
+    .sort((a, b) => dist(a.pos, at) - dist(b.pos, at) || a.id - b.id)[0];
+  if (receiver && defender && dist(defender.pos, at) < dist(receiver.pos, at)) {
+    return { kind: 'batted', by: defender.id, at: defender.pos, contested: true };
+  }
+  if (receiver) return { kind: 'caught', by: receiver, contested: defender !== undefined };
+  if (defender) return { kind: 'batted', by: defender.id, at: defender.pos, contested: false };
+  return { kind: 'incomplete', at };
+}
+
 /** Where a bullet along `angle` from `from` would go: as far as its range, or the sideline. */
 export function bulletEnd(state: RunState, from: Vec, angle: number): Vec {
   const dx = Math.sin(angle);
@@ -103,7 +135,7 @@ export function resolveFlight(state: RunState): FlightOutcome {
   if (ball.at !== 'flight') return null;
   const u = Math.min(1, (state.time - ball.thrownAt) / (ball.landsAt - ball.thrownAt));
   // A lob sails over everyone: only where it comes down counts.
-  if (ball.lob) return u >= 1 ? contact(state, ball.from, ball.target, true, ball.target) : null;
+  if (ball.lob) return u >= 1 ? lobLanding(state, ball.from, ball.target) : null;
   return contact(state, ball.from, lerp(ball.from, ball.target, u), u >= 1, ball.target);
 }
 

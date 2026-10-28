@@ -7,7 +7,7 @@
  */
 import * as THREE from 'three';
 import { hexToNumber, team } from '../../content/palettes';
-import { aimContact, bulletEnd, contact, lobTarget, sweepAngle } from '../sim/ball';
+import { aimContact, bulletEnd, lobLanding, lobTarget, sweepAngle } from '../sim/ball';
 import { arcadeTuning } from '../content/tuning';
 import { qbOf } from '../sim/ai';
 import { canThrow } from '../sim/step';
@@ -22,6 +22,8 @@ const MAX_DASHES = 48;
 export class ArcadeSweep {
   private readonly group = new THREE.Group();
   private readonly dashes: THREE.Mesh[] = [];
+  /** Two-tap throwing: the catch circle around the marker, where the lob would come down. */
+  private readonly circle: THREE.Mesh;
   private readonly material = new THREE.MeshBasicMaterial({
     color: hexToNumber(team.accent),
     transparent: true,
@@ -35,6 +37,12 @@ export class ArcadeSweep {
       this.dashes.push(d);
       this.group.add(d);
     }
+    const r = arcadeTuning.twoTap.catchRadius;
+    this.circle = new THREE.Mesh(
+      new THREE.RingGeometry(r - 0.15, r, 48).rotateX(-Math.PI / 2),
+      this.material,
+    );
+    this.group.add(this.circle);
     scene.add(this.group);
   }
 
@@ -49,6 +57,9 @@ export class ArcadeSweep {
     const full = bulletEnd(state, qb.pos, angle);
     const end = state.twoTapAim ? (lobTarget(state, qb.pos) ?? full) : (aimNow(state)?.at ?? full);
     const length = dist(qb.pos, end);
+    const lob = state.twoTapAim ? lobTarget(state, qb.pos) : null;
+    this.circle.visible = lob !== null;
+    if (lob) this.circle.position.copy(toWorld(lob, origin, 0.04));
     const march = (state.time * 3) % SPACING;
     this.dashes.forEach((dash, i) => {
       const along = 1.2 + i * SPACING + march;
@@ -78,7 +89,7 @@ export function litPlayers(state: RunState): Set<number> {
   if (state.twoTapAim && qb && canThrow(state)) {
     const target = lobTarget(state, qb.pos);
     if (target) {
-      const r = contact(state, qb.pos, target, true, target);
+      const r = lobLanding(state, qb.pos, target);
       return new Set(r?.kind === 'caught' ? [r.by.id] : []);
     }
     const end = bulletEnd(state, qb.pos, sweepAngle(state));
