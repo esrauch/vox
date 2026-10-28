@@ -57,7 +57,15 @@ import {
   type BreakOutcome,
 } from './sim/breakit';
 import { canThrow, step } from './sim/step';
-import type { Action, ArcadeEvent, Player, RosterPlayer, RunState, StepInput } from './sim/types';
+import type {
+  Action,
+  ArcadeEvent,
+  Drive,
+  Player,
+  RosterPlayer,
+  RunState,
+  StepInput,
+} from './sim/types';
 import { v } from './sim/vec';
 import { ArcadeControls, type BreakView } from './ui/controls';
 import { trickOrTreatView } from './ui/trickOrTreat';
@@ -76,6 +84,14 @@ export interface ArcadeOptions {
    * capture evenly spaced frames (tools/video/).
    */
   video?: boolean;
+  /**
+   * Hard mode (?hard=1): the zones go round until you lose, two more
+   * defenders each, recruits +30 a zone (Hands slower), the sweep no faster
+   * after the third, and TRICK OR TREAT! lets you set your lineup.
+   */
+  hard?: boolean;
+  /** Two-tap throwing (?aim=2): the first tap stops the line, the second picks how far. */
+  twoTapAim?: boolean;
   /** Which Frederick's Farm song candidate plays (1 Harvest Moon Hoedown, 2 Spooky Cow): ?farmSong=2. */
   farmSong?: number;
 }
@@ -132,6 +148,8 @@ export class ArcadeGame {
   /** ?win=1: PLAY goes straight to the win cutscene. */
   private readonly jumpToWin: boolean;
   private readonly video: boolean;
+  private readonly hard: boolean;
+  private readonly twoTapAim: boolean;
   /** Each area's song (the Farm's is one of its candidates). */
   private readonly areaSongs: readonly Song[];
   private readonly conductor = new Conductor();
@@ -179,9 +197,11 @@ export class ArcadeGame {
     this.startArea = Math.max(0, (options.area ?? 1) - 1);
     this.jumpToWin = options.win ?? false;
     this.video = options.video ?? false;
+    this.hard = options.hard ?? false;
+    this.twoTapAim = options.twoTapAim ?? false;
     const farm = FARM_SONGS[(options.farmSong ?? 1) - 1] ?? FARM_SONGS[0];
     this.areaSongs = [...AREA_SONGS, farm];
-    this.state = createRun(this.seed, firstRoster(this.monsters), this.startArea);
+    this.state = this.newRun();
     this.origin = this.startOrigin();
     this.view = new View(canvas, { fov: 50 });
     const { scene } = this.view;
@@ -321,10 +341,10 @@ export class ArcadeGame {
   }
 
   private after(events: readonly ArcadeEvent[], prev: RunState): void {
-    // A won drive marches on: the new drive's 0 is the old one's first-down line.
-    // A won drive marches on: the new drive's 0 is the old one's first-down line (not after the last).
+    // A won drive marches on: the new drive's 0 is the old one's first-down line (not after the
+    // last). Hard mode's zones come round onto the same stretch of field (originOf).
     if (events.some((e) => e.type === 'driveWon') && this.state.phase !== 'won') {
-      this.origin += prev.drive.firstDown;
+      this.origin = this.originOf(this.state.drive);
     }
     if (this.state.phase === 'won' && !this.outro) this.startOutro();
     this.react(events, prev);
@@ -581,7 +601,7 @@ export class ArcadeGame {
   /** The area's song (the intro plays the first area's). */
   private areaSong(): Song {
     const songs = this.areaSongs;
-    return songs[Math.min(this.state.drive.area, songs.length - 1)] ?? hollowHop;
+    return songs[this.state.drive.area % songs.length] ?? hollowHop;
   }
 
   private async onAction(): Promise<void> {
@@ -610,7 +630,7 @@ export class ArcadeGame {
     } else if (phase === 'over') {
       // AGAIN after a Game Over (a win is the end: there's no AGAIN).
       this.seed++;
-      this.state = createRun(this.seed, firstRoster(this.monsters), this.startArea);
+      this.state = this.newRun();
       this.origin = this.startOrigin();
       this.focus = v(0, -4);
       this.bodies.sync(this.state);
@@ -619,8 +639,25 @@ export class ArcadeGame {
   }
 
   /** Where a run's first drive sits on the long field: past the areas it skipped. */
+  private newRun(): RunState {
+    return createRun(this.seed, firstRoster(this.monsters), this.startArea, {
+      hard: this.hard,
+      twoTapAim: this.twoTapAim,
+    });
+  }
+
   private startOrigin(): number {
-    return this.state.drive.area * DRIVE_KINDS.length * arcadeTuning.drive.distance;
+    return this.originOf(this.state.drive);
+  }
+
+  /**
+   * Where a drive's 0 sits on the long field: its area's stretch, then its
+   * drives before it. The field only has the three areas, so hard mode's
+   * endless zones come round onto the same stretches (they look the same).
+   */
+  private originOf(drive: Drive): number {
+    const area = drive.area % arcadeTuning.run.areas;
+    return (area * DRIVE_KINDS.length + drive.index) * arcadeTuning.drive.distance;
   }
 
   /** ?win=1: the run as if just won (on the King's drive, eleven recruits on the bench), and the win cutscene. */

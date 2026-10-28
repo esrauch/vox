@@ -23,7 +23,7 @@
  */
 import { arcadeTuning, DT } from '../content/tuning';
 import { carrierOf, chooseLane, handedOff, qbOf } from './ai';
-import { bulletEnd, flightTime, pocketTime, resolveFlight, sweepAngle } from './ball';
+import { bulletEnd, flightTime, lobTarget, pocketTime, resolveFlight, sweepAngle } from './ball';
 import { moveBodies, separate, touching } from './physics';
 import { pushOutOfProps } from './props';
 import { judgeBreakIt, startBreakIt } from './breakit';
@@ -98,10 +98,35 @@ export function canThrow(state: RunState): boolean {
 
 // ── THROW ───────────────────────────────────────────────────────────────────
 
-/** THROW: a bullet along the line, as far as its range (or the sideline). */
+/**
+ * THROW: a bullet along the line, as far as its range (or the sideline).
+ * Two-tap throwing (?aim=2): the first tap stops the line; the second lobs
+ * the ball to where the marker is along it.
+ */
 function throwBullet(state: RunState, events: ArcadeEvent[]): void {
   const qb = qbOf(state);
   if (!qb || !canThrow(state)) return;
+  if (state.twoTapAim) {
+    if (!state.field.aim) {
+      state.field.aim = { angle: sweepAngle(state), since: state.time };
+      return;
+    }
+    const target = lobTarget(state, qb.pos);
+    if (!target) return;
+    const flight = dist(qb.pos, target) / (arcadeTuning.twoTap.lobSpeed * state.perks.throwScale);
+    const landsAt = state.time + Math.max(0.15, flight);
+    state.field.ball = {
+      at: 'flight',
+      from: qb.pos,
+      target,
+      thrownAt: state.time,
+      landsAt,
+      lob: true,
+    };
+    state.field.aim = null;
+    events.push({ type: 'thrown', target, landsAt });
+    return;
+  }
   const target = bulletEnd(state, qb.pos, sweepAngle(state));
   const landsAt = state.time + flightTime(qb.pos, target, state.perks.throwScale);
   state.field.ball = { at: 'flight', from: qb.pos, target, thrownAt: state.time, landsAt };

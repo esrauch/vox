@@ -90,8 +90,9 @@ export class ArcadeBall {
       }
       case 'flight': {
         const u = Math.min(1, (state.time - ball.thrownAt) / (ball.landsAt - ball.thrownAt));
-        // A bullet: flat and fast, at chest height.
-        this.ball.position.copy(toWorld(lerp(ball.from, ball.target, u), origin, 1));
+        // A bullet: flat and fast, at chest height. A lob (two-tap throwing) arcs up and over.
+        const arc = ball.lob ? 4 * Math.sin(Math.PI * u) : 0;
+        this.ball.position.copy(toWorld(lerp(ball.from, ball.target, u), origin, 1 + arc));
         break;
       }
       case 'carried': {

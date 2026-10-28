@@ -7,11 +7,12 @@
  */
 import * as THREE from 'three';
 import { hexToNumber, team } from '../../content/palettes';
-import { aimContact, bulletEnd, sweepAngle } from '../sim/ball';
+import { aimContact, bulletEnd, contact, lobTarget, sweepAngle } from '../sim/ball';
+import { arcadeTuning } from '../content/tuning';
 import { qbOf } from '../sim/ai';
 import { canThrow } from '../sim/step';
-import type { RunState } from '../sim/types';
-import { dist, lerp } from '../sim/vec';
+import type { RunState, Vec } from '../sim/types';
+import { dist, lerp, sub, v } from '../sim/vec';
 import { toWorld } from './world';
 
 /** Yards between dashes. */
@@ -44,7 +45,9 @@ export class ArcadeSweep {
     if (!show || !qb) return;
     const angle = sweepAngle(state);
     // The line stops where a bullet thrown now would first be caught or batted (or at its range).
-    const end = aimNow(state)?.at ?? bulletEnd(state, qb.pos, angle);
+    // Two-tap throwing: it runs its full range while it sweeps, and once stopped, out to the marker.
+    const full = bulletEnd(state, qb.pos, angle);
+    const end = state.twoTapAim ? (lobTarget(state, qb.pos) ?? full) : (aimNow(state)?.at ?? full);
     const length = dist(qb.pos, end);
     const march = (state.time * 3) % SPACING;
     this.dashes.forEach((dash, i) => {
@@ -64,8 +67,42 @@ export function aimNow(state: RunState): ReturnType<typeof aimContact> | null {
   return aimContact(state, qb.pos, bulletEnd(state, qb.pos, sweepAngle(state)));
 }
 
-/** The receiver who'd catch a bullet thrown right now, with everyone where they stand: it lights up. */
+/**
+ * The receiver who'd catch a bullet thrown right now, with everyone where
+ * they stand: it lights up. Two-tap throwing: while the line sweeps, every
+ * receiver it passes within reach of; once it's stopped, whoever would catch
+ * a lob coming down at the marker.
+ */
 export function litPlayers(state: RunState): Set<number> {
+  const qb = qbOf(state);
+  if (state.twoTapAim && qb && canThrow(state)) {
+    const target = lobTarget(state, qb.pos);
+    if (target) {
+      const r = contact(state, qb.pos, target, true, target);
+      return new Set(r?.kind === 'caught' ? [r.by.id] : []);
+    }
+    const end = bulletEnd(state, qb.pos, sweepAngle(state));
+    return new Set(
+      state.field.players
+        .filter(
+          (p) =>
+            (p.role === 'catcher' || p.role === 'runner') &&
+            p.down <= 0 &&
+            dist(p.pos, qb.pos) >= arcadeTuning.throw.minDistance &&
+            dist(p.pos, nearestOnSegment(qb.pos, end, p.pos)) <= p.reach,
+        )
+        .map((p) => p.id),
+    );
+  }
   const aim = aimNow(state);
   return new Set(aim?.outcome.kind === 'caught' ? [aim.outcome.by.id] : []);
+}
+
+/** The point on the segment from `a` to `b` nearest `p`. */
+function nearestOnSegment(a: Vec, b: Vec, p: Vec): Vec {
+  const ab = sub(b, a);
+  const l2 = ab.x * ab.x + ab.y * ab.y;
+  if (l2 === 0) return a;
+  const u = Math.max(0, Math.min(1, ((p.x - a.x) * ab.x + (p.y - a.y) * ab.y) / l2));
+  return v(a.x + ab.x * u, a.y + ab.y * u);
 }

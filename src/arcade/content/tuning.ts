@@ -75,6 +75,13 @@ export const arcadeTuning = {
     /** Your players closer than this to the QB are skipped (it's going past them). */
     minDistance: 3,
   },
+  /** Two-tap throwing (?aim=2): once the line is stopped, a marker slides out along it and back… */
+  twoTap: {
+    /** …at this speed (yards a second)… */
+    markerSpeed: 14,
+    /** …and the lob flies there at this speed (yards a second; slower than a bullet, so defenders close in). */
+    lobSpeed: 15,
+  },
   sweep: {
     /** The aim line sweeps this far either side of straight upfield (degrees)… */
     halfAngle: 62,
@@ -82,7 +89,7 @@ export const arcadeTuning = {
     degreesPerSecond: 112.5,
     /** …this much faster each area after the first (a share of it)… */
     perArea: 0.3,
-    /** …and again on the Boss drive. */
+    /** …and again on the Boss drive. It stops getting faster after the last area (hard mode's endless zones). */
     boss: 0.1,
     /**
      * The pocket holds while the line crosses this many times; then it's a
@@ -143,6 +150,14 @@ export const arcadeTuning = {
     dragPerHeft: 0.5,
     minDrag: 0.5,
     maxDrag: 4,
+  },
+  /** Hard mode (?hard=1): the endless run. */
+  hard: {
+    /** Every zone after the first lines up this many more defenders than the one before. */
+    extraDefendersPerZone: 2,
+    /** A recruit's stats add up to this in the first zone, and this much more every zone after. */
+    recruitTotal: 200,
+    recruitPerZone: 30,
   },
   trickOrTreat: {
     /**

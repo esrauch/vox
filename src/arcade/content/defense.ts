@@ -320,6 +320,6 @@ export const FARM: ArcadeArea = {
 /** The run's areas in order: the Forest, the Candy Kingdom, the Farm. */
 export const AREAS: readonly ArcadeArea[] = [FOREST, CANDY_KINGDOM, FARM];
 
-/** An area by its number (the last one for any beyond). */
+/** An area by its number: past the last they come round again (hard mode goes on for ever). */
 export const areaAt = (area: number): ArcadeArea =>
-  AREAS[Math.max(0, Math.min(area, AREAS.length - 1))] ?? FOREST;
+  AREAS[Math.max(0, area) % AREAS.length] ?? FOREST;

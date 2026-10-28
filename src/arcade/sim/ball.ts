@@ -19,7 +19,9 @@ const { sweep, throw: t, field } = arcadeTuning;
 
 /** How fast the line sweeps this drive (degrees a second): faster each area, and on the Boss. */
 export function sweepSpeed(state: RunState): number {
-  const { area, kind } = state.drive;
+  const { kind } = state.drive;
+  // No faster after the last area (hard mode's zones go on for ever).
+  const area = Math.min(state.drive.area, arcadeTuning.run.areas - 1);
   const base =
     sweep.degreesPerSecond * (1 + sweep.perArea * area + (kind === 'boss' ? sweep.boss : 0));
   // Slow-Mo Sweep (a perk) slows it.
@@ -43,9 +45,35 @@ export function pocketTime(state: RunState): number {
  * and sweeps back and forth.
  */
 export function sweepAngle(state: RunState): number {
+  // Two-tap throwing: stopped where the first tap left it.
+  if (state.field.aim) return state.field.aim.angle;
   const h = (sweep.halfAngle * Math.PI) / 180;
   const p = ((state.time - state.snappedAt) / scanTime(state)) % 2;
   return p < 1 ? -h + 2 * h * p : h - 2 * h * (p - 1);
+}
+
+/**
+ * Two-tap throwing, once the line is stopped: how far along it the marker is
+ * (yards from `from`). It slides out from just past the QB to the line's end
+ * and back, over and over.
+ */
+export function aimDistance(state: RunState, from: Vec): number | null {
+  const aim = state.field.aim;
+  if (!aim) return null;
+  const near = t.minDistance;
+  const far = Math.max(near + 1, dist(from, bulletEnd(state, from, aim.angle)));
+  const travelled = (state.time - aim.since) * arcadeTuning.twoTap.markerSpeed;
+  const span = far - near;
+  const p = (travelled / span) % 2;
+  return near + span * (p < 1 ? p : 2 - p);
+}
+
+/** Two-tap throwing: where the lob would come down right now, or null before the line is stopped. */
+export function lobTarget(state: RunState, from: Vec): Vec | null {
+  const d = aimDistance(state, from);
+  const aim = state.field.aim;
+  if (d === null || !aim) return null;
+  return v(from.x + Math.sin(aim.angle) * d, from.y + Math.cos(aim.angle) * d);
 }
 
 /** Where a bullet along `angle` from `from` would go: as far as its range, or the sideline. */
@@ -74,6 +102,8 @@ export function resolveFlight(state: RunState): FlightOutcome {
   const ball = state.field.ball;
   if (ball.at !== 'flight') return null;
   const u = Math.min(1, (state.time - ball.thrownAt) / (ball.landsAt - ball.thrownAt));
+  // A lob sails over everyone: only where it comes down counts.
+  if (ball.lob) return u >= 1 ? contact(state, ball.from, ball.target, true, ball.target) : null;
   return contact(state, ball.from, lerp(ball.from, ball.target, u), u >= 1, ball.target);
 }
 

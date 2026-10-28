@@ -4,9 +4,8 @@
  * to rearrange once one joins. The field is on the left
  * by position, the bench on the right; any two swap.
  */
-import { arcadeTuning } from '../content/tuning';
 import { POSITION_STAT, ROSTER_ROLES } from '../content/team';
-import { BENCH_START, atSpot, fieldedStats, playerStats } from '../sim/team';
+import { atSpot, BENCH_START, fieldedStats, playerStats, setsLineup } from '../sim/team';
 import { kindIcon } from './kindIcons';
 import type { Form, Perk, Position, RosterPlayer, RunState, Stats } from '../sim/types';
 import type { DraftView, OfferCard, RosterRow, StatBar } from '../../ui/hud';
@@ -93,7 +92,7 @@ export function trickOrTreatView(state: RunState, selected: number | null): Draf
     row(p, BENCH_START + seat, 'Bench', fieldedStats(state, p)),
   );
   const from = selected === null ? null : atSpot(state, selected);
-  const swappable = arcadeTuning.trickOrTreat.setLineup;
+  const swappable = setsLineup(state);
   const hand = !swappable
     ? null
     : from

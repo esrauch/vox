@@ -11,7 +11,16 @@ import { rngFor } from './random';
 import { assignMarks } from './ai';
 import { BOSS_SPOT, drivePropsWithBoss } from './props';
 import { lineUpDefense, lineUpTeam } from './bodies';
-import { applyPerk, atSpot, bestSpot, noPerks, rollOffer, setSpot, startingRoster } from './team';
+import {
+  applyPerk,
+  atSpot,
+  bestSpot,
+  noPerks,
+  rollOffer,
+  setSpot,
+  setsLineup,
+  startingRoster,
+} from './team';
 import type {
   Action,
   ArcadeEvent,
@@ -44,6 +53,23 @@ export function defenseFor(seed: number, area: number, index: number): DefenseSp
   }
 }
 
+/**
+ * A drive's defense as it lines up: its spec, plus in hard mode two more
+ * defenders for every zone after the first, alternately a Cover and a Bat,
+ * spread over the field.
+ */
+export function driveDefense(state: RunState, area: number, index: number): DefenseSpec {
+  const spec = defenseFor(state.seed, area, index);
+  const extra = state.hard ? area * arcadeTuning.hard.extraDefendersPerZone : 0;
+  if (extra === 0) return spec;
+  const spots = Array.from({ length: extra }, (_, k) => ({
+    kind: k % 2 === 0 ? ('cover' as const) : ('bat' as const),
+    x: -6.3 + ((k * 5.3) % 12.6),
+    y: 3 + ((k * 1.7) % 6),
+  }));
+  return { ...spec, defenders: [...spec.defenders, ...spots] };
+}
+
 /** How much stiffer a drive's defense is than its spec: more each area, more on the Boss. */
 export function defenseBoost(area: number, kind: DriveKind, spec: DefenseSpec): number {
   const d = arcadeTuning.defense;
@@ -58,9 +84,12 @@ export function createRun(
   seed: number,
   roster: RosterPlayer[] = startingRoster(),
   startArea = 0,
+  options: { readonly hard?: boolean; readonly twoTapAim?: boolean } = {},
 ): RunState {
   const state: RunState = {
     seed,
+    hard: options.hard ?? false,
+    twoTapAim: options.twoTapAim ?? false,
     step: 0,
     time: 0,
     phase: 'setup',
@@ -84,6 +113,7 @@ export function createRun(
       crows: null,
       ball: { at: 'qb' },
       runPath: null,
+      aim: null,
       lane: 0,
       breakaway: 0,
       lastBreak: null,
@@ -115,7 +145,7 @@ export function setUpDrive(
   events: ArcadeEvent[],
   ready: boolean,
 ): void {
-  const spec = defenseFor(state.seed, area, index);
+  const spec = driveDefense(state, area, index);
   const start = 0;
   state.perks.secondWindUsed = false;
   state.drive = {
@@ -169,7 +199,7 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     state.hand.push(deck.splice(rng.int(0, deck.length - 1), 1)[0] ?? 0);
   }
   state.called = null;
-  const spec = defenseFor(state.seed, drive.area, drive.index);
+  const spec = driveDefense(state, drive.area, drive.index);
   // The Queen's Royal Decree: one card of the three is banned this down.
   state.banned = spec.decree ? rng.int(0, state.hand.length - 1) : null;
   const first = state.banned === 0 ? 1 : 0;
@@ -190,6 +220,7 @@ export function setUpDown(state: RunState, events: ArcadeEvent[]): void {
     crows: spec.boss === 'king' ? perchedCrows() : null,
     ball: { at: 'qb' },
     runPath: null,
+    aim: null,
     lane: 0,
     breakaway: 0,
     lastBreak: null,
@@ -315,14 +346,14 @@ function pick(state: RunState, index: number, events: ArcadeEvent[]): void {
   });
   state.bench.unshift(replaced ?? recruit);
   relineTeam(state);
-  if (!arcadeTuning.trickOrTreat.setLineup) leaveDraft(state);
+  if (!setsLineup(state)) leaveDraft(state);
 }
 
 /** Swap two players' spots, field or bench (any player can play any position). */
 function swap(state: RunState, a: number, b: number): void {
   const pa = atSpot(state, a);
   const pb = atSpot(state, b);
-  if (state.phase !== 'draft' || !arcadeTuning.trickOrTreat.setLineup) return;
+  if (state.phase !== 'draft' || !setsLineup(state)) return;
   if (!pa || !pb || a === b) return;
   setSpot(state, a, pb);
   setSpot(state, b, pa);
@@ -376,7 +407,8 @@ export function nextDown(state: RunState, events: ArcadeEvent[]): void {
     events.push({ type: 'driveWon', drive: drive.index });
     const lastDrive = drive.index >= DRIVE_KINDS.length - 1;
     if (lastDrive) events.push({ type: 'areaCleared', area: drive.area });
-    if (lastDrive && drive.area >= arcadeTuning.run.areas - 1) {
+    // The run is won after the last area (hard mode goes round again).
+    if (lastDrive && !state.hard && drive.area >= arcadeTuning.run.areas - 1) {
       state.phase = 'won';
       return;
     }

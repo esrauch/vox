@@ -84,6 +84,8 @@ export type Ball =
       /** When it was thrown and when it comes down (sim time). */
       readonly thrownAt: number;
       readonly landsAt: number;
+      /** A lob (two-tap throwing): it sails over everyone and is only caught or batted where it comes down. */
+      readonly lob?: boolean;
     }
   | { readonly at: 'carried'; readonly by: number }
   | { readonly at: 'dead'; readonly pos: Vec; readonly how: DeadBall };
@@ -151,6 +153,8 @@ export interface Field {
   /** The King's two pairs of crows (his drive), in the order they go, or null. */
   crows: RoyalCrows[] | null;
   ball: Ball;
+  /** Two-tap throwing: the line, stopped by the first tap (its angle, and when), or null while it sweeps. */
+  aim: { readonly angle: number; readonly since: number } | null;
   /** On a handoff, the Runner's planned route (it leans toward it when it picks its lane), or null. */
   runPath: readonly Vec[] | null;
   /** The carrier's lane: the x it runs for (it picks the emptiest one itself, every moment). */
@@ -295,6 +299,13 @@ export type Phase =
 
 export interface RunState {
   readonly seed: number;
+  /**
+   * Hard mode (?hard=1): the zones go round and round until you lose, each with two
+   * more defenders; recruits grow by 30 a zone (Hands more slowly); you set your lineup.
+   */
+  readonly hard: boolean;
+  /** Two-tap throwing (?aim=2): the first THROW stops the line, the second lobs it as far as the marker. */
+  readonly twoTapAim: boolean;
   /** Fixed steps since the run began, and the time they add up to. */
   step: number;
   time: number;

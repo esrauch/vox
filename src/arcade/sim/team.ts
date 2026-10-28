@@ -3,6 +3,7 @@
  * player's stats with the perks added, the TRICK OR TREAT!
  * offer, and taking a perk.
  */
+import { arcadeTuning } from '../content/tuning';
 import { POSITIONS, RECRUIT_NAMES, STARTING_NAMES, ZONE_OFFER } from '../content/perks';
 import { BASE_STATS, FORM_STATS, POSITION_STAT, ROSTER_ROLES } from '../content/team';
 import type { Rng } from '../../sim/rng';
@@ -94,12 +95,18 @@ export function rollOffer(state: RunState): Perk[] {
   const rng = rngFor(state.seed, 'perks', state.drivesWon);
   const zone = ZONE_OFFER[Math.min(state.drive.area, ZONE_OFFER.length - 1)] ?? ZONE_OFFER[0];
   if (!zone) return [];
+  const hard = arcadeTuning.hard;
+  const total = state.hard
+    ? hard.recruitTotal + hard.recruitPerZone * state.drive.area
+    : zone.recruitTotal;
   const first = rng.pick(KINDS);
   const second = rng.pick(KINDS.filter((k) => k !== first));
   return [first, second].map((kind) => ({
     rarity: 'common',
     kind: 'recruit',
-    player: makeRecruit(rng, zone.recruitTotal, kind),
+    player: state.hard
+      ? slowHands(makeRecruit(rng, total, kind), total)
+      : makeRecruit(rng, total, kind),
   }));
 }
 
@@ -131,6 +138,35 @@ function makeRecruit(rng: Rng, total: number, kind: Form): RosterPlayer {
     [biggest]: rounded[biggest] + total - (rounded.hustle + rounded.hands + rounded.heft),
   };
   return { name: rng.pick(RECRUIT_NAMES[kind]), kind, preferred: suits(rng, stats), stats };
+}
+
+/**
+ * Hard mode's recruits grow for ever, but Hands (reach) only like the square
+ * root of the total, so catches don't get silly: what it has over ordinary
+ * is scaled by √(first zone's total / this total), and what that takes off
+ * goes to its Hustle and Heft, half each, so the total stays the same.
+ */
+function slowHands(p: RosterPlayer, total: number): RosterPlayer {
+  const base = arcadeTuning.hard.recruitTotal;
+  const ordinary = arcadeTuning.body.statBase;
+  const over = p.stats.hands - ordinary;
+  if (over <= 0 || total <= base) return p;
+  const hands = Math.round(ordinary + over * Math.sqrt(base / total));
+  const freed = p.stats.hands - hands;
+  const half = Math.floor(freed / 2);
+  return {
+    ...p,
+    stats: {
+      hands,
+      hustle: p.stats.hustle + half,
+      heft: p.stats.heft + (freed - half),
+    },
+  };
+}
+
+/** Whether TRICK OR TREAT! lets you set your lineup (hard mode does; otherwise a tuning flag). */
+export function setsLineup(state: RunState): boolean {
+  return state.hard || arcadeTuning.trickOrTreat.setLineup;
 }
 
 // ── Taking a perk ───────────────────────────────────────────────────────────
