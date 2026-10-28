@@ -82,7 +82,7 @@ export const arcadeTuning = {
     /** …and the lob flies there at this speed (yards a second; slower than a bullet, so defenders close in)… */
     lobSpeed: 15,
     /** …and your player nearest where it comes down, within this (yards), catches it (they run to it as it flies). */
-    catchRadius: 3,
+    catchRadius: 2,
   },
   sweep: {
     /** The aim line sweeps this far either side of straight upfield (degrees)… */
